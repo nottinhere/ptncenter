@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart';
+import 'package:http/http.dart' as http;  
 import 'package:somsakpharma/models/price_list_model.dart';
 import 'package:somsakpharma/models/product_all_model.dart';
 
@@ -71,7 +71,7 @@ class _DetailCartState extends State<DetailCart> {
     String url = '${MyStyle().loadMyCart}$memberId';
     print('url Detail Cart ====>>>>> $url');
 
-    Response response = await get(url);
+    http.Response response = await http.get(url);
     var result = json.decode(response.body);
     var cartList = result['cart'];
     // print('cartList =======>>> $cartList');
@@ -307,7 +307,7 @@ class _DetailCartState extends State<DetailCart> {
 
     print('url editDetailCart ====>>>>> $url');
 
-    await get(url).then((response) {
+    await http.get(url).then((response) {
       readCart();
     });
   }
@@ -368,7 +368,7 @@ class _DetailCartState extends State<DetailCart> {
         'http://somsakpharma.com/api/json_removeitemincart.php?productID=$productID&unitSize=$unitSize&memberId=$memberID';
     print('url DeleteCart#######################======>>>> $url');
 
-    await get(url).then((response) {
+    await http.get(url).then((response) {
       readCart();
     });
   }
@@ -590,7 +590,7 @@ class _DetailCartState extends State<DetailCart> {
       String url =
           'http://somsakpharma.com/api/json_submit_myorder.php?memberId=$memberID&transport=$transport&comment=$comment';
 
-      await get(url).then((value) {
+      await http.get(url).then((value) {
         confirmSubmit();
       });
     } catch (e) {}
@@ -680,7 +680,7 @@ class _DetailCartState extends State<DetailCart> {
   Future<void> decodeQRcode(String code) async {
     try {
       String url = 'http://somsakpharma.com/api/json_product.php?bqcode=$code';
-      Response response = await get(url);
+      http.Response response = await http.get(url);
       var result = json.decode(response.body);
       print('result ===*******>>>> $result');
 

@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:http/http.dart';
+import 'package:http/http.dart' as http;
 import 'package:somsakpharma/models/product_all_model.dart';
 import 'package:somsakpharma/models/product_all_model2.dart';
 import 'package:somsakpharma/models/unit_size_model.dart';
@@ -51,7 +51,7 @@ class _DetailState extends State<Detail> {
       id = currentProductAllModel.id.toString();
       String url = '${MyStyle().getProductWhereId}$id';
       print('url Detaillll ====>>> $url');
-      Response response = await get(url);
+      http.Response response = await http.get(url);
       var result = json.decode(response.body);
       print('result =0000000>>> $result');
 
@@ -204,7 +204,7 @@ class _DetailState extends State<Detail> {
 
         print('url Detail =====>>>>>>>> $url');
 
-    Response response = await get(url);
+    http.Response response = await http.get(url);
     var result = json.decode(response.body);
     var cartList = result['cart'];
 
@@ -340,7 +340,7 @@ class _DetailState extends State<Detail> {
     String url =
         'http://www.somsakpharma.com/api/json_savemycart.php?productID=$productID&unitSize=$unitSize&QTY=$qTY&memberId=$memberID';
 
-    Response response = await get(url).then((response) {
+    http.Response response = await http.get(url).then((response) {
       print('upload ok');
       readCart();
       MaterialPageRoute materialPageRoute = MaterialPageRoute(builder: (BuildContext buildContext){return DetailCart(userModel: myUserModel,);});

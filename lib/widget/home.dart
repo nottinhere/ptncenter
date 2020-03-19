@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart';
+import 'package:http/http.dart' as http;
 import 'package:somsakpharma/models/product_all_model.dart';
 import 'package:somsakpharma/models/promote_model.dart';
 import 'package:somsakpharma/models/user_model.dart';
@@ -43,7 +43,7 @@ class _HomeState extends State<Home> {
 
   Future<void> readPromotion() async {
     String url = 'http://www.somsakpharma.com/api/json_promotion.php';
-    Response response = await get(url);
+    http.Response response = await http.get(url);
     var result = json.decode(response.body);
     var mapItemProduct =
         result['itemsProduct']; // dynamic    จะส่ง value อะไรก็ได้ รวมถึง null
@@ -66,7 +66,7 @@ class _HomeState extends State<Home> {
 
   Future<void> readSuggest() async {
     String url = 'http://www.somsakpharma.com/api/json_promotion.php';
-    Response response = await get(url);
+    http.Response response = await http.get(url);
     var result = json.decode(response.body);
     var mapItemProduct =
         result['itemsProduct']; // dynamic    จะส่ง value อะไรก็ได้ รวมถึง null

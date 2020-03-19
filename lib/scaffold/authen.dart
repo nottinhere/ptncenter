@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:http/http.dart';
+import 'package:http/http.dart' as http;  
 import 'package:somsakpharma/models/user_model.dart';
 import 'package:somsakpharma/scaffold/my_service.dart';
 import 'package:somsakpharma/utility/my_style.dart';
@@ -102,7 +102,7 @@ class _AuthenState extends State<Authen> {
       // No space
       String url =
           '${MyStyle().getUserWhereUserAndPass}?username=$user&password=$password';
-      Response response = await get(
+      http.Response response = await http.get(
           url); // await จะต้องทำงานใน await จะเสร็จจึงจะไปทำ process ต่อไป
       var result = json.decode(response.body);
 
@@ -154,7 +154,7 @@ class _AuthenState extends State<Authen> {
       height: 35.0,
       width: 250.0,
       child: TextFormField(
-        style: TextStyle(color: Colors.white),
+        style: TextStyle(color: Colors.grey),
         // initialValue: 'nott', // set default value
         onSaved: (String string) {
           user = string.trim();
@@ -163,10 +163,10 @@ class _AuthenState extends State<Authen> {
           contentPadding: EdgeInsets.only(
             top: 6.0,
           ),
-          prefixIcon: Icon(Icons.account_box, color: Colors.white),
+          prefixIcon: Icon(Icons.account_box, color: Colors.grey),
           border: InputBorder.none,
           hintText: 'User :',
-          hintStyle: TextStyle(color: Colors.white),
+          hintStyle: TextStyle(color: Colors.grey),
         ),
       ),
     );
@@ -184,7 +184,7 @@ class _AuthenState extends State<Authen> {
       height: 35.0,
       width: 250.0,
       child: TextFormField(
-        style: TextStyle(color: Colors.white),
+        style: TextStyle(color: Colors.grey),
         // initialValue: '1234', // set default value
         onSaved: (String string) {
           password = string.trim();
@@ -196,11 +196,11 @@ class _AuthenState extends State<Authen> {
           ),
           prefixIcon: Icon(
             Icons.lock,
-            color: Colors.white,
+            color: Colors.grey,
           ),
           border: InputBorder.none,
           hintText: 'Pass :',
-          hintStyle: TextStyle(color: Colors.white),
+          hintStyle: TextStyle(color: Colors.grey),
         ),
       ),
     );
