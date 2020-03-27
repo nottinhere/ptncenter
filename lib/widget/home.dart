@@ -37,9 +37,8 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
     readPromotion();
-    readSuggest();
     myUserModel = widget.userModel;
-
+    readSuggest();
   }
 
   Future<void> readPromotion() async {
@@ -66,10 +65,8 @@ class _HomeState extends State<Home> {
   }
 
   Future<void> readSuggest() async {
-   // print("memberId >> $memberId");
-   // String memberId = myUserModel.id;
-    String url = 'http://www.somsakpharma.com/api/json_suggest.php'; // ?memberId=$memberId
-    print("url >> $url");
+    String memId = myUserModel.id;
+    String url = 'http://www.somsakpharma.com/api/json_suggest.php?memberId=$memId'; // ?memberId=$memberId
     http.Response response = await http.get(url);
     var result = json.decode(response.body);
     var mapItemProduct =
