@@ -79,26 +79,28 @@ class _DetailCartState extends State<DetailCart> {
     for (var map in cartList) {
       ProductAllModel2 productAllModel = ProductAllModel2.fromJson(map);
 
-      // print('productAllModel = ${productAllModel.toJson().toString()}');
+      print('productAllModel = ${productAllModel.toJson().toString()}');
 
       Map<String, dynamic> priceListMap = map['price_list'];
 
       Map<String, dynamic> sizeSmap = priceListMap['s'];
-
+     
       if (sizeSmap == null) {
         sMap.add({'lable': ''});
         PriceListModel priceListModel = PriceListModel.fromJson({'lable': ''});
         priceListSModels.add(priceListModel);
       } else {
         sMap.add(sizeSmap);
+       // var priceSdisplay = double.parse(sizeSmap['price']);
+       // print('S is not null >> $priceSdisplay');
         PriceListModel priceListModel = PriceListModel.fromJson(sizeSmap);
         priceListSModels.add(priceListModel);
-        calculateTotal(
-            priceListModel.price.toString(), priceListModel.quantity);
+       calculateTotal(
+            priceListModel.price, priceListModel.quantity);
       }
 
       //  print('sizeSmap = $sizeSmap');
-
+    
       Map<String, dynamic> sizeMmap = priceListMap['m'];
       if (sizeMmap == null) {
         mMap.add({'lable': ''});
@@ -129,6 +131,7 @@ class _DetailCartState extends State<DetailCart> {
 
       setState(() {
         amontCart++;
+        print('amontCart >> $amontCart');
         productAllModels.add(productAllModel);
       });
     }
@@ -249,6 +252,7 @@ class _DetailCartState extends State<DetailCart> {
   }
 
   Widget editQTY(String quantity) {
+    /*
       newQTYint = int.parse(quantity);
       return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -258,14 +262,14 @@ class _DetailCartState extends State<DetailCart> {
         incButton(),
       ],
     );
-
-    // return TextFormField(
-    //   keyboardType: TextInputType.number,
-    //   onChanged: (String string) {
-    //     newQTY = string.trim();
-    //   },
-    //   initialValue: quantity,
-    // );
+    */
+    return TextFormField(
+      keyboardType: TextInputType.number,
+      onChanged: (String string) {
+        newQTY = string.trim();
+      },
+      initialValue: quantity,
+    );
   }
 
   void myAlertDialog(int index, String size) {
@@ -388,7 +392,7 @@ class _DetailCartState extends State<DetailCart> {
     String lable = sMap[index]['lable'];
     String quantity = sMap[index]['quantity'];
 
-    // canculateTotal(price, quantity);
+    //calculateTotal(price, quantity);
 
     return lable.isEmpty
         ? SizedBox()
@@ -469,7 +473,8 @@ class _DetailCartState extends State<DetailCart> {
       shrinkWrap: true,
       itemCount: productAllModels.length,
       itemBuilder: (BuildContext buildContext, int index) {
-        return Card(
+
+       return Card(
           child: Column(
             children: <Widget>[
               showTitle(index),

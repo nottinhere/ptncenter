@@ -2,6 +2,8 @@ class ProductAllModel {
   String title;
   String productCode;
   String photo;
+  String itemprice;
+  String itemunit;
   String priceList;
   String detail;
   int stock;
@@ -11,6 +13,8 @@ class ProductAllModel {
       {this.title,
       this.productCode,
       this.photo,
+      this.itemprice,
+      this.itemunit,
       this.priceList,
       this.detail,
       this.stock,
@@ -20,6 +24,8 @@ class ProductAllModel {
     title = json['title'];
     productCode = json['product_code'];
     photo = json['photo'];
+    itemprice = json['itemprice'];
+    itemunit = json['itemunit'];
     priceList = json['price_list'];
     detail = json['detail'];
     stock = json['stock'];
@@ -31,6 +37,8 @@ class ProductAllModel {
     data['title'] = this.title;
     data['product_code'] = this.productCode;
     data['photo'] = this.photo;
+    data['itemprice'] = this.itemprice;
+    data['itemunit'] = this.itemunit;
     data['price_list'] = this.priceList;
     data['detail'] = this.detail;
     data['stock'] = this.stock;

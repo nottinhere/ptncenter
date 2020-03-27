@@ -1,6 +1,6 @@
 class UnitSizeModel {
   String lable;
-  int price;
+  String price;
   String unit;
 
   UnitSizeModel({this.lable, this.price, this.unit});

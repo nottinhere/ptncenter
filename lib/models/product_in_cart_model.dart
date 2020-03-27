@@ -59,7 +59,7 @@ class PriceList {
 
 class S {
   String lable;
-  String price;
+  int price;
   String unit;
   int quantity;
 

@@ -63,7 +63,7 @@ class PriceList {
 
 class S {
   String lable;
-  int price;
+  String price;
   String unit;
 
   S({this.lable, this.price, this.unit});

@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:http/http.dart' as http;  
 import 'package:somsakpharma/models/product_all_model.dart';
 import 'package:somsakpharma/models/product_all_model2.dart';
 import 'package:somsakpharma/models/unit_size_model.dart';
@@ -110,7 +110,7 @@ class _DetailState extends State<Detail> {
   }
 
   Widget showPricePackage(int index) {
-    return Text('${unitSizeModels[index].price} บาท/ ',style: MyStyle().h3Style,);
+    return Text('${unitSizeModels[index].price.toString()} บาท/ ',style: MyStyle().h3Style,);
   }
 
   Widget showChoosePricePackage(int index) {

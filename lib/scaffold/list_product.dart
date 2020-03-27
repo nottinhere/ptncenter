@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:http/http.dart' as http;  
 import 'package:somsakpharma/models/product_all_model.dart';
 import 'package:somsakpharma/models/user_model.dart';
 import 'package:somsakpharma/utility/my_style.dart';
@@ -132,7 +132,7 @@ class _ListProductState extends State<ListProduct> {
     return Row(
       children: <Widget>[
         Text(
-            'price : ${filterProductAllModels[index].stock.toString()}/unit',style: MyStyle().h3Style,),
+            'ราคา : ${filterProductAllModels[index].itemprice.toString()}/${filterProductAllModels[index].itemunit.toString()}',style: MyStyle().h3Style,),
       ],
     );
     // return Text('na');
@@ -153,7 +153,7 @@ class _ListProductState extends State<ListProduct> {
   Widget showImage(int index) {
     return Container(
       padding: EdgeInsets.all(5.0),
-      width: MediaQuery.of(context).size.width * 0.35,
+      width: MediaQuery.of(context).size.width * 0.30,
       child: Image.network(filterProductAllModels[index].photo),
     );
   }
