@@ -39,6 +39,7 @@ class _HomeState extends State<Home> {
     readPromotion();
     readSuggest();
     myUserModel = widget.userModel;
+
   }
 
   Future<void> readPromotion() async {
@@ -54,7 +55,7 @@ class _HomeState extends State<Home> {
       setState(() {
         //promoteModels.add(promoteModel); // push ค่าลง array
         promoteModels.add(productAllModel);
-        promoteLists.add(showImageNetWork(urlImage));
+        promoteLists.add(showImageNetWork(urlImage)); 
         urlImages.add(urlImage);
       });
     }
@@ -65,14 +66,16 @@ class _HomeState extends State<Home> {
   }
 
   Future<void> readSuggest() async {
-    String url = 'http://www.somsakpharma.com/api/json_promotion.php';
+   // print("memberId >> $memberId");
+   // String memberId = myUserModel.id;
+    String url = 'http://www.somsakpharma.com/api/json_suggest.php'; // ?memberId=$memberId
+    print("url >> $url");
     http.Response response = await http.get(url);
     var result = json.decode(response.body);
     var mapItemProduct =
         result['itemsProduct']; // dynamic    จะส่ง value อะไรก็ได้ รวมถึง null
     for (var map in mapItemProduct) {
       PromoteModel promoteModel = PromoteModel.fromJson(map);
-
       ProductAllModel productAllModel = ProductAllModel.fromJson(map);
       String urlImage = promoteModel.photo;
       setState(() {
@@ -98,9 +101,10 @@ class _HomeState extends State<Home> {
         MaterialPageRoute route = MaterialPageRoute(
           builder: (BuildContext context) => Detail(
             productAllModel: promoteModels[banerIndex],
-          ),
+            userModel: myUserModel,
+        ),
         );
-        Navigator.of(context).push(route).then((value) {});
+        // Navigator.of(context).push(route).then((value) {});  //  link to detail page
       },
       child: CarouselSlider(
         enlargeCenterPage: true,
@@ -125,7 +129,8 @@ class _HomeState extends State<Home> {
         MaterialPageRoute route = MaterialPageRoute(
           builder: (BuildContext context) => Detail(
             productAllModel: suggestModels[suggessIndex],
-          ),
+            userModel: myUserModel,
+         ),
         );
         Navigator.of(context).push(route).then((value) {});
       },
@@ -173,6 +178,45 @@ class _HomeState extends State<Home> {
     });
     Navigator.of(context).push(materialPageRoute);
   }
+
+
+  Widget productBox() {
+   String login = myUserModel.name;
+   return Container(
+      width: MediaQuery.of(context).size.width * 0.8,
+      // height: 80.0,
+      child: GestureDetector(
+        child: Card(
+          color: Colors.grey.shade100,
+          child: Container(
+            padding: EdgeInsets.all(16.0),
+            alignment: AlignmentDirectional(0.0, 0.0),
+            child: Row(
+              children: <Widget>[
+                Container(
+                  width: 45.0,
+                  child: Image.asset('images/icon_drugs.png'),
+                  padding:EdgeInsets.all(8.0) ,
+                ),
+                Text(
+                  'รายการสินค้า',
+                  style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black),
+                ),
+              ],
+            ),
+          ),
+        ),
+        onTap: () {
+          print('You click product');
+          routeToListProduct(0);
+        },
+      ),
+    );
+  }
+
 
   Widget topLeft() {
     return Container(
@@ -391,12 +435,13 @@ class _HomeState extends State<Home> {
     return SingleChildScrollView(
       child: Column(
         children: <Widget>[
-          headTitle('Promotion today',Icons.bookmark),
+          headTitle('สินค้าโปรโมชัน',Icons.bookmark),
           promotion(),
-          headTitle('Seggest Item',Icons.thumb_up),
+          headTitle('สินค้าแนะนำ',Icons.thumb_up),
           suggest(),
-          headTitle('Home menu',Icons.home),
-          homeMenu(),
+          headTitle('เมนู',Icons.home),
+          productBox(),        
+         // homeMenu(),
         ],
       ),
     );
