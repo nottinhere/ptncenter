@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;  
+import 'package:http/http.dart' as http;
 import 'package:somsakpharma/models/product_all_model.dart';
 import 'package:somsakpharma/models/user_model.dart';
 import 'package:somsakpharma/utility/my_style.dart';
@@ -97,7 +97,7 @@ class _ListProductState extends State<ListProduct> {
     }
 
     http.Response response = await http.get(url);
-    print('url readData ##################+++++++++++>>> $url');
+    // print('url readData ##################+++++++++++>>> $url');
     var result = json.decode(response.body);
     // print('result = $result');
     // print('url ListProduct ====>>>> $url');
@@ -107,6 +107,7 @@ class _ListProductState extends State<ListProduct> {
 
     for (var map in itemProducts) {
       ProductAllModel productAllModel = ProductAllModel.fromJson(map);
+
       setState(() {
         productAllModels.add(productAllModel);
         filterProductAllModels = productAllModels;
@@ -118,7 +119,7 @@ class _ListProductState extends State<ListProduct> {
     return Row(
       children: <Widget>[
         Container(
-          width: MediaQuery.of(context).size.width*0.7-50,
+          width: MediaQuery.of(context).size.width * 0.7 - 50,
           child: Text(
             filterProductAllModels[index].title,
             style: MyStyle().h3bStyle,
@@ -132,7 +133,9 @@ class _ListProductState extends State<ListProduct> {
     return Row(
       children: <Widget>[
         Text(
-            'ราคา : ${filterProductAllModels[index].itemprice.toString()}/${filterProductAllModels[index].itemunit.toString()}',style: MyStyle().h3Style,),
+          'ราคา : ${filterProductAllModels[index].itemprice.toString()}/${filterProductAllModels[index].itemunit.toString()}',
+          style: MyStyle().h3Style,
+        ),
       ],
     );
     // return Text('na');
@@ -189,11 +192,41 @@ class _ListProductState extends State<ListProduct> {
     );
   }
 
-  Widget showProgressIndicate() {
+  Widget showContent() {
+    print('searchString ===>>> $searchString');
+
+    bool searchKey;
+    if (searchString != '') {
+      searchKey = true;
+    }
+
+    return filterProductAllModels.length == 0
+        ? showProgressIndicate(searchKey)
+        : showProductItem();
+  }
+
+  Widget showProgressIndicate(searchKey) {
+    print('searchKey >> $searchKey');
+
+    if (searchKey == true) {
+      if (filterProductAllModels.length == 0) {
+             //print('aaaaa');
+             return Center(child: Text('')); // Search not found
+   
+      } else {
+             //print('bbbb');
+             return Center(child: Text(''));
+      }
+
+    } else {
+      return Center(child: CircularProgressIndicator());
+    }
+    /*
     return Center(
       child:
           statusStart ? CircularProgressIndicator() : Text('Search not found'),
     );
+    */
   }
 
   /*
@@ -216,8 +249,7 @@ class _ListProductState extends State<ListProduct> {
         trailing: IconButton(
             icon: Icon(Icons.search),
             onPressed: () {
-              print('searchString ===>>> $searchString');
-
+              // print('searchString ===>>> $searchString');
               setState(() {
                 page = 1;
                 productAllModels.clear();
@@ -235,12 +267,7 @@ class _ListProductState extends State<ListProduct> {
     );
   }
 
-  Widget showContent() {
-    return filterProductAllModels.length == 0
-        ? showProgressIndicate()
-        : showProductItem();
-  }
-
+/************************************** */
   Future<void> readCart() async {
     String memberId = myUserModel.id.toString();
     print(memberId);

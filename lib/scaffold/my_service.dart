@@ -103,7 +103,7 @@ class _MyServiceState extends State<MyService> {
         size: 36.0,
       ),
       title: Text('Contact'),
-      subtitle: Text('Contact pattana'),
+      subtitle: Text('Contact Somsakpharma'),
       onTap: () {
         setState(() {
           currentWidget = Contact();
@@ -150,7 +150,7 @@ class _MyServiceState extends State<MyService> {
       int status = result['status'];
       print('status ===>>> $status');
       if (status == 0) {
-        normalDialog(context, 'No Code', 'No $code in my Database');
+        normalDialog(context, 'Not found', 'ไม่พบ code :: $code ในระบบ');
       } else {
         var itemProducts = result['itemsProduct'];
         for (var map in itemProducts) {

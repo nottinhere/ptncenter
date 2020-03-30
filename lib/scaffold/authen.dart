@@ -97,7 +97,7 @@ class _AuthenState extends State<Authen> {
   Future<void> checkAuthen() async {
     if (user.isEmpty || password.isEmpty) {
       // Have space
-      normalDialog(context, 'Have space', 'Please fill all input');
+      normalDialog(context, 'ข้อมูลไม่ครบ', 'กรุณากรอกข้อมูลให้ครบ');
     } else {
       // No space
       String url =
@@ -111,7 +111,7 @@ class _AuthenState extends State<Authen> {
 
       if (statusInt == 0) {
         String message = result['message'];
-        normalDialog(context, 'Login fail', message);
+        normalDialog(context, 'ข้อมูลไม่ถูกต้อง', message);
       } else {
         Map<String, dynamic> map = result['data'];
         print('map = $map');

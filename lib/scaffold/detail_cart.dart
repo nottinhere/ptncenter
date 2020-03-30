@@ -202,7 +202,7 @@ class _DetailCartState extends State<DetailCart> {
         Icons.edit,
         size: 36.0,
       ),
-      title: Text('Edit cart'),
+      title: Text('แก้ไขจำนวน'),
     );
   }
 
@@ -493,7 +493,7 @@ class _DetailCartState extends State<DetailCart> {
     return Container(
       padding: EdgeInsets.only(left: 16.0, top: 10.0),
       child: Text(
-        'Total = $total BHT',
+        'รวม ::  $total บาท',
         style: MyStyle().h1Style,
       ),
     );
@@ -570,8 +570,8 @@ class _DetailCartState extends State<DetailCart> {
             color: MyStyle().textColor,
             onPressed: () {
               if (transport == null) {
-                normalDialog(context, 'ยังไม่เลือก  การขอส่ง',
-                    'กรุณา เลือกการขนส่ง ด้วยคะ');
+                normalDialog(context, 'ยังไม่เลือก  การจัดส่ง',
+                    'กรุณา เลือกการจัดส่ง ด้วยค่ะ');
               } else {
                 memberID = myUserModel.id.toString();
                 print(
@@ -607,7 +607,7 @@ class _DetailCartState extends State<DetailCart> {
         builder: (BuildContext context) {
           return AlertDialog(
             title: Text('Complete'),
-            content: Text('Success Order'),
+            content: Text('การสั่งซื้อเรียบร้อย'),
             actions: <Widget>[
               FlatButton(
                   onPressed: () {
