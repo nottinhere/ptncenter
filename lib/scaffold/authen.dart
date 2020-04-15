@@ -1,7 +1,8 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;  
+import 'package:http/http.dart' as http;
 import 'package:somsakpharma/models/user_model.dart';
 import 'package:somsakpharma/scaffold/my_service.dart';
 import 'package:somsakpharma/utility/my_style.dart';
@@ -21,8 +22,6 @@ class _AuthenState extends State<Authen> {
   bool remember = false; // false => unCheck      true = Check
   bool status = true;
 
-
-
   // Method
   @override
   void initState() {
@@ -39,7 +38,7 @@ class _AuthenState extends State<Authen> {
 
       if (user != null) {
         checkAuthen();
-      }else{
+      } else {
         setState(() {
           status = false;
         });
@@ -102,17 +101,16 @@ class _AuthenState extends State<Authen> {
       // No space
       String url =
           '${MyStyle().getUserWhereUserAndPass}?username=$user&password=$password';
-      http.Response response = await http.get(
-          url); // await จะต้องทำงานใน await จะเสร็จจึงจะไปทำ process ต่อไป
+      http.Response response = await http
+          .get(url); // await จะต้องทำงานใน await จะเสร็จจึงจะไปทำ process ต่อไป
       var result = json.decode(response.body);
-
       int statusInt = result['status'];
       print('statusInt = $statusInt');
 
       if (statusInt == 0) {
         String message = result['message'];
         normalDialog(context, 'ข้อมูลไม่ถูกต้อง', message);
-      } else {
+      } else if (statusInt == 1) {
         Map<String, dynamic> map = result['data'];
         print('map = $map');
         userModel = UserModel.fromJson(map);
@@ -123,8 +121,15 @@ class _AuthenState extends State<Authen> {
           routeToMyService();
         }
       }
+      if (statusInt == 2) {
+        String message = 'กรุณาติดต่อทางร้าน';
+        normalDialog(context, 'ข้อมูลไม่ถูกต้อง !!!', message);
+      }
     }
   }
+
+
+
 
   Future<void> saveSharePreference() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
@@ -244,35 +249,35 @@ class _AuthenState extends State<Authen> {
 
   Container mainContent() {
     return Container(
-        decoration: BoxDecoration(
-          gradient: RadialGradient(
-            colors: [Colors.white, MyStyle().bgColor],
-            radius: 1.5,
-          ),
+      decoration: BoxDecoration(
+        gradient: RadialGradient(
+          colors: [Colors.white, MyStyle().bgColor],
+          radius: 1.5,
         ),
-        child: Center(
-          child: Form(
-            key: formKey,
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min, //
-                children: <Widget>[
-                  showLogo(),
-                  mySizeBox(),
-                  showAppName(),
-                  mySizeBox(),
-                  userForm(),
-                  mySizeBox(),
-                  passwordForm(),
-                  mySizeBox(),
-                  rememberCheckbox(),
-                  mySizeBox(),
-                  loginButton(),
-                ],
-              ),
+      ),
+      child: Center(
+        child: Form(
+          key: formKey,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min, //
+              children: <Widget>[
+                showLogo(),
+                mySizeBox(),
+                showAppName(),
+                mySizeBox(),
+                userForm(),
+                mySizeBox(),
+                passwordForm(),
+                mySizeBox(),
+                rememberCheckbox(),
+                mySizeBox(),
+                loginButton(),
+              ],
             ),
           ),
         ),
-      );
+      ),
+    );
   }
 }

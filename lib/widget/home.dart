@@ -6,9 +6,11 @@ import 'package:http/http.dart' as http;
 import 'package:somsakpharma/models/product_all_model.dart';
 import 'package:somsakpharma/models/promote_model.dart';
 import 'package:somsakpharma/models/user_model.dart';
+import 'package:somsakpharma/scaffold/authen.dart';
 import 'package:somsakpharma/scaffold/detail.dart';
 import 'package:somsakpharma/scaffold/list_product.dart';
 import 'package:somsakpharma/utility/my_style.dart';
+import 'package:somsakpharma/utility/normal_dialog.dart';
 
 class Home extends StatefulWidget {
   final UserModel userModel;
@@ -54,7 +56,7 @@ class _HomeState extends State<Home> {
       setState(() {
         //promoteModels.add(promoteModel); // push ค่าลง array
         promoteModels.add(productAllModel);
-        promoteLists.add(showImageNetWork(urlImage)); 
+        promoteLists.add(showImageNetWork(urlImage));
         urlImages.add(urlImage);
       });
     }
@@ -66,7 +68,8 @@ class _HomeState extends State<Home> {
 
   Future<void> readSuggest() async {
     String memId = myUserModel.id;
-    String url = 'http://www.somsakpharma.com/api/json_suggest.php?memberId=$memId'; // ?memberId=$memberId
+    String url =
+        'http://www.somsakpharma.com/api/json_suggest.php?memberId=$memId'; // ?memberId=$memberId
     http.Response response = await http.get(url);
     var result = json.decode(response.body);
     var mapItemProduct =
@@ -99,7 +102,7 @@ class _HomeState extends State<Home> {
           builder: (BuildContext context) => Detail(
             productAllModel: promoteModels[banerIndex],
             userModel: myUserModel,
-        ),
+          ),
         );
         // Navigator.of(context).push(route).then((value) {});  //  link to detail page
       },
@@ -127,7 +130,7 @@ class _HomeState extends State<Home> {
           builder: (BuildContext context) => Detail(
             productAllModel: suggestModels[suggessIndex],
             userModel: myUserModel,
-         ),
+          ),
         );
         Navigator.of(context).push(route).then((value) {});
       },
@@ -176,10 +179,9 @@ class _HomeState extends State<Home> {
     Navigator.of(context).push(materialPageRoute);
   }
 
-
   Widget productBox() {
-   String login = myUserModel.name;
-   return Container(
+    String login = myUserModel.name;
+    return Container(
       width: MediaQuery.of(context).size.width * 0.8,
       // height: 80.0,
       child: GestureDetector(
@@ -193,7 +195,7 @@ class _HomeState extends State<Home> {
                 Container(
                   width: 45.0,
                   child: Image.asset('images/icon_drugs.png'),
-                  padding:EdgeInsets.all(8.0) ,
+                  padding: EdgeInsets.all(8.0),
                 ),
                 Text(
                   'รายการสินค้า',
@@ -213,7 +215,6 @@ class _HomeState extends State<Home> {
       ),
     );
   }
-
 
   Widget topLeft() {
     return Container(
@@ -432,19 +433,19 @@ class _HomeState extends State<Home> {
     return SingleChildScrollView(
       child: Column(
         children: <Widget>[
-          headTitle('สินค้าโปรโมชัน',Icons.bookmark),
-          promotion(),
-          headTitle('สินค้าแนะนำ',Icons.thumb_up),
+          headTitle('สินค้าแนะนำ', Icons.thumb_up),
           suggest(),
-          headTitle('เมนู',Icons.home),
-          productBox(),        
-         // homeMenu(),
+          headTitle('เมนู', Icons.home),
+          productBox(),
+          headTitle('สินค้าโปรโมชัน', Icons.bookmark),
+          promotion(),
+          // homeMenu(),
         ],
       ),
     );
   }
 
-  Widget headTitle(String string,IconData iconData) {
+  Widget headTitle(String string, IconData iconData) {
     // Widget  แทน object ประเภทไดก็ได้
     return Container(
       padding: EdgeInsets.all(5.0),
