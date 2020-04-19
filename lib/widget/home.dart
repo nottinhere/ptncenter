@@ -152,7 +152,7 @@ class _HomeState extends State<Home> {
   Widget promotion() {
     return Container(
       padding: EdgeInsets.only(top: 5.0, bottom: 5.0),
-      height: MediaQuery.of(context).size.height * 0.20,
+      height: MediaQuery.of(context).size.width * 0.70,  // size.height * 0.20,
       child:
           promoteLists.length == 0 ? myCircularProgress() : showCarouseSlider(),
     );
@@ -186,7 +186,7 @@ class _HomeState extends State<Home> {
       // height: 80.0,
       child: GestureDetector(
         child: Card(
-          color: Colors.grey.shade100,
+          color: Colors.greenAccent.shade100,  // Colors.grey.shade100,
           child: Container(
             padding: EdgeInsets.all(16.0),
             alignment: AlignmentDirectional(0.0, 0.0),
@@ -199,6 +199,43 @@ class _HomeState extends State<Home> {
                 ),
                 Text(
                   'รายการสินค้า',
+                  style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black),
+                ),
+              ],
+            ),
+          ),
+        ),
+        onTap: () {
+          print('You click product');
+          routeToListProduct(0);
+        },
+      ),
+    );
+  }
+
+  Widget orderhistoryBox() {
+    String login = myUserModel.name;
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.8,
+      // height: 80.0,
+      child: GestureDetector(
+        child: Card(
+          color: Colors.greenAccent.shade100,
+          child: Container(
+            padding: EdgeInsets.all(16.0),
+            alignment: AlignmentDirectional(0.0, 0.0),
+            child: Row(
+              children: <Widget>[
+                Container(
+                  width: 45.0,
+                  child: Image.asset('images/icon_drugs.png'),
+                  padding: EdgeInsets.all(8.0),
+                ),
+                Text(
+                  'ประวัติการสั่งซื้อ',
                   style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -437,6 +474,7 @@ class _HomeState extends State<Home> {
           suggest(),
           headTitle('เมนู', Icons.home),
           productBox(),
+          orderhistoryBox(),
           headTitle('สินค้าโปรโมชัน', Icons.bookmark),
           promotion(),
           // homeMenu(),
