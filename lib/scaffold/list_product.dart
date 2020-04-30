@@ -143,7 +143,7 @@ class _ListProductState extends State<ListProduct> {
 
   Widget showText(int index) {
     return Container(
-      padding: EdgeInsets.only(left: 8.0, right: 2.0),
+      padding: EdgeInsets.only(left: 5.0, right: 3.0),
       // height: MediaQuery.of(context).size.width * 0.5,
       width: MediaQuery.of(context).size.width * 0.60,
       child: Column(
@@ -161,6 +161,21 @@ class _ListProductState extends State<ListProduct> {
     );
   }
 
+  BoxDecoration myBoxDecoration() {
+    return BoxDecoration(
+      border: Border(
+        top: BorderSide(
+          color: Colors.blueGrey.shade100,
+          width: 1.0,
+        ),
+        // bottom: BorderSide(
+        //   color: Colors.blueGrey.shade100,
+        //   width: 1.0,
+        // ),
+      ),
+    );
+  }
+
   Widget showProductItem() {
     return Expanded(
       child: ListView.builder(
@@ -169,11 +184,15 @@ class _ListProductState extends State<ListProduct> {
         itemBuilder: (BuildContext buildContext, int index) {
           return GestureDetector(
             child: Card(
-              child: Row(
-                children: <Widget>[
-                  showImage(index),
-                  showText(index),
-                ],
+              child: Container(
+                decoration: myBoxDecoration(),
+                padding: EdgeInsets.only(top: 0.5),
+                child: Row(
+                  children: <Widget>[
+                    showImage(index),
+                    showText(index),
+                  ],
+                ),
               ),
             ),
             onTap: () {
@@ -210,14 +229,13 @@ class _ListProductState extends State<ListProduct> {
 
     if (searchKey == true) {
       if (filterProductAllModels.length == 0) {
-             //print('aaaaa');
-             return Center(child: Text('')); // Search not found
-   
-      } else {
-             //print('bbbb');
-             return Center(child: Text(''));
-      }
+        //print('aaaaa');
+        return Center(child: Text('')); // Search not found
 
+      } else {
+        //print('bbbb');
+        return Center(child: Text(''));
+      }
     } else {
       return Center(child: CircularProgressIndicator());
     }
