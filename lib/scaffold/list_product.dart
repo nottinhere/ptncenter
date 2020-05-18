@@ -145,10 +145,13 @@ class _ListProductState extends State<ListProduct> {
     return Container(
       padding: EdgeInsets.only(left: 5.0, right: 3.0),
       // height: MediaQuery.of(context).size.width * 0.5,
-      width: MediaQuery.of(context).size.width * 0.60,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: <Widget>[showName(index), showStock(index)],
+      width: MediaQuery.of(context).size.width * 0.63,
+      child: Container(
+       padding: EdgeInsets.only(bottom: 5.0, top: 5.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[showName(index), showStock(index)],
+        ),
       ),
     );
   }
@@ -156,7 +159,7 @@ class _ListProductState extends State<ListProduct> {
   Widget showImage(int index) {
     return Container(
       padding: EdgeInsets.all(5.0),
-      width: MediaQuery.of(context).size.width * 0.30,
+      width: MediaQuery.of(context).size.width * 0.33,
       child: Image.network(filterProductAllModels[index].photo),
     );
   }

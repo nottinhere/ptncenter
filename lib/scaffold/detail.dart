@@ -259,7 +259,7 @@ class _DetailState extends State<Detail> {
           showCart(),
         ],
         backgroundColor: MyStyle().textColor,
-        title: Text('Detail'),
+        title: Text('ข้อมูลสินค้า'),
       ),
       body: productAllModel == null ? showProgress() : showDetailList(),
     );
@@ -283,6 +283,7 @@ class _DetailState extends State<Detail> {
                 child: Text(
                   'Add to Cart',
                   style: TextStyle(
+                      fontSize: 18.0,
                       color: Colors.white, fontWeight: FontWeight.bold),
                 ),
                 onPressed: () {

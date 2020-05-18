@@ -475,7 +475,7 @@ class _HomeState extends State<Home> {
           headTitle('เมนู', Icons.home),
           productBox(),
           orderhistoryBox(),
-          headTitle('สินค้าโปรโมชัน', Icons.bookmark),
+          // headTitle('สินค้าโปรโมชัน', Icons.bookmark),
           promotion(),
           // homeMenu(),
         ],

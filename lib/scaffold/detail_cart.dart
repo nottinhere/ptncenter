@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;  
+import 'package:http/http.dart' as http;
 import 'package:somsakpharma/models/price_list_model.dart';
 import 'package:somsakpharma/models/product_all_model.dart';
 
@@ -37,12 +37,11 @@ class _DetailCartState extends State<DetailCart> {
   List<Map<String, dynamic>> lMap = List();
   int amontCart = 0;
   String newQTY = '';
-  int newQTYint =0;
+  int newQTYint = 0;
   double total = 0;
   String transport;
   int index = 0;
   String comment = '', memberID;
-
 
   List<String> listTransport = [
     '',
@@ -84,23 +83,22 @@ class _DetailCartState extends State<DetailCart> {
       Map<String, dynamic> priceListMap = map['price_list'];
 
       Map<String, dynamic> sizeSmap = priceListMap['s'];
-     
+
       if (sizeSmap == null) {
         sMap.add({'lable': ''});
         PriceListModel priceListModel = PriceListModel.fromJson({'lable': ''});
         priceListSModels.add(priceListModel);
       } else {
         sMap.add(sizeSmap);
-       // var priceSdisplay = double.parse(sizeSmap['price']);
-       // print('S is not null >> $priceSdisplay');
+        // var priceSdisplay = double.parse(sizeSmap['price']);
+        // print('S is not null >> $priceSdisplay');
         PriceListModel priceListModel = PriceListModel.fromJson(sizeSmap);
         priceListSModels.add(priceListModel);
-       calculateTotal(
-            priceListModel.price, priceListModel.quantity);
+        calculateTotal(priceListModel.price, priceListModel.quantity);
       }
 
       //  print('sizeSmap = $sizeSmap');
-    
+
       Map<String, dynamic> sizeMmap = priceListMap['m'];
       if (sizeMmap == null) {
         mMap.add({'lable': ''});
@@ -469,20 +467,23 @@ class _DetailCartState extends State<DetailCart> {
 
   Widget showListCart() {
     return ListView.builder(
+      padding: EdgeInsets.only(top: 5.0, bottom: 5.0),
       physics: ScrollPhysics(),
       shrinkWrap: true,
       itemCount: productAllModels.length,
       itemBuilder: (BuildContext buildContext, int index) {
-
-       return Card(
-          child: Column(
-            children: <Widget>[
-              showTitle(index),
-              showSText(index),
-              showMText(index),
-              showLText(index),
-              // Divider(),
-            ],
+        return Card(
+          child: Container(
+            padding: EdgeInsets.only(bottom: 10.0, top: 10.0),
+            child: Column(
+              children: <Widget>[
+                showTitle(index),
+                showSText(index),
+                showMText(index),
+                showLText(index),
+                // Divider(),
+              ],
+            ),
           ),
         );
       },
