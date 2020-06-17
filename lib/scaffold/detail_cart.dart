@@ -3,15 +3,15 @@ import 'dart:convert';
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:somsakpharma/models/price_list_model.dart';
-import 'package:somsakpharma/models/product_all_model.dart';
+import 'package:ptncenter/models/price_list_model.dart';
+import 'package:ptncenter/models/product_all_model.dart';
 
-import 'package:somsakpharma/models/product_all_model2.dart';
-import 'package:somsakpharma/models/user_model.dart';
-import 'package:somsakpharma/scaffold/detail.dart';
-import 'package:somsakpharma/utility/my_style.dart';
-import 'package:somsakpharma/utility/normal_dialog.dart';
-import 'package:somsakpharma/widget/home.dart';
+import 'package:ptncenter/models/product_all_model2.dart';
+import 'package:ptncenter/models/user_model.dart';
+import 'package:ptncenter/scaffold/detail.dart';
+import 'package:ptncenter/utility/my_style.dart';
+import 'package:ptncenter/utility/normal_dialog.dart';
+import 'package:ptncenter/widget/home.dart';
 
 import 'my_service.dart';
 
@@ -45,9 +45,11 @@ class _DetailCartState extends State<DetailCart> {
 
   List<String> listTransport = [
     '',
-    'รับสินค้าเองที่ร้าน สมศักดิ์เภสัช สอง',
-    'รถส่งของตามรอบส่งสินค้า ในเมืองเชียงใหม่และจังหวัดใกล้เคียง',
-    'รถขนส่งเอกชน'
+    'รับสินค้าเองที่ พัฒนาเภสัช',
+    'รับสินค้าเองที่คลังสินค้า (ซอยวัดท่าทอง)',
+    'รถส่งของตามรอบส่งสินค้า ตามสายส่ง',
+    'รถส่งของตามรอบส่งสินค้าในเมืองนครสวรรค์',
+    'ส่งทางบริษัทขนส่ง (เอกชน)'
   ];
 
   // Method
@@ -305,7 +307,7 @@ class _DetailCartState extends State<DetailCart> {
   Future<void> editDetailCart(
       String productID, String unitSize, String memberID) async {
     String url =
-        'http://somsakpharma.com/api/json_updatemycart.php?productID=$productID&unitSize=$unitSize&newQTY=$newQTY&memberId=$memberID';
+        'http://ptnpharma.com/apishop/json_updatemycart.php?productID=$productID&unitSize=$unitSize&newQTY=$newQTY&memberId=$memberID';
 
     print('url editDetailCart ====>>>>> $url');
 
@@ -367,7 +369,7 @@ class _DetailCartState extends State<DetailCart> {
     print('productID = $productID ,unitSize = $unitSize ,memberID = $memberID');
 
     String url =
-        'http://somsakpharma.com/api/json_removeitemincart.php?productID=$productID&unitSize=$unitSize&memberId=$memberID';
+        'http://ptnpharma.com/apishop/json_removeitemincart.php?productID=$productID&unitSize=$unitSize&memberId=$memberID';
     print('url DeleteCart#######################======>>>> $url');
 
     await http.get(url).then((response) {
@@ -519,6 +521,7 @@ class _DetailCartState extends State<DetailCart> {
 
   Widget showTransport() {
     return Container(
+       
       padding: EdgeInsets.only(left: 16.0, right: 16.0),
       child: Card(
         child: PopupMenuButton<String>(
@@ -526,6 +529,7 @@ class _DetailCartState extends State<DetailCart> {
             selectedTransport(string);
           },
           child: showTitleTransport(),
+          
           itemBuilder: (BuildContext context) {
             return [
               PopupMenuItem(
@@ -539,6 +543,12 @@ class _DetailCartState extends State<DetailCart> {
               PopupMenuItem(
                 child: Text(listTransport[3]),
                 value: '3',
+              ),PopupMenuItem(
+                child: Text(listTransport[4]),
+                value: '4',
+              ),PopupMenuItem(
+                child: Text(listTransport[5]),
+                value: '5',
               ),
             ];
           },
@@ -594,7 +604,7 @@ class _DetailCartState extends State<DetailCart> {
   Future<void> submitThread() async {
     try {
       String url =
-          'http://somsakpharma.com/api/json_submit_myorder.php?memberId=$memberID&transport=$transport&comment=$comment';
+          'http://ptnpharma.com/apishop/json_submit_myorder.php?memberId=$memberID&transport=$transport&comment=$comment';
 
       await http.get(url).then((value) {
         confirmSubmit();
@@ -685,7 +695,7 @@ class _DetailCartState extends State<DetailCart> {
 
   Future<void> decodeQRcode(String code) async {
     try {
-      String url = 'http://somsakpharma.com/api/json_product.php?bqcode=$code';
+      String url = 'http://ptnpharma.com/apishop/json_product.php?bqcode=$code';
       http.Response response = await http.get(url);
       var result = json.decode(response.body);
       print('result ===*******>>>> $result');

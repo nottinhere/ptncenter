@@ -3,10 +3,11 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:somsakpharma/models/product_all_model.dart';
-import 'package:somsakpharma/models/user_model.dart';
-import 'package:somsakpharma/utility/my_style.dart';
-
+import 'package:ptncenter/models/product_all_model.dart';
+import 'package:ptncenter/models/user_model.dart';
+import 'package:ptncenter/utility/my_style.dart';
+import 'package:barcode_scan/barcode_scan.dart';
+import 'package:ptncenter/utility/normal_dialog.dart';
 import 'detail.dart';
 import 'detail_cart.dart';
 
@@ -52,7 +53,7 @@ class _ListProductState extends State<ListProduct> {
   final Debouncer debouncer =
       Debouncer(milliseconds: 500); // ตั้งค่า เวลาที่จะ delay
   bool statusStart = true;
-
+  String qrString;
   // Method
   @override
   void initState() {
@@ -88,21 +89,76 @@ class _ListProductState extends State<ListProduct> {
     });
   }
 
+/************************************** */
+  Future<void> readCart() async {
+    amontCart = 0;
+    String memberId = myUserModel.id.toString();
+    String url =
+        'http://ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId';
+
+        print('url Detail =====>>>>>>>> $url');
+
+    http.Response response = await http.get(url);
+    var result = json.decode(response.body);
+    var cartList = result['cart'];
+    for (var map in cartList) {
+      setState(() {
+        amontCart++;
+        print('amontCart (list product page) >> $amontCart');
+      });
+    }
+ 
+    // print('amontCart (list product page)=====>>>>>>>> $amontCart');
+  }
+
+  Widget showCart() {
+    return GestureDetector(
+      onTap: () {
+        routeToDetailCart();
+      },
+      child: Container(
+        margin: EdgeInsets.only(top: 5.0, right: 5.0),
+        width: 32.0,
+        height: 32.0,
+        child: Stack(
+          children: <Widget>[
+            Image.asset('images/shopping_cart.png'),
+            Text(
+              '$amontCart',
+              style: TextStyle(
+                backgroundColor: Colors.blue.shade600,
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void routeToDetailCart() {
+    MaterialPageRoute materialPageRoute =
+        MaterialPageRoute(builder: (BuildContext buildContext) {
+      return DetailCart(
+        userModel: myUserModel,
+      );
+    });
+    Navigator.of(context).push(materialPageRoute);
+  }
+
   Future<void> readData() async {
     // String url = MyStyle().readAllProduct;
+    String memberId = myUserModel.id.toString();
     String url =
-        'http://somsakpharma.com/api/json_product.php?searchKey=$searchString&page=$page';
+        'http://ptnpharma.com/apishop/json_product.php?memberId=$memberId&searchKey=$searchString&page=$page';
+    print("URL = $url");
     if (myIndex != 0) {
       url = '${MyStyle().readProductWhereMode}$myIndex';
     }
 
     http.Response response = await http.get(url);
-    // print('url readData ##################+++++++++++>>> $url');
     var result = json.decode(response.body);
-    // print('result = $result');
-    // print('url ListProduct ====>>>> $url');
-    // print('result ListProduct ========>>>>> $result');
-
     var itemProducts = result['itemsProduct'];
 
     for (var map in itemProducts) {
@@ -147,7 +203,7 @@ class _ListProductState extends State<ListProduct> {
       // height: MediaQuery.of(context).size.width * 0.5,
       width: MediaQuery.of(context).size.width * 0.63,
       child: Container(
-       padding: EdgeInsets.only(bottom: 5.0, top: 5.0),
+        padding: EdgeInsets.only(bottom: 5.0, top: 5.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[showName(index), showStock(index)],
@@ -178,6 +234,11 @@ class _ListProductState extends State<ListProduct> {
       ),
     );
   }
+
+
+
+
+
 
   Widget showProductItem() {
     return Expanded(
@@ -215,7 +276,9 @@ class _ListProductState extends State<ListProduct> {
   }
 
   Widget showContent() {
-    print('searchString ===>>> $searchString');
+    // readCart();
+    print('searchString (show content) ===>>> $searchString');
+    print('TotalItemInCart (content)>>$amontCart');
 
     bool searchKey;
     if (searchString != '') {
@@ -261,85 +324,111 @@ class _ListProductState extends State<ListProduct> {
   }
   */
 
+
+  Widget lastItemInCart(){
+    return Column(
+      children: <Widget>[
+        Container(
+          width: MediaQuery.of(context).size.width * 0.7 - 50,
+          child: Text(
+            'รายการล่าสุดในตะกร้า',
+            style: MyStyle().h3bStyle,
+          ),
+        ),
+        Container(
+          width: MediaQuery.of(context).size.width * 0.7 - 50,
+          child: Text(
+            amontCart.toString(),
+            style: MyStyle().h3bStyle,
+          ),
+        ),
+      ],
+    );
+      
+  }
+
+    Future<void> readQRcode() async {
+    try {
+      qrString = await BarcodeScanner.scan();
+      print('QR code = $qrString');
+      if (qrString != null) {
+        decodeQRcode(qrString);
+      }
+    } catch (e) {
+      print('e = $e');
+    }
+  }
+
+  Future<void> decodeQRcode(String code) async {
+    try {
+      String url = 'http://ptnpharma.com/apishop/json_product.php?bqcode=$code';
+      http.Response response = await http.get(url);
+      var result = json.decode(response.body);
+      print('result ===*******>>>> $result');
+
+      int status = result['status'];
+      print('status ===>>> $status');
+      if (status == 0) {
+        normalDialog(context, 'Not found', 'ไม่พบ code :: $code ในระบบ');
+      } else {
+        var itemProducts = result['itemsProduct'];
+        for (var map in itemProducts) {
+          print('map ===*******>>>> $map');
+
+          ProductAllModel productAllModel = ProductAllModel.fromJson(map);
+          MaterialPageRoute route = MaterialPageRoute(
+            builder: (BuildContext context) => Detail(
+              userModel: myUserModel,
+              productAllModel: productAllModel,
+            ),
+          );
+          Navigator.of(context).push(route).then((value) {
+            setState(() {
+              // readCart();
+            });
+          });
+        }
+      }
+    } catch (e) {}
+  }
+
   Widget searchForm() {
     return Container(
       decoration: MyStyle().boxLightGray,
       // color: Colors.grey,
       padding: EdgeInsets.only(left: 5.0, right: 5.0, top: 2.0, bottom: 2.0),
       child: ListTile(
-        trailing: IconButton(
-            icon: Icon(Icons.search),
-            onPressed: () {
-              // print('searchString ===>>> $searchString');
-              setState(() {
-                page = 1;
-                productAllModels.clear();
-                readData();
-              });
-            }),
+        trailing: Container(
+                  width: 45.0,
+                  child: Image.asset('images/icon_barcode.png'),
+                ),onTap: () {
+          print('You click barcode scan');
+          readQRcode();
+         // Navigator.of(context).pop();
+        },
         title: TextField(
-          decoration:
-              InputDecoration(border: InputBorder.none, hintText: 'Search'),
+          textAlign: TextAlign.center,
+          scrollPadding: EdgeInsets.all(5.00),
+          style: TextStyle(
+              color: Colors.blue.shade900,
+              fontWeight: FontWeight.w300,
+              fontSize: 18.00),
+          decoration: InputDecoration(
+              border: OutlineInputBorder(), hintText: 'ค้นหาสินค้า'),
           onChanged: (String string) {
             searchString = string.trim();
+          },
+          textInputAction: TextInputAction.search,
+          onSubmitted: (value) {
+            setState(() {
+              page = 1;
+              productAllModels.clear();
+              readData();
+            });
           },
         ),
       ),
     );
-  }
-
-/************************************** */
-  Future<void> readCart() async {
-    String memberId = myUserModel.id.toString();
-    print(memberId);
-    String url =
-        'http://somsakpharma.com/api/json_loadmycart.php?memberId=$memberId';
-
-    http.Response response = await http.get(url);
-    var result = json.decode(response.body);
-    var cartList = result['cart'];
-
-    for (var map in cartList) {
-      setState(() {
-        amontCart++;
-      });
-    }
-  }
-
-  Widget showCart() {
-    return GestureDetector(
-      onTap: () {
-        routeToDetailCart();
-      },
-      child: Container(
-        margin: EdgeInsets.only(top: 5.0, right: 5.0),
-        width: 32.0,
-        height: 32.0,
-        child: Stack(
-          children: <Widget>[
-            Image.asset('images/shopping_cart.png'),
-            Text(
-              '$amontCart',
-              style: TextStyle(
-                backgroundColor: Colors.blue.shade600,
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void routeToDetailCart() {
-    MaterialPageRoute materialPageRoute =
-        MaterialPageRoute(builder: (BuildContext buildContext) {
-      return DetailCart(
-        userModel: myUserModel,
-      );
-    });
-    Navigator.of(context).push(materialPageRoute);
   }
 
   @override
@@ -359,6 +448,7 @@ class _ListProductState extends State<ListProduct> {
       body: Column(
         children: <Widget>[
           searchForm(),
+          lastItemInCart(),
           showContent(),
         ],
       ),

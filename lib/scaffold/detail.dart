@@ -1,14 +1,16 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;  
-import 'package:somsakpharma/models/product_all_model.dart';
-import 'package:somsakpharma/models/product_all_model2.dart';
-import 'package:somsakpharma/models/unit_size_model.dart';
-import 'package:somsakpharma/models/user_model.dart';
-import 'package:somsakpharma/scaffold/detail_cart.dart';
-import 'package:somsakpharma/utility/my_style.dart';
-import 'package:somsakpharma/utility/normal_dialog.dart';
+import 'package:http/http.dart' as http;
+import 'package:ptncenter/models/product_all_model.dart';
+import 'package:ptncenter/models/product_all_model2.dart';
+import 'package:ptncenter/models/unit_size_model.dart';
+import 'package:ptncenter/models/user_model.dart';
+import 'package:ptncenter/scaffold/detail_cart.dart';
+import 'package:ptncenter/utility/my_style.dart';
+import 'package:ptncenter/utility/normal_dialog.dart';
+
+import 'package:ptncenter/scaffold/list_product.dart';
 
 class Detail extends StatefulWidget {
   final ProductAllModel productAllModel;
@@ -48,8 +50,9 @@ class _DetailState extends State<Detail> {
 
   Future<void> getProductWhereID() async {
     if (currentProductAllModel != null) {
+      String memberId = myUserModel.id.toString();
       id = currentProductAllModel.id.toString();
-      String url = '${MyStyle().getProductWhereId}$id';
+      String url = '${MyStyle().getProductWhereId}$id&memberId=$memberId';
       print('url Detaillll ====>>> $url');
       http.Response response = await http.get(url);
       var result = json.decode(response.body);
@@ -92,13 +95,19 @@ class _DetailState extends State<Detail> {
 
   Widget showImage() {
     return Container(
-      height: MediaQuery.of(context).size.height*0.5-50,
-      child: Image.network(productAllModel.photo,fit: BoxFit.contain,),
+      height: MediaQuery.of(context).size.height * 0.5 - 50,
+      child: Image.network(
+        productAllModel.photo,
+        fit: BoxFit.contain,
+      ),
     );
   }
 
   Widget showTitle() {
-    return Text(productAllModel.title,style: MyStyle().h2Style,);
+    return Text(
+      productAllModel.title,
+      style: MyStyle().h2Style,
+    );
   }
 
   Widget showDetail() {
@@ -106,11 +115,17 @@ class _DetailState extends State<Detail> {
   }
 
   Widget showPackage(int index) {
-    return Text(unitSizeModels[index].lable,style: MyStyle().h3Style,);
+    return Text(
+      unitSizeModels[index].lable,
+      style: MyStyle().h3Style,
+    );
   }
 
   Widget showPricePackage(int index) {
-    return Text('${unitSizeModels[index].price.toString()} บาท/ ',style: MyStyle().h3Style,);
+    return Text(
+      '${unitSizeModels[index].price.toString()} บาท/ ',
+      style: MyStyle().h3Style,
+    );
   }
 
   Widget showChoosePricePackage(int index) {
@@ -200,19 +215,19 @@ class _DetailState extends State<Detail> {
     amontCart = 0;
     String memberId = myUserModel.id.toString();
     String url =
-        'http://www.somsakpharma.com/api/json_loadmycart.php?memberId=$memberId';
+        'http://ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId';
 
-        print('url Detail =====>>>>>>>> $url');
-
+    print('url Detail =====>>>>>>>> $url');
     http.Response response = await http.get(url);
     var result = json.decode(response.body);
     var cartList = result['cart'];
-
     for (var map in cartList) {
       setState(() {
         amontCart++;
+        print('amontCart  (detail page)>> $amontCart');
       });
     }
+    print('amontCart (detail page)=====>>>>>>>> $amontCart');
   }
 
   Widget showCart() {
@@ -284,7 +299,8 @@ class _DetailState extends State<Detail> {
                   'Add to Cart',
                   style: TextStyle(
                       fontSize: 18.0,
-                      color: Colors.white, fontWeight: FontWeight.bold),
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold),
                 ),
                 onPressed: () {
                   String productID = id;
@@ -326,6 +342,7 @@ class _DetailState extends State<Detail> {
                       }
                       index++;
                     }
+                   
                   }
                 },
               ),
@@ -339,22 +356,31 @@ class _DetailState extends State<Detail> {
   Future<void> addCart(
       String productID, String unitSize, int qTY, String memberID) async {
     String url =
-        'http://www.somsakpharma.com/api/json_savemycart.php?productID=$productID&unitSize=$unitSize&QTY=$qTY&memberId=$memberID';
+        'http://www.ptnpharma.com/apishop/json_savemycart.php?productID=$productID&unitSize=$unitSize&QTY=$qTY&memberId=$memberID';
+    print('urlAddcart = $url');
 
-    http.Response response = await http.get(url).then((response) {
+
+    await http.get(url).then((response) {
       print('upload ok');
-      readCart();
-      MaterialPageRoute materialPageRoute = MaterialPageRoute(builder: (BuildContext buildContext){return DetailCart(userModel: myUserModel,);});
-      Navigator.of(context).push(materialPageRoute);
+            Navigator.pop(context,  setState(() {
+              readCart();
+            }));
     });
+
+    // MaterialPageRoute materialPageRoute = MaterialPageRoute(builder: (BuildContext buildContext){return DetailCart(userModel: myUserModel,);});
+    // Navigator.of(context).push(materialPageRoute);
+   
+
   }
 
   Widget showDetailList() {
-    return Stack(
-      children: <Widget>[
-        showController(),
-        addButton(),
-      ],
+    return Card(
+      child: Stack(
+        children: <Widget>[
+          showController(),
+          addButton(),
+        ],
+      ),
     );
   }
 
@@ -363,9 +389,9 @@ class _DetailState extends State<Detail> {
       padding: EdgeInsets.all(10.0),
       children: <Widget>[
         showImage(),
-         MyStyle().mySizebox(),
+        MyStyle().mySizebox(),
         showTitle(),
-         MyStyle().mySizebox(),
+        MyStyle().mySizebox(),
         showDetail(),
         showPrice(),
       ],

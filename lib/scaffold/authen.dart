@@ -3,10 +3,10 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:somsakpharma/models/user_model.dart';
-import 'package:somsakpharma/scaffold/my_service.dart';
-import 'package:somsakpharma/utility/my_style.dart';
-import 'package:somsakpharma/utility/normal_dialog.dart';
+import 'package:ptncenter/models/user_model.dart';
+import 'package:ptncenter/scaffold/my_service.dart';
+import 'package:ptncenter/utility/my_style.dart';
+import 'package:ptncenter/utility/normal_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Authen extends StatefulWidget {
@@ -101,11 +101,11 @@ class _AuthenState extends State<Authen> {
       // No space
       String url =
           '${MyStyle().getUserWhereUserAndPass}?username=$user&password=$password';
+      print('url = $url');
       http.Response response = await http
           .get(url); // await จะต้องทำงานใน await จะเสร็จจึงจะไปทำ process ต่อไป
       var result = json.decode(response.body);
       int statusInt = result['status'];
-      print('statusInt = $statusInt');
 
       if (statusInt == 0) {
         String message = result['message'];
@@ -160,7 +160,7 @@ class _AuthenState extends State<Authen> {
       width: 250.0,
       child: TextFormField(
         style: TextStyle(color: Colors.grey),
-        // initialValue: 'nott', // set default value
+         initialValue: 'nott', // set default value
         onSaved: (String string) {
           user = string.trim();
         },
@@ -190,7 +190,7 @@ class _AuthenState extends State<Authen> {
       width: 250.0,
       child: TextFormField(
         style: TextStyle(color: Colors.grey),
-        // initialValue: '1234', // set default value
+         initialValue: '123456789', // set default value
         onSaved: (String string) {
           password = string.trim();
         },
@@ -221,7 +221,7 @@ class _AuthenState extends State<Authen> {
 
   Widget showAppName() {
     return Text(
-      'Somsak Pharma',
+      'PTN CENTER',
       style: TextStyle(
         fontSize: MyStyle().h1,
         color: MyStyle().mainColor,

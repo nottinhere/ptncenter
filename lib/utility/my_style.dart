@@ -51,16 +51,16 @@ class MyStyle {
   String fontName = 'Sarabun';
 
   String readAllProduct =
-      'http://www.somsakpharma.com/api/json_product.php?top=100';
+      'http://www.ptnpharma.com/apishop/json_product.php?top=100';
   String readProductWhereMode =
-      'http://www.somsakpharma.com/api/json_product.php?searchKey=';
+      'http://www.ptnpharma.com/apishop/json_product.php?searchKey=';
   String getUserWhereUserAndPass =
-      'http://www.somsakpharma.com/api/json_login.php';
+      'http://www.ptnpharma.com/apishop/json_login.php';
   String getProductWhereId =
-      'http://www.somsakpharma.com/api/json_productdetail.php?id=';
+      'http://www.ptnpharma.com/apishop/json_productdetail.php?id=';
 
   String loadMyCart =
-      'http://www.somsakpharma.com/api/json_loadmycart.php?memberId=';
+      'http://www.ptnpharma.com/apishop/json_loadmycart.php?memberId=';
 
   MyStyle();
 }

@@ -1,4 +1,4 @@
-package com.somsakpharma.somsakpharma
+package com.ptncenter.app
 
 import android.os.Bundle
 

@@ -4,14 +4,15 @@ import 'dart:io';
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:somsakpharma/models/product_all_model.dart';
-import 'package:somsakpharma/models/user_model.dart';
-import 'package:somsakpharma/scaffold/detail.dart';
+import 'package:ptncenter/models/product_all_model.dart';
+import 'package:ptncenter/models/user_model.dart';
+import 'package:ptncenter/scaffold/detail.dart';
 
-import 'package:somsakpharma/utility/my_style.dart';
-import 'package:somsakpharma/utility/normal_dialog.dart';
-import 'package:somsakpharma/widget/contact.dart';
-import 'package:somsakpharma/widget/home.dart';
+import 'package:ptncenter/utility/my_style.dart';
+import 'package:ptncenter/utility/normal_dialog.dart';
+import 'package:ptncenter/widget/contact.dart';
+import 'package:ptncenter/widget/home.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'detail_cart.dart';
@@ -41,8 +42,9 @@ class _MyServiceState extends State<MyService> {
       currentWidget = Home(
         userModel: myUserModel,
       );
+        readCart();
     });
-    readCart();
+  
   }
 
   Widget menuHome() {
@@ -103,7 +105,7 @@ class _MyServiceState extends State<MyService> {
         size: 36.0,
       ),
       title: Text('Contact'),
-      subtitle: Text('Contact Somsakpharma'),
+      subtitle: Text('Contact ptncenter'),
       onTap: () {
         setState(() {
           currentWidget = Contact();
@@ -142,7 +144,7 @@ class _MyServiceState extends State<MyService> {
 
   Future<void> decodeQRcode(String code) async {
     try {
-      String url = 'http://somsakpharma.com/api/json_product.php?bqcode=$code';
+      String url = 'http://ptnpharma.com/apishop/json_product.php?bqcode=$code';
       http.Response response = await http.get(url);
       var result = json.decode(response.body);
       print('result ===*******>>>> $result');
@@ -175,7 +177,7 @@ class _MyServiceState extends State<MyService> {
 
   Widget showAppName() {
     return Text(
-      'Somsak Pharma',
+      'PTN CENTER',
       style: TextStyle(
         fontSize: 24.0,
         color: MyStyle().textColor,
@@ -241,7 +243,7 @@ class _MyServiceState extends State<MyService> {
     amontCart = 0;
     String memberId = myUserModel.id.toString();
     String url =
-        'http://somsakpharma.com/api/json_loadmycart.php?memberId=$memberId';
+        'http://ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId';
 
     http.Response response = await http.get(url);
     var result = json.decode(response.body);
@@ -251,7 +253,7 @@ class _MyServiceState extends State<MyService> {
       setState(() {
         amontCart++;
       });
-      print('amontCart ===*******>>>> $amontCart');
+      print('amontCart (service page))>>>> $amontCart');
     }
   }
 
