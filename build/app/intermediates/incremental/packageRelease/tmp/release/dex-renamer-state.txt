@@ -1,0 +1,4 @@
+#Mon Jun 15 18:32:05 ICT 2020
+base.0=D\:\\ftproject\\ptncenter\\build\\app\\intermediates\\transforms\\dexMerger\\release\\0
+path.0=classes.dex
+renamed.0=classes.dex
