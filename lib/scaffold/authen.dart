@@ -160,7 +160,7 @@ class _AuthenState extends State<Authen> {
       width: 250.0,
       child: TextFormField(
         style: TextStyle(color: Colors.grey),
-         initialValue: 'nott', // set default value
+        //  initialValue: 'nott', // set default value
         onSaved: (String string) {
           user = string.trim();
         },
@@ -190,7 +190,7 @@ class _AuthenState extends State<Authen> {
       width: 250.0,
       child: TextFormField(
         style: TextStyle(color: Colors.grey),
-         initialValue: '123456789', // set default value
+        //  initialValue: '123456789', // set default value
         onSaved: (String string) {
           password = string.trim();
         },

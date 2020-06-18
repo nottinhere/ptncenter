@@ -14,6 +14,7 @@ import 'detail_cart.dart';
 class ListProduct extends StatefulWidget {
   final int index;
   final UserModel userModel;
+
   ListProduct({Key key, this.index, this.userModel}) : super(key: key);
 
   @override
@@ -47,13 +48,18 @@ class _ListProductState extends State<ListProduct> {
   int amontCart = 0;
   UserModel myUserModel;
   String searchString = '';
+  String lastItemName = '';
 
-  int amountListView = 6, page = 1;
+  int amountListView = 6;
+  int page = 1;
+  String qrString;
   ScrollController scrollController = ScrollController();
   final Debouncer debouncer =
       Debouncer(milliseconds: 500); // ตั้งค่า เวลาที่จะ delay
   bool statusStart = true;
-  String qrString;
+  
+
+
   // Method
   @override
   void initState() {
@@ -92,6 +98,7 @@ class _ListProductState extends State<ListProduct> {
 /************************************** */
   Future<void> readCart() async {
     amontCart = 0;
+    lastItemName = '';
     String memberId = myUserModel.id.toString();
     String url =
         'http://ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId';
@@ -102,13 +109,15 @@ class _ListProductState extends State<ListProduct> {
     var result = json.decode(response.body);
     var cartList = result['cart'];
     for (var map in cartList) {
+      lastItemName = map['title'];
       setState(() {
         amontCart++;
-        print('amontCart (list product page) >> $amontCart');
       });
     }
- 
-    // print('amontCart (list product page)=====>>>>>>>> $amontCart');
+      setState(() {
+        lastItemName;
+      });
+    print('lastItemName=====>>>>>>>> $lastItemName');
   }
 
   Widget showCart() {
@@ -267,7 +276,7 @@ class _ListProductState extends State<ListProduct> {
                   userModel: myUserModel,
                 );
               });
-              Navigator.of(context).push(materialPageRoute);
+              Navigator.of(context).push(materialPageRoute).then((value)=>readCart());
             },
           );
         },
@@ -277,8 +286,8 @@ class _ListProductState extends State<ListProduct> {
 
   Widget showContent() {
     // readCart();
-    print('searchString (show content) ===>>> $searchString');
-    print('TotalItemInCart (content)>>$amontCart');
+    // print('searchString (show content) ===>>> $searchString');
+    // print('TotalItemInCart (content)>>$amontCart');
 
     bool searchKey;
     if (searchString != '') {
@@ -291,7 +300,7 @@ class _ListProductState extends State<ListProduct> {
   }
 
   Widget showProgressIndicate(searchKey) {
-    print('searchKey >> $searchKey');
+    // print('searchKey >> $searchKey');
 
     if (searchKey == true) {
       if (filterProductAllModels.length == 0) {
@@ -329,16 +338,16 @@ class _ListProductState extends State<ListProduct> {
     return Column(
       children: <Widget>[
         Container(
-          width: MediaQuery.of(context).size.width * 0.7 - 50,
+          width: MediaQuery.of(context).size.width * 0.9,
           child: Text(
             'รายการล่าสุดในตะกร้า',
             style: MyStyle().h3bStyle,
           ),
         ),
         Container(
-          width: MediaQuery.of(context).size.width * 0.7 - 50,
+          width: MediaQuery.of(context).size.width * 0.9,
           child: Text(
-            amontCart.toString(),
+            lastItemName.toString(),
             style: MyStyle().h3bStyle,
           ),
         ),
@@ -364,7 +373,7 @@ class _ListProductState extends State<ListProduct> {
       String url = 'http://ptnpharma.com/apishop/json_product.php?bqcode=$code';
       http.Response response = await http.get(url);
       var result = json.decode(response.body);
-      print('result ===*******>>>> $result');
+      // print('result ===*******>>>> $result');
 
       int status = result['status'];
       print('status ===>>> $status');
@@ -373,7 +382,7 @@ class _ListProductState extends State<ListProduct> {
       } else {
         var itemProducts = result['itemsProduct'];
         for (var map in itemProducts) {
-          print('map ===*******>>>> $map');
+          // print('map ===*******>>>> $map');
 
           ProductAllModel productAllModel = ProductAllModel.fromJson(map);
           MaterialPageRoute route = MaterialPageRoute(

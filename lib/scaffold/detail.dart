@@ -217,17 +217,15 @@ class _DetailState extends State<Detail> {
     String url =
         'http://ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId';
 
-    print('url Detail =====>>>>>>>> $url');
+    // print('url Detail =====>>>>>>>> $url');
     http.Response response = await http.get(url);
     var result = json.decode(response.body);
     var cartList = result['cart'];
     for (var map in cartList) {
       setState(() {
         amontCart++;
-        print('amontCart  (detail page)>> $amontCart');
       });
     }
-    print('amontCart (detail page)=====>>>>>>>> $amontCart');
   }
 
   Widget showCart() {
@@ -357,19 +355,10 @@ class _DetailState extends State<Detail> {
       String productID, String unitSize, int qTY, String memberID) async {
     String url =
         'http://www.ptnpharma.com/apishop/json_savemycart.php?productID=$productID&unitSize=$unitSize&QTY=$qTY&memberId=$memberID';
-    print('urlAddcart = $url');
-
-
-    await http.get(url).then((response) {
-      print('upload ok');
-            Navigator.pop(context,  setState(() {
-              readCart();
-            }));
-    });
-
-    // MaterialPageRoute materialPageRoute = MaterialPageRoute(builder: (BuildContext buildContext){return DetailCart(userModel: myUserModel,);});
-    // Navigator.of(context).push(materialPageRoute);
-   
+        print('urlAddcart = $url');
+        await http.get(url).then((response) {});         
+        print('upload ok');
+        Navigator.pop(context,true);
 
   }
 
