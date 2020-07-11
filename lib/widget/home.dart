@@ -493,6 +493,24 @@ class _HomeState extends State<Home> {
     }
   }
 
+    Future<void> readCart() async {
+    amontCart = 0;
+    String memberId = myUserModel.id.toString();
+    String url =
+        'http://ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId';
+
+    http.Response response = await http.get(url);
+    var result = json.decode(response.body);
+    var cartList = result['cart'];
+
+    for (var map in cartList) {
+      setState(() {
+        amontCart++;
+      });
+      print('amontCart (service page))>>>> $amontCart');
+    }
+  }
+
   Future<void> decodeQRcode(String code) async {
     try {
       String url = 'http://ptnpharma.com/apishop/json_product.php?bqcode=$code';
@@ -516,11 +534,13 @@ class _HomeState extends State<Home> {
               productAllModel: productAllModel,
             ),
           );
-          Navigator.of(context).push(route).then((value) {
-            setState(() {
-              // readCart();
-            });
-          });
+          Navigator.of(context).push(route).then((value)=>readCart());       
+
+          // Navigator.of(context).push(route).then((value) {
+          //   setState(() {
+          //     // readCart();
+          //   });
+          // });
         }
       }
     } catch (e) {}

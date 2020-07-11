@@ -82,8 +82,8 @@ class _ListProductState extends State<ListProduct> {
           scrollController.position.maxScrollExtent) {
         page++;
         readData();
-
-        // print('in the end');
+        
+        //  print('in the end');
 
         // setState(() {
         //   amountListView = amountListView + 2;
@@ -170,6 +170,7 @@ class _ListProductState extends State<ListProduct> {
     var result = json.decode(response.body);
     var itemProducts = result['itemsProduct'];
 
+
     for (var map in itemProducts) {
       ProductAllModel productAllModel = ProductAllModel.fromJson(map);
 
@@ -198,7 +199,7 @@ class _ListProductState extends State<ListProduct> {
     return Row(
       children: <Widget>[
         Text(
-          'ราคา : ${filterProductAllModels[index].itemprice.toString()}/${filterProductAllModels[index].itemunit.toString()}',
+          'Stock : ${filterProductAllModels[index].stock}',
           style: MyStyle().h3Style,
         ),
       ],
@@ -206,16 +207,46 @@ class _ListProductState extends State<ListProduct> {
     // return Text('na');
   }
 
+
+
+
+    Widget showPrice(int index) {
+    return Row(
+      children: <Widget>[
+
+        if(filterProductAllModels[index].itemSprice.toString() != '0')
+          Text(
+            '[ ${filterProductAllModels[index].itemSprice.toString()}/${filterProductAllModels[index].itemSunit.toString()} ] ',
+            style: MyStyle().h3Style,
+          ),
+
+        if(filterProductAllModels[index].itemMprice.toString() != '0')
+        Text(
+          '[ ${filterProductAllModels[index].itemMprice.toString()}/${filterProductAllModels[index].itemMunit.toString()} ] ',
+          style: MyStyle().h3Style,
+        ),
+
+        if(filterProductAllModels[index].itemLprice.toString() != '0')
+        Text(
+          '[ ${filterProductAllModels[index].itemLprice.toString()}/${filterProductAllModels[index].itemLunit.toString()} ]',
+          style: MyStyle().h3Style,
+        ),
+
+      ],
+    );
+    // return Text('na');
+  }
+
   Widget showText(int index) {
     return Container(
-      padding: EdgeInsets.only(left: 5.0, right: 3.0),
+      padding: EdgeInsets.only(left: 5.0, right: 2.0),
       // height: MediaQuery.of(context).size.width * 0.5,
-      width: MediaQuery.of(context).size.width * 0.63,
+      width: MediaQuery.of(context).size.width * 0.73,
       child: Container(
         padding: EdgeInsets.only(bottom: 5.0, top: 5.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[showName(index), showStock(index)],
+          children: <Widget>[showName(index), showStock(index),showPrice(index)],
         ),
       ),
     );
@@ -224,7 +255,7 @@ class _ListProductState extends State<ListProduct> {
   Widget showImage(int index) {
     return Container(
       padding: EdgeInsets.all(5.0),
-      width: MediaQuery.of(context).size.width * 0.33,
+      width: MediaQuery.of(context).size.width * 0.25,
       child: Image.network(filterProductAllModels[index].photo),
     );
   }
@@ -391,11 +422,13 @@ class _ListProductState extends State<ListProduct> {
               productAllModel: productAllModel,
             ),
           );
-          Navigator.of(context).push(route).then((value) {
-            setState(() {
-              // readCart();
-            });
-          });
+
+          // Navigator.of(context).push(route).then((value) {
+          //   setState(() {
+          //     // readCart();
+          //   });
+          // });
+              Navigator.of(context).push(route).then((value)=>readCart());       
         }
       }
     } catch (e) {}
@@ -417,7 +450,7 @@ class _ListProductState extends State<ListProduct> {
         },
         title: TextField(
           textAlign: TextAlign.center,
-          scrollPadding: EdgeInsets.all(5.00),
+          scrollPadding: EdgeInsets.all(1.00),
           style: TextStyle(
               color: Colors.blue.shade900,
               fontWeight: FontWeight.w300,

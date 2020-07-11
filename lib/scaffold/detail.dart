@@ -181,8 +181,21 @@ class _DetailState extends State<Detail> {
     );
   }
 
-  Widget showValue(int value) {
-    return Text('$value');
+  Widget showValue(int index) {
+    // return Text('$value'),
+    int value = amounts[index];
+
+    return Container(
+      // decoration: MyStyle().boxLightGreen,
+      // height: 35.0,
+      width: MediaQuery.of(context).size.width * 0.2,
+      padding: EdgeInsets.only(left: 20.0, right: 10.0),
+      child: Column(
+        children: <Widget>[
+          Text('$value'),
+        ],
+      ),
+    );
   }
 
   Widget incDecValue(int index) {
@@ -192,7 +205,7 @@ class _DetailState extends State<Detail> {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         decButton(index),
-        showValue(value),
+        showValue(index),
         incButton(index),
       ],
     );
@@ -321,7 +334,7 @@ class _DetailState extends State<Detail> {
                   if (status.length == 1) {
                     sumStatus = status[0];
                   } else {
-                    sumStatus = status[0] && status[1];
+                    sumStatus = status[0] && status[1] && status[2];
                   }
 
                   if (sumStatus) {
@@ -340,7 +353,6 @@ class _DetailState extends State<Detail> {
                       }
                       index++;
                     }
-                   
                   }
                 },
               ),
@@ -355,11 +367,10 @@ class _DetailState extends State<Detail> {
       String productID, String unitSize, int qTY, String memberID) async {
     String url =
         'http://www.ptnpharma.com/apishop/json_savemycart.php?productID=$productID&unitSize=$unitSize&QTY=$qTY&memberId=$memberID';
-        print('urlAddcart = $url');
-        await http.get(url).then((response) {});         
-        print('upload ok');
-        Navigator.pop(context,true);
-
+    print('urlAddcart = $url');
+    await http.get(url).then((response) {});
+    print('upload ok');
+    Navigator.pop(context, true);
   }
 
   Widget showDetailList() {

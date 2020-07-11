@@ -165,11 +165,12 @@ class _MyServiceState extends State<MyService> {
               productAllModel: productAllModel,
             ),
           );
-          Navigator.of(context).push(route).then((value) {
-            setState(() {
-              readCart();
-            });
-          });
+                   // Navigator.of(context).push(route).then((value) {
+          //   setState(() {
+          //     // readCart();
+          //   });
+          // });
+              Navigator.of(context).push(route).then((value)=>readCart());   
         }
       }
     } catch (e) {}

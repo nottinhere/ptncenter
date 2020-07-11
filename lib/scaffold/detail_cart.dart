@@ -179,7 +179,12 @@ class _DetailCartState extends State<DetailCart> {
             width: MediaQuery.of(context).size.width - 40,
             child: Text(
               productAllModels[index].title,
-              style: MyStyle().h2Style,
+              style: TextStyle(
+                fontSize: 18.0,
+                fontWeight: FontWeight.bold,
+                color: Color.fromARGB(0xff, 0x00, 0x73, 0x26),
+              ),
+              // style: MyStyle().h2Style,
             ),
           ),
         ],
@@ -312,7 +317,9 @@ class _DetailCartState extends State<DetailCart> {
     print('url editDetailCart ====>>>>> $url');
 
     await http.get(url).then((response) {
-      readCart();
+      setState(() {
+        readCart();
+      });
     });
   }
 
@@ -373,7 +380,9 @@ class _DetailCartState extends State<DetailCart> {
     print('url DeleteCart#######################======>>>> $url');
 
     await http.get(url).then((response) {
-      readCart();
+      setState(() {
+        readCart();
+      });
     });
   }
 
@@ -521,7 +530,6 @@ class _DetailCartState extends State<DetailCart> {
 
   Widget showTransport() {
     return Container(
-       
       padding: EdgeInsets.only(left: 16.0, right: 16.0),
       child: Card(
         child: PopupMenuButton<String>(
@@ -529,7 +537,6 @@ class _DetailCartState extends State<DetailCart> {
             selectedTransport(string);
           },
           child: showTitleTransport(),
-          
           itemBuilder: (BuildContext context) {
             return [
               PopupMenuItem(
@@ -543,10 +550,12 @@ class _DetailCartState extends State<DetailCart> {
               PopupMenuItem(
                 child: Text(listTransport[3]),
                 value: '3',
-              ),PopupMenuItem(
+              ),
+              PopupMenuItem(
                 child: Text(listTransport[4]),
                 value: '4',
-              ),PopupMenuItem(
+              ),
+              PopupMenuItem(
                 child: Text(listTransport[5]),
                 value: '5',
               ),
@@ -605,6 +614,7 @@ class _DetailCartState extends State<DetailCart> {
     try {
       String url =
           'http://ptnpharma.com/apishop/json_submit_myorder.php?memberId=$memberID&transport=$transport&comment=$comment';
+      print('url ==> $url');
 
       await http.get(url).then((value) {
         confirmSubmit();
@@ -716,11 +726,13 @@ class _DetailCartState extends State<DetailCart> {
               productAllModel: productAllModel,
             ),
           );
-          Navigator.of(context).push(route).then((value) {
-            setState(() {
-              readCart();
-            });
-          });
+          Navigator.of(context).push(route).then((value) => readCart());
+
+          // Navigator.of(context).push(route).then((value) {
+          //   setState(() {
+          //     readCart();
+          //   });
+          // });
         }
       }
     } catch (e) {}
