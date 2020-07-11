@@ -176,26 +176,15 @@ class _DetailState extends State<Detail> {
           // print('inc index $index');
           value++;
           amounts[index] = value;
+          print('inc value = $value');
         });
       },
     );
   }
 
-  Widget showValue(int index) {
-    // return Text('$value'),
-    int value = amounts[index];
 
-    return Container(
-      // decoration: MyStyle().boxLightGreen,
-      // height: 35.0,
-      width: MediaQuery.of(context).size.width * 0.2,
-      padding: EdgeInsets.only(left: 20.0, right: 10.0),
-      child: Column(
-        children: <Widget>[
-          Text('$value'),
-        ],
-      ),
-    );
+  Widget showValue(int value) {
+    return Text('$value');
   }
 
   Widget incDecValue(int index) {
@@ -205,7 +194,7 @@ class _DetailState extends State<Detail> {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         decButton(index),
-        showValue(index),
+        showValue(value),
         incButton(index),
       ],
     );
