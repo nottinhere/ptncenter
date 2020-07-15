@@ -35,6 +35,11 @@ class _DetailState extends State<Detail> {
   int amontCart = 0;
   UserModel myUserModel;
   String id; // productID
+  // int qtyS = 0, qtyM = 0, qtyL = 0;
+  String qtyS = '', qtyM = '', qtyL = '';
+  int sizeSincart = 0, sizeMincart = 0, sizeLincart = 0;
+  int showSincart = 0, showMincart = 0, showLincart = 0;
+    // int qtyS = 0, qtyM = 0, qtyL = 0;
 
   // Method
   @override
@@ -133,7 +138,8 @@ class _DetailState extends State<Detail> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
         showDetailPrice(index),
-        incDecValue(index),
+        // incDecValue(index),
+        showValue(index),
       ],
     );
   }
@@ -148,55 +154,49 @@ class _DetailState extends State<Detail> {
     );
   }
 
-  Widget decButton(int index) {
-    int value = amounts[index];
-    return IconButton(
-      icon: Icon(Icons.remove_circle_outline),
-      onPressed: () {
-        // print('dec index $index');
-        if (value == 0) {
-          normalDialog(context, 'Cannot decrese', 'Because empty cart');
-        } else {
-          setState(() {
-            value--;
-            amounts[index] = value;
-          });
-        }
-      },
-    );
-  }
 
-  Widget incButton(int index) {
-    int value = amounts[index];
+  Widget showValue(int index) {
+    // int value = amounts[index];
+    //  return Text('$value');
+     int iniValue = 0;
+    // print('$sizeSincart / $sizeMincart / $sizeLincart ');
+    if (index == 0)
+      iniValue = showSincart;
+    else if (index == 1)
+      iniValue = showMincart;
+    else if (index == 2)
+      iniValue = showLincart;
 
-    return IconButton(
-      icon: Icon(Icons.add_circle_outline),
-      onPressed: () {
-        setState(() {
-          // print('inc index $index');
-          value++;
-          amounts[index] = value;
-          print('inc value = $value');
-        });
-      },
-    );
-  }
-
-
-  Widget showValue(int value) {
-    return Text('$value');
-  }
-
-  Widget incDecValue(int index) {
-    int value = amounts[index];
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        decButton(index),
-        showValue(value),
-        incButton(index),
-      ],
+    return Container(
+      // decoration: MyStyle().boxLightGreen,
+      // height: 35.0,
+      width: MediaQuery.of(context).size.width * 0.35,
+      padding: EdgeInsets.only(left: 20.0, right: 10.0),
+      child: Column(
+        children: <Widget>[
+          TextFormField(
+            style: TextStyle(color: Colors.black),
+            initialValue: '$iniValue',
+            keyboardType: TextInputType.number,
+            onChanged: (value) {
+              if (index == 0)
+                qtyS = value;
+              else if (index == 1)
+                qtyM = value;
+              else if (index == 2) qtyL = value;
+            },
+            decoration: InputDecoration(
+              contentPadding: EdgeInsets.only(
+                top: 6.0,
+              ),
+              prefixIcon: Icon(Icons.mode_edit, color: Colors.grey),
+              // border: InputBorder.none,
+              hintText: 'ระบุจำนวน',
+              hintStyle: TextStyle(color: Colors.grey),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -223,7 +223,32 @@ class _DetailState extends State<Detail> {
     http.Response response = await http.get(url);
     var result = json.decode(response.body);
     var cartList = result['cart'];
+    var thisproductID = id;
+
     for (var map in cartList) {
+      var productID =   map['id'].toString();
+      
+      if(productID == thisproductID){
+        if(map['price_list']['s'] != null){
+            var sizeSincart = int.parse(map['price_list']['s']['quantity']);
+            setState(() {
+              showSincart =  sizeSincart;
+            });
+        }
+        if(map['price_list']['m'] != null){
+            int sizeMincart = int.parse(map['price_list']['m']['quantity']);
+            setState(() {
+              showMincart =  sizeMincart;
+            });
+       }
+        if(map['price_list']['l'] != null){
+            int sizeLincart = int.parse(map['price_list']['l']['quantity']);
+            setState(() {
+              showLincart =  sizeLincart;
+            });
+        }
+      }
+
       setState(() {
         amontCart++;
       });
@@ -306,43 +331,60 @@ class _DetailState extends State<Detail> {
                   String productID = id;
                   String memberID = myUserModel.id.toString();
 
-                  int index = 0;
-                  List<bool> status = List();
 
-                  for (var object in unitSizeModels) {
-                    if (amounts[index] == 0) {
-                      status.add(true);
-                    } else {
-                      status.add(false);
-                    }
-
-                    index++;
+                  if (qtyS != 0 && qtyS != '') {
+                    String unitSize = 's';
+                    print(
+                        'productID = $productID, memberID=$memberID, unitSize=s, QTY=$qtyS');
+                    addCart(productID, unitSize, qtyS, memberID);
                   }
-
-                  bool sumStatus = true;
-                  if (status.length == 1) {
-                    sumStatus = status[0];
-                  } else {
-                    sumStatus = status[0] && status[1] && status[2];
+                  if (qtyM != 0 && qtyM != '') {
+                    String unitSize = 'm';
+                    print(
+                        'productID = $productID, memberID=$memberID, unitSize=m, QTY=$qtyM');
+                    addCart(productID, unitSize, qtyM, memberID);
                   }
-
-                  if (sumStatus) {
-                    normalDialog(
-                        context, 'Do not choose item', 'Please choose item');
-                  } else {
-                    int index = 0;
-                    for (var object in unitSizeModels) {
-                      String unitSize = unitSizeModels[index].unit;
-                      int qTY = amounts[index];
-
-                      print(
-                          'productID = $productID, memberID=$memberID, unitSize=$unitSize, QTY=$qTY');
-                      if (qTY != 0) {
-                        addCart(productID, unitSize, qTY, memberID);
-                      }
-                      index++;
-                    }
+                  if (qtyL != 0 && qtyL != '') {
+                    String unitSize = 'l';
+                    print(
+                        'productID = $productID, memberID=$memberID, unitSize=l, QTY=$qtyL');
+                    addCart(productID, unitSize, qtyL, memberID);
                   }
+                  
+                  // for (var object in unitSizeModels) {
+                  //   if (amounts[index] == 0) {
+                  //     status.add(true);
+                  //   } else {
+                  //     status.add(false);
+                  //   }
+
+                  //   index++;
+                  // }
+
+                  // bool sumStatus = true;
+                  // if (status.length == 1) {
+                  //   sumStatus = status[0];
+                  // } else {
+                  //   sumStatus = status[0] && status[1] && status[2];
+                  // }
+
+                  // if (sumStatus) {
+                  //   normalDialog(
+                  //       context, 'Do not choose item', 'Please choose item');
+                  // } else {
+                  //   int index = 0;
+                  //   for (var object in unitSizeModels) {
+                  //     String unitSize = unitSizeModels[index].unit;
+                  //     int qTY = amounts[index];
+
+                  //     print(
+                  //         'productID = $productID, memberID=$memberID, unitSize=$unitSize, QTY=$qTY');
+                  //     if (qTY != 0) {
+                  //       addCart(productID, unitSize, qTY, memberID);
+                  //     }
+                  //     index++;
+                  //   }
+                  // }
                 },
               ),
             ),
@@ -353,7 +395,7 @@ class _DetailState extends State<Detail> {
   }
 
   Future<void> addCart(
-      String productID, String unitSize, int qTY, String memberID) async {
+      String productID, String unitSize, String qTY, String memberID) async {
     String url =
         'http://www.ptnpharma.com/apishop/json_savemycart.php?productID=$productID&unitSize=$unitSize&QTY=$qTY&memberId=$memberID';
     print('urlAddcart = $url');
@@ -377,12 +419,12 @@ class _DetailState extends State<Detail> {
     return ListView(
       padding: EdgeInsets.all(10.0),
       children: <Widget>[
-        showImage(),
-        MyStyle().mySizebox(),
         showTitle(),
         MyStyle().mySizebox(),
         showDetail(),
         showPrice(),
+        MyStyle().mySizebox(),
+        showImage(),
       ],
     );
   }

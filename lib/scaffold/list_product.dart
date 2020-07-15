@@ -57,8 +57,6 @@ class _ListProductState extends State<ListProduct> {
   final Debouncer debouncer =
       Debouncer(milliseconds: 500); // ตั้งค่า เวลาที่จะ delay
   bool statusStart = true;
-  
-
 
   // Method
   @override
@@ -82,7 +80,7 @@ class _ListProductState extends State<ListProduct> {
           scrollController.position.maxScrollExtent) {
         page++;
         readData();
-        
+
         //  print('in the end');
 
         // setState(() {
@@ -103,7 +101,7 @@ class _ListProductState extends State<ListProduct> {
     String url =
         'http://ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId';
 
-        print('url Detail =====>>>>>>>> $url');
+    print('url Detail =====>>>>>>>> $url');
 
     http.Response response = await http.get(url);
     var result = json.decode(response.body);
@@ -114,10 +112,10 @@ class _ListProductState extends State<ListProduct> {
         amontCart++;
       });
     }
-      setState(() {
-        lastItemName;
-      });
-    print('lastItemName=====>>>>>>>> $lastItemName');
+    setState(() {
+      lastItemName;
+    });
+    // print('lastItemName=====>>>>>>>> $lastItemName');
   }
 
   Widget showCart() {
@@ -170,7 +168,6 @@ class _ListProductState extends State<ListProduct> {
     var result = json.decode(response.body);
     var itemProducts = result['itemsProduct'];
 
-
     for (var map in itemProducts) {
       ProductAllModel productAllModel = ProductAllModel.fromJson(map);
 
@@ -207,31 +204,24 @@ class _ListProductState extends State<ListProduct> {
     // return Text('na');
   }
 
-
-
-
-    Widget showPrice(int index) {
+  Widget showPrice(int index) {
     return Row(
       children: <Widget>[
-
-        if(filterProductAllModels[index].itemSprice.toString() != '0')
+        if (filterProductAllModels[index].itemSprice.toString() != '0')
           Text(
             '[ ${filterProductAllModels[index].itemSprice.toString()}/${filterProductAllModels[index].itemSunit.toString()} ] ',
             style: MyStyle().h3Style,
           ),
-
-        if(filterProductAllModels[index].itemMprice.toString() != '0')
-        Text(
-          '[ ${filterProductAllModels[index].itemMprice.toString()}/${filterProductAllModels[index].itemMunit.toString()} ] ',
-          style: MyStyle().h3Style,
-        ),
-
-        if(filterProductAllModels[index].itemLprice.toString() != '0')
-        Text(
-          '[ ${filterProductAllModels[index].itemLprice.toString()}/${filterProductAllModels[index].itemLunit.toString()} ]',
-          style: MyStyle().h3Style,
-        ),
-
+        if (filterProductAllModels[index].itemMprice.toString() != '0')
+          Text(
+            '[ ${filterProductAllModels[index].itemMprice.toString()}/${filterProductAllModels[index].itemMunit.toString()} ] ',
+            style: MyStyle().h3Style,
+          ),
+        if (filterProductAllModels[index].itemLprice.toString() != '0')
+          Text(
+            '[ ${filterProductAllModels[index].itemLprice.toString()}/${filterProductAllModels[index].itemLunit.toString()} ]',
+            style: MyStyle().h3Style,
+          ),
       ],
     );
     // return Text('na');
@@ -246,7 +236,11 @@ class _ListProductState extends State<ListProduct> {
         padding: EdgeInsets.only(bottom: 5.0, top: 5.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[showName(index), showStock(index),showPrice(index)],
+          children: <Widget>[
+            showName(index),
+            showStock(index),
+            showPrice(index)
+          ],
         ),
       ),
     );
@@ -275,11 +269,6 @@ class _ListProductState extends State<ListProduct> {
     );
   }
 
-
-
-
-
-
   Widget showProductItem() {
     return Expanded(
       child: ListView.builder(
@@ -307,7 +296,9 @@ class _ListProductState extends State<ListProduct> {
                   userModel: myUserModel,
                 );
               });
-              Navigator.of(context).push(materialPageRoute).then((value)=>readCart());
+              Navigator.of(context)
+                  .push(materialPageRoute)
+                  .then((value) => readCart());
             },
           );
         },
@@ -364,8 +355,7 @@ class _ListProductState extends State<ListProduct> {
   }
   */
 
-
-  Widget lastItemInCart(){
+  Widget lastItemInCart() {
     return Column(
       children: <Widget>[
         Container(
@@ -377,17 +367,18 @@ class _ListProductState extends State<ListProduct> {
         ),
         Container(
           width: MediaQuery.of(context).size.width * 0.9,
-          child: Text(
-            lastItemName.toString(),
-            style: MyStyle().h3bStyle,
-          ),
+          child: Text(lastItemName.toString(),
+              style: TextStyle(
+                fontSize: 14.0,
+                fontWeight: FontWeight.bold,
+                color: Color.fromARGB(0xff, 0x00, 0x73, 0x26),
+              )),
         ),
       ],
     );
-      
   }
 
-    Future<void> readQRcode() async {
+  Future<void> readQRcode() async {
     try {
       qrString = await BarcodeScanner.scan();
       print('QR code = $qrString');
@@ -428,7 +419,7 @@ class _ListProductState extends State<ListProduct> {
           //     // readCart();
           //   });
           // });
-              Navigator.of(context).push(route).then((value)=>readCart());       
+          Navigator.of(context).push(route).then((value) => readCart());
         }
       }
     } catch (e) {}
@@ -441,12 +432,13 @@ class _ListProductState extends State<ListProduct> {
       padding: EdgeInsets.only(left: 5.0, right: 5.0, top: 2.0, bottom: 2.0),
       child: ListTile(
         trailing: Container(
-                  width: 45.0,
-                  child: Image.asset('images/icon_barcode.png'),
-                ),onTap: () {
+          width: 45.0,
+          child: Image.asset('images/icon_barcode.png'),
+        ),
+        onTap: () {
           print('You click barcode scan');
           readQRcode();
-         // Navigator.of(context).pop();
+          // Navigator.of(context).pop();
         },
         title: TextField(
           textAlign: TextAlign.center,
