@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:barcode_scan/barcode_scan.dart';
 import 'package:ptncenter/models/product_all_model.dart';
 import 'package:ptncenter/models/product_all_model2.dart';
 import 'package:ptncenter/models/unit_size_model.dart';
@@ -11,6 +12,12 @@ import 'package:ptncenter/utility/my_style.dart';
 import 'package:ptncenter/utility/normal_dialog.dart';
 
 import 'package:ptncenter/scaffold/list_product.dart';
+import 'package:carousel_slider/carousel_slider.dart';
+import 'package:ptncenter/models/promote_model.dart';
+import 'package:ptncenter/widget/home.dart';
+import 'package:ptncenter/scaffold/list_product.dart';
+import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
+import 'my_service.dart';
 
 class Detail extends StatefulWidget {
   final ProductAllModel productAllModel;
@@ -38,9 +45,18 @@ class _DetailState extends State<Detail> {
   // int qtyS = 0, qtyM = 0, qtyL = 0;
   String qtyS = '', qtyM = '', qtyL = '';
   int sizeSincart = 0, sizeMincart = 0, sizeLincart = 0;
-  int showSincart = 0, showMincart = 0, showLincart = 0;
-    // int qtyS = 0, qtyM = 0, qtyL = 0;
+  var showSincart = '', showMincart = '', showLincart = '';
+  // int qtyS = 0, qtyM = 0, qtyL = 0;
 
+  List<Widget> promoteLists = List();
+  List<Widget> relateLists = List();
+  List<String> urlImages = List();
+  List<String> urlImagesRelate = List();
+  List<String> productsName = List();
+  List<ProductAllModel> promoteModels = List();
+  List<ProductAllModel> relateModels = List();
+  int banerIndex = 0, relateIndex = 0;
+  int currentIndex = 1;
   // Method
   @override
   void initState() {
@@ -51,6 +67,7 @@ class _DetailState extends State<Detail> {
       getProductWhereID();
       readCart();
     });
+    readRelate();
   }
 
   Future<void> getProductWhereID() async {
@@ -92,10 +109,97 @@ class _DetailState extends State<Detail> {
           print('sizeSmap = $sizeSmap');
           print('sizeMmap = $sizeMmap');
           print('sizeLmap = $sizeLmap');
-          // print('unitSizeModel = ${unitSizeModels[0].lable}');
         });
       } // for
     }
+  }
+
+  Future<void> readRelate() async {
+    String memId = myUserModel.id;
+    id = currentProductAllModel.id.toString();
+
+    String url =
+        'http://www.ptnpharma.com/apishop/json_relate.php?memberId=$memId&productId=$id'; // ?memberId=$memberId
+
+    print('URL >> $url');
+    http.Response response = await http.get(url);
+    var result = json.decode(response.body);
+    var mapItemProduct =
+        result['itemsProduct']; // dynamic    จะส่ง value อะไรก็ได้ รวมถึง null
+    for (var map in mapItemProduct) {
+      PromoteModel promoteModel = PromoteModel.fromJson(map);
+      ProductAllModel productAllModel = ProductAllModel.fromJson(map);
+      String urlImage = promoteModel.photo;
+      String productName = promoteModel.title;
+      setState(() {
+        //promoteModels.add(promoteModel); // push ค่าลง array
+        relateModels.add(productAllModel);
+        relateLists.add(Image.network(urlImage));
+        urlImagesRelate.add(urlImage);
+        productsName.add(productName);
+      });
+    }
+  }
+
+  Widget myCircularProgress() {
+    return Center(
+      child: CircularProgressIndicator(),
+    );
+  }
+
+  Widget showCarouseSliderRelate() {
+    int indexSlide = 0;
+    return GestureDetector(
+      onTap: () {
+        print('You Click index is $relateIndex');
+
+        MaterialPageRoute route = MaterialPageRoute(
+          builder: (BuildContext context) => Detail(
+            productAllModel: relateModels[relateIndex],
+            userModel: myUserModel,
+          ),
+        );
+        Navigator.of(context).push(route).then((value) {});
+      },
+      child: CarouselSlider(
+        height: 350.0,
+        enlargeCenterPage: true,
+        aspectRatio: 16 / 9,
+        pauseAutoPlayOnTouch: Duration(seconds: 5),
+        autoPlay: true,
+        autoPlayAnimationDuration: Duration(seconds: 5),
+        // items: relateLists,
+        items: relateLists
+            .map((item) => Container(
+                  child: Center(
+                    child: Column(
+                      children: <Widget>[
+                        Container(
+                          // width: MediaQuery.of(context).size.width * 0.50,
+                          height: 135.00,
+                          child: item,
+                          padding: EdgeInsets.all(8.0),
+                        ),
+                        Text(
+                          productsName[indexSlide++].toString(),
+                          style: TextStyle(
+                              fontSize: 12,
+                              // fontWeight: FontWeight.bold,
+                              color: Colors.black),
+                        ),
+                      ],
+                    ),
+                  ),
+                  color: Colors.grey.shade200,
+                ))
+            .toList(),
+
+        onPageChanged: (int index) {
+          relateIndex = index;
+          // print('index = $index');
+        },
+      ),
+    );
   }
 
   Widget showImage() {
@@ -120,17 +224,31 @@ class _DetailState extends State<Detail> {
   }
 
   Widget showPackage(int index) {
-    return Text(
-      unitSizeModels[index].lable,
-      style: MyStyle().h3Style,
-    );
+    if (unitSizeModels[index].price.toString() == '0') {
+      return Text(
+        unitSizeModels[index].lable,
+        style: MyStyle().h3bStyleRed,
+      );
+    } else {
+      return Text(
+        unitSizeModels[index].lable,
+        style: MyStyle().h3Style,
+      );
+    }
   }
 
   Widget showPricePackage(int index) {
-    return Text(
-      '${unitSizeModels[index].price.toString()} บาท/ ',
-      style: MyStyle().h3Style,
-    );
+    if (unitSizeModels[index].price.toString() == '0') {
+      return Text(
+        'งดจำหน่าย / ',
+        style: MyStyle().h3bStyleRed,
+      );
+    } else {
+      return Text(
+        '${unitSizeModels[index].price.toString()} บาท / ',
+        style: MyStyle().h3bStyleGreen,
+      );
+    }
   }
 
   Widget showChoosePricePackage(int index) {
@@ -154,18 +272,29 @@ class _DetailState extends State<Detail> {
     );
   }
 
-
   Widget showValue(int index) {
     // int value = amounts[index];
     //  return Text('$value');
-     int iniValue = 0;
+    var iniValue = '';
+    bool readOnlyMode;
+    var iconName;
+    var iconColor;
     // print('$sizeSincart / $sizeMincart / $sizeLincart ');
     if (index == 0)
-      iniValue = showSincart;
+      iniValue = showSincart.toString();
     else if (index == 1)
-      iniValue = showMincart;
-    else if (index == 2)
-      iniValue = showLincart;
+      iniValue = showMincart.toString();
+    else if (index == 2) iniValue = showLincart.toString();
+    /////////////////////////////////////////////////////////
+    if (unitSizeModels[index].price.toString() == '0') {
+      readOnlyMode = true;
+      iconName = Icons.cancel;
+      iconColor = Color.fromARGB(0xff, 0xff, 0x99, 0x99);
+    } else {
+      readOnlyMode = false;
+      iconName = Icons.mode_edit;
+      iconColor = Colors.grey;
+    }
 
     return Container(
       // decoration: MyStyle().boxLightGreen,
@@ -176,7 +305,9 @@ class _DetailState extends State<Detail> {
         children: <Widget>[
           TextFormField(
             style: TextStyle(color: Colors.black),
-            initialValue: '$iniValue',
+            initialValue: '${iniValue}',
+            // readOnly: (unitSizeModels[index].price == 0)?true:false,
+            readOnly: readOnlyMode,
             keyboardType: TextInputType.number,
             onChanged: (value) {
               if (index == 0)
@@ -189,15 +320,144 @@ class _DetailState extends State<Detail> {
               contentPadding: EdgeInsets.only(
                 top: 6.0,
               ),
-              prefixIcon: Icon(Icons.mode_edit, color: Colors.grey),
+              prefixIcon: Icon(iconName, color: iconColor),
               // border: InputBorder.none,
-              hintText: 'ระบุจำนวน',
-              hintStyle: TextStyle(color: Colors.grey),
+              // hintText: 'ระบุจำนวน',
+              hintStyle: TextStyle(color: iconColor),
             ),
           ),
         ],
       ),
     );
+  }
+
+  Widget showStockExpire() {
+    // if(productAllModel.expireColor == 'red')
+    //   Color   expColor = Colors.red;
+    // else if(productAllModel.expireColor == 'blue')
+    //   Color   expColor = Colors.blue;
+    // else if(productAllModel.expireColor == 'black')
+    //   Color   expColor = Colors.black;
+
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.98,
+      child: Row(
+        children: <Widget>[
+          Container(
+            width: MediaQuery.of(context).size.width * 0.14,
+            child: Text(
+              'Stock :',
+              style: MyStyle().h3StyleGray,
+            ),
+          ),
+          if (productAllModel.stock.toString() != '0')
+            Container(
+              width: MediaQuery.of(context).size.width * 0.30,
+              child: Text(
+                ' ${productAllModel.stock}',
+                style: MyStyle().h3StyleGray,
+              ),
+            ),
+          if (productAllModel.stock.toString() == '0')
+            Container(
+              width: MediaQuery.of(context).size.width * 0.30,
+              child: Text(
+                ' ${productAllModel.stock}',
+                style: MyStyle().h3StyleRed,
+              ),
+            ),
+          Container(
+            width: MediaQuery.of(context).size.width * 0.10,
+            child: Text(
+              'Exp :',
+              style: MyStyle().h3StyleGray,
+            ),
+          ),
+          if (productAllModel.expireColor == 'red')
+            Container(
+              width: MediaQuery.of(context).size.width * 0.35,
+              child: Text(
+                ' ${productAllModel.expire}',
+                style: TextStyle(
+                  color: Colors.red,
+                  fontSize: 16.0,
+                ),
+              ),
+            ),
+          if (productAllModel.expireColor == 'blue')
+            Container(
+              width: MediaQuery.of(context).size.width * 0.35,
+              child: Text(
+                ' ${productAllModel.expire}',
+                style: TextStyle(
+                  color: Colors.blue.shade700,
+                  fontSize: 16.0,
+                ),
+              ),
+            ),
+          if (productAllModel.expireColor == 'black')
+            Container(
+              width: MediaQuery.of(context).size.width * 0.35,
+              child: Text(
+                ' ${productAllModel.expire}',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 16.0,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget showStock() {
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.48,
+      child: Row(
+        children: <Widget>[
+          Text(
+            'Stock :',
+            style: MyStyle().h3StyleGray,
+          ),
+          if (productAllModel.stock.toString() != '0')
+            Text(
+              ' ${productAllModel.stock}',
+              style: MyStyle().h3StyleGray,
+            ),
+          if (productAllModel.stock.toString() == '0')
+            Text(
+              ' ${productAllModel.stock}',
+              style: MyStyle().h3StyleRed,
+            ),
+        ],
+      ),
+    );
+    // return Text('na');
+  }
+
+  Widget showExpire() {
+    return Container(
+      child: Row(
+        children: <Widget>[
+          Text(
+            'Exp :',
+            style: MyStyle().h3StyleGray,
+          ),
+          if (productAllModel.expire.toString() != '0')
+            Text(
+              ' ${productAllModel.expire}',
+              style: MyStyle().h3StyleGray,
+            ),
+          if (productAllModel.expire.toString() == '0')
+            Text(
+              ' ${productAllModel.expire}',
+              style: MyStyle().h3StyleRed,
+            ),
+        ],
+      ),
+    );
+    // return Text('na');
   }
 
   Widget showPrice() {
@@ -207,8 +467,53 @@ class _DetailState extends State<Detail> {
       child: ListView.builder(
         itemCount: unitSizeModels.length,
         itemBuilder: (BuildContext buildContext, int index) {
-          return showChoosePricePackage(index); // showDetailPrice(index);
+          return showChoosePricePackage(index);
+          Text('$index'); // showDetailPrice(index);
         },
+      ),
+    );
+  }
+
+  Widget relate() {
+    return Card(
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        height: MediaQuery.of(context).size.height * 0.25,
+        child: relateLists.length == 0
+            ? myCircularProgress()
+            : showCarouseSliderRelate(),
+      ),
+    );
+  }
+
+  Widget mySizebox() {
+    return SizedBox(
+      width: 10.0,
+      height: 30.0,
+    );
+  }
+
+  Widget headTitle(String string, IconData iconData) {
+    // Widget  แทน object ประเภทไดก็ได้
+    return Container(
+      padding: EdgeInsets.all(5.0),
+      child: Row(
+        children: <Widget>[
+          Icon(
+            iconData,
+            size: 24.0,
+            color: MyStyle().textColor,
+          ),
+          mySizebox(),
+          Text(
+            string,
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: MyStyle().textColor,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -226,26 +531,26 @@ class _DetailState extends State<Detail> {
     var thisproductID = id;
 
     for (var map in cartList) {
-      var productID =   map['id'].toString();
-      
-      if(productID == thisproductID){
-        if(map['price_list']['s'] != null){
-            var sizeSincart = int.parse(map['price_list']['s']['quantity']);
-            setState(() {
-              showSincart =  sizeSincart;
-            });
+      var productID = map['id'].toString();
+
+      if (productID == thisproductID) {
+        if (map['price_list']['s'] != null) {
+          var sizeSincart = int.parse(map['price_list']['s']['quantity']);
+          setState(() {
+            showSincart = sizeSincart.toString();
+          });
         }
-        if(map['price_list']['m'] != null){
-            int sizeMincart = int.parse(map['price_list']['m']['quantity']);
-            setState(() {
-              showMincart =  sizeMincart;
-            });
-       }
-        if(map['price_list']['l'] != null){
-            int sizeLincart = int.parse(map['price_list']['l']['quantity']);
-            setState(() {
-              showLincart =  sizeLincart;
-            });
+        if (map['price_list']['m'] != null) {
+          int sizeMincart = int.parse(map['price_list']['m']['quantity']);
+          setState(() {
+            showMincart = sizeMincart.toString();
+          });
+        }
+        if (map['price_list']['l'] != null) {
+          int sizeLincart = int.parse(map['price_list']['l']['quantity']);
+          setState(() {
+            showLincart = sizeLincart.toString();
+          });
         }
       }
 
@@ -291,6 +596,197 @@ class _DetailState extends State<Detail> {
     Navigator.of(context).push(materialPageRoute);
   }
 
+    BottomNavigationBarItem homeBotton() {
+    return BottomNavigationBarItem(
+      icon: Icon(Icons.home),
+      title: Text('Home'),
+    );
+  }
+
+  BottomNavigationBarItem cartBotton() {
+    return BottomNavigationBarItem(
+      icon: Icon(Icons.shopping_cart),
+      title: Text('Cart'),
+    );
+  }
+
+  BottomNavigationBarItem readQrBotton() {
+    return BottomNavigationBarItem(
+      icon: Icon(Icons.code),
+      title: Text('QR code'),
+    );
+  }
+
+  Widget showBottomBarNav() {
+    return BottomNavigationBar(
+      currentIndex: 1,
+      items: <BottomNavigationBarItem>[
+        homeBotton(),
+        cartBotton(),
+        readQrBotton(),
+      ],
+      onTap: (int index) {
+        print('index =$index');
+        if (index == 0) {
+          // routeToDetailCart();
+          MaterialPageRoute route = MaterialPageRoute(
+            builder: (value) => MyService(
+              userModel: myUserModel,
+            ),
+          );
+          Navigator.of(context).pushAndRemoveUntil(route, (route) => false);
+        } else if (index == 2) {
+          readQRcode();
+        }
+      },
+    );
+  }
+
+  Future<void> readQRcode() async {
+    try {
+      String qrString = await BarcodeScanner.scan();
+      print('QR code = $qrString');
+      if (qrString != null) {
+        decodeQRcode(qrString);
+      }
+    } catch (e) {
+      print('e = $e');
+    }
+  }
+
+  Future<void> decodeQRcode(String code) async {
+    try {
+      String url = 'http://ptnpharma.com/apishop/json_product.php?bqcode=$code';
+      http.Response response = await http.get(url);
+      var result = json.decode(response.body);
+      print('result ===*******>>>> $result');
+
+      int status = result['status'];
+      print('status ===>>> $status');
+      if (status == 0) {
+        normalDialog(context, 'No Code', 'No $code in my Database');
+      } else {
+        var itemProducts = result['itemsProduct'];
+        for (var map in itemProducts) {
+          print('map ===*******>>>> $map');
+
+          ProductAllModel productAllModel = ProductAllModel.fromJson(map);
+          MaterialPageRoute route = MaterialPageRoute(
+            builder: (BuildContext context) => Detail(
+              userModel: myUserModel,
+              productAllModel: productAllModel,
+            ),
+          );
+          Navigator.of(context).push(route).then((value) => readCart());
+
+          // Navigator.of(context).push(route).then((value) {
+          //   setState(() {
+          //     readCart();
+          //   });
+          // });
+        }
+      }
+    } catch (e) {}
+  }
+
+  void routeToListProduct(int index) {
+    MaterialPageRoute materialPageRoute =
+        MaterialPageRoute(builder: (BuildContext buildContext) {
+      return ListProduct(
+        index: index,
+        userModel: myUserModel,
+      );
+    });
+    Navigator.of(context).push(materialPageRoute);
+  }
+
+  void changePage(int index) {
+    setState(() {
+      currentIndex = index;
+    });
+
+    //You can have a switch case to Navigate to different pages
+    switch (currentIndex) {
+      case 0:
+        MaterialPageRoute route = MaterialPageRoute(
+          builder: (value) => MyService(
+            userModel: myUserModel,
+          ),
+        );
+        Navigator.of(context).pushAndRemoveUntil(route, (route) => false);
+
+        break; // home
+      case 1:
+        routeToListProduct(0);
+        break; // all product
+      case 2:
+           routeToListProduct(2);
+        MaterialPageRoute materialPageRoute =
+            MaterialPageRoute(builder: (BuildContext buildContext) {
+          return DetailCart(
+            userModel: myUserModel,
+          );
+        });
+        Navigator.of(context).push(materialPageRoute).then((value) {
+          setState(() {
+            readCart();
+          });
+        });
+        break; // promotion
+
+    }
+  }
+
+  Widget showBubbleBottomBarNav() {
+    return BubbleBottomBar(
+      hasNotch: true,
+      // fabLocation: BubbleBottomBarFabLocation.end,
+      opacity: .2,
+      borderRadius: BorderRadius.vertical(
+          top: Radius.circular(
+              16)), //border radius doesn't work when the notch is enabled.
+      elevation: 8,
+      currentIndex: currentIndex,
+      onTap: changePage,
+      items: <BubbleBottomBarItem>[
+        BubbleBottomBarItem(
+            backgroundColor: Colors.red,
+            icon: Icon(
+              Icons.home,
+              color: Colors.black,
+            ),
+            activeIcon: Icon(
+              Icons.home,
+              color: Colors.red,
+            ),
+            title: Text("หน้าหลัก")),
+        BubbleBottomBarItem(
+            backgroundColor: Colors.green,
+            icon: Icon(
+              Icons.format_list_bulleted,
+              color: Colors.black,
+            ),
+            activeIcon: Icon(
+              Icons.format_list_bulleted,
+              color: Colors.green,
+            ),
+            title: Text("สินค้า")),
+        BubbleBottomBarItem(
+            backgroundColor: Colors.blue,
+            icon: Icon(
+              Icons.shopping_cart,
+              color: Colors.black,
+            ),
+            activeIcon: Icon(
+              Icons.shopping_cart,
+              color: Colors.blue,
+            ),
+            title: Text("ตะกร้าสินค้า")),
+      ],
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -298,10 +794,11 @@ class _DetailState extends State<Detail> {
         actions: <Widget>[
           showCart(),
         ],
-        backgroundColor: MyStyle().textColor,
+        backgroundColor: MyStyle().bgColor,
         title: Text('ข้อมูลสินค้า'),
       ),
       body: productAllModel == null ? showProgress() : showDetailList(),
+      bottomNavigationBar: showBubbleBottomBarNav(), //showBottomBarNav
     );
   }
 
@@ -331,7 +828,6 @@ class _DetailState extends State<Detail> {
                   String productID = id;
                   String memberID = myUserModel.id.toString();
 
-
                   if (qtyS != 0 && qtyS != '') {
                     String unitSize = 's';
                     print(
@@ -350,41 +846,7 @@ class _DetailState extends State<Detail> {
                         'productID = $productID, memberID=$memberID, unitSize=l, QTY=$qtyL');
                     addCart(productID, unitSize, qtyL, memberID);
                   }
-                  
-                  // for (var object in unitSizeModels) {
-                  //   if (amounts[index] == 0) {
-                  //     status.add(true);
-                  //   } else {
-                  //     status.add(false);
-                  //   }
 
-                  //   index++;
-                  // }
-
-                  // bool sumStatus = true;
-                  // if (status.length == 1) {
-                  //   sumStatus = status[0];
-                  // } else {
-                  //   sumStatus = status[0] && status[1] && status[2];
-                  // }
-
-                  // if (sumStatus) {
-                  //   normalDialog(
-                  //       context, 'Do not choose item', 'Please choose item');
-                  // } else {
-                  //   int index = 0;
-                  //   for (var object in unitSizeModels) {
-                  //     String unitSize = unitSizeModels[index].unit;
-                  //     int qTY = amounts[index];
-
-                  //     print(
-                  //         'productID = $productID, memberID=$memberID, unitSize=$unitSize, QTY=$qTY');
-                  //     if (qTY != 0) {
-                  //       addCart(productID, unitSize, qTY, memberID);
-                  //     }
-                  //     index++;
-                  //   }
-                  // }
                 },
               ),
             ),
@@ -406,10 +868,15 @@ class _DetailState extends State<Detail> {
 
   Widget showDetailList() {
     return Card(
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10)),
+          side: BorderSide(width: 5, color: Colors.grey.shade200)),
       child: Stack(
         children: <Widget>[
           showController(),
+          MyStyle().mySizebox(),
           addButton(),
+          MyStyle().mySizebox(),
         ],
       ),
     );
@@ -421,10 +888,20 @@ class _DetailState extends State<Detail> {
       children: <Widget>[
         showTitle(),
         MyStyle().mySizebox(),
-        showDetail(),
+        // showStock(),
+        // MyStyle().mySizebox(),
+        // showExpire(),
+        showStockExpire(),
         showPrice(),
         MyStyle().mySizebox(),
         showImage(),
+        // addButton(),
+
+        MyStyle().mySizebox(),
+        headTitle('สินค้าที่เกี่ยวข้อง', Icons.thumb_up),
+        relate(),
+        MyStyle().mySizebox(),
+        MyStyle().mySizebox(),
       ],
     );
   }

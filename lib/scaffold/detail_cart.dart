@@ -12,7 +12,8 @@ import 'package:ptncenter/scaffold/detail.dart';
 import 'package:ptncenter/utility/my_style.dart';
 import 'package:ptncenter/utility/normal_dialog.dart';
 import 'package:ptncenter/widget/home.dart';
-
+import 'package:ptncenter/scaffold/list_product.dart';
+import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
 import 'my_service.dart';
 
 class DetailCart extends StatefulWidget {
@@ -42,14 +43,15 @@ class _DetailCartState extends State<DetailCart> {
   String transport;
   int index = 0;
   String comment = '', memberID;
+  int currentIndex = 2;
 
   List<String> listTransport = [
     '',
-    'รับสินค้าเองที่ พัฒนาเภสัช',
-    'รับสินค้าเองที่คลังสินค้า (ซอยวัดท่าทอง)',
-    'รถส่งของตามรอบส่งสินค้า ตามสายส่ง',
-    'รถส่งของตามรอบส่งสินค้าในเมืองนครสวรรค์',
-    'ส่งทางบริษัทขนส่ง (เอกชน)'
+    '1. รับสินค้าเองที่ พัฒนาเภสัช',
+    '2. รับสินค้าเองที่คลังสินค้า (ซอยวัดท่าทอง)',
+    '3. รถส่งของตามรอบส่งสินค้า ตามสายส่ง',
+    '4. รถส่งของตามรอบส่งสินค้าในเมืองนครสวรรค์',
+    '5. ส่งทางบริษัทขนส่ง (เอกชน)'
   ];
 
   // Method
@@ -334,7 +336,7 @@ class _DetailCartState extends State<DetailCart> {
 
   Widget deleteButton(int index, String size) {
     return IconButton(
-      icon: Icon(Icons.remove_circle_outline),
+      icon: Icon(Icons.delete),
       onPressed: () {
         confirmDelete(index, size);
       },
@@ -484,6 +486,9 @@ class _DetailCartState extends State<DetailCart> {
       itemCount: productAllModels.length,
       itemBuilder: (BuildContext buildContext, int index) {
         return Card(
+          shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10)),
+          side: BorderSide(width: 2, color: Colors.grey.shade200)),
           child: Container(
             padding: EdgeInsets.only(bottom: 10.0, top: 10.0),
             child: Column(
@@ -523,7 +528,7 @@ class _DetailCartState extends State<DetailCart> {
     return Text(
       'การจัดส่ง : ${listTransport[index]}',
       style: TextStyle(
-        fontSize: 24.0,
+        fontSize: 18.0,
       ),
     );
   }
@@ -540,23 +545,38 @@ class _DetailCartState extends State<DetailCart> {
           itemBuilder: (BuildContext context) {
             return [
               PopupMenuItem(
-                child: Text(listTransport[1]),
+                child: new Container(
+                  width: 400.0,
+                  child: Text(listTransport[1]),
+                ),
                 value: '1',
               ),
               PopupMenuItem(
-                child: Text(listTransport[2]),
+                child: new Container(
+                  width: 400.0,
+                  child: Text(listTransport[2]),
+                ),
                 value: '2',
               ),
               PopupMenuItem(
-                child: Text(listTransport[3]),
+                child: new Container(
+                  width: 400.0,
+                  child: Text(listTransport[3]),
+                ),
                 value: '3',
               ),
               PopupMenuItem(
-                child: Text(listTransport[4]),
+                child: new Container(
+                  width: 400.0,
+                  child: Text(listTransport[4]),
+                ),
                 value: '4',
               ),
               PopupMenuItem(
-                child: Text(listTransport[5]),
+                child: new Container(
+                  width: 400.0,
+                  child: Text(listTransport[5]),
+                ),
                 value: '5',
               ),
             ];
@@ -738,12 +758,96 @@ class _DetailCartState extends State<DetailCart> {
     } catch (e) {}
   }
 
+  void routeToListProduct(int index) {
+    MaterialPageRoute materialPageRoute =
+        MaterialPageRoute(builder: (BuildContext buildContext) {
+      return ListProduct(
+        index: index,
+        userModel: myUserModel,
+      );
+    });
+    Navigator.of(context).push(materialPageRoute);
+  }
+
+  void changePage(int index) {
+    setState(() {
+      currentIndex = index;
+    });
+
+    //You can have a switch case to Navigate to different pages
+    switch (currentIndex) {
+      case 0:
+        MaterialPageRoute route = MaterialPageRoute(
+          builder: (value) => MyService(
+            userModel: myUserModel,
+          ),
+        );
+        Navigator.of(context).pushAndRemoveUntil(route, (route) => false);
+
+        break; // home
+      case 1:
+        routeToListProduct(0);
+        break; // all product
+      case 2:
+        break; // promotion
+
+    }
+  }
+
+  Widget showBubbleBottomBarNav() {
+    return BubbleBottomBar(
+      hasNotch: true,
+      // fabLocation: BubbleBottomBarFabLocation.end,
+      opacity: .2,
+      borderRadius: BorderRadius.vertical(
+          top: Radius.circular(
+              16)), //border radius doesn't work when the notch is enabled.
+      elevation: 8,
+      currentIndex: currentIndex,
+      onTap: changePage,
+      items: <BubbleBottomBarItem>[
+        BubbleBottomBarItem(
+            backgroundColor: Colors.red,
+            icon: Icon(
+              Icons.home,
+              color: Colors.black,
+            ),
+            activeIcon: Icon(
+              Icons.home,
+              color: Colors.red,
+            ),
+            title: Text("หน้าหลัก")),
+        BubbleBottomBarItem(
+            backgroundColor: Colors.green,
+            icon: Icon(
+              Icons.format_list_bulleted,
+              color: Colors.black,
+            ),
+            activeIcon: Icon(
+              Icons.format_list_bulleted,
+              color: Colors.green,
+            ),
+            title: Text("สินค้า")),
+        BubbleBottomBarItem(
+            backgroundColor: Colors.blue,
+            icon: Icon(
+              Icons.shopping_cart,
+              color: Colors.black,
+            ),
+            activeIcon: Icon(
+              Icons.shopping_cart,
+              color: Colors.blue,
+            ),
+            title: Text("ตะกร้าสินค้า")),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: showBottomBarNav(),
       appBar: AppBar(
-        backgroundColor: MyStyle().textColor,
+        backgroundColor: MyStyle().bgColor,
         title: Text('ตะกร้าสินค้า'),
       ),
       body: ListView(
@@ -755,6 +859,7 @@ class _DetailCartState extends State<DetailCart> {
           submitButton(),
         ],
       ),
+      bottomNavigationBar: showBubbleBottomBarNav(), //showBottomBarNav
     );
   }
 }

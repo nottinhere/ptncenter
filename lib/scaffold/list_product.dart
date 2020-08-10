@@ -10,11 +10,15 @@ import 'package:barcode_scan/barcode_scan.dart';
 import 'package:ptncenter/utility/normal_dialog.dart';
 import 'detail.dart';
 import 'detail_cart.dart';
+import 'package:ptncenter/widget/home.dart';
+
+import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
+
+import 'my_service.dart';
 
 class ListProduct extends StatefulWidget {
   final int index;
   final UserModel userModel;
-
   ListProduct({Key key, this.index, this.userModel}) : super(key: key);
 
   @override
@@ -58,14 +62,20 @@ class _ListProductState extends State<ListProduct> {
       Debouncer(milliseconds: 500); // ตั้งค่า เวลาที่จะ delay
   bool statusStart = true;
 
+  int currentIndex;
   // Method
   @override
   void initState() {
     // auto load
     super.initState();
+  
     myIndex = widget.index;
     myUserModel = widget.userModel;
 
+    if(myIndex==0){ currentIndex = 1;}   
+    else   if(myIndex==2){ currentIndex = 2;}   
+    else   if(myIndex==3){ currentIndex = 3;}   
+    else   if(myIndex==1){ currentIndex = 4;}   
     createController(); // เมื่อ scroll to bottom
 
     setState(() {
@@ -159,11 +169,11 @@ class _ListProductState extends State<ListProduct> {
     String memberId = myUserModel.id.toString();
     String url =
         'http://ptnpharma.com/apishop/json_product.php?memberId=$memberId&searchKey=$searchString&page=$page';
-    print("URL = $url");
     if (myIndex != 0) {
-      url = '${MyStyle().readProductWhereMode}$myIndex';
+      // url = '${MyStyle().readProductWhereMode}$myIndex';
+      url = 'http://ptnpharma.com/apishop/json_product.php?memberId=$memberId&searchKey=$searchString&product_mode=$myIndex&page=$page';
     }
-
+    print("URL = $url");
     http.Response response = await http.get(url);
     var result = json.decode(response.body);
     var itemProducts = result['itemsProduct'];
@@ -182,10 +192,10 @@ class _ListProductState extends State<ListProduct> {
     return Row(
       children: <Widget>[
         Container(
-          width: MediaQuery.of(context).size.width * 0.7 - 50,
+          width: MediaQuery.of(context).size.width * 0.7 - 10,
           child: Text(
             filterProductAllModels[index].title,
-            style: MyStyle().h3bStyle,
+            style: MyStyle().h3Style,
           ),
         ),
       ],
@@ -195,10 +205,23 @@ class _ListProductState extends State<ListProduct> {
   Widget showStock(int index) {
     return Row(
       children: <Widget>[
-        Text(
-          'Stock : ${filterProductAllModels[index].stock}',
-          style: MyStyle().h3Style,
-        ),
+          Text(
+            'Stock :',
+            style: MyStyle().h3StyleGray,
+          ),
+
+        if (filterProductAllModels[index].stock.toString() != '0')
+          Text(
+            ' ${filterProductAllModels[index].stock}',
+            style: MyStyle().h3StyleGray,
+          ),
+
+        if (filterProductAllModels[index].stock.toString() == '0')
+          Text(
+            ' ${filterProductAllModels[index].stock}',
+            style: MyStyle().h3StyleRed,
+          ),
+      
       ],
     );
     // return Text('na');
@@ -210,17 +233,17 @@ class _ListProductState extends State<ListProduct> {
         if (filterProductAllModels[index].itemSprice.toString() != '0')
           Text(
             '[ ${filterProductAllModels[index].itemSprice.toString()}/${filterProductAllModels[index].itemSunit.toString()} ] ',
-            style: MyStyle().h3Style,
+            style: MyStyle().h3StyleGray,
           ),
         if (filterProductAllModels[index].itemMprice.toString() != '0')
           Text(
             '[ ${filterProductAllModels[index].itemMprice.toString()}/${filterProductAllModels[index].itemMunit.toString()} ] ',
-            style: MyStyle().h3Style,
+            style: MyStyle().h3StyleGray,
           ),
         if (filterProductAllModels[index].itemLprice.toString() != '0')
           Text(
             '[ ${filterProductAllModels[index].itemLprice.toString()}/${filterProductAllModels[index].itemLunit.toString()} ]',
-            style: MyStyle().h3Style,
+            style: MyStyle().h3StyleGray,
           ),
       ],
     );
@@ -370,7 +393,7 @@ class _ListProductState extends State<ListProduct> {
           child: Text(lastItemName.toString(),
               style: TextStyle(
                 fontSize: 14.0,
-                fontWeight: FontWeight.bold,
+                // fontWeight: FontWeight.bold,
                 color: Color.fromARGB(0xff, 0x00, 0x73, 0x26),
               )),
         ),
@@ -425,6 +448,9 @@ class _ListProductState extends State<ListProduct> {
     } catch (e) {}
   }
 
+
+  
+
   Widget searchForm() {
     return Container(
       decoration: MyStyle().boxLightGray,
@@ -465,12 +491,134 @@ class _ListProductState extends State<ListProduct> {
     );
   }
 
+
+    void routeToListProduct(int index) {
+    MaterialPageRoute materialPageRoute =
+        MaterialPageRoute(builder: (BuildContext buildContext) {
+      return ListProduct(
+        index: index,
+        userModel: myUserModel,
+      );
+    });
+    Navigator.of(context).push(materialPageRoute);
+  }
+
+  void changePage(int index) {
+    setState(() {
+      currentIndex = index;
+    });
+
+    //You can have a switch case to Navigate to different pages
+    switch (currentIndex){
+      case 0:  
+          MaterialPageRoute route = MaterialPageRoute(
+            builder: (value) => MyService(
+              userModel: myUserModel,
+            ),
+          );
+          Navigator.of(context).pushAndRemoveUntil(route, (route) => false);
+     
+      break;  // home
+      case 1:  routeToListProduct(0);   break;  // all product
+      case 2:  routeToListProduct(2);   break;  // promotion 
+      case 3:  routeToListProduct(3);   break;  // update price
+      case 4:  routeToListProduct(1);   break;  // new item
+    }
+  }
+
+
+
+
+  Widget showBubbleBottomBarNav() {
+    return BubbleBottomBar(
+      hasNotch: true,
+      // fabLocation: BubbleBottomBarFabLocation.end,
+      opacity: .2,
+      borderRadius: BorderRadius.vertical(
+          top: Radius.circular(
+              16)), //border radius doesn't work when the notch is enabled.
+      elevation: 8,
+      currentIndex: currentIndex,
+      onTap: changePage,
+      items: <BubbleBottomBarItem>[
+        BubbleBottomBarItem(
+            backgroundColor: Colors.red,
+            icon: Icon(
+              Icons.home,
+              color: Colors.black,
+            ),
+            activeIcon: Icon(
+              Icons.home,
+              color: Colors.red,
+            ),
+            title: Text("หน้าหลัก")),
+        BubbleBottomBarItem(
+            backgroundColor: Colors.green,
+            icon: Icon(
+              Icons.format_list_bulleted,
+              color: Colors.black,
+            ),
+            activeIcon: Icon(
+              Icons.format_list_bulleted,
+              color: Colors.green,
+            ),
+            title: Text("สินค้า")),
+        BubbleBottomBarItem(
+            backgroundColor: Colors.green,
+            icon: Icon(
+              Icons.bookmark,
+              color: Colors.black,
+            ),
+            activeIcon: Icon(
+              Icons.bookmark,
+              color: Colors.green,
+            ),
+            title: Text("โปรโมชัน")),
+        BubbleBottomBarItem(
+            backgroundColor: Colors.green,
+            icon: Icon(
+              Icons.arrow_upward,
+              color: Colors.black,
+            ),
+            activeIcon: Icon(
+              Icons.arrow_upward,
+              color: Colors.green,
+            ),
+            title: Text("ปรับราคา")),
+        BubbleBottomBarItem(
+            backgroundColor: Colors.green,
+            icon: Icon(
+              Icons.fiber_new,
+              color: Colors.black,
+            ),
+            activeIcon: Icon(
+              Icons.fiber_new,
+              color: Colors.green,
+            ),
+            title: Text("สินค้าใหม่")),
+      ],
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
+    String txtheader = '';
+    if (myIndex != 0) {
+      if(myIndex == 1){
+       txtheader = 'สินค้าใหม่';
+      }else if(myIndex == 2){
+       txtheader = 'สินค้าโปรโมชัน';
+      }else if(myIndex == 3){
+       txtheader = 'สินค้าจะปรับราคา';
+      }
+    }else{
+       txtheader = 'รายการสินค้า';
+    }
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: MyStyle().textColor,
-        title: Text('รายการสินค้า'),
+        backgroundColor: MyStyle().bgColor,
+        title: Text(txtheader),
         actions: <Widget>[
           showCart(),
         ],
@@ -486,6 +634,7 @@ class _ListProductState extends State<ListProduct> {
           showContent(),
         ],
       ),
+            bottomNavigationBar: showBubbleBottomBarNav(), //showBottomBarNav
     );
   }
 }

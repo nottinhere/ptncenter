@@ -13,8 +13,9 @@ import 'package:ptncenter/utility/normal_dialog.dart';
 import 'package:ptncenter/widget/contact.dart';
 import 'package:ptncenter/widget/home.dart';
 
+import 'package:ptncenter/scaffold/list_product.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
 import 'detail_cart.dart';
 
 class MyService extends StatefulWidget {
@@ -32,19 +33,64 @@ class _MyServiceState extends State<MyService> {
   String qrString;
   int amontCart = 0;
 
+  int currentIndex;
 
   // Method
   @override
   void initState() {
     super.initState(); // จะทำงานก่อน build
+    currentIndex = 0;
     setState(() {
       myUserModel = widget.userModel;
       currentWidget = Home(
         userModel: myUserModel,
       );
-        readCart();
+      readCart();
     });
-  
+  }
+
+  void routeToListProduct(int index) {
+    MaterialPageRoute materialPageRoute =
+        MaterialPageRoute(builder: (BuildContext buildContext) {
+      return ListProduct(
+        index: index,
+        userModel: myUserModel,
+      );
+    });
+    Navigator.of(context).push(materialPageRoute);
+  }
+
+  void changePage(int index) {
+    setState(() {
+      currentIndex = index;
+    });
+
+    //You can have a switch case to Navigate to different pages
+    switch (currentIndex) {
+      case 0:
+        break; // home
+      case 1:
+        routeToListProduct(0);
+        break; // all product
+      case 2:
+        routeToListProduct(2);
+        MaterialPageRoute materialPageRoute =
+            MaterialPageRoute(builder: (BuildContext buildContext) {
+          return DetailCart(
+            userModel: myUserModel,
+          );
+        });
+        Navigator.of(context).push(materialPageRoute).then((value) {
+          setState(() {
+            readCart();
+          });
+        });
+        break; // Shopping cart
+
+      // case 2:  routeToListProduct(2);   break;  // promotion
+      // case 3:  routeToListProduct(3);   break;  // update price
+      // case 4:  routeToListProduct(1);   break;  // new item
+    }
   }
 
   Widget menuHome() {
@@ -94,7 +140,7 @@ class _MyServiceState extends State<MyService> {
 
   Future<void> logOut() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    sharedPreferences.clear();
+    await sharedPreferences.clear();
     exit(0);
   }
 
@@ -165,12 +211,12 @@ class _MyServiceState extends State<MyService> {
               productAllModel: productAllModel,
             ),
           );
-                   // Navigator.of(context).push(route).then((value) {
+          // Navigator.of(context).push(route).then((value) {
           //   setState(() {
           //     // readCart();
           //   });
           // });
-              Navigator.of(context).push(route).then((value)=>readCart());   
+          Navigator.of(context).push(route).then((value) => readCart());
         }
       }
     } catch (e) {}
@@ -326,30 +372,115 @@ class _MyServiceState extends State<MyService> {
         cartBotton(),
         readQrBotton(),
       ],
-      onTap: (int index){
+      onTap: (int index) {
         print('index =$index');
-        if(index==1){
+        if (index == 1) {
           routeToDetailCart();
-        }else if(index==2){
+        } else if (index == 2) {
           readQRcode();
-        } 
-      } ,
+        }
+      },
+    );
+  }
+
+  Widget showBubbleBottomBarNav() {
+    return BubbleBottomBar(
+      hasNotch: true,
+      // fabLocation: BubbleBottomBarFabLocation.end,
+      opacity: .2,
+      borderRadius: BorderRadius.vertical(
+          top: Radius.circular(
+              16)), //border radius doesn't work when the notch is enabled.
+      elevation: 8,
+      currentIndex: currentIndex,
+      onTap: changePage,
+      items: <BubbleBottomBarItem>[
+        BubbleBottomBarItem(
+            backgroundColor: Colors.red,
+            icon: Icon(
+              Icons.home,
+              color: Colors.black,
+            ),
+            activeIcon: Icon(
+              Icons.home,
+              color: Colors.red,
+            ),
+            title: Text("หน้าหลัก")),
+        BubbleBottomBarItem(
+            backgroundColor: Colors.green,
+            icon: Icon(
+              Icons.format_list_bulleted,
+              color: Colors.black,
+            ),
+            activeIcon: Icon(
+              Icons.format_list_bulleted,
+              color: Colors.green,
+            ),
+            title: Text("สินค้า")),
+        BubbleBottomBarItem(
+            backgroundColor: Colors.blue,
+            icon: Icon(
+              Icons.shopping_cart,
+              color: Colors.black,
+            ),
+            activeIcon: Icon(
+              Icons.shopping_cart,
+              color: Colors.blue,
+            ),
+            title: Text("ตะกร้าสินค้า")),
+        /*
+        BubbleBottomBarItem(
+            backgroundColor: Colors.green,
+            icon: Icon(
+              Icons.bookmark,
+              color: Colors.black,
+            ),
+            activeIcon: Icon(
+              Icons.bookmark,
+              color: Colors.green,
+            ),
+            title: Text("โปรโมชัน")),
+        BubbleBottomBarItem(
+            backgroundColor: Colors.green,
+            icon: Icon(
+              Icons.arrow_upward,
+              color: Colors.black,
+            ),
+            activeIcon: Icon(
+              Icons.arrow_upward,
+              color: Colors.green,
+            ),
+            title: Text("ปรับราคา")),
+        BubbleBottomBarItem(
+            backgroundColor: Colors.green,
+            icon: Icon(
+              Icons.fiber_new,
+              color: Colors.black,
+            ),
+            activeIcon: Icon(
+              Icons.fiber_new,
+              color: Colors.green,
+            ),
+            title: Text("สินค้าใหม่")),
+            */
+      ],
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: showBottomBarNav(),
       appBar: AppBar(
         actions: <Widget>[
           showCart(),
         ],
-        backgroundColor: MyStyle().textColor,
+        backgroundColor: MyStyle().bgColor,
         title: Text('Home'),
       ),
+
       body: currentWidget,
       drawer: showDrawer(),
+      bottomNavigationBar: showBubbleBottomBarNav(), //showBottomBarNav
     );
   }
 }

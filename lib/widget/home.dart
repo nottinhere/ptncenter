@@ -31,16 +31,20 @@ class _HomeState extends State<Home> {
   List<Widget> suggestLists = List();
   List<String> urlImages = List();
   List<String> urlImagesSuggest = List();
+  List<String> productsName = List();
 
-  int amontCart = 0, banerIndex = 0, suggessIndex = 0;
+  int amontCart = 0, banerIndex = 0, suggestIndex = 0;
   UserModel myUserModel;
   List<ProductAllModel> promoteModels = List();
   List<ProductAllModel> suggestModels = List();
   String qrString;
+  int currentIndex = 0;
+
   // Method
   @override
   void initState() {
     super.initState();
+
     readPromotion();
     myUserModel = widget.userModel;
     readSuggest();
@@ -81,11 +85,13 @@ class _HomeState extends State<Home> {
       PromoteModel promoteModel = PromoteModel.fromJson(map);
       ProductAllModel productAllModel = ProductAllModel.fromJson(map);
       String urlImage = promoteModel.photo;
+      String productName = promoteModel.title;
       setState(() {
         //promoteModels.add(promoteModel); // push ค่าลง array
         suggestModels.add(productAllModel);
         suggestLists.add(Image.network(urlImage));
         urlImagesSuggest.add(urlImage);
+        productsName.add(productName);
       });
     }
   }
@@ -127,27 +133,55 @@ class _HomeState extends State<Home> {
   }
 
   Widget showCarouseSliderSuggest() {
+    int indexSlide = 0;
     return GestureDetector(
       onTap: () {
-        print('You Click index is $suggessIndex');
+        print('You Click index is $suggestIndex');
 
         MaterialPageRoute route = MaterialPageRoute(
           builder: (BuildContext context) => Detail(
-            productAllModel: suggestModels[suggessIndex],
+            productAllModel: suggestModels[suggestIndex],
             userModel: myUserModel,
           ),
         );
         Navigator.of(context).push(route).then((value) {});
       },
       child: CarouselSlider(
+        height: 350.0,
         enlargeCenterPage: true,
         aspectRatio: 16 / 9,
         pauseAutoPlayOnTouch: Duration(seconds: 5),
         autoPlay: true,
         autoPlayAnimationDuration: Duration(seconds: 5),
-        items: suggestLists,
+        // items: suggestLists,
+        items: suggestLists
+          .map((item) => Container(
+
+                child: Center(
+                  child: Column(
+                    children: <Widget>[
+                      Container(
+                        // width: MediaQuery.of(context).size.width * 0.50,
+                        height: 135.00,
+                        child: item,
+                        padding: EdgeInsets.all(8.0),
+                      ),
+                      Text(
+                        productsName[indexSlide++].toString(),
+                        style: TextStyle(
+                            fontSize: 12,
+                            // fontWeight: FontWeight.bold,
+                            color: Colors.black),
+                      ),
+                    ],
+                  ),
+                ),
+                color: Colors.grey.shade200,
+              ))
+          .toList(),
+
         onPageChanged: (int index) {
-          suggessIndex = index;
+          suggestIndex = index;
           // print('index = $index');
         },
       ),
@@ -190,43 +224,6 @@ class _HomeState extends State<Home> {
     Navigator.of(context).push(materialPageRoute);
   }
 
-  Widget productBox() {
-    String login = myUserModel.name;
-    return Container(
-      width: MediaQuery.of(context).size.width * 0.8,
-      // height: 80.0,
-      child: GestureDetector(
-        child: Card(
-          color: Colors.greenAccent.shade100, // Colors.grey.shade100,
-          child: Container(
-            padding: EdgeInsets.all(16.0),
-            alignment: AlignmentDirectional(0.0, 0.0),
-            child: Row(
-              children: <Widget>[
-                Container(
-                  width: 45.0,
-                  child: Image.asset('images/icon_drugs.png'),
-                  padding: EdgeInsets.all(8.0),
-                ),
-                Text(
-                  'รายการสินค้า',
-                  style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black),
-                ),
-              ],
-            ),
-          ),
-        ),
-        onTap: () {
-          print('You click product');
-          routeToListProduct(0);
-        },
-      ),
-    );
-  }
-
   Widget orderhistoryBox() {
     String login = myUserModel.name;
     return Container(
@@ -264,7 +261,7 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Widget topLeft() {
+  Widget productBox() {
     return Container(
       width: MediaQuery.of(context).size.width * 0.45,
       // height: 80.0,
@@ -299,7 +296,112 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Widget topRight() {
+  Widget promotionBox() {
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.45,
+      // height: 80.0,
+      child: GestureDetector(
+        child: Card(
+          // color: Colors.green.shade100,
+          child: Container(
+            padding: EdgeInsets.all(16.0),
+            alignment: AlignmentDirectional(0.0, 0.0),
+            child: Column(
+              children: <Widget>[
+                Container(
+                  width: 45.0,
+                  child: Image.asset('images/icon_promotion.png'),
+                ),
+                Text(
+                  'สินค้าโปรโมชัน',
+                  style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black),
+                ),
+              ],
+            ),
+          ),
+        ),
+        onTap: () {
+          print('You click promotion');
+          routeToListProduct(2);
+        },
+      ),
+    );
+  }
+
+  Widget updatepriceBox() {
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.45,
+      // height: 80.0,
+      child: GestureDetector(
+        child: Card(
+          // color: Colors.green.shade100,
+          child: Container(
+            padding: EdgeInsets.all(16.0),
+            alignment: AlignmentDirectional(0.0, 0.0),
+            child: Column(
+              children: <Widget>[
+                Container(
+                  width: 45.0,
+                  child: Image.asset('images/icon_updateprice.png'),
+                ),
+                Text(
+                  'จะปรับราคา',
+                  style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black),
+                ),
+              ],
+            ),
+          ),
+        ),
+        onTap: () {
+          print('You click promotion');
+          routeToListProduct(3);
+        },
+      ),
+    );
+  }
+
+  Widget newproductBox() {
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.45,
+      // height: 80.0,
+      child: GestureDetector(
+        child: Card(
+          // color: Colors.green.shade100,
+          child: Container(
+            padding: EdgeInsets.all(16.0),
+            alignment: AlignmentDirectional(0.0, 0.0),
+            child: Column(
+              children: <Widget>[
+                Container(
+                  width: 45.0,
+                  child: Image.asset('images/icon_new.png'),
+                ),
+                Text(
+                  'สินค้าใหม่',
+                  style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black),
+                ),
+              ],
+            ),
+          ),
+        ),
+        onTap: () {
+          print('You click promotion');
+          routeToListProduct(1);
+        },
+      ),
+    );
+  }
+
+  Widget cartBox() {
     return Container(
       width: MediaQuery.of(context).size.width * 0.45,
       // height: 80.0,
@@ -340,7 +442,7 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Widget bottomLeft() {
+  Widget barcodeBox() {
     return Container(
       width: MediaQuery.of(context).size.width * 0.45,
       // height: 80.0,
@@ -370,7 +472,7 @@ class _HomeState extends State<Home> {
         onTap: () {
           print('You click barcode scan');
           readQRcode();
-         // Navigator.of(context).pop();
+          // Navigator.of(context).pop();
         },
       ),
     );
@@ -435,26 +537,39 @@ class _HomeState extends State<Home> {
     );
   }
 */
-  Widget bottomMenu() {
+
+  Widget row1Menu() {
     return Row(
       // mainAxisAlignment: MainAxisAlignment.spaceAround,
       // mainAxisSize: MainAxisSize.max,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        bottomLeft(),
-        // bottomRight(),
+        productBox(),
+        promotionBox(),
       ],
     );
   }
 
-  Widget topMenu() {
+  Widget row2Menu() {
     return Row(
       // mainAxisAlignment: MainAxisAlignment.spaceAround,
       // mainAxisSize: MainAxisSize.max,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        topLeft(),
-        topRight(),
+        updatepriceBox(),
+        newproductBox(),
+      ],
+    );
+  }
+
+  Widget row3Menu() {
+    return Row(
+      // mainAxisAlignment: MainAxisAlignment.spaceAround,
+      // mainAxisSize: MainAxisSize.max,
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        cartBox(),
+        barcodeBox(),
       ],
     );
   }
@@ -493,7 +608,7 @@ class _HomeState extends State<Home> {
     }
   }
 
-    Future<void> readCart() async {
+  Future<void> readCart() async {
     amontCart = 0;
     String memberId = myUserModel.id.toString();
     String url =
@@ -534,7 +649,7 @@ class _HomeState extends State<Home> {
               productAllModel: productAllModel,
             ),
           );
-          Navigator.of(context).push(route).then((value)=>readCart());       
+          Navigator.of(context).push(route).then((value) => readCart());
 
           // Navigator.of(context).push(route).then((value) {
           //   setState(() {
@@ -556,9 +671,11 @@ class _HomeState extends State<Home> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          topMenu(),
+          row1Menu(),
           // mySizebox(),
-          bottomMenu(),
+          row2Menu(),
+          // mySizebox(),
+          row3Menu(),
         ],
       ),
     );
@@ -569,8 +686,8 @@ class _HomeState extends State<Home> {
     return SingleChildScrollView(
       child: Column(
         children: <Widget>[
-          // headTitle('สินค้าแนะนำ', Icons.thumb_up),
-          // suggest(),
+          headTitle('สินค้าแนะนำ', Icons.thumb_up),
+          suggest(),
           headTitle('เมนู', Icons.home),
           homeMenu(),
           // productBox(),

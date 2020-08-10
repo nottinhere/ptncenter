@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 
 class MyStyle {
   double h1 = 24.0, h2 = 18.0;
-  Color mainColor = Color.fromARGB(0xff, 0x31, 0xa3, 0x51);
+  Color mainColor = Color.fromARGB(0xff, 0x2c, 0xb5, 0x1b);   // (0xff, 0x31, 0xa3, 0x51);
   Color textColor = Color.fromARGB(0xff, 0x00, 0x73, 0x26);
   Color lightColor = Color.fromARGB(0x68, 0x00, 0xd5, 0x7f);
-  Color bgColor = Color.fromARGB(0xff, 0x31, 0xa3, 0x51);
-  Color barColor = Color.fromARGB(0xff, 0x00, 0x73, 0x26);
+  Color bgColor = Color.fromARGB(0xff, 0x2c, 0xb5, 0x1b);   // (0xff, 0x31, 0xa3, 0x51);
+  Color barColor = Color.fromARGB(0xff, 0x2c, 0xb5, 0x1b);      // (0xff, 0x00, 0x73, 0x26);
 
   TextStyle h1Style = TextStyle(
     fontSize: 24.0,
@@ -29,6 +29,29 @@ class MyStyle {
     fontSize: 16.0,
     // fontWeight: FontWeight.bold,
     color: Color.fromARGB(0xff, 0x00, 0x73, 0x26),
+  );
+
+  TextStyle h3bStyleGreen = TextStyle(
+    fontSize: 16.0,
+    fontWeight: FontWeight.bold,
+    color: Color.fromARGB(0xff, 0x00, 0x73, 0x26),
+  );
+
+  TextStyle h3StyleGray = TextStyle(
+    fontSize: 16.0,
+    // fontWeight: FontWeight.bold,
+    color: Colors.grey.shade900,
+  );
+
+  TextStyle h3bStyleRed = TextStyle(
+    fontSize: 16.0,
+    fontWeight: FontWeight.bold,
+    color: Color.fromARGB(0xff, 0xff, 0x99, 0x99),
+  );
+
+  TextStyle h3StyleRed = TextStyle(
+    fontSize: 16.0,
+    color: Colors.red,
   );
 
   BoxDecoration boxLightGreen = BoxDecoration(
