@@ -898,8 +898,8 @@ class _DetailState extends State<Detail> {
         // addButton(),
 
         MyStyle().mySizebox(),
-        headTitle('สินค้าที่เกี่ยวข้อง', Icons.thumb_up),
-        relate(),
+        // headTitle('สินค้าที่เกี่ยวข้อง', Icons.thumb_up),
+        // relate(),
         MyStyle().mySizebox(),
         MyStyle().mySizebox(),
       ],

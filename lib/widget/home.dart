@@ -686,8 +686,8 @@ class _HomeState extends State<Home> {
     return SingleChildScrollView(
       child: Column(
         children: <Widget>[
-          headTitle('สินค้าแนะนำ', Icons.thumb_up),
-          suggest(),
+          // headTitle('สินค้าแนะนำ', Icons.thumb_up),
+          // suggest(),
           headTitle('เมนู', Icons.home),
           homeMenu(),
           // productBox(),
