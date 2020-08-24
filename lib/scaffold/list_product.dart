@@ -68,16 +68,21 @@ class _ListProductState extends State<ListProduct> {
   void initState() {
     // auto load
     super.initState();
-  
+
     myIndex = widget.index;
     myUserModel = widget.userModel;
 
-    if(myIndex==0){ currentIndex = 1;}   
-    else   if(myIndex==2){ currentIndex = 2;}   
-    else   if(myIndex==3){ currentIndex = 3;}   
-    else   if(myIndex==1){ currentIndex = 4;}   
+    if (myIndex == 0) {
+      currentIndex = 1;
+    } else if (myIndex == 2) {
+      currentIndex = 2;
+    } else if (myIndex == 3) {
+      currentIndex = 3;
+    } else if (myIndex == 1) {
+      currentIndex = 4;
+    }
     createController(); // เมื่อ scroll to bottom
-
+    
     setState(() {
       readData(); // read  ข้อมูลมาแสดง
       readCart();
@@ -89,10 +94,9 @@ class _ListProductState extends State<ListProduct> {
       if (scrollController.position.pixels ==
           scrollController.position.maxScrollExtent) {
         page++;
+        
         readData();
-
-        //  print('in the end');
-
+        // print('in the end');
         // setState(() {
         //   amountListView = amountListView + 2;
         //   if (amountListView > filterProductAllModels.length) {
@@ -171,7 +175,8 @@ class _ListProductState extends State<ListProduct> {
         'http://ptnpharma.com/apishop/json_product.php?memberId=$memberId&searchKey=$searchString&page=$page';
     if (myIndex != 0) {
       // url = '${MyStyle().readProductWhereMode}$myIndex';
-      url = 'http://ptnpharma.com/apishop/json_product.php?memberId=$memberId&searchKey=$searchString&product_mode=$myIndex&page=$page';
+      url =
+          'http://ptnpharma.com/apishop/json_product.php?memberId=$memberId&searchKey=$searchString&product_mode=$myIndex&page=$page';
     }
     print("URL = $url");
     http.Response response = await http.get(url);
@@ -205,46 +210,67 @@ class _ListProductState extends State<ListProduct> {
   Widget showStock(int index) {
     return Row(
       children: <Widget>[
-          Text(
+        Container(
+          width: MediaQuery.of(context).size.width * 0.12,
+          child: Text(
             'Stock :',
             style: MyStyle().h3StyleGray,
           ),
-
-        if (filterProductAllModels[index].stock.toString() != '0')
-          Text(
+        ),
+        Container(
+          width: MediaQuery.of(context).size.width * 0.14,          
+          child: Text(
             ' ${filterProductAllModels[index].stock}',
-            style: MyStyle().h3StyleGray,
+            style: (filterProductAllModels[index].stock.toString() != '0')
+                ? MyStyle().h3StyleGray
+                : MyStyle().h3StyleRed,
           ),
-
-        if (filterProductAllModels[index].stock.toString() == '0')
-          Text(
-            ' ${filterProductAllModels[index].stock}',
-            style: MyStyle().h3StyleRed,
+        ),Container(
+            width: MediaQuery.of(context).size.width * 0.14,
+            child: Text(
+              'Incart :',
+              style: MyStyle().h3StyleBlue,
+            ),
           ),
-      
+          Container(
+            width: MediaQuery.of(context).size.width * 0.30,
+            child: Text('x',
+              style: MyStyle().h3StyleBlue,),
+          ),
       ],
     );
     // return Text('na');
   }
 
   Widget showPrice(int index) {
+    String txtShowPrice;
+    String txtShowUnit;
+    String txtPriceUnit = '';
+    if (filterProductAllModels[index].itemSprice.toString() != '0') {
+      txtShowPrice = filterProductAllModels[index].itemSprice.toString();
+      txtShowUnit = filterProductAllModels[index].itemSunit.toString();
+      if (txtShowPrice != '' && txtShowUnit != '')
+        txtPriceUnit = '$txtPriceUnit' + " [$txtShowPrice/$txtShowUnit] ";
+    }
+    if (filterProductAllModels[index].itemMprice.toString() != '0') {
+      txtShowPrice = filterProductAllModels[index].itemMprice.toString();
+      txtShowUnit = filterProductAllModels[index].itemMunit.toString();
+      if (txtShowPrice != '' && txtShowUnit != '')
+        txtPriceUnit = '$txtPriceUnit' + " [$txtShowPrice/$txtShowUnit] ";
+    }
+    if (filterProductAllModels[index].itemLprice.toString() != '0') {
+      txtShowPrice = filterProductAllModels[index].itemLprice.toString();
+      txtShowUnit = filterProductAllModels[index].itemLunit.toString();
+      if (txtShowPrice != '' && txtShowUnit != '')
+        txtPriceUnit = '$txtPriceUnit' + " [$txtShowPrice/$txtShowUnit] ";
+    }
+
     return Row(
       children: <Widget>[
-        if (filterProductAllModels[index].itemSprice.toString() != '0')
-          Text(
-            '[ ${filterProductAllModels[index].itemSprice.toString()}/${filterProductAllModels[index].itemSunit.toString()} ] ',
-            style: MyStyle().h3StyleGray,
-          ),
-        if (filterProductAllModels[index].itemMprice.toString() != '0')
-          Text(
-            '[ ${filterProductAllModels[index].itemMprice.toString()}/${filterProductAllModels[index].itemMunit.toString()} ] ',
-            style: MyStyle().h3StyleGray,
-          ),
-        if (filterProductAllModels[index].itemLprice.toString() != '0')
-          Text(
-            '[ ${filterProductAllModels[index].itemLprice.toString()}/${filterProductAllModels[index].itemLunit.toString()} ]',
-            style: MyStyle().h3StyleGray,
-          ),
+        Text(
+          '$txtPriceUnit',
+          style: MyStyle().h3StyleGray,
+        ),
       ],
     );
     // return Text('na');
@@ -262,8 +288,8 @@ class _ListProductState extends State<ListProduct> {
           children: <Widget>[
             showName(index),
             showStock(index),
-            showPrice(index)
-          ],
+            showPrice(index),
+         ],
         ),
       ),
     );
@@ -271,9 +297,19 @@ class _ListProductState extends State<ListProduct> {
 
   Widget showImage(int index) {
     return Container(
-      padding: EdgeInsets.all(5.0),
-      width: MediaQuery.of(context).size.width * 0.25,
-      child: Image.network(filterProductAllModels[index].photo),
+        padding: EdgeInsets.all(5.0),
+      // width: MediaQuery.of(context).size.width * 0.25,
+            // child: Image.network(filterProductAllModels[index].photo),
+        width: 90,
+        height: 90,
+        decoration: new BoxDecoration(
+          image: new DecorationImage(
+            fit: BoxFit.cover,
+            alignment: FractionalOffset.topCenter,
+            image: new NetworkImage(filterProductAllModels[index].photo),
+          )
+        ),
+         
     );
   }
 
@@ -293,6 +329,16 @@ class _ListProductState extends State<ListProduct> {
   }
 
   Widget showProductItem() {
+
+    print('Point 1');
+    scrollController.addListener(() {
+      if (scrollController.position.pixels == scrollController.position.maxScrollExtent) {
+            print('Point 2');
+        return Center(child: CircularProgressIndicator(strokeWidth: 10,));
+      }
+    });
+    print('Point 3');
+
     return Expanded(
       child: ListView.builder(
         controller: scrollController,
@@ -339,9 +385,23 @@ class _ListProductState extends State<ListProduct> {
       searchKey = true;
     }
 
-    return filterProductAllModels.length == 0
-        ? showProgressIndicate(searchKey)
-        : showProductItem();
+        // return filterProductAllModels.length == 0
+        // ? showProgressIndicate(searchKey)
+        // : showProductItem();
+
+    if(filterProductAllModels.length == 0){
+      return showProgressIndicate(searchKey);
+    }else{
+      return showProductItem();
+      // scrollController.addListener(() {
+      //   if (scrollController.position.pixels ==
+      //       scrollController.position.maxScrollExtent) {
+      //         return CircularProgressIndicator();
+      //   }else{
+      //     return showProductItem();
+      //   }
+      // });
+    }
   }
 
   Widget showProgressIndicate(searchKey) {
@@ -448,9 +508,6 @@ class _ListProductState extends State<ListProduct> {
     } catch (e) {}
   }
 
-
-  
-
   Widget searchForm() {
     return Container(
       decoration: MyStyle().boxLightGray,
@@ -491,8 +548,7 @@ class _ListProductState extends State<ListProduct> {
     );
   }
 
-
-    void routeToListProduct(int index) {
+  void routeToListProduct(int index) {
     MaterialPageRoute materialPageRoute =
         MaterialPageRoute(builder: (BuildContext buildContext) {
       return ListProduct(
@@ -509,25 +565,30 @@ class _ListProductState extends State<ListProduct> {
     });
 
     //You can have a switch case to Navigate to different pages
-    switch (currentIndex){
-      case 0:  
-          MaterialPageRoute route = MaterialPageRoute(
-            builder: (value) => MyService(
-              userModel: myUserModel,
-            ),
-          );
-          Navigator.of(context).pushAndRemoveUntil(route, (route) => false);
-     
-      break;  // home
-      case 1:  routeToListProduct(0);   break;  // all product
-      case 2:  routeToListProduct(2);   break;  // promotion 
-      case 3:  routeToListProduct(3);   break;  // update price
-      case 4:  routeToListProduct(1);   break;  // new item
+    switch (currentIndex) {
+      case 0:
+        MaterialPageRoute route = MaterialPageRoute(
+          builder: (value) => MyService(
+            userModel: myUserModel,
+          ),
+        );
+        Navigator.of(context).pushAndRemoveUntil(route, (route) => false);
+
+        break; // home
+      case 1:
+        routeToListProduct(0);
+        break; // all product
+      case 2:
+        routeToListProduct(2);
+        break; // promotion
+      case 3:
+        routeToListProduct(3);
+        break; // update price
+      case 4:
+        routeToListProduct(1);
+        break; // new item
     }
   }
-
-
-
 
   Widget showBubbleBottomBarNav() {
     return BubbleBottomBar(
@@ -600,20 +661,19 @@ class _ListProductState extends State<ListProduct> {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     String txtheader = '';
     if (myIndex != 0) {
-      if(myIndex == 1){
-       txtheader = 'สินค้าใหม่';
-      }else if(myIndex == 2){
-       txtheader = 'สินค้าโปรโมชัน';
-      }else if(myIndex == 3){
-       txtheader = 'สินค้าจะปรับราคา';
+      if (myIndex == 1) {
+        txtheader = 'สินค้าใหม่';
+      } else if (myIndex == 2) {
+        txtheader = 'สินค้าโปรโมชัน';
+      } else if (myIndex == 3) {
+        txtheader = 'สินค้าจะปรับราคา';
       }
-    }else{
-       txtheader = 'รายการสินค้า';
+    } else {
+      txtheader = 'รายการสินค้า';
     }
     return Scaffold(
       appBar: AppBar(
@@ -634,7 +694,7 @@ class _ListProductState extends State<ListProduct> {
           showContent(),
         ],
       ),
-            bottomNavigationBar: showBubbleBottomBarNav(), //showBottomBarNav
+      bottomNavigationBar: showBubbleBottomBarNav(), //showBottomBarNav
     );
   }
 }

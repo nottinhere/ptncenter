@@ -1,5 +1,5 @@
 import 'dart:convert';
-
+import 'dart:async';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +14,7 @@ import 'package:ptncenter/scaffold/detail_cart.dart';
 import 'package:ptncenter/scaffold/list_product.dart';
 import 'package:ptncenter/utility/my_style.dart';
 import 'package:ptncenter/utility/normal_dialog.dart';
+import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 
 class Home extends StatefulWidget {
   final UserModel userModel;
@@ -155,30 +156,29 @@ class _HomeState extends State<Home> {
         autoPlayAnimationDuration: Duration(seconds: 5),
         // items: suggestLists,
         items: suggestLists
-          .map((item) => Container(
-
-                child: Center(
-                  child: Column(
-                    children: <Widget>[
-                      Container(
-                        // width: MediaQuery.of(context).size.width * 0.50,
-                        height: 135.00,
-                        child: item,
-                        padding: EdgeInsets.all(8.0),
-                      ),
-                      Text(
-                        productsName[indexSlide++].toString(),
-                        style: TextStyle(
-                            fontSize: 12,
-                            // fontWeight: FontWeight.bold,
-                            color: Colors.black),
-                      ),
-                    ],
+            .map((item) => Container(
+                  child: Center(
+                    child: Column(
+                      children: <Widget>[
+                        Container(
+                          // width: MediaQuery.of(context).size.width * 0.50,
+                          height: 135.00,
+                          child: item,
+                          padding: EdgeInsets.all(8.0),
+                        ),
+                        Text(
+                          productsName[indexSlide++].toString(),
+                          style: TextStyle(
+                              fontSize: 12,
+                              // fontWeight: FontWeight.bold,
+                              color: Colors.black),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                color: Colors.grey.shade200,
-              ))
-          .toList(),
+                  color: Colors.grey.shade200,
+                ))
+            .toList(),
 
         onPageChanged: (int index) {
           suggestIndex = index;
@@ -442,6 +442,46 @@ class _HomeState extends State<Home> {
     );
   }
 
+
+
+
+  Widget historyBox() {
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.45,
+      // height: 80.0,
+      child: GestureDetector(
+        child: Card(
+          // color: Colors.green.shade100,
+          child: Container(
+            padding: EdgeInsets.all(16.0),
+            alignment: AlignmentDirectional(0.0, 0.0),
+            child: Column(
+              children: <Widget>[
+                Container(
+                  width: 45.0,
+                  child: Image.asset('images/icon_history.png'),
+                ),
+                Text(
+                  'ประวัติการสั่ง',
+                  style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black),
+                ),
+              ],
+            ),
+          ),
+        ),
+        onTap: () {
+          print('You click order history');
+            Navigator.push(context,
+                          MaterialPageRoute(builder: (context) => WebView(userModel: myUserModel,)));
+        },
+      ),
+    );
+  }
+  
+
   Widget barcodeBox() {
     return Container(
       width: MediaQuery.of(context).size.width * 0.45,
@@ -513,30 +553,7 @@ class _HomeState extends State<Home> {
     );
   }
 
-/*
-  Widget productMenu() {
-    return Container(
-      width: MediaQuery.of(context).size.width * 0.4,
-      height: 80.0,
-      child: GestureDetector(
-        child: Card(
-          color: Colors.green.shade100,
-          child: Container(
-            alignment: AlignmentDirectional(0.0, 0.0),
-            child: Text(
-              'recommend',
-              style: TextStyle(color: Colors.black),
-            ),
-          ),
-        ),
-        onTap: () {
-          print('You click recommend');
-          routeToListProduct(3);
-        },
-      ),
-    );
-  }
-*/
+
 
   Widget row1Menu() {
     return Row(
@@ -570,6 +587,18 @@ class _HomeState extends State<Home> {
       children: <Widget>[
         cartBox(),
         barcodeBox(),
+      ],
+    );
+  }
+
+  Widget row4Menu() {
+    return Row(
+      // mainAxisAlignment: MainAxisAlignment.spaceAround,
+      // mainAxisSize: MainAxisSize.max,
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        historyBox(),
+        // barcodeBox(),
       ],
     );
   }
@@ -661,6 +690,8 @@ class _HomeState extends State<Home> {
     } catch (e) {}
   }
 
+
+
   Widget homeMenu() {
     return Container(
       width: MediaQuery.of(context).size.width * 0.9,
@@ -676,6 +707,8 @@ class _HomeState extends State<Home> {
           row2Menu(),
           // mySizebox(),
           row3Menu(),
+          // mySizebox(),
+          row4Menu(),
         ],
       ),
     );
@@ -686,8 +719,8 @@ class _HomeState extends State<Home> {
     return SingleChildScrollView(
       child: Column(
         children: <Widget>[
-          // headTitle('สินค้าแนะนำ', Icons.thumb_up),
-          // suggest(),
+          headTitle('สินค้าแนะนำ', Icons.thumb_up),
+          suggest(),
           headTitle('เมนู', Icons.home),
           homeMenu(),
           // productBox(),
@@ -721,6 +754,83 @@ class _HomeState extends State<Home> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class WebViewWidget extends StatefulWidget {
+  WebViewWidget({Key key}) : super(key: key);
+
+  @override
+  _WebViewWidgetState createState() => _WebViewWidgetState();
+}
+
+class _WebViewWidgetState extends State {
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          title: Text("Sample WebView Widget"),
+          backgroundColor: MyStyle().bgColor,
+        ),
+        body: Center(
+          child: Column(
+            children: [
+              Container(
+                child: FlatButton(
+                    child: Text("Open my Blog"),
+                    onPressed: () {
+                      print("in");
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) => WebView()));
+                    }),
+              )
+            ],
+          ),
+        ));
+  }
+}
+
+class WebView extends StatefulWidget {
+  final UserModel userModel;
+
+  WebView({Key key, this.userModel}) : super(key: key);
+
+  @override
+  _WebViewState createState() => _WebViewState();
+}
+
+class _WebViewState extends State<WebView> {
+  UserModel myUserModel;
+
+  @override
+  void initState() {
+    super.initState();
+    myUserModel = widget.userModel;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    String memberId = myUserModel.id;
+    String memberCode = myUserModel.customerCode;
+    String url = 'https://ptnpharma.com/shop/pages/tables/orderhistory_mobile.php?memberId=$memberId&memberCode=$memberCode'; // 
+    print('URL ==>> $url');
+    return WebviewScaffold(
+      url: url,//"https://www.androidmonks.com",
+      appBar: AppBar(
+        backgroundColor: MyStyle().bgColor,
+        title: Text("ประวัติการสั่งซื้อ"),
+      ),
+      withZoom: true,
+      withJavascript: true,
+      withLocalStorage: true,
+      appCacheEnabled: false,
+      ignoreSSLErrors: true,
     );
   }
 }

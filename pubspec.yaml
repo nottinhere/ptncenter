@@ -28,6 +28,7 @@ dependencies:
   barcode_scan: ^1.0.0
   shared_preferences: ^0.5.4+6
   bubble_bottom_bar: ^1.2.0
+  flutter_webview_plugin: ^0.3.11
 
 dev_dependencies:
   flutter_test:

@@ -15,7 +15,6 @@ import 'package:ptncenter/scaffold/list_product.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:ptncenter/models/promote_model.dart';
 import 'package:ptncenter/widget/home.dart';
-import 'package:ptncenter/scaffold/list_product.dart';
 import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
 import 'my_service.dart';
 
@@ -332,132 +331,47 @@ class _DetailState extends State<Detail> {
   }
 
   Widget showStockExpire() {
-    // if(productAllModel.expireColor == 'red')
-    //   Color   expColor = Colors.red;
-    // else if(productAllModel.expireColor == 'blue')
-    //   Color   expColor = Colors.blue;
-    // else if(productAllModel.expireColor == 'black')
-    //   Color   expColor = Colors.black;
-
     return Container(
       width: MediaQuery.of(context).size.width * 0.98,
       child: Row(
         children: <Widget>[
           Container(
-            width: MediaQuery.of(context).size.width * 0.14,
+            width: MediaQuery.of(context).size.width * 0.16,
             child: Text(
               'Stock :',
               style: MyStyle().h3StyleGray,
             ),
           ),
-          if (productAllModel.stock.toString() != '0')
-            Container(
-              width: MediaQuery.of(context).size.width * 0.30,
-              child: Text(
-                ' ${productAllModel.stock}',
-                style: MyStyle().h3StyleGray,
-              ),
-            ),
-          if (productAllModel.stock.toString() == '0')
-            Container(
-              width: MediaQuery.of(context).size.width * 0.30,
-              child: Text(
-                ' ${productAllModel.stock}',
-                style: MyStyle().h3StyleRed,
-              ),
-            ),
           Container(
-            width: MediaQuery.of(context).size.width * 0.10,
+            width: MediaQuery.of(context).size.width * 0.22,
+            child: Text(' ${productAllModel.stock}',
+                style: (productAllModel.stock.toString() != '0')
+                    ? MyStyle().h3StyleGray
+                    : MyStyle().h3StyleRed),
+          ),
+          Container(
+            width: MediaQuery.of(context).size.width * 0.14,
             child: Text(
               'Exp :',
               style: MyStyle().h3StyleGray,
             ),
           ),
-          if (productAllModel.expireColor == 'red')
-            Container(
-              width: MediaQuery.of(context).size.width * 0.35,
-              child: Text(
-                ' ${productAllModel.expire}',
-                style: TextStyle(
-                  color: Colors.red,
-                  fontSize: 16.0,
-                ),
-              ),
-            ),
-          if (productAllModel.expireColor == 'blue')
-            Container(
-              width: MediaQuery.of(context).size.width * 0.35,
-              child: Text(
-                ' ${productAllModel.expire}',
-                style: TextStyle(
-                  color: Colors.blue.shade700,
-                  fontSize: 16.0,
-                ),
-              ),
-            ),
-          if (productAllModel.expireColor == 'black')
-            Container(
-              width: MediaQuery.of(context).size.width * 0.35,
-              child: Text(
-                ' ${productAllModel.expire}',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 16.0,
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget showStock() {
-    return Container(
-      width: MediaQuery.of(context).size.width * 0.48,
-      child: Row(
-        children: <Widget>[
-          Text(
-            'Stock :',
-            style: MyStyle().h3StyleGray,
-          ),
-          if (productAllModel.stock.toString() != '0')
-            Text(
-              ' ${productAllModel.stock}',
-              style: MyStyle().h3StyleGray,
-            ),
-          if (productAllModel.stock.toString() == '0')
-            Text(
-              ' ${productAllModel.stock}',
-              style: MyStyle().h3StyleRed,
-            ),
-        ],
-      ),
-    );
-    // return Text('na');
-  }
-
-  Widget showExpire() {
-    return Container(
-      child: Row(
-        children: <Widget>[
-          Text(
-            'Exp :',
-            style: MyStyle().h3StyleGray,
-          ),
-          if (productAllModel.expire.toString() != '0')
-            Text(
+          Container(
+            width: MediaQuery.of(context).size.width * 0.35,
+            child: Text(
               ' ${productAllModel.expire}',
-              style: MyStyle().h3StyleGray,
+              style: TextStyle(
+                  fontSize: 16.0,
+                  color: (productAllModel.expireColor == 'red')
+                      ? Colors.red
+                      : (productAllModel.expireColor == 'blue')
+                          ? Colors.blue.shade700
+                          : Colors.black),
             ),
-          if (productAllModel.expire.toString() == '0')
-            Text(
-              ' ${productAllModel.expire}',
-              style: MyStyle().h3StyleRed,
-            ),
+          ),
         ],
       ),
     );
-    // return Text('na');
   }
 
   Widget showPrice() {
@@ -468,7 +382,6 @@ class _DetailState extends State<Detail> {
         itemCount: unitSizeModels.length,
         itemBuilder: (BuildContext buildContext, int index) {
           return showChoosePricePackage(index);
-          Text('$index'); // showDetailPrice(index);
         },
       ),
     );
@@ -596,7 +509,7 @@ class _DetailState extends State<Detail> {
     Navigator.of(context).push(materialPageRoute);
   }
 
-    BottomNavigationBarItem homeBotton() {
+  BottomNavigationBarItem homeBotton() {
     return BottomNavigationBarItem(
       icon: Icon(Icons.home),
       title: Text('Home'),
@@ -720,7 +633,7 @@ class _DetailState extends State<Detail> {
         routeToListProduct(0);
         break; // all product
       case 2:
-           routeToListProduct(2);
+        routeToListProduct(2);
         MaterialPageRoute materialPageRoute =
             MaterialPageRoute(builder: (BuildContext buildContext) {
           return DetailCart(
@@ -786,7 +699,6 @@ class _DetailState extends State<Detail> {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -846,7 +758,6 @@ class _DetailState extends State<Detail> {
                         'productID = $productID, memberID=$memberID, unitSize=l, QTY=$qtyL');
                     addCart(productID, unitSize, qtyL, memberID);
                   }
-
                 },
               ),
             ),
