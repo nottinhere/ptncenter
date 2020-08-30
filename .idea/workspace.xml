@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="a0b7d477-393b-424b-b810-692c11e5f29a" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.flutter-plugins" beforeDir="false" afterPath="$PROJECT_DIR$/.flutter-plugins" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.flutter-plugins-dependencies" beforeDir="false" afterPath="$PROJECT_DIR$/.flutter-plugins-dependencies" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.packages" beforeDir="false" afterPath="$PROJECT_DIR$/.packages" afterDir="false" />
@@ -17,19 +16,6 @@
       <change beforePath="$PROJECT_DIR$/android/.gradle/4.10.2/taskHistory/taskHistory.lock" beforeDir="false" afterPath="$PROJECT_DIR$/android/.gradle/4.10.2/taskHistory/taskHistory.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/android/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" afterPath="$PROJECT_DIR$/android/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/android/.gradle/buildOutputCleanup/outputFiles.bin" beforeDir="false" afterPath="$PROJECT_DIR$/android/.gradle/buildOutputCleanup/outputFiles.bin" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java" beforeDir="false" afterPath="$PROJECT_DIR$/android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/images/New folder/Thumbs.db" beforeDir="false" afterPath="$PROJECT_DIR$/images/New folder/Thumbs.db" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/images/Thumbs.db" beforeDir="false" afterPath="$PROJECT_DIR$/images/Thumbs.db" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ios/Flutter/Generated.xcconfig" beforeDir="false" afterPath="$PROJECT_DIR$/ios/Flutter/Generated.xcconfig" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ios/Flutter/flutter_export_environment.sh" beforeDir="false" afterPath="$PROJECT_DIR$/ios/Flutter/flutter_export_environment.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ios/Runner/GeneratedPluginRegistrant.h" beforeDir="false" afterPath="$PROJECT_DIR$/ios/Runner/GeneratedPluginRegistrant.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ios/Runner/GeneratedPluginRegistrant.m" beforeDir="false" afterPath="$PROJECT_DIR$/ios/Runner/GeneratedPluginRegistrant.m" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/scaffold/detail.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/scaffold/detail.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/scaffold/list_product.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/scaffold/list_product.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/utility/my_style.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/utility/my_style.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/widget/home.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/widget/home.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/pubspec.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/pubspec.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -92,15 +78,15 @@
       <screen x="0" y="0" width="1600" height="860" />
     </state>
     <state x="301" y="60" key="SettingsEditor/1600.0.1600.860/-1600.0.1600.860/0.0.1600.860@0.0.1600.860" timestamp="1597534147804" />
-    <state x="154" y="224" width="1416" height="676" key="com.android.tools.idea.avdmanager.AvdListDialog" timestamp="1598277570583">
+    <state x="154" y="224" width="1416" height="676" key="com.android.tools.idea.avdmanager.AvdListDialog" timestamp="1598623912715">
       <screen x="0" y="0" width="1600" height="860" />
     </state>
-    <state x="154" y="224" width="1416" height="676" key="com.android.tools.idea.avdmanager.AvdListDialog/-1600.0.1600.860/0.0.1600.860/1600.0.1600.860@0.0.1600.860" timestamp="1598277570583" />
+    <state x="154" y="224" width="1416" height="676" key="com.android.tools.idea.avdmanager.AvdListDialog/-1600.0.1600.860/0.0.1600.860/1600.0.1600.860@0.0.1600.860" timestamp="1598623912715" />
     <state x="92" y="92" width="1416" height="676" key="com.android.tools.idea.avdmanager.AvdListDialog/1600.0.1600.860/-1600.0.1600.860/0.0.1600.860@0.0.1600.860" timestamp="1598181432409" />
-    <state x="495" y="252" key="com.intellij.ide.util.TipDialog" timestamp="1598277454738">
+    <state x="495" y="252" key="com.intellij.ide.util.TipDialog" timestamp="1598623899330">
       <screen x="0" y="0" width="1600" height="860" />
     </state>
-    <state x="495" y="252" key="com.intellij.ide.util.TipDialog/-1600.0.1600.860/0.0.1600.860/1600.0.1600.860@0.0.1600.860" timestamp="1598277454738" />
+    <state x="495" y="252" key="com.intellij.ide.util.TipDialog/-1600.0.1600.860/0.0.1600.860/1600.0.1600.860@0.0.1600.860" timestamp="1598623899330" />
     <state x="495" y="252" key="com.intellij.ide.util.TipDialog/1600.0.1600.860/-1600.0.1600.860/0.0.1600.860@0.0.1600.860" timestamp="1598181411720" />
   </component>
 </project>

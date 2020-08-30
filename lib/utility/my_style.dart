@@ -80,9 +80,9 @@ class MyStyle {
   String fontName = 'Sarabun';
 
   String readAllProduct =
-      'http://www.ptnpharma.com/apishop/json_product.php?top=100';
+      'http://www.ptnpharma.com/apishop/json_productlist.php?top=100';
   String readProductWhereMode =
-      'http://www.ptnpharma.com/apishop/json_product.php?searchKey=';
+      'http://www.ptnpharma.com/apishop/json_productlist.php?searchKey=';
   String getUserWhereUserAndPass =
       'http://www.ptnpharma.com/apishop/json_login.php';
   String getProductWhereId =

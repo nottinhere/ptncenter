@@ -5,10 +5,13 @@ class ProductAllModel {
   String priceList;
   String itemSprice;
   String itemSunit;
+  String itemincartSunit;
   String itemMprice;
   String itemMunit;
+  String itemincartMunit;
   String itemLprice;
   String itemLunit;
+  String itemincartLunit;
   String detail;
   int stock;
   int id;
@@ -20,10 +23,13 @@ class ProductAllModel {
       this.priceList,
       this.itemSprice,
       this.itemSunit,
+      this.itemincartSunit,
       this.itemMprice,
       this.itemMunit,
+      this.itemincartMunit,
       this.itemLprice,
       this.itemLunit,
+      this.itemincartLunit,
       this.detail,
       this.stock,
       this.id});
@@ -35,10 +41,13 @@ class ProductAllModel {
     priceList = json['price_list'];
     itemSprice = json['itemSprice'];
     itemSunit = json['itemSunit'];
+    itemincartSunit = json['itemincartSunit'];
     itemMprice = json['itemMprice'];
     itemMunit = json['itemMunit'];
+    itemincartMunit = json['itemincartMunit'];
     itemLprice = json['itemLprice'];
     itemLunit = json['itemLunit'];
+    itemincartLunit = json['itemincartLunit'];
     detail = json['detail'];
     stock = json['stock'];
     id = json['id'];
@@ -52,10 +61,13 @@ class ProductAllModel {
     data['price_list'] = this.priceList;
     data['itemSprice'] = this.itemSprice;
     data['itemSunit'] = this.itemSunit;
+    data['itemincartSunit'] = this.itemincartSunit;
     data['itemMprice'] = this.itemMprice;
     data['itemMunit'] = this.itemMunit;
+    data['itemincartMunit'] = this.itemincartMunit;
     data['itemLprice'] = this.itemLprice;
     data['itemLunit'] = this.itemLunit;
+    data['itemincartLunit'] = this.itemincartLunit;
     data['detail'] = this.detail;
     data['stock'] = this.stock;
     data['id'] = this.id;

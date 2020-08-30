@@ -172,11 +172,11 @@ class _ListProductState extends State<ListProduct> {
     // String url = MyStyle().readAllProduct;
     String memberId = myUserModel.id.toString();
     String url =
-        'http://ptnpharma.com/apishop/json_product.php?memberId=$memberId&searchKey=$searchString&page=$page';
+        'http://ptnpharma.com/apishop/json_productlist.php?memberId=$memberId&searchKey=$searchString&page=$page';
     if (myIndex != 0) {
       // url = '${MyStyle().readProductWhereMode}$myIndex';
       url =
-          'http://ptnpharma.com/apishop/json_product.php?memberId=$memberId&searchKey=$searchString&product_mode=$myIndex&page=$page';
+          'http://ptnpharma.com/apishop/json_productlist.php?memberId=$memberId&searchKey=$searchString&product_mode=$myIndex&page=$page';
     }
     print("URL = $url");
     http.Response response = await http.get(url);
@@ -211,7 +211,7 @@ class _ListProductState extends State<ListProduct> {
     return Row(
       children: <Widget>[
         Container(
-          width: MediaQuery.of(context).size.width * 0.12,
+          width: MediaQuery.of(context).size.width * 0.14,
           child: Text(
             'Stock :',
             style: MyStyle().h3StyleGray,
@@ -226,17 +226,23 @@ class _ListProductState extends State<ListProduct> {
                 : MyStyle().h3StyleRed,
           ),
         ),Container(
-            width: MediaQuery.of(context).size.width * 0.14,
+            width: MediaQuery.of(context).size.width * 0.16,
             child: Text(
-              'Incart :',
+              (filterProductAllModels[index].itemincartSunit != '0' || filterProductAllModels[index].itemincartMunit != '0' || filterProductAllModels[index].itemincartLunit != '0')?'ตะกร้า :':'',
               style: MyStyle().h3StyleBlue,
             ),
           ),
+
           Container(
             width: MediaQuery.of(context).size.width * 0.30,
-            child: Text('x',
+            child: Text(
+              ((filterProductAllModels[index].itemincartSunit != '0')?'${filterProductAllModels[index].itemincartSunit} ${filterProductAllModels[index].itemSunit}':'')+
+              ((filterProductAllModels[index].itemincartMunit != '0')?',${filterProductAllModels[index].itemincartMunit} ${filterProductAllModels[index].itemMunit}':'')+
+              ((filterProductAllModels[index].itemincartLunit != '0')?',${filterProductAllModels[index].itemincartLunit} ${filterProductAllModels[index].itemLunit}':'')         
+              ,
               style: MyStyle().h3StyleBlue,),
           ),
+
       ],
     );
     // return Text('na');
@@ -475,7 +481,7 @@ class _ListProductState extends State<ListProduct> {
 
   Future<void> decodeQRcode(String code) async {
     try {
-      String url = 'http://ptnpharma.com/apishop/json_product.php?bqcode=$code';
+      String url = 'http://ptnpharma.com/apishop/json_productlist.php?bqcode=$code';
       http.Response response = await http.get(url);
       var result = json.decode(response.body);
       // print('result ===*******>>>> $result');
