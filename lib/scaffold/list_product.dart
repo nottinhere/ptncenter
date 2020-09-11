@@ -226,7 +226,7 @@ class _ListProductState extends State<ListProduct> {
                 : MyStyle().h3StyleRed,
           ),
         ),Container(
-            width: MediaQuery.of(context).size.width * 0.16,
+            width: MediaQuery.of(context).size.width * 0.15,
             child: Text(
               (filterProductAllModels[index].itemincartSunit != '0' || filterProductAllModels[index].itemincartMunit != '0' || filterProductAllModels[index].itemincartLunit != '0')?'ตะกร้า :':'',
               style: MyStyle().h3StyleBlue,
@@ -234,7 +234,7 @@ class _ListProductState extends State<ListProduct> {
           ),
 
           Container(
-            width: MediaQuery.of(context).size.width * 0.30,
+            width: MediaQuery.of(context).size.width * 0.25,
             child: Text(
               ((filterProductAllModels[index].itemincartSunit != '0')?'${filterProductAllModels[index].itemincartSunit} ${filterProductAllModels[index].itemSunit}':'')+
               ((filterProductAllModels[index].itemincartMunit != '0')?',${filterProductAllModels[index].itemincartMunit} ${filterProductAllModels[index].itemMunit}':'')+

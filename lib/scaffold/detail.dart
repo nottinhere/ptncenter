@@ -120,7 +120,7 @@ class _DetailState extends State<Detail> {
     String url =
         'http://www.ptnpharma.com/apishop/json_relate.php?memberId=$memId&productId=$id'; // ?memberId=$memberId
 
-    print('URL >> $url');
+    print('URL relate >> $url');
     http.Response response = await http.get(url);
     var result = json.decode(response.body);
     var mapItemProduct =
@@ -809,8 +809,8 @@ class _DetailState extends State<Detail> {
         // addButton(),
 
         MyStyle().mySizebox(),
-        // headTitle('สินค้าที่เกี่ยวข้อง', Icons.thumb_up),
-        // relate(),
+        headTitle('สินค้าที่เกี่ยวข้อง', Icons.thumb_up),
+        relate(),
         MyStyle().mySizebox(),
         MyStyle().mySizebox(),
       ],
