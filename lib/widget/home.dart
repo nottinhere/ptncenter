@@ -117,7 +117,7 @@ class _HomeState extends State<Home> {
         // Navigator.of(context).push(route).then((value) {});  //  link to detail page
       },
       child: CarouselSlider(
-        height: 1200,
+        height: 1500,
         viewportFraction: 0.8,
         enlargeCenterPage: true,
         aspectRatio: 16 / 9,
@@ -134,55 +134,54 @@ class _HomeState extends State<Home> {
   }
 
   Widget showCarouseSliderSuggest() {
-    int indexSlide = 0;
     return GestureDetector(
-      onTap: () {
-        print('You Click index is $suggestIndex');
-
-        MaterialPageRoute route = MaterialPageRoute(
-          builder: (BuildContext context) => Detail(
-            productAllModel: suggestModels[suggestIndex],
-            userModel: myUserModel,
-          ),
-        );
-        Navigator.of(context).push(route).then((value) {});
-      },
-      child: CarouselSlider(
-        height: 350.0,
-        enlargeCenterPage: true,
-        aspectRatio: 16 / 9,
+      child: CarouselSlider.builder(
         pauseAutoPlayOnTouch: Duration(seconds: 5),
         autoPlay: true,
         autoPlayAnimationDuration: Duration(seconds: 5),
-        // items: suggestLists,
-        items: suggestLists
-            .map((item) => Container(
-                  child: Center(
-                    child: Column(
-                      children: <Widget>[
-                        Container(
-                          // width: MediaQuery.of(context).size.width * 0.50,
-                          height: 135.00,
-                          child: item,
-                          padding: EdgeInsets.all(8.0),
-                        ),
-                        Text(
-                          productsName[indexSlide++].toString(),
-                          style: TextStyle(
-                              fontSize: 12,
-                              // fontWeight: FontWeight.bold,
-                              color: Colors.black),
-                        ),
-                      ],
-                    ),
-                  ),
-                  color: Colors.grey.shade200,
-                ))
-            .toList(),
+        itemCount: (suggestLists.length / 2).round(),
+        itemBuilder: (context, index) {
+          final int first = index * 2;
+          final int second = first + 1;
 
-        onPageChanged: (int index) {
-          suggestIndex = index;
-          // print('index = $index');
+          return Row(
+            children: [first, second].map((idx) {
+              return Expanded(
+                child: GestureDetector(
+                    child: Card(
+                  // flex: 1,
+                  child: Column(
+                    children: <Widget>[
+                      Container(
+                        // width: MediaQuery.of(context).size.width * 0.50,
+                        height: 100.00,
+                        child: suggestLists[idx],
+                        padding: EdgeInsets.all(8.0),
+                      ),
+                      Text(
+                        productsName[idx].toString(),
+                        style: TextStyle(
+                            fontSize: 12,
+                            // fontWeight: FontWeight.bold,
+                            color: Colors.black),
+                      ),
+                    ],
+                  ),
+                ),    
+                  onTap: () {
+                    print('You Click index >> $idx');
+                    MaterialPageRoute route = MaterialPageRoute(
+                      builder: (BuildContext context) => Detail(
+                        productAllModel: suggestModels[idx],
+                        userModel: myUserModel,
+                      ),
+                    );
+                    Navigator.of(context).push(route).then((value) {});
+                  },
+                ),
+              );
+            }).toList(),
+          );
         },
       ),
     );
@@ -442,9 +441,6 @@ class _HomeState extends State<Home> {
     );
   }
 
-
-
-
   Widget historyBox() {
     return Container(
       width: MediaQuery.of(context).size.width * 0.45,
@@ -474,13 +470,16 @@ class _HomeState extends State<Home> {
         ),
         onTap: () {
           print('You click order history');
-            Navigator.push(context,
-                          MaterialPageRoute(builder: (context) => WebView(userModel: myUserModel,)));
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => WebView(
+                        userModel: myUserModel,
+                      )));
         },
       ),
     );
   }
-  
 
   Widget barcodeBox() {
     return Container(
@@ -552,8 +551,6 @@ class _HomeState extends State<Home> {
       ),
     );
   }
-
-
 
   Widget row1Menu() {
     return Row(
@@ -657,7 +654,8 @@ class _HomeState extends State<Home> {
 
   Future<void> decodeQRcode(String code) async {
     try {
-      String url = 'http://ptnpharma.com/apishop/json_productlist.php?bqcode=$code';
+      String url =
+          'http://ptnpharma.com/apishop/json_productlist.php?bqcode=$code';
       http.Response response = await http.get(url);
       var result = json.decode(response.body);
       print('result ===*******>>>> $result');
@@ -689,8 +687,6 @@ class _HomeState extends State<Home> {
       }
     } catch (e) {}
   }
-
-
 
   Widget homeMenu() {
     return Container(
@@ -818,10 +814,11 @@ class _WebViewState extends State<WebView> {
   Widget build(BuildContext context) {
     String memberId = myUserModel.id;
     String memberCode = myUserModel.customerCode;
-    String url = 'https://ptnpharma.com/shop/pages/tables/orderhistory_mobile.php?memberId=$memberId&memberCode=$memberCode'; // 
+    String url =
+        'https://ptnpharma.com/shop/pages/tables/orderhistory_mobile.php?memberId=$memberId&memberCode=$memberCode'; //
     print('URL ==>> $url');
     return WebviewScaffold(
-      url: url,//"https://www.androidmonks.com",
+      url: url, //"https://www.androidmonks.com",
       appBar: AppBar(
         backgroundColor: MyStyle().bgColor,
         title: Text("ประวัติการสั่งซื้อ"),

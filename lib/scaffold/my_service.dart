@@ -12,6 +12,7 @@ import 'package:ptncenter/utility/my_style.dart';
 import 'package:ptncenter/utility/normal_dialog.dart';
 import 'package:ptncenter/widget/contact.dart';
 import 'package:ptncenter/widget/home.dart';
+import 'package:ptncenter/widget/homescreen.dart';
 
 import 'package:ptncenter/scaffold/list_product.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -116,6 +117,38 @@ class _MyServiceState extends State<MyService> {
         setState(() {
           readCart();
           currentWidget = Home(
+            userModel: myUserModel,
+          );
+        });
+        Navigator.of(context).pop();
+      },
+    );
+  }
+
+
+  Widget menuHomeScreen() {
+    return ListTile(
+      leading: Icon(
+        Icons.home,
+        size: 36.0,
+        color: MyStyle().mainColor,
+      ),
+      title: Text(
+        'HomeScreen',
+        style: TextStyle(
+          color: MyStyle().textColor,
+        ),
+      ),
+      subtitle: Text(
+        'Description Home',
+        style: TextStyle(
+          color: MyStyle().mainColor,
+        ),
+      ),
+      onTap: () {
+        setState(() {
+          readCart();
+          currentWidget = HomeScreen(
             userModel: myUserModel,
           );
         });
@@ -278,6 +311,7 @@ class _MyServiceState extends State<MyService> {
         children: <Widget>[
           headDrawer(),
           menuHome(),
+          menuHomeScreen(),
           menuContact(),
           menuReadQRcode(),
           menuLogOut(),
