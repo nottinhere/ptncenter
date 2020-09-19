@@ -717,7 +717,7 @@ class _HomeState extends State<Home> {
         children: <Widget>[
           headTitle('สินค้าแนะนำ', Icons.thumb_up),
           suggest(),
-          headTitle('เมนู', Icons.home),
+          headTitle('เมนู.', Icons.home),
           homeMenu(),
           // productBox(),
           // orderhistoryBox(),
