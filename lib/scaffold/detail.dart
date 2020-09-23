@@ -324,18 +324,21 @@ class _DetailState extends State<Detail> {
   }
 
   Widget showValue(int index) {
-    // int value = amounts[index];
+    //  int value = amounts[index];
     //  return Text('$value');
-    var iniValue = '';
+    var iniValue='';
     bool readOnlyMode;
     var iconName;
     var iconColor;
     // print('$sizeSincart / $sizeMincart / $sizeLincart ');
-    if (index == 0)
+    if (index == 0){
       iniValue = showSincart.toString();
-    else if (index == 1)
+    }else if (index == 1){
       iniValue = showMincart.toString();
-    else if (index == 2) iniValue = showLincart.toString();
+    }else if (index == 2){
+      iniValue = showLincart.toString();
+    }
+
     /////////////////////////////////////////////////////////
     if (unitSizeModels[index].price.toString() == '0') {
       readOnlyMode = true;
@@ -347,16 +350,23 @@ class _DetailState extends State<Detail> {
       iconColor = Colors.grey;
     }
 
-    return Container(
+    
+      // var x = (iniValue!='0')?int.tryParse(iniValue):('').toString();
+       print('iniValue ($index)>> $iniValue');
+
+      return Container(
       // decoration: MyStyle().boxLightGreen,
       // height: 35.0,
       width: MediaQuery.of(context).size.width * 0.35,
       padding: EdgeInsets.only(left: 20.0, right: 10.0),
       child: Column(
         children: <Widget>[
+          // Text('($index) >> $iniValue'),
+          // Text('($index) >> $x'),
           TextFormField(
             style: TextStyle(color: Colors.black),
-            initialValue: '${iniValue}',
+            // initialValue: '$iniValue',
+              controller: TextEditingController()..text = '$iniValue',
             // readOnly: (unitSizeModels[index].price == 0)?true:false,
             readOnly: readOnlyMode,
             keyboardType: TextInputType.number,

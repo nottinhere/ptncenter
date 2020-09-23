@@ -82,10 +82,11 @@ class _ListProductState extends State<ListProduct> {
       currentIndex = 4;
     }
     createController(); // เมื่อ scroll to bottom
-    
+
     setState(() {
       readData(); // read  ข้อมูลมาแสดง
       readCart();
+      showProductItem();
     });
   }
 
@@ -94,7 +95,7 @@ class _ListProductState extends State<ListProduct> {
       if (scrollController.position.pixels ==
           scrollController.position.maxScrollExtent) {
         page++;
-        
+
         readData();
         // print('in the end');
         // setState(() {
@@ -218,34 +219,49 @@ class _ListProductState extends State<ListProduct> {
           ),
         ),
         Container(
-          width: MediaQuery.of(context).size.width * 0.14,          
+          width: MediaQuery.of(context).size.width * 0.14,
           child: Text(
             ' ${filterProductAllModels[index].stock}',
             style: (filterProductAllModels[index].stock.toString() != '0')
                 ? MyStyle().h3StyleGray
                 : MyStyle().h3StyleRed,
           ),
-        ),Container(
-            width: MediaQuery.of(context).size.width * 0.15,
-            child: Text(
-              (filterProductAllModels[index].itemincartSunit != '0' || filterProductAllModels[index].itemincartMunit != '0' || filterProductAllModels[index].itemincartLunit != '0')?'ตะกร้า :':'',
-              style: MyStyle().h3StyleBlue,
-            ),
-          ),
-
-          Container(
-            width: MediaQuery.of(context).size.width * 0.25,
-            child: Text(
-              ((filterProductAllModels[index].itemincartSunit != '0')?'${filterProductAllModels[index].itemincartSunit} ${filterProductAllModels[index].itemSunit}':'')+
-              ((filterProductAllModels[index].itemincartMunit != '0')?',${filterProductAllModels[index].itemincartMunit} ${filterProductAllModels[index].itemMunit}':'')+
-              ((filterProductAllModels[index].itemincartLunit != '0')?',${filterProductAllModels[index].itemincartLunit} ${filterProductAllModels[index].itemLunit}':'')         
-              ,
-              style: MyStyle().h3StyleBlue,),
-          ),
-
+        ),
+        showIncart(index),
       ],
     );
     // return Text('na');
+  }
+
+  Widget showIncart(int index) {
+    return Row(children: <Widget>[
+      Container(
+        width: MediaQuery.of(context).size.width * 0.15,
+        child: Text(
+          (filterProductAllModels[index].itemincartSunit != '0' ||
+                  filterProductAllModels[index].itemincartMunit != '0' ||
+                  filterProductAllModels[index].itemincartLunit != '0')
+              ? 'ตะกร้า :'
+              : '',
+          style: MyStyle().h3StyleBlue,
+        ),
+      ),
+      Container(
+        width: MediaQuery.of(context).size.width * 0.25,
+        child: Text(
+          ((filterProductAllModels[index].itemincartSunit != '0')
+                  ? '${filterProductAllModels[index].itemincartSunit} ${filterProductAllModels[index].itemSunit}'
+                  : '') +
+              ((filterProductAllModels[index].itemincartMunit != '0')
+                  ? ',${filterProductAllModels[index].itemincartMunit} ${filterProductAllModels[index].itemMunit}'
+                  : '') +
+              ((filterProductAllModels[index].itemincartLunit != '0')
+                  ? ',${filterProductAllModels[index].itemincartLunit} ${filterProductAllModels[index].itemLunit}'
+                  : ''),
+          style: MyStyle().h3StyleBlue,
+        ),
+      ),
+    ]);
   }
 
   Widget showPrice(int index) {
@@ -295,7 +311,7 @@ class _ListProductState extends State<ListProduct> {
             showName(index),
             showStock(index),
             showPrice(index),
-         ],
+          ],
         ),
       ),
     );
@@ -303,19 +319,17 @@ class _ListProductState extends State<ListProduct> {
 
   Widget showImage(int index) {
     return Container(
-        padding: EdgeInsets.all(5.0),
+      padding: EdgeInsets.all(5.0),
       // width: MediaQuery.of(context).size.width * 0.25,
-            // child: Image.network(filterProductAllModels[index].photo),
-        width: 90,
-        height: 90,
-        decoration: new BoxDecoration(
+      // child: Image.network(filterProductAllModels[index].photo),
+      width: 90,
+      height: 90,
+      decoration: new BoxDecoration(
           image: new DecorationImage(
-            fit: BoxFit.cover,
-            alignment: FractionalOffset.topCenter,
-            image: new NetworkImage(filterProductAllModels[index].photo),
-          )
-        ),
-         
+        fit: BoxFit.cover,
+        alignment: FractionalOffset.topCenter,
+        image: new NetworkImage(filterProductAllModels[index].photo),
+      )),
     );
   }
 
@@ -335,12 +349,15 @@ class _ListProductState extends State<ListProduct> {
   }
 
   Widget showProductItem() {
-
     print('Point 1');
     scrollController.addListener(() {
-      if (scrollController.position.pixels == scrollController.position.maxScrollExtent) {
-            print('Point 2');
-        return Center(child: CircularProgressIndicator(strokeWidth: 10,));
+      if (scrollController.position.pixels ==
+          scrollController.position.maxScrollExtent) {
+        print('Point 2');
+        return Center(
+            child: CircularProgressIndicator(
+          strokeWidth: 10,
+        ));
       }
     });
     print('Point 3');
@@ -391,13 +408,13 @@ class _ListProductState extends State<ListProduct> {
       searchKey = true;
     }
 
-        // return filterProductAllModels.length == 0
-        // ? showProgressIndicate(searchKey)
-        // : showProductItem();
+    // return filterProductAllModels.length == 0
+    // ? showProgressIndicate(searchKey)
+    // : showProductItem();
 
-    if(filterProductAllModels.length == 0){
+    if (filterProductAllModels.length == 0) {
       return showProgressIndicate(searchKey);
-    }else{
+    } else {
       return showProductItem();
       // scrollController.addListener(() {
       //   if (scrollController.position.pixels ==
@@ -481,7 +498,8 @@ class _ListProductState extends State<ListProduct> {
 
   Future<void> decodeQRcode(String code) async {
     try {
-      String url = 'http://ptnpharma.com/apishop/json_productlist.php?bqcode=$code';
+      String url =
+          'http://ptnpharma.com/apishop/json_productlist.php?bqcode=$code';
       http.Response response = await http.get(url);
       var result = json.decode(response.body);
       // print('result ===*******>>>> $result');
