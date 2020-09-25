@@ -49,6 +49,9 @@ class _HomeState extends State<Home> {
     readPromotion();
     myUserModel = widget.userModel;
     readSuggest();
+    setState(() {
+      readCart();
+    });
   }
 
   Future<void> readPromotion() async {
@@ -148,28 +151,29 @@ class _HomeState extends State<Home> {
             children: [first, second].map((idx) {
               return Expanded(
                 child: GestureDetector(
-                    child: Card(
-                  // flex: 1,
-                  child: Column(
-                    children: <Widget>[
-                      Container(
-                        // width: MediaQuery.of(context).size.width * 0.50,
-                        height: 100.00,
-                        child: suggestLists[idx],
-                        padding: EdgeInsets.all(8.0),
-                      ),
-                      Text(
-                        productsName[idx].toString(),
-                        style: TextStyle(
-                            fontSize: 12,
-                            // fontWeight: FontWeight.bold,
-                            color: Colors.black),
-                      ),
-                    ],
+                  child: Card(
+                    // flex: 1,
+                    child: Column(
+                      children: <Widget>[
+                        Container(
+                          // width: MediaQuery.of(context).size.width * 0.50,
+                          height: 100.00,
+                          child: suggestLists[idx],
+                          padding: EdgeInsets.all(8.0),
+                        ),
+                        Text(
+                          productsName[idx].toString(),
+                          style: TextStyle(
+                              fontSize: 12,
+                              // fontWeight: FontWeight.bold,
+                              color: Colors.black),
+                        ),
+                      ],
+                    ),
                   ),
-                ),    
                   onTap: () {
                     print('You Click index >> $idx');
+                    /*
                     MaterialPageRoute route = MaterialPageRoute(
                       builder: (BuildContext context) => Detail(
                         productAllModel: suggestModels[idx],
@@ -177,6 +181,17 @@ class _HomeState extends State<Home> {
                       ),
                     );
                     Navigator.of(context).push(route).then((value) {});
+                    */
+                    MaterialPageRoute materialPageRoute =
+                        MaterialPageRoute(builder: (BuildContext buildContext) {
+                      return Detail(
+                        productAllModel: suggestModels[idx],
+                        userModel: myUserModel,
+                      );
+                    });
+                    Navigator.of(context)
+                        .push(materialPageRoute)
+                        .then((value) => readCart());
                   },
                 ),
               );
@@ -288,7 +303,7 @@ class _HomeState extends State<Home> {
           ),
         ),
         onTap: () {
-          print('You click promotion');
+          print('You click product');
           routeToListProduct(0);
         },
       ),
@@ -358,7 +373,7 @@ class _HomeState extends State<Home> {
           ),
         ),
         onTap: () {
-          print('You click promotion');
+          print('You click update price');
           routeToListProduct(3);
         },
       ),
@@ -393,7 +408,7 @@ class _HomeState extends State<Home> {
           ),
         ),
         onTap: () {
-          print('You click promotion');
+          print('You click new item');
           routeToListProduct(1);
         },
       ),
@@ -428,7 +443,7 @@ class _HomeState extends State<Home> {
           ),
         ),
         onTap: () {
-          print('You click newproduct');
+          print('You click cart');
           MaterialPageRoute materialPageRoute =
               MaterialPageRoute(builder: (BuildContext buildContext) {
             return DetailCart(

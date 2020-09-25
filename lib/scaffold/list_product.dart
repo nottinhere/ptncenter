@@ -86,7 +86,6 @@ class _ListProductState extends State<ListProduct> {
     setState(() {
       readData(); // read  ข้อมูลมาแสดง
       readCart();
-      showProductItem();
     });
   }
 
