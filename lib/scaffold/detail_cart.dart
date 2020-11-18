@@ -54,6 +54,15 @@ class _DetailCartState extends State<DetailCart> {
     '5. ส่งทางบริษัทขนส่ง (เอกชน)'
   ];
 
+  // List<String> listTransport = [
+  //   '',
+  //   '1. รับสินค้าเองที่ พัฒนาเภสัช',
+  //   '2. รับเองที่คลังสินค้า(ซอยวัดท่าทอง)',
+  //   '3. รถส่งของตามรอบสายส่งสินค้า',
+  //   '4. รถส่งตามรอบส่งในเมืองนครสวรรค์',
+  //   '5. ส่งทางบริษัทขนส่ง (เอกชน)'
+  // ];
+
   // Method
   @override
   void initState() {
@@ -182,7 +191,7 @@ class _DetailCartState extends State<DetailCart> {
             child: Text(
               productAllModels[index].title,
               style: TextStyle(
-                fontSize: 18.0,
+                fontSize: 16.0,
                 fontWeight: FontWeight.bold,
                 color: Color.fromARGB(0xff, 0x00, 0x73, 0x26),
               ),
@@ -487,8 +496,8 @@ class _DetailCartState extends State<DetailCart> {
       itemBuilder: (BuildContext buildContext, int index) {
         return Card(
           shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(10)),
-          side: BorderSide(width: 2, color: Colors.grey.shade200)),
+              borderRadius: BorderRadius.all(Radius.circular(10)),
+              side: BorderSide(width: 2, color: Colors.grey.shade200)),
           child: Container(
             padding: EdgeInsets.only(bottom: 10.0, top: 10.0),
             child: Column(
@@ -507,11 +516,15 @@ class _DetailCartState extends State<DetailCart> {
   }
 
   Widget showTotal() {
-    return Container(
-      padding: EdgeInsets.only(left: 16.0, top: 10.0),
-      child: Text(
-        'รวม ::  $total บาท',
-        style: MyStyle().h1Style,
+    return Card(
+      child: Center(
+        child: Container(
+          padding: EdgeInsets.only(top: 10.0, bottom: 10.0),
+          child: Text(
+            'ยอดรวม        $total บาท',
+            style: MyStyle().h1Style,
+          ),
+        ),
       ),
     );
   }
@@ -528,14 +541,15 @@ class _DetailCartState extends State<DetailCart> {
     return Text(
       'การจัดส่ง : ${listTransport[index]}',
       style: TextStyle(
-        fontSize: 18.0,
+        fontSize: 20.0,
       ),
     );
   }
 
   Widget showTransport() {
     return Container(
-      padding: EdgeInsets.only(left: 16.0, right: 16.0),
+      width: 400.0,
+      padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
       child: Card(
         child: PopupMenuButton<String>(
           onSelected: (String string) {
@@ -725,7 +739,8 @@ class _DetailCartState extends State<DetailCart> {
 
   Future<void> decodeQRcode(String code) async {
     try {
-      String url = 'http://ptnpharma.com/apishop/json_productlist.php?bqcode=$code';
+      String url =
+          'http://ptnpharma.com/apishop/json_productlist.php?bqcode=$code';
       http.Response response = await http.get(url);
       var result = json.decode(response.body);
       print('result ===*******>>>> $result');
@@ -852,6 +867,7 @@ class _DetailCartState extends State<DetailCart> {
       ),
       body: ListView(
         children: <Widget>[
+          showTotal(),
           showListCart(),
           showTotal(),
           showTransport(),

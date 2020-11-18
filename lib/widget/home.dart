@@ -415,6 +415,41 @@ class _HomeState extends State<Home> {
     );
   }
 
+  Widget notreceiveBox() {
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.45,
+      // height: 80.0,
+      child: GestureDetector(
+        child: Card(
+          // color: Colors.green.shade100,
+          child: Container(
+            padding: EdgeInsets.all(16.0),
+            alignment: AlignmentDirectional(0.0, 0.0),
+            child: Column(
+              children: <Widget>[
+                Container(
+                  width: 45.0,
+                  child: Image.asset('images/icon_cancel.png'),
+                ),
+                Text(
+                  'สั่งแล้วไม่ได้รับ',
+                  style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black),
+                ),
+              ],
+            ),
+          ),
+        ),
+        onTap: () {
+          print('You click not receive');
+          routeToListProduct(4);
+        },
+      ),
+    );
+  }
+
   Widget cartBox() {
     return Container(
       width: MediaQuery.of(context).size.width * 0.45,
@@ -574,7 +609,7 @@ class _HomeState extends State<Home> {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         productBox(),
-        promotionBox(),
+        notreceiveBox(),
       ],
     );
   }
@@ -585,7 +620,7 @@ class _HomeState extends State<Home> {
       // mainAxisSize: MainAxisSize.max,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        updatepriceBox(),
+        promotionBox(),
         newproductBox(),
       ],
     );
@@ -597,8 +632,8 @@ class _HomeState extends State<Home> {
       // mainAxisSize: MainAxisSize.max,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
+        updatepriceBox(),
         cartBox(),
-        barcodeBox(),
       ],
     );
   }
@@ -609,8 +644,8 @@ class _HomeState extends State<Home> {
       // mainAxisSize: MainAxisSize.max,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
+        barcodeBox(),
         historyBox(),
-        // barcodeBox(),
       ],
     );
   }

@@ -19,7 +19,10 @@ import 'my_service.dart';
 class ListProduct extends StatefulWidget {
   final int index;
   final UserModel userModel;
-  ListProduct({Key key, this.index, this.userModel}) : super(key: key);
+  final int cate;
+  final String cateName;
+  ListProduct({Key key, this.index, this.userModel, this.cate, this.cateName})
+      : super(key: key);
 
   @override
   _ListProductState createState() => _ListProductState();
@@ -47,8 +50,9 @@ class Debouncer {
 class _ListProductState extends State<ListProduct> {
   // Explicit
   int myIndex;
-  List<ProductAllModel> productAllModels = List(); // set array
-  List<ProductAllModel> filterProductAllModels = List();
+  List<ProductAllModel> productAllModels = List(); // []; // set array
+  List<ProductAllModel> filterProductAllModels = List(); // []; //
+
   int amontCart = 0;
   UserModel myUserModel;
   String searchString = '';
@@ -56,13 +60,19 @@ class _ListProductState extends State<ListProduct> {
 
   int amountListView = 6;
   int page = 1;
+
   String qrString;
+  int myCate = 0;
+  String myCateName = '';
   ScrollController scrollController = ScrollController();
   final Debouncer debouncer =
       Debouncer(milliseconds: 500); // ตั้งค่า เวลาที่จะ delay
   bool statusStart = true;
 
   int currentIndex;
+  List<ProductAllModel> productAllModels_buffer = List(); // []; //
+  var _controller = TextEditingController();
+
   // Method
   @override
   void initState() {
@@ -71,15 +81,21 @@ class _ListProductState extends State<ListProduct> {
 
     myIndex = widget.index;
     myUserModel = widget.userModel;
+    myCate = widget.cate;
+    myCateName = widget.cateName;
 
     if (myIndex == 0) {
       currentIndex = 1;
+    } else if (myIndex == 1) {
+      currentIndex = 4;
     } else if (myIndex == 2) {
       currentIndex = 2;
     } else if (myIndex == 3) {
       currentIndex = 3;
-    } else if (myIndex == 1) {
-      currentIndex = 4;
+    } else if (myIndex == 4) {
+      currentIndex = 1;
+    } else if (myIndex == 5) {
+      currentIndex = 1;
     }
     createController(); // เมื่อ scroll to bottom
 
@@ -94,7 +110,6 @@ class _ListProductState extends State<ListProduct> {
       if (scrollController.position.pixels ==
           scrollController.position.maxScrollExtent) {
         page++;
-
         readData();
         // print('in the end');
         // setState(() {
@@ -122,14 +137,14 @@ class _ListProductState extends State<ListProduct> {
     var cartList = result['cart'];
     for (var map in cartList) {
       lastItemName = map['title'];
-      setState(() {
-        amontCart++;
-      });
+      // setState(() {
+      amontCart++;
+      // });
     }
     setState(() {
       lastItemName;
+      amontCart;
     });
-    // print('lastItemName=====>>>>>>>> $lastItemName');
   }
 
   Widget showCart() {
@@ -170,27 +185,49 @@ class _ListProductState extends State<ListProduct> {
 
   Future<void> readData() async {
     // String url = MyStyle().readAllProduct;
+
     String memberId = myUserModel.id.toString();
     String url =
         'http://ptnpharma.com/apishop/json_productlist.php?memberId=$memberId&searchKey=$searchString&page=$page';
     if (myIndex != 0) {
-      // url = '${MyStyle().readProductWhereMode}$myIndex';
-      url =
-          'http://ptnpharma.com/apishop/json_productlist.php?memberId=$memberId&searchKey=$searchString&product_mode=$myIndex&page=$page';
+      if (myIndex == 1 || myIndex == 2 || myIndex == 3) {
+        url =
+            'http://ptnpharma.com/apishop/json_productlist.php?memberId=$memberId&searchKey=$searchString&product_mode=$myIndex&page=$page';
+      } else if (myIndex == 4) {
+        url =
+            'http://ptnpharma.com/apishop/json_productnotreceive.php?memberId=$memberId&page=$page';
+      } else if (myIndex == 5) {
+        url =
+            'http://ptnpharma.com/apishop/json_productlist.php?memberId=$memberId&cate_id=$myCate&page=$page';
+      }
     }
+
+    // url = '${MyStyle().readProductWhereMode}$myIndex';
     print("URL = $url");
     http.Response response = await http.get(url);
     var result = json.decode(response.body);
     var itemProducts = result['itemsProduct'];
+    print('itemProducts >> ${itemProducts}');
 
     for (var map in itemProducts) {
       ProductAllModel productAllModel = ProductAllModel.fromJson(map);
+      // productAllModels_buffer.add(productAllModel);
+      // productAllModels = productAllModels_buffer;
 
       setState(() {
         productAllModels.add(productAllModel);
         filterProductAllModels = productAllModels;
       });
     }
+    setState(() {
+      filterProductAllModels;
+    });
+
+    print(
+        'read BF filter >> ${productAllModels[0].title} (${productAllModels[0].itemincartSunit})');
+
+    print(
+        'read AT filter >> ${filterProductAllModels[0].title} (${filterProductAllModels[0].itemincartSunit})');
   }
 
   Widget showName(int index) {
@@ -211,14 +248,14 @@ class _ListProductState extends State<ListProduct> {
     return Row(
       children: <Widget>[
         Container(
-          width: MediaQuery.of(context).size.width * 0.14,
+          width: MediaQuery.of(context).size.width * 0.16,
           child: Text(
             'Stock :',
             style: MyStyle().h3StyleGray,
           ),
         ),
         Container(
-          width: MediaQuery.of(context).size.width * 0.14,
+          width: MediaQuery.of(context).size.width * 0.15,
           child: Text(
             ' ${filterProductAllModels[index].stock}',
             style: (filterProductAllModels[index].stock.toString() != '0')
@@ -249,10 +286,10 @@ class _ListProductState extends State<ListProduct> {
         width: MediaQuery.of(context).size.width * 0.25,
         child: Text(
           ((filterProductAllModels[index].itemincartSunit != '0')
-                  ? '${filterProductAllModels[index].itemincartSunit} ${filterProductAllModels[index].itemSunit}'
+                  ? '${filterProductAllModels[index].itemincartSunit} ${filterProductAllModels[index].itemSunit},'
                   : '') +
               ((filterProductAllModels[index].itemincartMunit != '0')
-                  ? ',${filterProductAllModels[index].itemincartMunit} ${filterProductAllModels[index].itemMunit}'
+                  ? '${filterProductAllModels[index].itemincartMunit} ${filterProductAllModels[index].itemMunit},'
                   : '') +
               ((filterProductAllModels[index].itemincartLunit != '0')
                   ? ',${filterProductAllModels[index].itemincartLunit} ${filterProductAllModels[index].itemLunit}'
@@ -348,18 +385,21 @@ class _ListProductState extends State<ListProduct> {
   }
 
   Widget showProductItem() {
-    print('Point 1');
+    // print('Point 1');
+    // print(
+    //     'showProductItem >> ${filterProductAllModels[0].title} (${filterProductAllModels[0].itemincartSunit})');
+
     scrollController.addListener(() {
       if (scrollController.position.pixels ==
           scrollController.position.maxScrollExtent) {
-        print('Point 2');
+        // print('Point 2');
         return Center(
             child: CircularProgressIndicator(
           strokeWidth: 10,
         ));
       }
     });
-    print('Point 3');
+    // print('Point 3');
 
     return Expanded(
       child: ListView.builder(
@@ -387,9 +427,18 @@ class _ListProductState extends State<ListProduct> {
                   userModel: myUserModel,
                 );
               });
+
               Navigator.of(context)
                   .push(materialPageRoute)
-                  .then((value) => readCart());
+                  .then((value) => setState(() {
+                        readCart();
+                        readData();
+                        // showProductItem();
+                        filterProductAllModels[index].itemincartSunit;
+                        filterProductAllModels[index].itemincartMunit;
+                        filterProductAllModels[index].itemincartLunit;
+                      }));
+              // Navigator.of(context).push(materialPageRoute);
             },
           );
         },
@@ -410,11 +459,16 @@ class _ListProductState extends State<ListProduct> {
     // return filterProductAllModels.length == 0
     // ? showProgressIndicate(searchKey)
     // : showProductItem();
-
+    print('Filter >> ${filterProductAllModels.length}');
     if (filterProductAllModels.length == 0) {
-      return showProgressIndicate(searchKey);
+      if (myIndex != 4) {
+        return showProgressIndicate(searchKey);
+      } else {
+        return Center(child: Text(''));
+      }
     } else {
       return showProductItem();
+
       // scrollController.addListener(() {
       //   if (scrollController.position.pixels ==
       //       scrollController.position.maxScrollExtent) {
@@ -431,11 +485,8 @@ class _ListProductState extends State<ListProduct> {
 
     if (searchKey == true) {
       if (filterProductAllModels.length == 0) {
-        //print('aaaaa');
         return Center(child: Text('')); // Search not found
-
       } else {
-        //print('bbbb');
         return Center(child: Text(''));
       }
     } else {
@@ -520,11 +571,6 @@ class _ListProductState extends State<ListProduct> {
             ),
           );
 
-          // Navigator.of(context).push(route).then((value) {
-          //   setState(() {
-          //     // readCart();
-          //   });
-          // });
           Navigator.of(context).push(route).then((value) => readCart());
         }
       }
@@ -547,6 +593,7 @@ class _ListProductState extends State<ListProduct> {
           // Navigator.of(context).pop();
         },
         title: TextField(
+          controller: _controller,
           textAlign: TextAlign.center,
           scrollPadding: EdgeInsets.all(1.00),
           style: TextStyle(
@@ -554,7 +601,13 @@ class _ListProductState extends State<ListProduct> {
               fontWeight: FontWeight.w300,
               fontSize: 18.00),
           decoration: InputDecoration(
-              border: OutlineInputBorder(), hintText: 'ค้นหาสินค้า'),
+            border: OutlineInputBorder(),
+            hintText: 'ค้นหาสินค้า',
+            suffixIcon: IconButton(
+              onPressed: () => _controller.clear(),
+              icon: Icon(Icons.clear),
+            ),
+          ),
           onChanged: (String string) {
             searchString = string.trim();
           },
@@ -562,6 +615,7 @@ class _ListProductState extends State<ListProduct> {
           onSubmitted: (value) {
             setState(() {
               page = 1;
+              myIndex = 0;
               productAllModels.clear();
               readData();
             });
@@ -694,6 +748,10 @@ class _ListProductState extends State<ListProduct> {
         txtheader = 'สินค้าโปรโมชัน';
       } else if (myIndex == 3) {
         txtheader = 'สินค้าจะปรับราคา';
+      } else if (myIndex == 4) {
+        txtheader = 'สินค้าที่เคยสั่งแล้วไม่ได้รับ';
+      } else if (myIndex == 5) {
+        txtheader = myCateName;
       }
     } else {
       txtheader = 'รายการสินค้า';

@@ -161,26 +161,26 @@ class _DetailState extends State<Detail> {
             children: [first, second].map((idx) {
               return Expanded(
                 child: GestureDetector(
-                    child: Card(
-                  // flex: 1,
-                  child: Column(
-                    children: <Widget>[
-                      Container(
-                        // width: MediaQuery.of(context).size.width * 0.50,
-                        height: 100.00,
-                        child: relateLists[idx],
-                        padding: EdgeInsets.all(8.0),
-                      ),
-                      Text(
-                        productsName[idx].toString(),
-                        style: TextStyle(
-                            fontSize: 12,
-                            // fontWeight: FontWeight.bold,
-                            color: Colors.black),
-                      ),
-                    ],
+                  child: Card(
+                    // flex: 1,
+                    child: Column(
+                      children: <Widget>[
+                        Container(
+                          // width: MediaQuery.of(context).size.width * 0.50,
+                          height: 100.00,
+                          child: relateLists[idx],
+                          padding: EdgeInsets.all(8.0),
+                        ),
+                        Text(
+                          productsName[idx].toString(),
+                          style: TextStyle(
+                              fontSize: 12,
+                              // fontWeight: FontWeight.bold,
+                              color: Colors.black),
+                        ),
+                      ],
+                    ),
                   ),
-                ),    
                   onTap: () {
                     print('You Click index >> $idx');
                     MaterialPageRoute route = MaterialPageRoute(
@@ -326,16 +326,16 @@ class _DetailState extends State<Detail> {
   Widget showValue(int index) {
     //  int value = amounts[index];
     //  return Text('$value');
-    var iniValue='';
+    var iniValue = '';
     bool readOnlyMode;
     var iconName;
     var iconColor;
     // print('$sizeSincart / $sizeMincart / $sizeLincart ');
-    if (index == 0){
+    if (index == 0) {
       iniValue = showSincart.toString();
-    }else if (index == 1){
+    } else if (index == 1) {
       iniValue = showMincart.toString();
-    }else if (index == 2){
+    } else if (index == 2) {
       iniValue = showLincart.toString();
     }
 
@@ -350,11 +350,10 @@ class _DetailState extends State<Detail> {
       iconColor = Colors.grey;
     }
 
-    
-      // var x = (iniValue!='0')?int.tryParse(iniValue):('').toString();
-       print('iniValue ($index)>> $iniValue');
+    // var x = (iniValue!='0')?int.tryParse(iniValue):('').toString();
+    print('iniValue ($index)>> $iniValue');
 
-      return Container(
+    return Container(
       // decoration: MyStyle().boxLightGreen,
       // height: 35.0,
       width: MediaQuery.of(context).size.width * 0.35,
@@ -366,7 +365,7 @@ class _DetailState extends State<Detail> {
           TextFormField(
             style: TextStyle(color: Colors.black),
             // initialValue: '$iniValue',
-              controller: TextEditingController()..text = '$iniValue',
+            controller: TextEditingController()..text = '$iniValue',
             // readOnly: (unitSizeModels[index].price == 0)?true:false,
             readOnly: readOnlyMode,
             keyboardType: TextInputType.number,
@@ -631,7 +630,8 @@ class _DetailState extends State<Detail> {
 
   Future<void> decodeQRcode(String code) async {
     try {
-      String url = 'http://ptnpharma.com/apishop/json_productlist.php?bqcode=$code';
+      String url =
+          'http://ptnpharma.com/apishop/json_productlist.php?bqcode=$code';
       http.Response response = await http.get(url);
       var result = json.decode(response.body);
       print('result ===*******>>>> $result');
@@ -676,6 +676,7 @@ class _DetailState extends State<Detail> {
   }
 
   void changePage(int index) {
+    // selected  >>  BubbleBottomBar
     setState(() {
       currentIndex = index;
     });

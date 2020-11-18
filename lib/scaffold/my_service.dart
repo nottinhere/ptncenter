@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:ptncenter/models/product_all_model.dart';
 import 'package:ptncenter/models/user_model.dart';
+import 'package:ptncenter/models/category_model.dart';
 import 'package:ptncenter/scaffold/detail.dart';
 
 import 'package:ptncenter/utility/my_style.dart';
@@ -29,12 +30,13 @@ class MyService extends StatefulWidget {
 
 class _MyServiceState extends State<MyService> {
   //Explicit
+  List<CategoryModel> categoryModels = List(); // set array
   UserModel myUserModel;
   Widget currentWidget;
   String qrString;
   int amontCart = 0;
-
   int currentIndex;
+  ScrollController scrollController = ScrollController();
 
   // Method
   @override
@@ -47,6 +49,7 @@ class _MyServiceState extends State<MyService> {
         userModel: myUserModel,
       );
       readCart();
+      readCategory(); // read  ข้อมูลมาแสดง
     });
   }
 
@@ -56,6 +59,19 @@ class _MyServiceState extends State<MyService> {
       return ListProduct(
         index: index,
         userModel: myUserModel,
+      );
+    });
+    Navigator.of(context).push(materialPageRoute);
+  }
+
+  void routeToListProductByCate(int index, int cate, String cateName) {
+    MaterialPageRoute materialPageRoute =
+        MaterialPageRoute(builder: (BuildContext buildContext) {
+      return ListProduct(
+        index: index,
+        userModel: myUserModel,
+        cate: cate,
+        cateName: cateName,
       );
     });
     Navigator.of(context).push(materialPageRoute);
@@ -125,35 +141,61 @@ class _MyServiceState extends State<MyService> {
     );
   }
 
-
-  Widget menuHomeScreen() {
-    return ListTile(
+  Widget menuCategory() {
+    return ExpansionTile(
       leading: Icon(
-        Icons.home,
+        Icons.category,
         size: 36.0,
-        color: MyStyle().mainColor,
       ),
-      title: Text(
-        'HomeScreen',
-        style: TextStyle(
-          color: MyStyle().textColor,
+      title: Text('Category'),
+      children: <Widget>[
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: new InkWell(
+                          child: Text(
+                            ' - สินค้าทั้งหมด',
+                            style: TextStyle(fontSize: 16, color: Colors.black),
+                          ),
+                          onTap: () =>
+                              routeToListProductByCate(6, 0, 'สินค้าทั้งหมด')),
+                    ),
+                    ListView.builder(
+                        scrollDirection: Axis.vertical,
+                        shrinkWrap: true,
+                        controller: scrollController,
+                        itemCount: categoryModels.length,
+                        itemBuilder: (BuildContext buildContext, int index) {
+                          return Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: new InkWell(
+                                child: Text(
+                                  ' - ' + categoryModels[index].cateName,
+                                  style: TextStyle(
+                                      fontSize: 16, color: Colors.black),
+                                ),
+                                onTap: () => routeToListProductByCate(
+                                    5,
+                                    categoryModels[index].cateId,
+                                    categoryModels[index].cateName)),
+                          );
+                        }),
+                  ],
+                ),
+              ],
+            ),
+          ),
         ),
-      ),
-      subtitle: Text(
-        'Description Home',
-        style: TextStyle(
-          color: MyStyle().mainColor,
-        ),
-      ),
-      onTap: () {
-        setState(() {
-          readCart();
-          currentWidget = HomeScreen(
-            userModel: myUserModel,
-          );
-        });
-        Navigator.of(context).pop();
-      },
+      ],
     );
   }
 
@@ -223,7 +265,8 @@ class _MyServiceState extends State<MyService> {
 
   Future<void> decodeQRcode(String code) async {
     try {
-      String url = 'http://ptnpharma.com/apishop/json_productlist.php?bqcode=$code';
+      String url =
+          'http://ptnpharma.com/apishop/json_productlist.php?bqcode=$code';
       http.Response response = await http.get(url);
       var result = json.decode(response.body);
       print('result ===*******>>>> $result');
@@ -311,7 +354,7 @@ class _MyServiceState extends State<MyService> {
         children: <Widget>[
           headDrawer(),
           menuHome(),
-          menuHomeScreen(),
+          menuCategory(),
           menuContact(),
           menuReadQRcode(),
           menuLogOut(),
@@ -335,6 +378,19 @@ class _MyServiceState extends State<MyService> {
         amontCart++;
       });
       print('amontCart (service page))>>>> $amontCart');
+    }
+  }
+
+  Future<void> readCategory() async {
+    String url = 'http://ptnpharma.com/apishop/json_category.php';
+
+    http.Response response = await http.get(url);
+    var result = json.decode(response.body);
+    var cateList = result['data'];
+
+    for (var map in cateList) {
+      CategoryModel categoryModel = CategoryModel.fromJson(map);
+      categoryModels.add(categoryModel);
     }
   }
 
