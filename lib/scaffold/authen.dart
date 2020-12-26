@@ -93,6 +93,44 @@ class _AuthenState extends State<Authen> {
     );
   }
 
+  Future<void> logOut() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    await sharedPreferences.clear();
+    // exit(0);
+  }
+
+  Widget okButtonLogin(BuildContext buildContext) {
+    return FlatButton(
+      child: Text('OK'),
+      onPressed: () {
+        // Navigator.of(buildContext).pop();  // pop คือการทำให้มันหายไป
+        logOut();
+        MaterialPageRoute materialPageRoute =
+            MaterialPageRoute(builder: (BuildContext buildContext) {
+          return Authen();
+        });
+        Navigator.of(context).push(materialPageRoute);
+      },
+    );
+  }
+
+  Future<void> normalDialogLogin(
+    BuildContext buildContext,
+    String title,
+    String message,
+  ) async {
+    showDialog(
+      context: buildContext,
+      builder: (BuildContext buildContext) {
+        return AlertDialog(
+          title: showTitle(title),
+          content: Text(message),
+          actions: <Widget>[okButtonLogin(buildContext)],
+        );
+      },
+    );
+  }
+
   Future<void> checkAuthen() async {
     if (user.isEmpty || password.isEmpty) {
       // Have space
@@ -109,7 +147,7 @@ class _AuthenState extends State<Authen> {
 
       if (statusInt == 0) {
         String message = result['message'];
-        normalDialog(context, 'ข้อมูลไม่ถูกต้อง', message);
+        normalDialogLogin(context, 'ข้อมูลไม่ถูกต้อง', message);
       } else if (statusInt == 1) {
         Map<String, dynamic> map = result['data'];
         print('map = $map');
@@ -127,9 +165,6 @@ class _AuthenState extends State<Authen> {
       }
     }
   }
-
-
-
 
   Future<void> saveSharePreference() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();

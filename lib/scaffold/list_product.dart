@@ -66,12 +66,15 @@ class _ListProductState extends State<ListProduct> {
   String myCateName = '';
   ScrollController scrollController = ScrollController();
   final Debouncer debouncer =
-      Debouncer(milliseconds: 500); // ตั้งค่า เวลาที่จะ delay
+      Debouncer(milliseconds: 300); // ตั้งค่า เวลาที่จะ delay
   bool statusStart = true;
 
   int currentIndex;
-  List<ProductAllModel> productAllModels_buffer = List(); // []; //
+  // List<ProductAllModel> productAllModels_buffer = List(); // []; //
+
   var _controller = TextEditingController();
+
+  int substart = 0;
 
   // Method
   @override
@@ -111,7 +114,7 @@ class _ListProductState extends State<ListProduct> {
           scrollController.position.maxScrollExtent) {
         page++;
         readData();
-        // print('in the end');
+        print('in the end');
         // setState(() {
         //   amountListView = amountListView + 2;
         //   if (amountListView > filterProductAllModels.length) {
@@ -184,8 +187,8 @@ class _ListProductState extends State<ListProduct> {
   }
 
   Future<void> readData() async {
+    // List<ProductAllModel> productAllModels_buffer = List(); // []; //
     // String url = MyStyle().readAllProduct;
-
     String memberId = myUserModel.id.toString();
     String url =
         'http://ptnpharma.com/apishop/json_productlist.php?memberId=$memberId&searchKey=$searchString&page=$page';
@@ -208,26 +211,62 @@ class _ListProductState extends State<ListProduct> {
     var result = json.decode(response.body);
     var itemProducts = result['itemsProduct'];
     print('itemProducts >> ${itemProducts}');
+    int i = 0;
+    print('Start >> ${filterProductAllModels.length}');
+    int s = (filterProductAllModels.length);
+    if (filterProductAllModels.length == 0)
+      int substart = 0;
+    else
+      int substart = 20;
 
     for (var map in itemProducts) {
       ProductAllModel productAllModel = ProductAllModel.fromJson(map);
-      // productAllModels_buffer.add(productAllModel);
-      // productAllModels = productAllModels_buffer;
-
       setState(() {
         productAllModels.add(productAllModel);
         filterProductAllModels = productAllModels;
+        print(
+            ' >> ${s} >> $i => ${productAllModel.id} || ${filterProductAllModels[s + i].id} || ${productAllModel.title} (${productAllModel.itemincartSunit}) ($substart)');
+
+        if (productAllModel.itemincartSunit != '0' ||
+            productAllModel.itemincartMunit != '0' ||
+            productAllModel.itemincartLunit != '0') {
+          filterProductAllModels[(s + i) - substart].itemincartSunit =
+              productAllModel.itemincartSunit;
+          filterProductAllModels[(s + i) - substart].itemincartMunit =
+              productAllModel.itemincartMunit;
+          filterProductAllModels[(s + i) - substart].itemincartLunit =
+              productAllModel.itemincartLunit;
+        } else {
+          filterProductAllModels[i].itemincartSunit =
+              productAllModels[i].itemincartSunit;
+          filterProductAllModels[i].itemincartMunit =
+              productAllModels[i].itemincartMunit;
+          filterProductAllModels[i].itemincartLunit =
+              productAllModels[i].itemincartLunit;
+        }
+
+        // if (productAllModel.itemincartSunit != '0') {
+        //   filterProductAllModels[i].itemincartSunit =
+        //       productAllModel.itemincartSunit;
+        // }
+        // if (productAllModel.itemincartMunit != '0') {
+        //   filterProductAllModels[i].itemincartMunit =
+        //       productAllModel.itemincartMunit;
+        // }
+        // if (productAllModel.itemincartLunit != '0') {
+        //   filterProductAllModels[i].itemincartLunit =
+        //       productAllModel.itemincartLunit;
+        // }
       });
+      i = i + 1;
     }
-    setState(() {
-      filterProductAllModels;
-    });
+    // setState(() {
+    //   productAllModels;
+    //   filterProductAllModels;
+    // });
 
-    print(
-        'read BF filter >> ${productAllModels[0].title} (${productAllModels[0].itemincartSunit})');
-
-    print(
-        'read AT filter >> ${filterProductAllModels[0].title} (${filterProductAllModels[0].itemincartSunit})');
+    // print(
+    //     'read AT filter >> ${filterProductAllModels[0].title} (${filterProductAllModels[0].itemincartSunit})');
   }
 
   Widget showName(int index) {
@@ -250,8 +289,8 @@ class _ListProductState extends State<ListProduct> {
         Container(
           width: MediaQuery.of(context).size.width * 0.16,
           child: Text(
-            'Stock :',
-            style: MyStyle().h3StyleGray,
+            'Stock:',
+            style: MyStyle().h4StyleGray,
           ),
         ),
         Container(
@@ -259,8 +298,8 @@ class _ListProductState extends State<ListProduct> {
           child: Text(
             ' ${filterProductAllModels[index].stock}',
             style: (filterProductAllModels[index].stock.toString() != '0')
-                ? MyStyle().h3StyleGray
-                : MyStyle().h3StyleRed,
+                ? MyStyle().h4StyleGray
+                : MyStyle().h4StyleRed,
           ),
         ),
         showIncart(index),
@@ -277,9 +316,9 @@ class _ListProductState extends State<ListProduct> {
           (filterProductAllModels[index].itemincartSunit != '0' ||
                   filterProductAllModels[index].itemincartMunit != '0' ||
                   filterProductAllModels[index].itemincartLunit != '0')
-              ? 'ตะกร้า :'
+              ? 'ตะกร้า:'
               : '',
-          style: MyStyle().h3StyleBlue,
+          style: MyStyle().h4StyleBlue,
         ),
       ),
       Container(
@@ -294,7 +333,7 @@ class _ListProductState extends State<ListProduct> {
               ((filterProductAllModels[index].itemincartLunit != '0')
                   ? ',${filterProductAllModels[index].itemincartLunit} ${filterProductAllModels[index].itemLunit}'
                   : ''),
-          style: MyStyle().h3StyleBlue,
+          style: MyStyle().h4StyleBlue,
         ),
       ),
     ]);
@@ -433,10 +472,6 @@ class _ListProductState extends State<ListProduct> {
                   .then((value) => setState(() {
                         readCart();
                         readData();
-                        // showProductItem();
-                        filterProductAllModels[index].itemincartSunit;
-                        filterProductAllModels[index].itemincartMunit;
-                        filterProductAllModels[index].itemincartLunit;
                       }));
               // Navigator.of(context).push(materialPageRoute);
             },

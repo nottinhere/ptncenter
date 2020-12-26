@@ -15,6 +15,7 @@ import 'package:ptncenter/scaffold/list_product.dart';
 import 'package:ptncenter/utility/my_style.dart';
 import 'package:ptncenter/utility/normal_dialog.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Home extends StatefulWidget {
   final UserModel userModel;
@@ -762,20 +763,27 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        children: <Widget>[
-          headTitle('สินค้าแนะนำ', Icons.thumb_up),
-          suggest(),
-          headTitle('เมนู.', Icons.home),
-          homeMenu(),
-          // productBox(),
-          // orderhistoryBox(),
-          // headTitle('สินค้าโปรโมชัน', Icons.bookmark),
-          // promotion(),
-        ],
-      ),
-    );
+    String login = myUserModel.name;
+    String loginStatus = myUserModel.status;
+
+    if (loginStatus == '1') {
+      return SingleChildScrollView(
+        child: Column(
+          children: <Widget>[
+            headTitle('สินค้าแนะนำ $login ($loginStatus)', Icons.thumb_up),
+            suggest(),
+            headTitle('เมนู.', Icons.home),
+            homeMenu(),
+            // productBox(),
+            // orderhistoryBox(),
+            // headTitle('สินค้าโปรโมชัน', Icons.bookmark),
+            // promotion(),
+          ],
+        ),
+      );
+    } else {
+      return Text('กรุณาติดต่อ PTN Pharma');
+    }
   }
 
   Widget headTitle(String string, IconData iconData) {
