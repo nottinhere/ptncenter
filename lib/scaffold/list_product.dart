@@ -16,6 +16,10 @@ import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
 
 import 'my_service.dart';
 
+import 'package:loading/loading.dart';
+import 'package:loading/indicator/ball_pulse_indicator.dart';
+import 'package:flutter/cupertino.dart';
+
 class ListProduct extends StatefulWidget {
   final int index;
   final UserModel userModel;
@@ -100,27 +104,32 @@ class _ListProductState extends State<ListProduct> {
     } else if (myIndex == 5) {
       currentIndex = 1;
     }
+
     createController(); // เมื่อ scroll to bottom
+    readData(); // read  ข้อมูลมาแสดง
 
     setState(() {
-      readData(); // read  ข้อมูลมาแสดง
       readCart();
     });
   }
 
   void createController() {
     scrollController.addListener(() {
-      if (scrollController.position.pixels ==
-          scrollController.position.maxScrollExtent) {
-        page++;
-        readData();
-        print('in the end');
-        // setState(() {
-        //   amountListView = amountListView + 2;
-        //   if (amountListView > filterProductAllModels.length) {
-        //     amountListView = filterProductAllModels.length;
-        //   }
-        // });
+      if (scrollController.position.atEdge) {
+        if (scrollController.position.pixels ==
+            scrollController.position.maxScrollExtent) {
+          page++;
+          readData();
+
+          print('in the end');
+
+          // setState(() {
+          //   amountListView = amountListView + 2;
+          //   if (amountListView > filterProductAllModels.length) {
+          //     amountListView = filterProductAllModels.length;
+          //   }
+          // });
+        }
       }
     });
   }
@@ -189,6 +198,7 @@ class _ListProductState extends State<ListProduct> {
   Future<void> readData() async {
     // List<ProductAllModel> productAllModels_buffer = List(); // []; //
     // String url = MyStyle().readAllProduct;
+
     String memberId = myUserModel.id.toString();
     String url =
         'http://ptnpharma.com/apishop/json_productlist.php?memberId=$memberId&searchKey=$searchString&page=$page';
@@ -207,43 +217,50 @@ class _ListProductState extends State<ListProduct> {
 
     // url = '${MyStyle().readProductWhereMode}$myIndex';
     print("URL = $url");
+
     http.Response response = await http.get(url);
     var result = json.decode(response.body);
     var itemProducts = result['itemsProduct'];
-    print('itemProducts >> ${itemProducts}');
-    int i = 0;
-    print('Start >> ${filterProductAllModels.length}');
-    int s = (filterProductAllModels.length);
-    if (filterProductAllModels.length == 0)
-      int substart = 0;
-    else
-      int substart = 20;
+    // print('itemProducts >> ${itemProducts}');
+    // int i = 0;
+    // print('Start >> ${filterProductAllModels.length}');
+    // int s = (filterProductAllModels.length);
+    // if (filterProductAllModels.length == 0)
+    //   int substart = 0;
+    // else
+    //   int substart = 20;
+
+    int len = (filterProductAllModels.length);
 
     for (var map in itemProducts) {
       ProductAllModel productAllModel = ProductAllModel.fromJson(map);
       setState(() {
         productAllModels.add(productAllModel);
         filterProductAllModels = productAllModels;
-        print(
-            ' >> ${s} >> $i => ${productAllModel.id} || ${filterProductAllModels[s + i].id} || ${productAllModel.title} (${productAllModel.itemincartSunit}) ($substart)');
 
-        if (productAllModel.itemincartSunit != '0' ||
-            productAllModel.itemincartMunit != '0' ||
-            productAllModel.itemincartLunit != '0') {
-          filterProductAllModels[(s + i) - substart].itemincartSunit =
-              productAllModel.itemincartSunit;
-          filterProductAllModels[(s + i) - substart].itemincartMunit =
-              productAllModel.itemincartMunit;
-          filterProductAllModels[(s + i) - substart].itemincartLunit =
-              productAllModel.itemincartLunit;
-        } else {
-          filterProductAllModels[i].itemincartSunit =
-              productAllModels[i].itemincartSunit;
-          filterProductAllModels[i].itemincartMunit =
-              productAllModels[i].itemincartMunit;
-          filterProductAllModels[i].itemincartLunit =
-              productAllModels[i].itemincartLunit;
-        }
+        print(
+            ' >> ${len} => ${productAllModel.id}  || ${productAllModel.title} (${productAllModel.itemincartSunit}) ($substart)');
+
+        // print(
+        //     ' >> ${s} >> $i => ${productAllModel.id} || ${filterProductAllModels[s + i].id} || ${productAllModel.title} (${productAllModel.itemincartSunit}) ($substart)');
+
+        // if (productAllModel.itemincartSunit != '0' ||
+        //     productAllModel.itemincartMunit != '0' ||
+        //     productAllModel.itemincartLunit != '0') {
+        //   filterProductAllModels[(s + i) - substart].itemincartSunit =
+        //       productAllModel.itemincartSunit;
+        //   filterProductAllModels[(s + i) - substart].itemincartMunit =
+        //       productAllModel.itemincartMunit;
+        //   filterProductAllModels[(s + i) - substart].itemincartLunit =
+        //       productAllModel.itemincartLunit;
+        // } else {
+        //   filterProductAllModels[i].itemincartSunit =
+        //       productAllModels[i].itemincartSunit;
+        //   filterProductAllModels[i].itemincartMunit =
+        //       productAllModels[i].itemincartMunit;
+        //   filterProductAllModels[i].itemincartLunit =
+        //       productAllModels[i].itemincartLunit;
+        // }
 
         // if (productAllModel.itemincartSunit != '0') {
         //   filterProductAllModels[i].itemincartSunit =
@@ -258,7 +275,7 @@ class _ListProductState extends State<ListProduct> {
         //       productAllModel.itemincartLunit;
         // }
       });
-      i = i + 1;
+      // i = i + 1;
     }
     // setState(() {
     //   productAllModels;
@@ -267,6 +284,19 @@ class _ListProductState extends State<ListProduct> {
 
     // print(
     //     'read AT filter >> ${filterProductAllModels[0].title} (${filterProductAllModels[0].itemincartSunit})');
+  }
+
+  Widget loading() {
+    print('Now is loading');
+    return Center(
+      child: Loading(indicator: BallPulseIndicator(), size: 100.0),
+    );
+  }
+
+  Widget myCircularProgress() {
+    return Center(
+      child: CircularProgressIndicator(),
+    );
   }
 
   Widget showName(int index) {
@@ -287,14 +317,14 @@ class _ListProductState extends State<ListProduct> {
     return Row(
       children: <Widget>[
         Container(
-          width: MediaQuery.of(context).size.width * 0.16,
+          width: MediaQuery.of(context).size.width * 0.12,
           child: Text(
             'Stock:',
             style: MyStyle().h4StyleGray,
           ),
         ),
         Container(
-          width: MediaQuery.of(context).size.width * 0.15,
+          width: MediaQuery.of(context).size.width * 0.12,
           child: Text(
             ' ${filterProductAllModels[index].stock}',
             style: (filterProductAllModels[index].stock.toString() != '0')
@@ -366,7 +396,11 @@ class _ListProductState extends State<ListProduct> {
       children: <Widget>[
         Text(
           '$txtPriceUnit',
-          style: MyStyle().h3StyleGray,
+          style: TextStyle(
+            fontSize: 16.0,
+            //  fontWeight: FontWeight.bold,
+            color: Color.fromRGBO(50, 117, 168, 1.0),
+          ), // h3StyleGray
         ),
       ],
     );
@@ -384,8 +418,8 @@ class _ListProductState extends State<ListProduct> {
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
             showName(index),
-            showStock(index),
             showPrice(index),
+            showStock(index),
           ],
         ),
       ),
@@ -397,8 +431,8 @@ class _ListProductState extends State<ListProduct> {
       padding: EdgeInsets.all(5.0),
       // width: MediaQuery.of(context).size.width * 0.25,
       // child: Image.network(filterProductAllModels[index].photo),
-      width: 90,
-      height: 90,
+      width: 80,
+      height: 80,
       decoration: new BoxDecoration(
           image: new DecorationImage(
         fit: BoxFit.cover,
@@ -424,37 +458,44 @@ class _ListProductState extends State<ListProduct> {
   }
 
   Widget showProductItem() {
-    // print('Point 1');
-    // print(
-    //     'showProductItem >> ${filterProductAllModels[0].title} (${filterProductAllModels[0].itemincartSunit})');
+    int perpage = 10;
+    bool loadingIcon = false;
 
-    scrollController.addListener(() {
-      if (scrollController.position.pixels ==
-          scrollController.position.maxScrollExtent) {
-        // print('Point 2');
-        return Center(
-            child: CircularProgressIndicator(
-          strokeWidth: 10,
-        ));
-      }
-    });
-    // print('Point 3');
-
+    // int i = 0;
     return Expanded(
       child: ListView.builder(
         controller: scrollController,
         itemCount: productAllModels.length,
         itemBuilder: (BuildContext buildContext, int index) {
+          // i = i + 1;
+          print('perpage >> ${perpage} || index >> $index');
+
+          if ((index + 1) % perpage == 0) {
+            loadingIcon = true;
+          } else {
+            loadingIcon = false;
+          }
+
+          if (loadingIcon == true) {
+            return CupertinoActivityIndicator();
+          }
+
+          // if ((index + 1) % perpage == 0) {
+          //   return CupertinoActivityIndicator();
+          //   // return myCircularProgress();
+          // }
           return GestureDetector(
-            child: Card(
-              child: Container(
-                decoration: myBoxDecoration(),
-                padding: EdgeInsets.only(top: 0.5),
-                child: Row(
-                  children: <Widget>[
-                    showImage(index),
-                    showText(index),
-                  ],
+            child: Container(
+              child: Card(
+                child: Container(
+                  decoration: myBoxDecoration(),
+                  padding: EdgeInsets.only(top: 0.5),
+                  child: Row(
+                    children: <Widget>[
+                      showImage(index),
+                      showText(index),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -494,7 +535,8 @@ class _ListProductState extends State<ListProduct> {
     // return filterProductAllModels.length == 0
     // ? showProgressIndicate(searchKey)
     // : showProductItem();
-    print('Filter >> ${filterProductAllModels.length}');
+    // print(
+    // 'Filter >> ${filterProductAllModels.length} || Endpoint >> ${page * 10}');
     if (filterProductAllModels.length == 0) {
       if (myIndex != 4) {
         return showProgressIndicate(searchKey);
@@ -502,16 +544,14 @@ class _ListProductState extends State<ListProduct> {
         return Center(child: Text(''));
       }
     } else {
+      // set loading more data here
       return showProductItem();
 
-      // scrollController.addListener(() {
-      //   if (scrollController.position.pixels ==
-      //       scrollController.position.maxScrollExtent) {
-      //         return CircularProgressIndicator();
-      //   }else{
-      //     return showProductItem();
-      //   }
-      // });
+      // if (filterProductAllModels.length < (page * 20)) {
+      //   return loading();
+      // } else {
+      //   return showProductItem();
+      // }
     }
   }
 
@@ -808,6 +848,9 @@ class _ListProductState extends State<ListProduct> {
           searchForm(),
           lastItemInCart(),
           showContent(),
+          // filterProductAllModels.length > (page * 20)
+          //     ? myCircularProgress()
+          //     : showContent(),
         ],
       ),
       bottomNavigationBar: showBubbleBottomBarNav(), //showBottomBarNav

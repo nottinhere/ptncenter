@@ -640,6 +640,10 @@ class _DetailCartState extends State<DetailCart> {
             ),
           ),
         ),
+        SizedBox(
+          width: 10.0,
+          height: (myUserModel.msg == '') ? 0 : 90.0,
+        )
       ],
     );
   }

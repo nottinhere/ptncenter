@@ -30,7 +30,12 @@ dependencies:
   bubble_bottom_bar: ^1.2.0
   flutter_webview_plugin: ^0.3.11
   barcode_scan: ^1.0.0
+  rflutter_alert: ^1.1.0
+  toast: ^0.1.5
+  loading: ^1.0.2
+  loadmore: ^1.0.4
 
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter

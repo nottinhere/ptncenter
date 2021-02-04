@@ -783,9 +783,9 @@ class _DetailState extends State<Detail> {
     );
   }
 
-  Widget addButton() {
+  Widget addButtonfix() {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.end,
+      // mainAxisAlignment: MainAxisAlignment.end,
       children: <Widget>[
         Row(
           children: <Widget>[
@@ -830,6 +830,57 @@ class _DetailState extends State<Detail> {
     );
   }
 
+  Widget addButton() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: <Widget>[
+        Row(
+          children: <Widget>[
+            Expanded(
+              child: RaisedButton(
+                color: MyStyle().mainColor,
+                child: Text(
+                  'Add to Cart',
+                  style: TextStyle(
+                      fontSize: 18.0,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold),
+                ),
+                onPressed: () {
+                  String productID = id;
+                  String memberID = myUserModel.id.toString();
+
+                  if (qtyS != 0 && qtyS != '') {
+                    String unitSize = 's';
+                    print(
+                        'productID = $productID, memberID=$memberID, unitSize=s, QTY=$qtyS');
+                    addCart(productID, unitSize, qtyS, memberID);
+                  }
+                  if (qtyM != 0 && qtyM != '') {
+                    String unitSize = 'm';
+                    print(
+                        'productID = $productID, memberID=$memberID, unitSize=m, QTY=$qtyM');
+                    addCart(productID, unitSize, qtyM, memberID);
+                  }
+                  if (qtyL != 0 && qtyL != '') {
+                    String unitSize = 'l';
+                    print(
+                        'productID = $productID, memberID=$memberID, unitSize=l, QTY=$qtyL');
+                    addCart(productID, unitSize, qtyL, memberID);
+                  }
+                },
+              ),
+            ),
+            SizedBox(
+              width: 10.0,
+              height: (myUserModel.msg == '') ? 0 : 105.0,
+            )
+          ],
+        ),
+      ],
+    );
+  }
+
   Future<void> addCart(
       String productID, String unitSize, String qTY, String memberID) async {
     String url =
@@ -867,9 +918,9 @@ class _DetailState extends State<Detail> {
         // showExpire(),
         showStockExpire(),
         showPrice(),
+        // addButtonfix(),
         MyStyle().mySizebox(),
         showImage(),
-        // addButton(),
 
         MyStyle().mySizebox(),
         headTitle('สินค้าที่เกี่ยวข้อง', Icons.thumb_up),

@@ -16,6 +16,7 @@ import 'package:ptncenter/utility/my_style.dart';
 import 'package:ptncenter/utility/normal_dialog.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:toast/toast.dart';
 
 class Home extends StatefulWidget {
   final UserModel userModel;
@@ -46,6 +47,8 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
+    // WidgetsBinding.instance
+    //     .addPostFrameCallback((_) => _onBasicAlertPressed(context));
 
     readPromotion();
     myUserModel = widget.userModel;
@@ -53,7 +56,27 @@ class _HomeState extends State<Home> {
     setState(() {
       readCart();
     });
+    directMessage();
   }
+
+//   // The easiest way for creating RFlutter Alert
+//   _onBasicAlertPressed(context) {
+//     Alert(
+//       context: context,
+//       title: "RFLUTTER ALERT",
+//       desc: "Flutter is more awesome with RFlutter Alert.",
+//     ).show();
+//   }
+
+// //Custom animation alert
+//   _onCustomAnimationAlertPressed(context) {
+//     Alert(
+//       context: context,
+//       title: "RFLUTTER ALERT",
+//       desc: "Flutter is more awesome with RFlutter Alert.",
+//       alertAnimation: FadeAlertAnimation,
+//     ).show();
+//   }
 
   Future<void> readPromotion() async {
     String url = 'http://www.ptnpharma.com/apishop/json_promotion.php';
@@ -694,7 +717,6 @@ class _HomeState extends State<Home> {
     http.Response response = await http.get(url);
     var result = json.decode(response.body);
     var cartList = result['cart'];
-
     for (var map in cartList) {
       setState(() {
         amontCart++;
@@ -739,6 +761,16 @@ class _HomeState extends State<Home> {
     } catch (e) {}
   }
 
+  Widget FadeAlertAnimation(BuildContext context, Animation<double> animation,
+      Animation<double> secondaryAnimation, Widget child) {
+    return Align(
+      child: FadeTransition(
+        opacity: animation,
+        child: child,
+      ),
+    );
+  }
+
   Widget homeMenu() {
     return Container(
       width: MediaQuery.of(context).size.width * 0.9,
@@ -749,6 +781,17 @@ class _HomeState extends State<Home> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
+          ////////////////////////////
+          // RaisedButton(
+          //   child: Text('Basic Alert'),
+          //   onPressed: () => _onBasicAlertPressed(context),
+          // ),
+          // RaisedButton(
+          //   child: Text('Custom Animation Alert'),
+          //   onPressed: () => _onCustomAnimationAlertPressed(context),
+          // ),
+          ////////////////////////////
+
           row1Menu(),
           // mySizebox(),
           row2Menu(),
@@ -761,19 +804,44 @@ class _HomeState extends State<Home> {
     );
   }
 
+  Future<void> directMessage() {
+    String msg = myUserModel.msg;
+    if (msg != '') {
+      // ToastView.createView(msg, context, Toast.LENGTH_LONG, Toast.BOTTOM,
+      //     Colors.red, Colors.white, 200, null);
+      Toast.show(msg, context,
+          duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     String login = myUserModel.name;
     String loginStatus = myUserModel.status;
+    String msg = myUserModel.msg;
 
     if (loginStatus == '1') {
       return SingleChildScrollView(
         child: Column(
           children: <Widget>[
-            headTitle('สินค้าแนะนำ $login ($loginStatus)', Icons.thumb_up),
+            headTitle('สินค้าแนะนำ $login ', Icons.thumb_up), //($loginStatus)
             suggest(),
             headTitle('เมนู.', Icons.home),
             homeMenu(),
+            // Padding(
+            //   padding: const EdgeInsets.all(10.0),
+            //   child: RaisedButton(
+            //       child: Text('แสดงข้อความ'),
+            //       onPressed: () => ToastView.createView(
+            //           msg,
+            //           context,
+            //           Toast.LENGTH_LONG,
+            //           Toast.BOTTOM,
+            //           Colors.red,
+            //           Colors.white,
+            //           200,
+            //           null)),
+            // )
             // productBox(),
             // orderhistoryBox(),
             // headTitle('สินค้าโปรโมชัน', Icons.bookmark),
@@ -784,6 +852,10 @@ class _HomeState extends State<Home> {
     } else {
       return Text('กรุณาติดต่อ PTN Pharma');
     }
+  }
+
+  void showToast(String msg, {int duration, int gravity}) {
+    Toast.show(msg, context, duration: duration, gravity: gravity);
   }
 
   Widget headTitle(String string, IconData iconData) {

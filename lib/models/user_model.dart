@@ -28,6 +28,7 @@ class UserModel {
   String cartJson;
   String lineID;
   String facebook;
+  String msg;
 
   UserModel(
       {this.id,
@@ -58,7 +59,8 @@ class UserModel {
       this.financialAmount,
       this.cartJson,
       this.lineID,
-      this.facebook});
+      this.facebook,
+      this.msg});
 
   UserModel.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -90,6 +92,7 @@ class UserModel {
     cartJson = json['cart_json'];
     lineID = json['lineID'];
     facebook = json['facebook'];
+    msg = json['msg'];
   }
 
   Map<String, dynamic> toJson() {
@@ -123,6 +126,7 @@ class UserModel {
     data['cart_json'] = this.cartJson;
     data['lineID'] = this.lineID;
     data['facebook'] = this.facebook;
+    data['msg'] = this.msg;
     return data;
   }
 }

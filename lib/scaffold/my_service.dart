@@ -19,6 +19,7 @@ import 'package:ptncenter/scaffold/list_product.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
 import 'detail_cart.dart';
+import 'package:toast/toast.dart';
 
 class MyService extends StatefulWidget {
   final UserModel userModel;
@@ -420,6 +421,32 @@ class _MyServiceState extends State<MyService> {
     );
   }
 
+  void showToast(String msg, {int duration, int gravity}) {
+    Toast.show(msg, context, duration: duration, gravity: gravity);
+  }
+
+  Widget showMsg() {
+    var iconMsg = 'images/bubble-white.png';
+    if (myUserModel.msg == '') {
+      iconMsg = 'images/bubble-white.png';
+    } else {
+      iconMsg = 'images/bubble-red.png';
+    }
+    return GestureDetector(
+      onTap: () => showToast(myUserModel.msg, gravity: Toast.TOP, duration: 5),
+      child: Container(
+        margin: EdgeInsets.only(top: 5.0, right: 5.0),
+        width: 28.0,
+        height: 28.0,
+        child: Stack(
+          children: <Widget>[
+            Image.asset(iconMsg),
+          ],
+        ),
+      ),
+    );
+  }
+
   void routeToDetailCart() {
     MaterialPageRoute materialPageRoute =
         MaterialPageRoute(builder: (BuildContext buildContext) {
@@ -562,6 +589,7 @@ class _MyServiceState extends State<MyService> {
     return Scaffold(
       appBar: AppBar(
         actions: <Widget>[
+          // showMsg(),
           showCart(),
         ],
         backgroundColor: MyStyle().bgColor,
