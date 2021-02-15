@@ -79,6 +79,7 @@ class _ListProductState extends State<ListProduct> {
   var _controller = TextEditingController();
 
   int substart = 0;
+  bool visible = true;
 
   // Method
   @override
@@ -106,9 +107,9 @@ class _ListProductState extends State<ListProduct> {
     }
 
     createController(); // เมื่อ scroll to bottom
-    readData(); // read  ข้อมูลมาแสดง
 
     setState(() {
+      readData(); // read  ข้อมูลมาแสดง
       readCart();
     });
   }
@@ -120,22 +121,20 @@ class _ListProductState extends State<ListProduct> {
             scrollController.position.maxScrollExtent) {
           page++;
           readData();
-
           print('in the end');
-
-          // setState(() {
-          //   amountListView = amountListView + 2;
-          //   if (amountListView > filterProductAllModels.length) {
-          //     amountListView = filterProductAllModels.length;
-          //   }
-          // });
         }
+      } else {
+        setState(() {
+          visible = false;
+        });
       }
     });
   }
 
 /************************************** */
   Future<void> readCart() async {
+    print('Here is readcart function');
+
     amontCart = 0;
     lastItemName = '';
     String memberId = myUserModel.id.toString();
@@ -198,6 +197,10 @@ class _ListProductState extends State<ListProduct> {
   Future<void> readData() async {
     // List<ProductAllModel> productAllModels_buffer = List(); // []; //
     // String url = MyStyle().readAllProduct;
+    print('Here is readdata function');
+    setState(() {
+      visible = true;
+    });
 
     String memberId = myUserModel.id.toString();
     String url =
@@ -222,7 +225,7 @@ class _ListProductState extends State<ListProduct> {
     var result = json.decode(response.body);
     var itemProducts = result['itemsProduct'];
     // print('itemProducts >> ${itemProducts}');
-    // int i = 0;
+    int i = 0;
     // print('Start >> ${filterProductAllModels.length}');
     // int s = (filterProductAllModels.length);
     // if (filterProductAllModels.length == 0)
@@ -234,69 +237,53 @@ class _ListProductState extends State<ListProduct> {
 
     for (var map in itemProducts) {
       ProductAllModel productAllModel = ProductAllModel.fromJson(map);
+
       setState(() {
         productAllModels.add(productAllModel);
         filterProductAllModels = productAllModels;
-
-        print(
-            ' >> ${len} => ${productAllModel.id}  || ${productAllModel.title} (${productAllModel.itemincartSunit}) ($substart)');
-
-        // print(
-        //     ' >> ${s} >> $i => ${productAllModel.id} || ${filterProductAllModels[s + i].id} || ${productAllModel.title} (${productAllModel.itemincartSunit}) ($substart)');
-
-        // if (productAllModel.itemincartSunit != '0' ||
-        //     productAllModel.itemincartMunit != '0' ||
-        //     productAllModel.itemincartLunit != '0') {
-        //   filterProductAllModels[(s + i) - substart].itemincartSunit =
-        //       productAllModel.itemincartSunit;
-        //   filterProductAllModels[(s + i) - substart].itemincartMunit =
-        //       productAllModel.itemincartMunit;
-        //   filterProductAllModels[(s + i) - substart].itemincartLunit =
-        //       productAllModel.itemincartLunit;
-        // } else {
-        //   filterProductAllModels[i].itemincartSunit =
-        //       productAllModels[i].itemincartSunit;
-        //   filterProductAllModels[i].itemincartMunit =
-        //       productAllModels[i].itemincartMunit;
-        //   filterProductAllModels[i].itemincartLunit =
-        //       productAllModels[i].itemincartLunit;
-        // }
-
-        // if (productAllModel.itemincartSunit != '0') {
-        //   filterProductAllModels[i].itemincartSunit =
-        //       productAllModel.itemincartSunit;
-        // }
-        // if (productAllModel.itemincartMunit != '0') {
-        //   filterProductAllModels[i].itemincartMunit =
-        //       productAllModel.itemincartMunit;
-        // }
-        // if (productAllModel.itemincartLunit != '0') {
-        //   filterProductAllModels[i].itemincartLunit =
-        //       productAllModel.itemincartLunit;
-        // }
       });
-      // i = i + 1;
+      print(
+          ' >> ${len} =>($i)  ${productAllModel.id}  || ${productAllModels[i].title} (${filterProductAllModels[i].itemincartSunit}) <<  (${productAllModel.itemincartSunit})');
+
+      i = i + 1;
     }
-    // setState(() {
-    //   productAllModels;
-    //   filterProductAllModels;
-    // });
-
-    // print(
-    //     'read AT filter >> ${filterProductAllModels[0].title} (${filterProductAllModels[0].itemincartSunit})');
+    setState(() {
+      visible = false;
+    });
   }
 
-  Widget loading() {
-    print('Now is loading');
-    return Center(
-      child: Loading(indicator: BallPulseIndicator(), size: 100.0),
-    );
-  }
+  Future<void> updateDatalist(index) async {
+    // List<ProductAllModel> productAllModels_buffer = List(); // []; //
+    // String url = MyStyle().readAllProduct;
+    print('Here is updateDatalist function');
 
-  Widget myCircularProgress() {
-    return Center(
-      child: CircularProgressIndicator(),
-    );
+    String memberId = myUserModel.id.toString();
+    int productID = filterProductAllModels[index].id;
+    String url =
+        'http://ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId';
+
+    print("URL update item = $url");
+    http.Response response = await http.get(url);
+    var result = json.decode(response.body);
+    var cartList = result['cart'];
+    for (var mapCart in cartList) {
+      if (mapCart['id'] == productID) {
+        setState(() {
+          if (mapCart['price_list'].containsKey('s')) {
+            filterProductAllModels[index].itemincartSunit =
+                mapCart['price_list']['s']['quantity'];
+          }
+          if (mapCart['price_list'].containsKey('m')) {
+            filterProductAllModels[index].itemincartMunit =
+                mapCart['price_list']['m']['quantity'];
+          }
+          if (mapCart['price_list'].containsKey('l')) {
+            filterProductAllModels[index].itemincartLunit =
+                mapCart['price_list']['l']['quantity'];
+          }
+        });
+      }
+    }
   }
 
   Widget showName(int index) {
@@ -341,7 +328,7 @@ class _ListProductState extends State<ListProduct> {
   Widget showIncart(int index) {
     return Row(children: <Widget>[
       Container(
-        width: MediaQuery.of(context).size.width * 0.15,
+        width: MediaQuery.of(context).size.width * 0.13,
         child: Text(
           (filterProductAllModels[index].itemincartSunit != '0' ||
                   filterProductAllModels[index].itemincartMunit != '0' ||
@@ -355,10 +342,10 @@ class _ListProductState extends State<ListProduct> {
         width: MediaQuery.of(context).size.width * 0.25,
         child: Text(
           ((filterProductAllModels[index].itemincartSunit != '0')
-                  ? '${filterProductAllModels[index].itemincartSunit} ${filterProductAllModels[index].itemSunit},'
+                  ? '${filterProductAllModels[index].itemincartSunit} ${filterProductAllModels[index].itemSunit}  '
                   : '') +
               ((filterProductAllModels[index].itemincartMunit != '0')
-                  ? '${filterProductAllModels[index].itemincartMunit} ${filterProductAllModels[index].itemMunit},'
+                  ? '${filterProductAllModels[index].itemincartMunit} ${filterProductAllModels[index].itemMunit}  '
                   : '') +
               ((filterProductAllModels[index].itemincartLunit != '0')
                   ? ',${filterProductAllModels[index].itemincartLunit} ${filterProductAllModels[index].itemLunit}'
@@ -457,6 +444,26 @@ class _ListProductState extends State<ListProduct> {
     );
   }
 
+  Widget loading() {
+    return Visibility(
+      maintainSize: true,
+      maintainAnimation: true,
+      maintainState: true,
+      visible: visible,
+      child: Loading(indicator: BallPulseIndicator(), size: 10.0),
+    );
+  }
+
+  Widget myCircularProgress() {
+    return Visibility(
+      maintainSize: true,
+      maintainAnimation: true,
+      maintainState: true,
+      visible: visible,
+      child: Center(child: CupertinoActivityIndicator()),
+    );
+  }
+
   Widget showProductItem() {
     int perpage = 10;
     bool loadingIcon = false;
@@ -467,8 +474,7 @@ class _ListProductState extends State<ListProduct> {
         controller: scrollController,
         itemCount: productAllModels.length,
         itemBuilder: (BuildContext buildContext, int index) {
-          // i = i + 1;
-          print('perpage >> ${perpage} || index >> $index');
+          // print('perpage >> ${perpage} || index >> $index');
 
           if ((index + 1) % perpage == 0) {
             loadingIcon = true;
@@ -477,13 +483,10 @@ class _ListProductState extends State<ListProduct> {
           }
 
           if (loadingIcon == true) {
-            return CupertinoActivityIndicator();
+            // return CupertinoActivityIndicator();
+            return myCircularProgress();
           }
 
-          // if ((index + 1) % perpage == 0) {
-          //   return CupertinoActivityIndicator();
-          //   // return myCircularProgress();
-          // }
           return GestureDetector(
             child: Container(
               child: Card(
@@ -500,6 +503,7 @@ class _ListProductState extends State<ListProduct> {
               ),
             ),
             onTap: () {
+              print('index select item => ${filterProductAllModels[index]}');
               MaterialPageRoute materialPageRoute =
                   MaterialPageRoute(builder: (BuildContext buildContext) {
                 return Detail(
@@ -512,7 +516,7 @@ class _ListProductState extends State<ListProduct> {
                   .push(materialPageRoute)
                   .then((value) => setState(() {
                         readCart();
-                        readData();
+                        updateDatalist(index);
                       }));
               // Navigator.of(context).push(materialPageRoute);
             },
@@ -523,20 +527,11 @@ class _ListProductState extends State<ListProduct> {
   }
 
   Widget showContent() {
-    // readCart();
-    // print('searchString (show content) ===>>> $searchString');
-    // print('TotalItemInCart (content)>>$amontCart');
-
     bool searchKey;
     if (searchString != '') {
       searchKey = true;
     }
 
-    // return filterProductAllModels.length == 0
-    // ? showProgressIndicate(searchKey)
-    // : showProductItem();
-    // print(
-    // 'Filter >> ${filterProductAllModels.length} || Endpoint >> ${page * 10}');
     if (filterProductAllModels.length == 0) {
       if (myIndex != 4) {
         return showProgressIndicate(searchKey);
@@ -544,14 +539,7 @@ class _ListProductState extends State<ListProduct> {
         return Center(child: Text(''));
       }
     } else {
-      // set loading more data here
       return showProductItem();
-
-      // if (filterProductAllModels.length < (page * 20)) {
-      //   return loading();
-      // } else {
-      //   return showProductItem();
-      // }
     }
   }
 
@@ -839,18 +827,12 @@ class _ListProductState extends State<ListProduct> {
           showCart(),
         ],
       ),
-      // body: filterProductAllModels.length == 0
-      //     ? showProgressIndicate()
-      //     : myLayout(),
 
       body: Column(
         children: <Widget>[
           searchForm(),
           lastItemInCart(),
           showContent(),
-          // filterProductAllModels.length > (page * 20)
-          //     ? myCircularProgress()
-          //     : showContent(),
         ],
       ),
       bottomNavigationBar: showBubbleBottomBarNav(), //showBottomBarNav

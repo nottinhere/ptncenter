@@ -888,6 +888,7 @@ class _DetailState extends State<Detail> {
     print('urlAddcart = $url');
     await http.get(url).then((response) {});
     print('upload ok');
+
     Navigator.pop(context, true);
   }
 
