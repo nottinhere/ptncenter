@@ -348,7 +348,7 @@ class _ListProductState extends State<ListProduct> {
                   ? '${filterProductAllModels[index].itemincartMunit} ${filterProductAllModels[index].itemMunit}  '
                   : '') +
               ((filterProductAllModels[index].itemincartLunit != '0')
-                  ? ',${filterProductAllModels[index].itemincartLunit} ${filterProductAllModels[index].itemLunit}'
+                  ? '${filterProductAllModels[index].itemincartLunit} ${filterProductAllModels[index].itemLunit}'
                   : ''),
           style: MyStyle().h4StyleBlue,
         ),

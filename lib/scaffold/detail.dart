@@ -152,48 +152,49 @@ class _DetailState extends State<Detail> {
         pauseAutoPlayOnTouch: Duration(seconds: 5),
         autoPlay: true,
         autoPlayAnimationDuration: Duration(seconds: 5),
-        itemCount: (relateModels.length / 2).round(),
+        itemCount: (relateModels.length / 2).compareTo(0),
         itemBuilder: (context, index) {
           final int first = index * 2;
           final int second = first + 1;
 
           return Row(
             children: [first, second].map((idx) {
-              return Expanded(
-                child: GestureDetector(
-                  child: Card(
-                    // flex: 1,
-                    child: Column(
-                      children: <Widget>[
-                        Container(
-                          // width: MediaQuery.of(context).size.width * 0.50,
-                          height: 100.00,
-                          child: relateLists[idx],
-                          padding: EdgeInsets.all(8.0),
+                  return Expanded(
+                    child: GestureDetector(
+                      child: Card(
+                        // flex: 1,
+                        child: Column(
+                          children: <Widget>[
+                            Container(
+                              // width: MediaQuery.of(context).size.width * 0.50,
+                              height: 100.00,
+                              child: relateLists[idx],
+                              padding: EdgeInsets.all(8.0),
+                            ),
+                            Text(
+                              productsName[idx].toString(),
+                              style: TextStyle(
+                                  fontSize: 12,
+                                  // fontWeight: FontWeight.bold,
+                                  color: Colors.black),
+                            ),
+                          ],
                         ),
-                        Text(
-                          productsName[idx].toString(),
-                          style: TextStyle(
-                              fontSize: 12,
-                              // fontWeight: FontWeight.bold,
-                              color: Colors.black),
-                        ),
-                      ],
-                    ),
-                  ),
-                  onTap: () {
-                    print('You Click index >> $idx');
-                    MaterialPageRoute route = MaterialPageRoute(
-                      builder: (BuildContext context) => Detail(
-                        productAllModel: relateModels[idx],
-                        userModel: myUserModel,
                       ),
-                    );
-                    Navigator.of(context).push(route).then((value) {});
-                  },
-                ),
-              );
-            }).toList(),
+                      onTap: () {
+                        print('You Click index >> $idx');
+                        MaterialPageRoute route = MaterialPageRoute(
+                          builder: (BuildContext context) => Detail(
+                            productAllModel: relateModels[idx],
+                            userModel: myUserModel,
+                          ),
+                        );
+                        Navigator.of(context).push(route).then((value) {});
+                      },
+                    ),
+                  );
+                }).toList() ??
+                [],
           );
         },
       ),
@@ -920,7 +921,7 @@ class _DetailState extends State<Detail> {
         showStockExpire(),
         showPrice(),
         // addButtonfix(),
-        MyStyle().mySizebox(),
+        // MyStyle().mySizebox(),
         showImage(),
 
         MyStyle().mySizebox(),

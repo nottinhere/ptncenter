@@ -826,7 +826,7 @@ class _HomeState extends State<Home> {
           children: <Widget>[
             headTitle('สินค้าแนะนำ $login ', Icons.thumb_up), //($loginStatus)
             suggest(),
-            headTitle('เมนู.', Icons.home),
+            headTitle('เมนู', Icons.home),
             homeMenu(),
             // Padding(
             //   padding: const EdgeInsets.all(10.0),

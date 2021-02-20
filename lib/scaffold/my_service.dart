@@ -14,7 +14,7 @@ import 'package:ptncenter/utility/normal_dialog.dart';
 import 'package:ptncenter/widget/contact.dart';
 import 'package:ptncenter/widget/home.dart';
 import 'package:ptncenter/widget/homescreen.dart';
-
+import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 import 'package:ptncenter/scaffold/list_product.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
@@ -33,6 +33,8 @@ class _MyServiceState extends State<MyService> {
   //Explicit
   List<CategoryModel> categoryModels = List(); // set array
   UserModel myUserModel;
+  String mywebPage;
+
   Widget currentWidget;
   String qrString;
   int amontCart = 0;
@@ -119,17 +121,17 @@ class _MyServiceState extends State<MyService> {
         color: MyStyle().mainColor,
       ),
       title: Text(
-        'Home',
+        'หน้าหลัก',
         style: TextStyle(
           color: MyStyle().textColor,
         ),
       ),
-      subtitle: Text(
-        'Description Home',
-        style: TextStyle(
-          color: MyStyle().mainColor,
-        ),
-      ),
+      // subtitle: Text(
+      //   'หน้าหลัก',
+      //   style: TextStyle(
+      //     color: MyStyle().mainColor,
+      //   ),
+      // ),
       onTap: () {
         setState(() {
           readCart();
@@ -148,7 +150,7 @@ class _MyServiceState extends State<MyService> {
         Icons.category,
         size: 36.0,
       ),
-      title: Text('Category'),
+      title: Text('หมวดสินค้า'),
       children: <Widget>[
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -206,8 +208,8 @@ class _MyServiceState extends State<MyService> {
         Icons.exit_to_app,
         size: 36.0,
       ),
-      title: Text('Logout and exit'),
-      subtitle: Text('Logout and exit'),
+      title: Text('ออกจากระบบ'),
+      // subtitle: Text('Logout and exit'),
       onTap: () {
         logOut();
       },
@@ -226,13 +228,58 @@ class _MyServiceState extends State<MyService> {
         Icons.home,
         size: 36.0,
       ),
-      title: Text('Contact'),
-      subtitle: Text('Contact ptncenter'),
+      title: Text('ติดต่อเรา'),
+      // subtitle: Text('ข้อมูลติดต่อพัฒนาเภสัช'),
       onTap: () {
         setState(() {
           currentWidget = Contact();
         });
         Navigator.of(context).pop();
+      },
+    );
+  }
+
+  Widget menuPay() {
+    String webPage = 'pay';
+
+    return ListTile(
+      leading: Icon(
+        Icons.payment,
+        size: 36.0,
+      ),
+      title: Text('แจ้งชำระเงิน'),
+      // subtitle: Text('Read QR code or barcode'),
+      onTap: () {
+        print('You click $webPage');
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => WebView(
+                      userModel: myUserModel,
+                      webPage: webPage,
+                    )));
+      },
+    );
+  }
+
+  Widget menuComplain() {
+    String webPage = 'complain';
+    return ListTile(
+      leading: Icon(
+        Icons.comment,
+        size: 36.0,
+      ),
+      title: Text('แจ้งร้องเรียน'),
+      // subtitle: Text('Read QR code or barcode'),
+      onTap: () {
+        print('You click $webPage');
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => WebView(
+                      userModel: myUserModel,
+                      webPage: webPage,
+                    )));
       },
     );
   }
@@ -243,8 +290,8 @@ class _MyServiceState extends State<MyService> {
         Icons.photo_camera,
         size: 36.0,
       ),
-      title: Text('Read QR code'),
-      subtitle: Text('Read QR code or barcode'),
+      title: Text('Scan barcode'),
+      // subtitle: Text('Read QR code or barcode'),
       onTap: () {
         readQRcode();
         Navigator.of(context).pop();
@@ -315,7 +362,7 @@ class _MyServiceState extends State<MyService> {
       login = '...';
     }
     return Text(
-      'Login by $login',
+      'ร้าน $login',
       style: TextStyle(
         fontSize: 20.0,
         color: MyStyle().mainColor,
@@ -357,6 +404,8 @@ class _MyServiceState extends State<MyService> {
           menuHome(),
           menuCategory(),
           menuContact(),
+          menuPay(),
+          menuComplain(),
           menuReadQRcode(),
           menuLogOut(),
         ],
@@ -599,6 +648,65 @@ class _MyServiceState extends State<MyService> {
       body: currentWidget,
       drawer: showDrawer(),
       bottomNavigationBar: showBubbleBottomBarNav(), //showBottomBarNav
+    );
+  }
+}
+
+class WebView extends StatefulWidget {
+  final UserModel userModel;
+  final String webPage;
+
+  WebView({Key key, this.userModel, this.webPage}) : super(key: key);
+
+  @override
+  _WebViewState createState() => _WebViewState();
+}
+
+class _WebViewState extends State<WebView> {
+  UserModel myUserModel;
+  String mywebPage;
+
+  @override
+  void initState() {
+    super.initState();
+    myUserModel = widget.userModel;
+    mywebPage = widget.webPage;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    String memberId = myUserModel.id;
+    String memberCode = myUserModel.customerCode;
+    String webPage = mywebPage.toString();
+
+    String url =
+        'https://ptnpharma.com/shop/pages/tables/orderhistory_mobile.php?memberId=$memberId&memberCode=$memberCode'; //
+    String txtTitle = 'หน้า.....';
+
+    if (webPage == 'pay') {
+      url =
+          'https://ptnpharma.com/shop/pages/forms/pay_mobile.php?memberId=$memberId&memberCode=$memberCode'; //
+      txtTitle = 'แจ้งชำระเงิน';
+    } else {
+      url =
+          'https://ptnpharma.com/shop/pages/forms/complain_mobile.php?memberId=$memberId&memberCode=$memberCode'; //
+      txtTitle = 'แจ้งร้องเรียน';
+    }
+
+    print('Click open ==>> $webPage');
+
+    print('URL ==>> $url');
+    return WebviewScaffold(
+      url: url, //"https://www.androidmonks.com",
+      appBar: AppBar(
+        backgroundColor: MyStyle().bgColor,
+        title: Text(txtTitle),
+      ),
+      withZoom: true,
+      withJavascript: true,
+      withLocalStorage: true,
+      appCacheEnabled: false,
+      ignoreSSLErrors: true,
     );
   }
 }
