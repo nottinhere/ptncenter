@@ -34,6 +34,11 @@ dependencies:
   toast: ^0.1.5
   loading: ^1.0.2
   loadmore: ^1.0.4
+  location: ^2.3.5
+  url_launcher: ^5.0.2
+  google_maps_flutter: ^0.5.30
+  font_awesome_flutter: ^8.2.0
+
 
   
 dev_dependencies:
@@ -56,6 +61,7 @@ flutter:
   assets:
     - images/logo.png
     - images/shopping_cart.png
+    - images/icon_googlemap.jpg
     - images/
 
 
