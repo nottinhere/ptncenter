@@ -146,6 +146,152 @@ class _DetailState extends State<Detail> {
     );
   }
 
+  Widget promotionTag() {
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.18,
+      // height: 80.0,
+      child: GestureDetector(
+        child: Card(
+          color: Colors.green.shade300,
+          child: Container(
+            padding: EdgeInsets.all(4.0),
+            alignment: AlignmentDirectional(0.0, 0.0),
+            child: Column(
+              children: <Widget>[
+                Text(
+                  'โปรโมชัน',
+                  style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white),
+                ),
+              ],
+            ),
+          ),
+        ),
+        onTap: () {
+          print('You click promotion');
+          routeToListProduct(2);
+        },
+      ),
+    );
+  }
+
+  Widget updatepriceTag() {
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.22,
+      // height: 80.0,
+      child: GestureDetector(
+        child: Card(
+          color: Colors.green.shade300,
+          child: Container(
+            padding: EdgeInsets.all(4.0),
+            alignment: AlignmentDirectional(0.0, 0.0),
+            child: Column(
+              children: <Widget>[
+                Text(
+                  'จะปรับราคา',
+                  style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white),
+                ),
+              ],
+            ),
+          ),
+        ),
+        onTap: () {
+          print('You click update price');
+          routeToListProduct(3);
+        },
+      ),
+    );
+  }
+
+  Widget newproductTag() {
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.18,
+      // height: 80.0,
+      child: GestureDetector(
+        child: Card(
+          color: Colors.green.shade300,
+          child: Container(
+            padding: EdgeInsets.all(4.0),
+            alignment: AlignmentDirectional(0.0, 0.0),
+            child: Column(
+              children: <Widget>[
+                Text(
+                  'สินค้าใหม่',
+                  style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white),
+                ),
+              ],
+            ),
+          ),
+        ),
+        onTap: () {
+          print('You click new item');
+          routeToListProduct(1);
+        },
+      ),
+    );
+  }
+
+  Widget notreceiveTag() {
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.25,
+      // height: 80.0,
+      child: GestureDetector(
+        child: Card(
+          color: Colors.green.shade300,
+          child: Container(
+            padding: EdgeInsets.all(4.0),
+            alignment: AlignmentDirectional(0.0, 0.0),
+            child: Column(
+              children: <Widget>[
+                Text(
+                  'สั่งแล้วไม่ได้รับ',
+                  style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white),
+                ),
+              ],
+            ),
+          ),
+        ),
+        onTap: () {
+          print('You click not receive');
+          routeToListProduct(4);
+        },
+      ),
+    );
+  }
+
+  Widget showTag() {
+    return Row(
+      // mainAxisAlignment: MainAxisAlignment.spaceAround,
+      // mainAxisSize: MainAxisSize.max,
+      // mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        SizedBox(
+          width: 5.0,
+          height: 8.0,
+        ),
+        productAllModel.promotion == 1 ? promotionTag() : Container(),
+        productAllModel.newproduct == 1 ? newproductTag() : Container(),
+        productAllModel.updateprice == 1 ? updatepriceTag() : Container(),
+        productAllModel.notreceive == 1 ? notreceiveTag() : Container(),
+        SizedBox(
+          width: 5.0,
+          height: 8.0,
+        )
+      ],
+    );
+  }
+
   Widget showCarouseSliderRelate() {
     return GestureDetector(
       child: CarouselSlider.builder(
@@ -256,7 +402,8 @@ class _DetailState extends State<Detail> {
 
   Widget showImage() {
     return Container(
-      height: MediaQuery.of(context).size.height * 0.5 - 50,
+      // height: MediaQuery.of(context).size.height * 0.5 - 50,
+      height: MediaQuery.of(context).size.height * 0.5 - 150,
       child: Image.network(
         productAllModel.photo,
         fit: BoxFit.contain,
@@ -914,7 +1061,8 @@ class _DetailState extends State<Detail> {
       padding: EdgeInsets.all(10.0),
       children: <Widget>[
         showTitle(),
-        MyStyle().mySizebox(),
+        // MyStyle().mySizebox(),
+        showTag(),
         // showStock(),
         // MyStyle().mySizebox(),
         // showExpire(),

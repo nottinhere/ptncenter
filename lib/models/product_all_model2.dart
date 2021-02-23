@@ -6,8 +6,15 @@ class ProductAllModel2 {
   String expire;
   String expireColor;
   String detail;
+  int recommend;
+  int promotion;
+  int updateprice;
+  int newproduct;
+  int notreceive;
   int stock;
   int id;
+
+
 
   ProductAllModel2(
       {this.title,
@@ -17,6 +24,11 @@ class ProductAllModel2 {
       this.expire,
       this.expireColor,
       this.detail,
+      this.recommend,
+      this.promotion,
+      this.updateprice,
+      this.newproduct,
+      this.notreceive,
       this.stock,
       this.id});
 
@@ -30,6 +42,11 @@ class ProductAllModel2 {
     expire = json['expire'];
     expireColor = json['expire_color'];
     detail = json['detail'];
+    recommend = json['recommend'];
+    promotion = json['promotion'];
+    updateprice = json['updateprice'];
+    newproduct = json['newproduct'];
+    notreceive = json['notreceive'];
     stock = json['stock'];
     id = json['id'];
   }
@@ -45,6 +62,11 @@ class ProductAllModel2 {
     data['expire'] = this.expire;
     data['expire_color'] = this.expireColor;
     data['detail'] = this.detail;
+    data['recommend'] = this.recommend;
+    data['promotion'] = this.promotion;
+    data['updateprice'] = this.updateprice;
+    data['newproduct'] = this.newproduct;
+    data['notreceive'] = this.notreceive;
     data['stock'] = this.stock;
     data['id'] = this.id;
     return data;
@@ -90,4 +112,3 @@ class S {
     return data;
   }
 }
-
