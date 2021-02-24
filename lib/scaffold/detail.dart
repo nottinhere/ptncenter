@@ -17,6 +17,7 @@ import 'package:ptncenter/models/promote_model.dart';
 import 'package:ptncenter/widget/home.dart';
 import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
 import 'my_service.dart';
+import 'package:flutter_spinbox/flutter_spinbox.dart';
 
 class Detail extends StatefulWidget {
   final ProductAllModel productAllModel;
@@ -33,19 +34,15 @@ class _DetailState extends State<Detail> {
   ProductAllModel currentProductAllModel;
   ProductAllModel2 productAllModel;
   List<UnitSizeModel> unitSizeModels = List();
-  List<int> amounts = [
-    0,
-    0,
-    0
-  ]; // amount[0] -> s,amount[1] -> m,amount[2] -> l;
+  List<int> amounts = [0, 0, 0];
   int amontCart = 0;
   UserModel myUserModel;
   String id; // productID
-  // int qtyS = 0, qtyM = 0, qtyL = 0;
-  String qtyS = '', qtyM = '', qtyL = '';
+  // String qtyS = '', qtyM = '', qtyL = '';
   int sizeSincart = 0, sizeMincart = 0, sizeLincart = 0;
-  var showSincart = '', showMincart = '', showLincart = '';
-  // int qtyS = 0, qtyM = 0, qtyL = 0;
+  int qtyS = 0, qtyM = 0, qtyL = 0;
+  int showSincart = 0, showMincart = 0, showLincart = 0;
+  // var showSincart = '', showMincart = '', showLincart = '';
 
   List<Widget> promoteLists = List();
   List<Widget> relateLists = List();
@@ -474,69 +471,93 @@ class _DetailState extends State<Detail> {
   Widget showValue(int index) {
     //  int value = amounts[index];
     //  return Text('$value');
-    var iniValue = '';
+    int iniValue = 0;
     bool readOnlyMode;
     var iconName;
     var iconColor;
     // print('$sizeSincart / $sizeMincart / $sizeLincart ');
     if (index == 0) {
-      iniValue = showSincart.toString();
+      iniValue = showSincart;
     } else if (index == 1) {
-      iniValue = showMincart.toString();
+      iniValue = showMincart;
     } else if (index == 2) {
-      iniValue = showLincart.toString();
+      iniValue = showLincart;
     }
+
+    iniValue = (iniValue).toInt();
 
     /////////////////////////////////////////////////////////
     if (unitSizeModels[index].price.toString() == '0') {
       readOnlyMode = true;
       iconName = Icons.cancel;
       iconColor = Color.fromARGB(0xff, 0xff, 0x99, 0x99);
+      return Container(
+        // decoration: MyStyle().boxLightGreen,
+        // height: 35.0,
+        width: MediaQuery.of(context).size.width * 0.50,
+        padding: EdgeInsets.only(left: 20.0, right: 10.0),
+        child: Column(
+          children: <Widget>[
+            TextFormField(
+              style: TextStyle(color: Colors.black),
+              // initialValue: '$iniValue',
+              // controller: TextEditingController()..text = '$iniValue',
+              readOnly: readOnlyMode,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                contentPadding: EdgeInsets.only(
+                  top: 6.0,
+                ),
+                prefixIcon: Icon(iconName, color: iconColor),
+                // border: InputBorder.none,
+                // hintText: 'ระบุจำนวน',
+                hintStyle: TextStyle(color: iconColor),
+              ),
+            ),
+          ],
+        ),
+      );
     } else {
       readOnlyMode = false;
       iconName = Icons.mode_edit;
       iconColor = Colors.grey;
+      return Container(
+        // decoration: MyStyle().boxLightGreen,
+        // height: 35.0,
+        width: MediaQuery.of(context).size.width * 0.50,
+        padding: EdgeInsets.only(left: 20.0, right: 10.0),
+        child: Column(
+          children: <Widget>[
+            Padding(
+              child: SpinBox(
+                value: (iniValue)
+                    .toDouble(), //(iniValue == 0) ? 0 : (iniValue).toInt(),
+                onChanged: (changevalue) {
+                  if (index == 0) {
+                    setState(() {
+                      qtyS = (changevalue == 0) ? 0 : (changevalue).toInt();
+                    });
+                  } else if (index == 1) {
+                    setState(() {
+                      qtyM = (changevalue == 0) ? 0 : (changevalue).toInt();
+                    });
+                  } else if (index == 2) {
+                    setState(() {
+                      qtyL = (changevalue == 0) ? 0 : (changevalue).toInt();
+                    });
+                  }
+                },
+                // decoration: InputDecoration(labelText: 'Decimals'),
+              ),
+              padding: const EdgeInsets.all(2),
+            ),
+          ],
+        ),
+      );
     }
 
     // var x = (iniValue!='0')?int.tryParse(iniValue):('').toString();
-    print('iniValue ($index)>> $iniValue');
-
-    return Container(
-      // decoration: MyStyle().boxLightGreen,
-      // height: 35.0,
-      width: MediaQuery.of(context).size.width * 0.35,
-      padding: EdgeInsets.only(left: 20.0, right: 10.0),
-      child: Column(
-        children: <Widget>[
-          // Text('($index) >> $iniValue'),
-          // Text('($index) >> $x'),
-          TextFormField(
-            style: TextStyle(color: Colors.black),
-            // initialValue: '$iniValue',
-            controller: TextEditingController()..text = '$iniValue',
-            // readOnly: (unitSizeModels[index].price == 0)?true:false,
-            readOnly: readOnlyMode,
-            keyboardType: TextInputType.number,
-            onChanged: (value) {
-              if (index == 0)
-                qtyS = value;
-              else if (index == 1)
-                qtyM = value;
-              else if (index == 2) qtyL = value;
-            },
-            decoration: InputDecoration(
-              contentPadding: EdgeInsets.only(
-                top: 6.0,
-              ),
-              prefixIcon: Icon(iconName, color: iconColor),
-              // border: InputBorder.none,
-              // hintText: 'ระบุจำนวน',
-              hintStyle: TextStyle(color: iconColor),
-            ),
-          ),
-        ],
-      ),
-    );
+    // print('iniValue ($index)>> $iniValue');
   }
 
   Widget showStockExpire() {
@@ -659,19 +680,19 @@ class _DetailState extends State<Detail> {
         if (map['price_list']['s'] != null) {
           var sizeSincart = int.parse(map['price_list']['s']['quantity']);
           setState(() {
-            showSincart = sizeSincart.toString();
+            showSincart = sizeSincart;
           });
         }
         if (map['price_list']['m'] != null) {
           int sizeMincart = int.parse(map['price_list']['m']['quantity']);
           setState(() {
-            showMincart = sizeMincart.toString();
+            showMincart = sizeMincart;
           });
         }
         if (map['price_list']['l'] != null) {
           int sizeLincart = int.parse(map['price_list']['l']['quantity']);
           setState(() {
-            showLincart = sizeLincart.toString();
+            showLincart = sizeLincart;
           });
         }
       }
@@ -951,19 +972,19 @@ class _DetailState extends State<Detail> {
                   String productID = id;
                   String memberID = myUserModel.id.toString();
 
-                  if (qtyS != 0 && qtyS != '') {
+                  if (qtyS != 0) {
                     String unitSize = 's';
                     print(
                         'productID = $productID, memberID=$memberID, unitSize=s, QTY=$qtyS');
                     addCart(productID, unitSize, qtyS, memberID);
                   }
-                  if (qtyM != 0 && qtyM != '') {
+                  if (qtyM != 0) {
                     String unitSize = 'm';
                     print(
                         'productID = $productID, memberID=$memberID, unitSize=m, QTY=$qtyM');
                     addCart(productID, unitSize, qtyM, memberID);
                   }
-                  if (qtyL != 0 && qtyL != '') {
+                  if (qtyL != 0) {
                     String unitSize = 'l';
                     print(
                         'productID = $productID, memberID=$memberID, unitSize=l, QTY=$qtyL');
@@ -998,19 +1019,19 @@ class _DetailState extends State<Detail> {
                   String productID = id;
                   String memberID = myUserModel.id.toString();
 
-                  if (qtyS != 0 && qtyS != '') {
+                  if (qtyS != 0) {
                     String unitSize = 's';
                     print(
                         'productID = $productID, memberID=$memberID, unitSize=s, QTY=$qtyS');
                     addCart(productID, unitSize, qtyS, memberID);
                   }
-                  if (qtyM != 0 && qtyM != '') {
+                  if (qtyM != 0) {
                     String unitSize = 'm';
                     print(
                         'productID = $productID, memberID=$memberID, unitSize=m, QTY=$qtyM');
                     addCart(productID, unitSize, qtyM, memberID);
                   }
-                  if (qtyL != 0 && qtyL != '') {
+                  if (qtyL != 0) {
                     String unitSize = 'l';
                     print(
                         'productID = $productID, memberID=$memberID, unitSize=l, QTY=$qtyL');
@@ -1030,7 +1051,7 @@ class _DetailState extends State<Detail> {
   }
 
   Future<void> addCart(
-      String productID, String unitSize, String qTY, String memberID) async {
+      String productID, String unitSize, int qTY, String memberID) async {
     String url =
         'http://www.ptnpharma.com/apishop/json_savemycart.php?productID=$productID&unitSize=$unitSize&QTY=$qTY&memberId=$memberID';
     print('urlAddcart = $url');
@@ -1057,6 +1078,7 @@ class _DetailState extends State<Detail> {
   }
 
   ListView showController() {
+    String intVL = '10';
     return ListView(
       padding: EdgeInsets.all(10.0),
       children: <Widget>[
@@ -1067,6 +1089,13 @@ class _DetailState extends State<Detail> {
         // MyStyle().mySizebox(),
         // showExpire(),
         showStockExpire(),
+        //  Padding(
+        //     child: SpinBox(
+        //       value: int.parse('intVL'),
+        //       decoration: InputDecoration(labelText: 'Basic'),
+        //     ),
+        //     padding: const EdgeInsets.all(16),
+        //   ),
         showPrice(),
         // addButtonfix(),
         // MyStyle().mySizebox(),

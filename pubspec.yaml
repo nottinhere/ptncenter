@@ -38,6 +38,7 @@ dependencies:
   url_launcher: ^5.0.2
   google_maps_flutter: ^0.5.30
   font_awesome_flutter: ^8.2.0
+  flutter_spinbox: ^0.2.0
 
 
   

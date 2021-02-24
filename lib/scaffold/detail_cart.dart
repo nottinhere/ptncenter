@@ -15,6 +15,7 @@ import 'package:ptncenter/widget/home.dart';
 import 'package:ptncenter/scaffold/list_product.dart';
 import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
 import 'my_service.dart';
+import 'package:flutter_spinbox/flutter_spinbox.dart';
 
 class DetailCart extends StatefulWidget {
   final UserModel userModel;
@@ -37,7 +38,7 @@ class _DetailCartState extends State<DetailCart> {
   List<Map<String, dynamic>> mMap = List();
   List<Map<String, dynamic>> lMap = List();
   int amontCart = 0;
-  String newQTY = '';
+  double newQTY = 0;
   int newQTYint = 0;
   double total = 0;
   String transport;
@@ -107,7 +108,8 @@ class _DetailCartState extends State<DetailCart> {
         // print('S is not null >> $priceSdisplay');
         PriceListModel priceListModel = PriceListModel.fromJson(sizeSmap);
         priceListSModels.add(priceListModel);
-        calculateTotal(priceListModel.price, priceListModel.quantity);
+        calculateTotal(
+            priceListModel.price, double.parse(priceListModel.quantity));
       }
 
       //  print('sizeSmap = $sizeSmap');
@@ -121,8 +123,8 @@ class _DetailCartState extends State<DetailCart> {
         mMap.add(sizeMmap);
         PriceListModel priceListModel = PriceListModel.fromJson(sizeMmap);
         priceListMModels.add(priceListModel);
-        calculateTotal(
-            priceListModel.price.toString(), priceListModel.quantity);
+        calculateTotal(priceListModel.price.toString(),
+            double.parse(priceListModel.quantity));
       }
       // print('sizeMmap = $sizeMmap');
 
@@ -135,8 +137,8 @@ class _DetailCartState extends State<DetailCart> {
         lMap.add(sizeLmap);
         PriceListModel priceListModel = PriceListModel.fromJson(sizeLmap);
         priceListLModels.add(priceListModel);
-        calculateTotal(
-            priceListModel.price.toString(), priceListModel.quantity);
+        calculateTotal(priceListModel.price.toString(),
+            double.parse(priceListModel.quantity));
       }
       // print('sizeLmap = $sizeLmap');
 
@@ -223,24 +225,28 @@ class _DetailCartState extends State<DetailCart> {
   }
 
   Widget alertContent(int index, String size) {
-    String quantity = '';
+    double quantity = 0;
+    String unitText = '';
 
     if (size == 's') {
-      quantity = priceListSModels[index].quantity;
-      newQTY = quantity;
+      quantity = double.parse(priceListSModels[index].quantity);
+      newQTY = (quantity).toDouble();
+      unitText = priceListSModels[index].lable;
     } else if (size == 'm') {
-      quantity = priceListMModels[index].quantity;
-      newQTY = quantity;
+      quantity = double.parse(priceListMModels[index].quantity);
+      newQTY = (quantity).toDouble();
+      unitText = priceListMModels[index].lable;
     } else if (size == 'l') {
-      quantity = priceListLModels[index].quantity;
-      newQTY = quantity;
+      quantity = double.parse(priceListLModels[index].quantity);
+      newQTY = (quantity).toDouble();
+      unitText = priceListLModels[index].lable;
     }
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         Text(productAllModels[index].title),
-        Text('Size = $size'),
+        Text('Size = $unitText'),
         Container(
           // width: 50.0,
           child: editQTY(quantity),
@@ -267,25 +273,36 @@ class _DetailCartState extends State<DetailCart> {
     return Text('$value');
   }
 
-  Widget editQTY(String quantity) {
-    /*
-      newQTYint = int.parse(quantity);
-      return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        decButton(),
-        showValue(newQTYint),
-        incButton(),
-      ],
-    );
-    */
-    return TextFormField(
-      keyboardType: TextInputType.number,
-      onChanged: (String string) {
-        newQTY = string.trim();
-      },
-      initialValue: quantity,
-    );
+  Widget editQTY(double quantity) {
+    // return TextFormField(
+    //   keyboardType: TextInputType.number,
+    //   onChanged: (String string) {
+    //     newQTY = string.trim();
+    //   },
+    //   initialValue: quantity,
+    // );
+
+    return SpinBox(
+        value: (quantity).toDouble(),
+        onChanged: (changevalue) {
+          newQTY = (changevalue == 0) ? 0 : (changevalue).toDouble();
+
+          // if (index == 0) {
+          //   setState(() {
+          //     qtyS = (changevalue == 0) ? 0 : (changevalue).toInt();
+          //   });
+          // } else if (index == 1) {
+          //   setState(() {
+          //     qtyM = (changevalue == 0) ? 0 : (changevalue).toInt();
+          //   });
+          // } else if (index == 2) {
+          //   setState(() {
+          //     qtyL = (changevalue == 0) ? 0 : (changevalue).toInt();
+          //   });
+          // }
+        }
+        // decoration: InputDecoration(labelText: 'Decimals'),
+        );
   }
 
   void myAlertDialog(int index, String size) {
@@ -432,10 +449,10 @@ class _DetailCartState extends State<DetailCart> {
           );
   }
 
-  void calculateTotal(String price, String quantity) {
+  void calculateTotal(String price, double quantity) {
     double priceDou = double.parse(price);
     print('price Dou ====>>>> $priceDou');
-    double quantityDou = double.parse(quantity);
+    double quantityDou = (quantity);
     print('quantityDou ====>> $quantityDou');
     total = total + (priceDou * quantityDou);
     print('total = $total');
