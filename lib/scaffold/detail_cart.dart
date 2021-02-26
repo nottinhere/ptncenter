@@ -170,9 +170,9 @@ class _DetailCartState extends State<DetailCart> {
         children: <Widget>[
           Image.asset('images/shopping_cart.png'),
           Text(
-            '$amontCart',
+            ' $amontCart ',
             style: TextStyle(
-              backgroundColor: Colors.blue.shade600,
+              backgroundColor: Colors.red.shade600,
               color: Colors.white,
               fontWeight: FontWeight.bold,
             ),

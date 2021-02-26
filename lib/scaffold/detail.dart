@@ -342,59 +342,6 @@ class _DetailState extends State<Detail> {
         },
       ),
     );
-    /*
-    return GestureDetector(
-      onTap: () {
-        print('You Click index is $relateIndex');
-
-        MaterialPageRoute route = MaterialPageRoute(
-          builder: (BuildContext context) => Detail(
-            productAllModel: relateModels[relateIndex],
-            userModel: myUserModel,
-          ),
-        );
-        Navigator.of(context).push(route).then((value) {});
-      },
-      child: CarouselSlider(
-        height: 350.0,
-        enlargeCenterPage: true,
-        aspectRatio: 16 / 9,
-        pauseAutoPlayOnTouch: Duration(seconds: 5),
-        autoPlay: true,
-        autoPlayAnimationDuration: Duration(seconds: 5),
-        // items: relateLists,
-        items: relateLists
-            .map((item) => Container(
-                  child: Center(
-                    child: Column(
-                      children: <Widget>[
-                        Container(
-                          // width: MediaQuery.of(context).size.width * 0.50,
-                          height: 135.00,
-                          child: item,
-                          padding: EdgeInsets.all(8.0),
-                        ),
-                        Text(
-                          productsName[indexSlide++].toString(),
-                          style: TextStyle(
-                              fontSize: 12,
-                              // fontWeight: FontWeight.bold,
-                              color: Colors.black),
-                        ),
-                      ],
-                    ),
-                  ),
-                  color: Colors.grey.shade200,
-                ))
-            .toList(),
-
-        onPageChanged: (int index) {
-          relateIndex = index;
-          // print('index = $index');
-        },
-      ),
-    );
-  */
   }
 
   Widget showImage() {
@@ -716,9 +663,9 @@ class _DetailState extends State<Detail> {
           children: <Widget>[
             Image.asset('images/shopping_cart.png'),
             Text(
-              '$amontCart',
+              ' $amontCart ',
               style: TextStyle(
-                backgroundColor: Colors.blue.shade600,
+                backgroundColor: Colors.red.shade600,
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
               ),
