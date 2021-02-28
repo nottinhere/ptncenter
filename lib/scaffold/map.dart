@@ -90,7 +90,7 @@ class HomePageState extends State<HomePage> {
 
   Widget _buildContainer() {
     return Align(
-      alignment: Alignment.topLeft,   // Alignment.bottomLeft,
+      alignment: Alignment.topLeft, // Alignment.bottomLeft,
       child: Container(
         margin: EdgeInsets.symmetric(vertical: 20.0),
         height: 150.0,
@@ -102,8 +102,8 @@ class HomePageState extends State<HomePage> {
               padding: const EdgeInsets.all(8.0),
               child: _boxes(
                   "https://lh5.googleusercontent.com/p/AF1QipNt9g0_-ukGBnxORRrhmIuJ36hTKefeEweb8xT4=w408-h306-k-no",
-                  15.708536144000876,
-                  100.11429372928784,
+                  15.70841026138502,
+                  100.11360550988977,
                   "บ.พี ที เอ็น ฟาร์มาเซ็นเตอร์ จำกัด",
                   "เวลาทำการ  9.30น -18.00 น."),
             ),
@@ -112,8 +112,8 @@ class HomePageState extends State<HomePage> {
               padding: const EdgeInsets.all(8.0),
               child: _boxes(
                   "https://lh5.googleusercontent.com/p/AF1QipNtZv55u0KQ5noMN07op4Z0hiHt9qDxu7tw3GAx=w408-h725-k-no",
-                  15.679764775218933,
-                  100.09056190904961,
+                  15.678749051684694,
+                  100.09041714424625,
                   "คลังสินค้า พัฒนาเภสัช",
                   'เวลาทำการ  9.30น -17.00 น.'),
             ),
@@ -123,7 +123,8 @@ class HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _boxes(String _image, double lat, double long, String restaurantName, String officeHours) {
+  Widget _boxes(String _image, double lat, double long, String restaurantName,
+      String officeHours) {
     return GestureDetector(
       onTap: () {
         _gotoLocation(lat, long);
@@ -152,7 +153,7 @@ class HomePageState extends State<HomePage> {
                   Container(
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: myDetailsContainer1(restaurantName,officeHours),
+                      child: myDetailsContainer1(restaurantName, officeHours),
                     ),
                   ),
                 ],
@@ -162,7 +163,7 @@ class HomePageState extends State<HomePage> {
     );
   }
 
-  Widget myDetailsContainer1(String restaurantName,String officeHours) {
+  Widget myDetailsContainer1(String restaurantName, String officeHours) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: <Widget>[
@@ -190,8 +191,6 @@ class HomePageState extends State<HomePage> {
     );
   }
 
-   
-
   Widget _buildGoogleMap(BuildContext context) {
     return Container(
       height: MediaQuery.of(context).size.height,
@@ -199,7 +198,7 @@ class HomePageState extends State<HomePage> {
       child: GoogleMap(
         mapType: MapType.normal,
         initialCameraPosition: CameraPosition(
-            target: LatLng(15.708656385451224, 100.11356121755354), zoom: 12),
+            target: LatLng(15.70841026138502, 100.11360550988977), zoom: 12),
         onMapCreated: (GoogleMapController controller) {
           _controller.complete(controller);
         },
@@ -237,7 +236,7 @@ class HomePageState extends State<HomePage> {
 
 Marker warehouseMarker = Marker(
   markerId: MarkerId('PhatthanaWarehouse'),
-  position: LatLng(15.708546472129683, 100.11416498326123),
+  position: LatLng(15.70841026138502, 100.11360550988977),
   infoWindow: InfoWindow(title: 'บริษัท พี ที เอ็น ฟาร์มาเซ็นเตอร์ จำกัด'),
   icon: BitmapDescriptor.defaultMarkerWithHue(
     BitmapDescriptor.hueBlue,
@@ -246,13 +245,12 @@ Marker warehouseMarker = Marker(
 
 Marker pharmacyMarker = Marker(
   markerId: MarkerId('PhatthanaPharmacy'),
-  position: LatLng(15.679764775218933, 100.09056190904961),
+  position: LatLng(15.678749051684694, 100.09041714424625),
   infoWindow: InfoWindow(title: 'คลังสินค้า พัฒนาเภสัช'),
   icon: BitmapDescriptor.defaultMarkerWithHue(
     BitmapDescriptor.hueBlue,
   ),
 );
-
 
 //New York Marker
 
