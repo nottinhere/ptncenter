@@ -60,8 +60,8 @@ class _DetailState extends State<Detail> {
     currentProductAllModel = widget.productAllModel;
     myUserModel = widget.userModel;
     setState(() {
-      getProductWhereID();
       readCart();
+      getProductWhereID();
     });
     readRelate();
   }
@@ -107,6 +107,12 @@ class _DetailState extends State<Detail> {
           print('sizeLmap = $sizeLmap');
         });
       } // for
+
+      setState(() {
+        showSincart = productAllModel.itemincartSunit;
+        showMincart = productAllModel.itemincartMunit;
+        showLincart = productAllModel.itemincartLunit;
+      });
     }
   }
 
@@ -609,45 +615,26 @@ class _DetailState extends State<Detail> {
   }
 
   Future<void> readCart() async {
+    print('Here is readcart function');
+
     amontCart = 0;
     String memberId = myUserModel.id.toString();
     String url =
         'http://ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId';
 
-    // print('url Detail =====>>>>>>>> $url');
+    print('url Detail =====>>>>>>>> $url');
+
     http.Response response = await http.get(url);
     var result = json.decode(response.body);
     var cartList = result['cart'];
-    var thisproductID = id;
-
     for (var map in cartList) {
-      var productID = map['id'].toString();
-
-      if (productID == thisproductID) {
-        if (map['price_list']['s'] != null) {
-          var sizeSincart = int.parse(map['price_list']['s']['quantity']);
-          setState(() {
-            showSincart = sizeSincart;
-          });
-        }
-        if (map['price_list']['m'] != null) {
-          int sizeMincart = int.parse(map['price_list']['m']['quantity']);
-          setState(() {
-            showMincart = sizeMincart;
-          });
-        }
-        if (map['price_list']['l'] != null) {
-          int sizeLincart = int.parse(map['price_list']['l']['quantity']);
-          setState(() {
-            showLincart = sizeLincart;
-          });
-        }
-      }
-
-      setState(() {
-        amontCart++;
-      });
+      // setState(() {
+      amontCart++;
+      // });
     }
+    setState(() {
+      amontCart;
+    });
   }
 
   Widget showCart() {

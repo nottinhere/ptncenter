@@ -465,7 +465,7 @@ class _ListProductState extends State<ListProduct> {
   }
 
   Widget showProductItem() {
-    int perpage = 10;
+    int perpage = 15;
     bool loadingIcon = false;
 
     // int i = 0;
