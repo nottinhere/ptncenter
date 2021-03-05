@@ -397,7 +397,8 @@ class _AuthenState extends State<Authen> {
     return Container(
       decoration: BoxDecoration(
         gradient: RadialGradient(
-          colors: [Colors.white, MyStyle().bgColor],
+          // colors: [Colors.white, MyStyle().bgColor],
+          // colors: [Colors.white, MyStyle().bgColor],
           radius: 1.5,
         ),
       ),
