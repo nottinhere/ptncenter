@@ -717,11 +717,13 @@ class _HomeState extends State<Home> {
     http.Response response = await http.get(url);
     var result = json.decode(response.body);
     var cartList = result['cart'];
-    for (var map in cartList) {
-      setState(() {
-        amontCart++;
-      });
-      print('amontCart (service page))>>>> $amontCart');
+    if (cartList != null) {
+      for (var map in cartList) {
+        setState(() {
+          amontCart++;
+        });
+        print('amontCart (service page))>>>> $amontCart');
+      }
     }
   }
 
@@ -810,7 +812,9 @@ class _HomeState extends State<Home> {
       // ToastView.createView(msg, context, Toast.LENGTH_LONG, Toast.BOTTOM,
       //     Colors.red, Colors.white, 200, null);
       Toast.show(msg, context,
-          duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
+          duration: Toast.LENGTH_LONG,
+          gravity: Toast.BOTTOM,
+          backgroundColor: Colors.red);
     }
   }
 

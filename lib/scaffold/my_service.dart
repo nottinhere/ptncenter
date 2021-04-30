@@ -51,9 +51,46 @@ class _MyServiceState extends State<MyService> {
       currentWidget = Home(
         userModel: myUserModel,
       );
+      print('Here is initState');
       readCart();
       readCategory(); // read  ข้อมูลมาแสดง
     });
+  }
+
+  Future<void> readCart() async {
+    amontCart = 0;
+    // List map;
+    String memberId = myUserModel.id.toString();
+    String url =
+        'http://ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId';
+
+    http.Response response = await http.get(url);
+    var result = json.decode(response.body);
+    var cartList = result['cart'];
+    print('cartList >> $cartList');
+
+    if (cartList != null) {
+      for (var map in cartList) {
+        setState(() {
+          amontCart++;
+        });
+      }
+    }
+    print('amontCart (service page))>>>> $amontCart');
+  }
+
+  Future<void> readCategory() async {
+    String url = 'http://ptnpharma.com/apishop/json_category.php';
+    // print('url readCategory >> $url');
+
+    http.Response response = await http.get(url);
+    var result = json.decode(response.body);
+    var cateList = result['data'];
+    for (var map in cateList) {
+      CategoryModel categoryModel = CategoryModel.fromJson(map);
+      categoryModels.add(categoryModel);
+    }
+    // print(' cateList ()>> $categoryModels');
   }
 
   void routeToListProduct(int index) {
@@ -102,6 +139,8 @@ class _MyServiceState extends State<MyService> {
         });
         Navigator.of(context).push(materialPageRoute).then((value) {
           setState(() {
+            print('Here is change page');
+
             readCart();
           });
         });
@@ -134,6 +173,7 @@ class _MyServiceState extends State<MyService> {
       // ),
       onTap: () {
         setState(() {
+          print('Here is menu home');
           readCart();
           currentWidget = Home(
             userModel: myUserModel,
@@ -169,8 +209,8 @@ class _MyServiceState extends State<MyService> {
                             ' - สินค้าทั้งหมด',
                             style: TextStyle(fontSize: 16, color: Colors.black),
                           ),
-                          onTap: () =>
-                              routeToListProductByCate(6, 0, 'สินค้าทั้งหมด')),
+                          onTap: () => routeToListProduct(
+                              0)), //  routeToListProductByCate(6, 0, 'สินค้าทั้งหมด')),
                     ),
                     ListView.builder(
                         scrollDirection: Axis.vertical,
@@ -397,6 +437,8 @@ class _MyServiceState extends State<MyService> {
   }
 
   Widget showDrawer() {
+    print(' cateList ()>> $categoryModels');
+
     return Drawer(
       child: ListView(
         children: <Widget>[
@@ -411,37 +453,6 @@ class _MyServiceState extends State<MyService> {
         ],
       ),
     );
-  }
-
-  Future<void> readCart() async {
-    amontCart = 0;
-    String memberId = myUserModel.id.toString();
-    String url =
-        'http://ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId';
-
-    http.Response response = await http.get(url);
-    var result = json.decode(response.body);
-    var cartList = result['cart'];
-
-    for (var map in cartList) {
-      setState(() {
-        amontCart++;
-      });
-      print('amontCart (service page))>>>> $amontCart');
-    }
-  }
-
-  Future<void> readCategory() async {
-    String url = 'http://ptnpharma.com/apishop/json_category.php';
-
-    http.Response response = await http.get(url);
-    var result = json.decode(response.body);
-    var cateList = result['data'];
-
-    for (var map in cateList) {
-      CategoryModel categoryModel = CategoryModel.fromJson(map);
-      categoryModels.add(categoryModel);
-    }
   }
 
   Widget showCart() {
@@ -505,6 +516,8 @@ class _MyServiceState extends State<MyService> {
     });
     Navigator.of(context).push(materialPageRoute).then((value) {
       setState(() {
+        print('Here is routeToDetailCart');
+
         readCart();
       });
     });
