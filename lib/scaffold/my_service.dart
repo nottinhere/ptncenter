@@ -52,8 +52,8 @@ class _MyServiceState extends State<MyService> {
         userModel: myUserModel,
       );
       print('Here is initState');
-      readCart();
       readCategory(); // read  ข้อมูลมาแสดง
+      readCart();
     });
   }
 
@@ -185,6 +185,7 @@ class _MyServiceState extends State<MyService> {
   }
 
   Widget menuCategory() {
+    print('menuCategory');
     return ExpansionTile(
       leading: Icon(
         Icons.category,
@@ -437,7 +438,7 @@ class _MyServiceState extends State<MyService> {
   }
 
   Widget showDrawer() {
-    print(' cateList ()>> $categoryModels');
+    print(' cateList (showDrawer)>> $categoryModels');
 
     return Drawer(
       child: ListView(
@@ -644,6 +645,7 @@ class _MyServiceState extends State<MyService> {
             */
       ],
     );
+    readCategory();
   }
 
   @override
