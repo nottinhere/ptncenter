@@ -484,7 +484,46 @@ class _ListProductState extends State<ListProduct> {
 
           if (loadingIcon == true) {
             // return CupertinoActivityIndicator();
-            return myCircularProgress();
+            return Column(
+              children: [
+                GestureDetector(
+                  child: Container(
+                    child: Card(
+                      child: Container(
+                        decoration: myBoxDecoration(),
+                        padding: EdgeInsets.only(top: 0.5),
+                        child: Row(
+                          children: <Widget>[
+                            showImage(index),
+                            showText(index),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  onTap: () {
+                    print(
+                        'index select item => ${filterProductAllModels[index]}');
+                    MaterialPageRoute materialPageRoute =
+                        MaterialPageRoute(builder: (BuildContext buildContext) {
+                      return Detail(
+                        productAllModel: filterProductAllModels[index],
+                        userModel: myUserModel,
+                      );
+                    });
+
+                    Navigator.of(context)
+                        .push(materialPageRoute)
+                        .then((value) => setState(() {
+                              readCart();
+                              updateDatalist(index);
+                            }));
+                    // Navigator.of(context).push(materialPageRoute);
+                  },
+                ),
+                myCircularProgress(),
+              ],
+            );
           }
 
           return GestureDetector(
