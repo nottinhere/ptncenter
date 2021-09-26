@@ -39,6 +39,7 @@ dependencies:
   google_maps_flutter: ^0.5.30
   font_awesome_flutter: ^8.2.0
   flutter_spinbox: ^0.2.0
+  favorite_button: ^0.0.4
 
 
   

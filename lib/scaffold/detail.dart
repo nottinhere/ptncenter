@@ -18,6 +18,7 @@ import 'package:ptncenter/widget/home.dart';
 import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
 import 'my_service.dart';
 import 'package:flutter_spinbox/flutter_spinbox.dart';
+import 'package:favorite_button/favorite_button.dart';
 
 class Detail extends StatefulWidget {
   final ProductAllModel productAllModel;
@@ -301,7 +302,7 @@ class _DetailState extends State<Detail> {
         pauseAutoPlayOnTouch: Duration(seconds: 5),
         autoPlay: true,
         autoPlayAnimationDuration: Duration(seconds: 5),
-        itemCount: (relateModels.length / 2).compareTo(0),
+        itemCount: (relateModels.length / 2).round(),
         itemBuilder: (context, index) {
           final int first = index * 2;
           final int second = first + 1;
@@ -358,6 +359,46 @@ class _DetailState extends State<Detail> {
         productAllModel.photo,
         fit: BoxFit.contain,
       ),
+    );
+  }
+
+  // Post ค่าไปยัง API ที่ต้องการ
+  Future<void> editFavorite(
+      String productID, String memberID, bool _isFavorite) async {
+    String url =
+        'http://ptnpharma.com/apishop/json_favorite.php?productID=$productID&memberId=$memberID&status=$_isFavorite';
+
+    print('url Favorites url ====>>>>> $url');
+    // await http.get(url).then((response) {
+    //   setState(() {
+    //     readCart();
+    //   });
+    // });
+  }
+
+  Widget favButton() {
+    bool favStatus = true;
+    String productID = id;
+    String memberID = myUserModel.id.toString();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        // Text(
+        //   'รายการโปรด',
+        //   style: MyStyle().h3StyleBlue,
+        // ),
+        FavoriteButton(
+          isFavorite: favStatus,
+          iconSize: 50.0,
+          // iconDisabledColor: Colors.white,
+          valueChanged: (_isFavorite) {
+            // print('Is Favorite : $_isFavorite');
+            editFavorite(productID, memberID, _isFavorite);
+
+            // http.Response response =  http.get(url);
+          },
+        ),
+      ],
     );
   }
 
@@ -1016,6 +1057,7 @@ class _DetailState extends State<Detail> {
     return ListView(
       padding: EdgeInsets.all(10.0),
       children: <Widget>[
+        favButton(),
         showTitle(),
         // MyStyle().mySizebox(),
         showTag(),
