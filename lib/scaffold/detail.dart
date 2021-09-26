@@ -369,11 +369,11 @@ class _DetailState extends State<Detail> {
         'http://ptnpharma.com/apishop/json_favorite.php?productID=$productID&memberId=$memberID&status=$_isFavorite';
 
     print('url Favorites url ====>>>>> $url');
-    // await http.get(url).then((response) {
-    //   setState(() {
-    //     readCart();
-    //   });
-    // });
+    await http.get(url).then((response) {
+      setState(() {
+        //readCart();
+      });
+    });
   }
 
   Widget favButton() {
