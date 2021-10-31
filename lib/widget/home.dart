@@ -64,8 +64,13 @@ class _HomeState extends State<Home> {
       readCart();
     });
     directMessage();
+    _requestPermission();
+
   }
 
+  _requestPermission() async {
+    await Permission.camera.request();
+  }
 //   // The easiest way for creating RFlutter Alert
 //   _onBasicAlertPressed(context) {
 //     Alert(
