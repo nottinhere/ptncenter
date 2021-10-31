@@ -14,6 +14,7 @@ class ProductAllModel2 {
   int updateprice;
   int newproduct;
   int notreceive;
+  bool favorite;
   int stock;
   int id;
 
@@ -33,6 +34,7 @@ class ProductAllModel2 {
       this.updateprice,
       this.newproduct,
       this.notreceive,
+      this.favorite,
       this.stock,
       this.id});
 
@@ -54,6 +56,7 @@ class ProductAllModel2 {
     updateprice = json['updateprice'];
     newproduct = json['newproduct'];
     notreceive = json['notreceive'];
+    favorite = json['favorite'];
     stock = json['stock'];
     id = json['id'];
   }
@@ -77,6 +80,7 @@ class ProductAllModel2 {
     data['updateprice'] = this.updateprice;
     data['newproduct'] = this.newproduct;
     data['notreceive'] = this.notreceive;
+    data['favorite'] = this.favorite;
     data['stock'] = this.stock;
     data['id'] = this.id;
     return data;

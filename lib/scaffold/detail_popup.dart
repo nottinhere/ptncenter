@@ -229,11 +229,11 @@ class _DetailState extends State<DetailPopup> {
         BubbleBottomBarItem(
             backgroundColor: Colors.green,
             icon: Icon(
-              Icons.format_list_bulleted,
+              Icons.medical_services,
               color: Colors.black,
             ),
             activeIcon: Icon(
-              Icons.format_list_bulleted,
+              Icons.medical_services,
               color: Colors.green,
             ),
             title: Text("สินค้า")),
@@ -251,8 +251,6 @@ class _DetailState extends State<DetailPopup> {
       ],
     );
   }
-
-
 
   Widget gotoHome() {
     // all product

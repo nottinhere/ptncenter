@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:barcode_scan/barcode_scan.dart';
+import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:ptncenter/models/product_all_model.dart';
 import 'package:ptncenter/models/product_all_model2.dart';
 import 'package:ptncenter/models/unit_size_model.dart';
@@ -19,6 +19,12 @@ import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
 import 'my_service.dart';
 import 'package:flutter_spinbox/flutter_spinbox.dart';
 import 'package:favorite_button/favorite_button.dart';
+
+import 'package:flutter/services.dart';
+
+import 'package:permission_handler/permission_handler.dart';
+import 'package:scan_preview/scan_preview_widget.dart';
+import 'package:flutter/foundation.dart';
 
 class Detail extends StatefulWidget {
   final ProductAllModel productAllModel;
@@ -54,6 +60,9 @@ class _DetailState extends State<Detail> {
   List<ProductAllModel> relateModels = List();
   int banerIndex = 0, relateIndex = 0;
   int currentIndex = 1;
+  String _result = '';
+  String qrString;
+
   // Method
   @override
   void initState() {
@@ -299,11 +308,13 @@ class _DetailState extends State<Detail> {
   Widget showCarouseSliderRelate() {
     return GestureDetector(
       child: CarouselSlider.builder(
-        pauseAutoPlayOnTouch: Duration(seconds: 5),
-        autoPlay: true,
-        autoPlayAnimationDuration: Duration(seconds: 5),
+        options: CarouselOptions(
+          // pauseAutoPlayOnTouch: Duration(seconds: 5),
+          autoPlay: true,
+          autoPlayAnimationDuration: Duration(seconds: 5),
+        ),
         itemCount: (relateModels.length / 2).round(),
-        itemBuilder: (context, index) {
+        itemBuilder: (context, index, realIdx) {
           final int first = index * 2;
           final int second = first + 1;
 
@@ -377,7 +388,8 @@ class _DetailState extends State<Detail> {
   }
 
   Widget favButton() {
-    bool favStatus = true;
+    bool favStatus = (productAllModel.favorite == true) ? true : false;
+
     String productID = id;
     String memberID = myUserModel.id.toString();
     return Column(
@@ -754,7 +766,8 @@ class _DetailState extends State<Detail> {
           );
           Navigator.of(context).pushAndRemoveUntil(route, (route) => false);
         } else if (index == 2) {
-          readQRcode();
+          // readQRcode();
+          readQRcodePreview();
         }
       },
     );
@@ -762,7 +775,7 @@ class _DetailState extends State<Detail> {
 
   Future<void> readQRcode() async {
     try {
-      String qrString = await BarcodeScanner.scan();
+      var qrString = await BarcodeScanner.scan();
       print('QR code = $qrString');
       if (qrString != null) {
         decodeQRcode(qrString);
@@ -772,7 +785,26 @@ class _DetailState extends State<Detail> {
     }
   }
 
-  Future<void> decodeQRcode(String code) async {
+  Future<void> readQRcodePreview() async {
+    try {
+      final qrScanString = await Navigator.push(this.context,
+          MaterialPageRoute(builder: (context) => ScanPreviewPage()));
+
+      print('Before scan');
+      // final qrScanString = await BarcodeScanner.scan();
+      print('After scan');
+      print('scanl result: $qrScanString');
+      qrString = qrScanString;
+      if (qrString != null) {
+        decodeQRcode(qrString);
+      }
+      // setState(() => scanResult = qrScanString);
+    } on PlatformException catch (e) {
+      print('e = $e');
+    }
+  }
+
+  Future<void> decodeQRcode(var code) async {
     try {
       String url =
           'http://ptnpharma.com/apishop/json_productlist.php?bqcode=$code';
@@ -883,11 +915,11 @@ class _DetailState extends State<Detail> {
         BubbleBottomBarItem(
             backgroundColor: Colors.green,
             icon: Icon(
-              Icons.format_list_bulleted,
+              Icons.medical_services,
               color: Colors.black,
             ),
             activeIcon: Icon(
-              Icons.format_list_bulleted,
+              Icons.medical_services,
               color: Colors.green,
             ),
             title: Text("สินค้า")),
@@ -1083,6 +1115,40 @@ class _DetailState extends State<Detail> {
         MyStyle().mySizebox(),
         MyStyle().mySizebox(),
       ],
+    );
+  }
+}
+
+class ScanPreviewPage extends StatefulWidget {
+  @override
+  _ScanPreviewPageState createState() => _ScanPreviewPageState();
+}
+
+class _ScanPreviewPageState extends State<ScanPreviewPage> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('PTN Pharma'),
+          backgroundColor: MyStyle().bgColor,
+        ),
+        body: SizedBox(
+          width: double.infinity,
+          height: double.infinity,
+          child: ScanPreviewWidget(
+            onScanResult: (result) {
+              debugPrint('scan result: $result');
+              Navigator.pop(context, result);
+            },
+          ),
+        ),
+      ),
     );
   }
 }

@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:async';
 import 'dart:ui' as ui;
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:barcode_scan/barcode_scan.dart';
+import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:ptncenter/models/product_all_model.dart';
@@ -16,6 +16,12 @@ import 'package:ptncenter/scaffold/list_product.dart';
 import 'package:ptncenter/utility/my_style.dart';
 import 'package:ptncenter/utility/normal_dialog.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
+
+import 'package:flutter/services.dart';
+
+import 'package:permission_handler/permission_handler.dart';
+import 'package:scan_preview/scan_preview_widget.dart';
+import 'package:flutter/foundation.dart';
 
 // import 'package:flutter_ui_challenges/core/presentation/res/assets.dart';
 
@@ -43,6 +49,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List<ProductAllModel> suggestModels = List();
   String qrString;
   int currentIndex = 0;
+  String _result = '';
 
   // Method
   @override
@@ -120,18 +127,21 @@ class _HomeScreenState extends State<HomeScreen> {
         // Navigator.of(context).push(route).then((value) {});  //  link to detail page
       },
       child: CarouselSlider(
-        height: 1200,
-        viewportFraction: 0.8,
-        enlargeCenterPage: true,
-        aspectRatio: 16 / 9,
-        pauseAutoPlayOnTouch: Duration(seconds: 5),
-        autoPlay: true,
-        autoPlayAnimationDuration: Duration(seconds: 5),
+        options: CarouselOptions(
+          height: 1200,
+          viewportFraction: 0.8,
+          enlargeCenterPage: true,
+          aspectRatio: 16 / 9,
+          // pauseAutoPlayOnTouch: Duration(seconds: 5),
+          autoPlay: true,
+          autoPlayAnimationDuration: Duration(seconds: 5),
+          onPageChanged: (int index, reason) {
+            banerIndex = index;
+            Text('x');
+            // print('index = $index');
+          },
+        ),
         items: promoteLists,
-        onPageChanged: (int index) {
-          banerIndex = index;
-          // print('index = $index');
-        },
       ),
     );
   }
@@ -151,12 +161,18 @@ class _HomeScreenState extends State<HomeScreen> {
         Navigator.of(context).push(route).then((value) {});
       },
       child: CarouselSlider(
-        height: 350.0,
-        enlargeCenterPage: true,
-        aspectRatio: 16 / 9,
-        pauseAutoPlayOnTouch: Duration(seconds: 5),
-        autoPlay: true,
-        autoPlayAnimationDuration: Duration(seconds: 5),
+        options: CarouselOptions(
+          height: 350.0,
+          enlargeCenterPage: true,
+          aspectRatio: 16 / 9,
+          // pauseAutoPlayOnTouch: Duration(seconds: 5),
+          autoPlay: true,
+          autoPlayAnimationDuration: Duration(seconds: 5),
+          onPageChanged: (int index, reason) {
+            suggestIndex = index;
+            // print('index = $index');
+          },
+        ),
         // items: suggestLists,
         items: suggestLists
             .map((item) => Container(
@@ -182,11 +198,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   color: Colors.grey.shade200,
                 ))
             .toList(),
-
-        onPageChanged: (int index) {
-          suggestIndex = index;
-          // print('index = $index');
-        },
       ),
     );
   }
@@ -445,9 +456,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-
-
-
   Widget historyBox() {
     return Container(
       width: MediaQuery.of(context).size.width * 0.45,
@@ -477,13 +485,16 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         onTap: () {
           print('You click order history');
-            Navigator.push(context,
-                          MaterialPageRoute(builder: (context) => WebView(userModel: myUserModel,)));
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => WebView(
+                        userModel: myUserModel,
+                      )));
         },
       ),
     );
   }
-  
 
   Widget barcodeBox() {
     return Container(
@@ -514,7 +525,8 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         onTap: () {
           print('You click barcode scan');
-          readQRcode();
+          // readQRcode();
+          readQRcodePreview();
           // Navigator.of(context).pop();
         },
       ),
@@ -555,8 +567,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
-
 
   Widget row1Menu() {
     return Row(
@@ -622,7 +632,8 @@ class _HomeScreenState extends State<HomeScreen> {
       title: Text('Read QR code'),
       subtitle: Text('Read QR code or barcode'),
       onTap: () {
-        readQRcode();
+        // readQRcode();
+        readQRcodePreview();
         Navigator.of(context).pop();
       },
     );
@@ -630,12 +641,31 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> readQRcode() async {
     try {
-      qrString = await BarcodeScanner.scan();
+      var qrString = await BarcodeScanner.scan();
       print('QR code = $qrString');
       if (qrString != null) {
         decodeQRcode(qrString);
       }
     } catch (e) {
+      print('e = $e');
+    }
+  }
+
+  Future<void> readQRcodePreview() async {
+    try {
+      final qrScanString = await Navigator.push(this.context,
+          MaterialPageRoute(builder: (context) => ScanPreviewPage()));
+
+      print('Before scan');
+      // final qrScanString = await BarcodeScanner.scan();
+      print('After scan');
+      print('scanl result: $qrScanString');
+      qrString = qrScanString;
+      if (qrString != null) {
+        decodeQRcode(qrString);
+      }
+      // setState(() => scanResult = qrScanString);
+    } on PlatformException catch (e) {
       print('e = $e');
     }
   }
@@ -658,9 +688,10 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Future<void> decodeQRcode(String code) async {
+  Future<void> decodeQRcode(var code) async {
     try {
-      String url = 'http://ptnpharma.com/apishop/json_productlist.php?bqcode=$code';
+      String url =
+          'http://ptnpharma.com/apishop/json_productlist.php?bqcode=$code';
       http.Response response = await http.get(url);
       var result = json.decode(response.body);
       print('result ===*******>>>> $result');
@@ -692,8 +723,6 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     } catch (e) {}
   }
-
-
 
   Widget homeMenu() {
     return Container(
@@ -821,10 +850,11 @@ class _WebViewState extends State<WebView> {
   Widget build(BuildContext context) {
     String memberId = myUserModel.id;
     String memberCode = myUserModel.customerCode;
-    String url = 'https://ptnpharma.com/shop/pages/tables/orderhistory_mobile.php?memberId=$memberId&memberCode=$memberCode'; // 
+    String url =
+        'https://ptnpharma.com/shop/pages/tables/orderhistory_mobile.php?memberId=$memberId&memberCode=$memberCode'; //
     print('URL ==>> $url');
     return WebviewScaffold(
-      url: url,//"https://www.androidmonks.com",
+      url: url, //"https://www.androidmonks.com",
       appBar: AppBar(
         backgroundColor: MyStyle().bgColor,
         title: Text("ประวัติการสั่งซื้อ"),
@@ -834,6 +864,40 @@ class _WebViewState extends State<WebView> {
       withLocalStorage: true,
       appCacheEnabled: false,
       ignoreSSLErrors: true,
+    );
+  }
+}
+
+class ScanPreviewPage extends StatefulWidget {
+  @override
+  _ScanPreviewPageState createState() => _ScanPreviewPageState();
+}
+
+class _ScanPreviewPageState extends State<ScanPreviewPage> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('PTN Pharma'),
+           backgroundColor: MyStyle().bgColor,
+       ),
+        body: SizedBox(
+          width: double.infinity,
+          height: double.infinity,
+          child: ScanPreviewWidget(
+            onScanResult: (result) {
+              debugPrint('scan result: $result');
+              Navigator.pop(context, result);
+            },
+          ),
+        ),
+      ),
     );
   }
 }

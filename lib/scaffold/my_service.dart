@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:barcode_scan/barcode_scan.dart';
+import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:ptncenter/models/product_all_model.dart';
@@ -16,10 +16,17 @@ import 'package:ptncenter/widget/home.dart';
 import 'package:ptncenter/widget/homescreen.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 import 'package:ptncenter/scaffold/list_product.dart';
+import 'package:ptncenter/scaffold/list_product_favorite.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
 import 'detail_cart.dart';
 import 'package:toast/toast.dart';
+
+import 'package:flutter/services.dart';
+
+import 'package:permission_handler/permission_handler.dart';
+import 'package:scan_preview/scan_preview_widget.dart';
+import 'package:flutter/foundation.dart';
 
 class MyService extends StatefulWidget {
   final UserModel userModel;
@@ -40,6 +47,7 @@ class _MyServiceState extends State<MyService> {
   int amontCart = 0;
   int currentIndex;
   ScrollController scrollController = ScrollController();
+  String _result = '';
 
   // Method
   @override
@@ -104,6 +112,17 @@ class _MyServiceState extends State<MyService> {
     Navigator.of(context).push(materialPageRoute);
   }
 
+  void routeToListProductfav(int index) {
+    MaterialPageRoute materialPageRoute =
+        MaterialPageRoute(builder: (BuildContext buildContext) {
+      return ListProductfav(
+        index: index,
+        userModel: myUserModel,
+      );
+    });
+    Navigator.of(context).push(materialPageRoute);
+  }
+
   void routeToListProductByCate(int index, int cate, String cateName) {
     MaterialPageRoute materialPageRoute =
         MaterialPageRoute(builder: (BuildContext buildContext) {
@@ -127,9 +146,12 @@ class _MyServiceState extends State<MyService> {
       case 0:
         break; // home
       case 1:
-        routeToListProduct(0);
+        routeToListProductfav(0);
         break; // all product
       case 2:
+        routeToListProduct(0);
+        break; // all product
+      case 3:
         routeToListProduct(2);
         MaterialPageRoute materialPageRoute =
             MaterialPageRoute(builder: (BuildContext buildContext) {
@@ -334,15 +356,16 @@ class _MyServiceState extends State<MyService> {
       title: Text('Scan barcode'),
       // subtitle: Text('Read QR code or barcode'),
       onTap: () {
-        readQRcode();
-        Navigator.of(context).pop();
+        // readQRcode();
+        readQRcodePreview();
+        // Navigator.of(context).pop();
       },
     );
   }
 
   Future<void> readQRcode() async {
     try {
-      qrString = await BarcodeScanner.scan();
+      var qrString = await BarcodeScanner.scan();
       print('QR code = $qrString');
       if (qrString != null) {
         decodeQRcode(qrString);
@@ -352,7 +375,26 @@ class _MyServiceState extends State<MyService> {
     }
   }
 
-  Future<void> decodeQRcode(String code) async {
+  Future<void> readQRcodePreview() async {
+    try {
+      final qrScanString = await Navigator.push(this.context,
+          MaterialPageRoute(builder: (context) => ScanPreviewPage()));
+
+      print('Before scan');
+      // final qrScanString = await BarcodeScanner.scan();
+      print('After scan');
+      print('scanl result: $qrScanString');
+      qrString = qrScanString;
+      if (qrString != null) {
+        decodeQRcode(qrString);
+      }
+      // setState(() => scanResult = qrScanString);
+    } on PlatformException catch (e) {
+      print('e = $e');
+    }
+  }
+
+  Future<void> decodeQRcode(var code) async {
     try {
       String url =
           'http://ptnpharma.com/apishop/json_productlist.php?bqcode=$code';
@@ -531,6 +573,13 @@ class _MyServiceState extends State<MyService> {
     );
   }
 
+  BottomNavigationBarItem favoriteBotton() {
+    return BottomNavigationBarItem(
+      icon: Icon(Icons.favorite),
+      title: Text('Favorite'),
+    );
+  }
+
   BottomNavigationBarItem cartBotton() {
     return BottomNavigationBarItem(
       icon: Icon(Icons.shopping_cart),
@@ -549,15 +598,18 @@ class _MyServiceState extends State<MyService> {
     return BottomNavigationBar(
       items: <BottomNavigationBarItem>[
         homeBotton(),
+        favoriteBotton(),
         cartBotton(),
         readQrBotton(),
       ],
       onTap: (int index) {
         print('index =$index');
         if (index == 1) {
-          routeToDetailCart();
+          routeToListProductfav(0);
         } else if (index == 2) {
-          readQRcode();
+          routeToListProduct(0);
+        } else if (index == 3) {
+          routeToDetailCart();
         }
       },
     );
@@ -576,36 +628,47 @@ class _MyServiceState extends State<MyService> {
       onTap: changePage,
       items: <BubbleBottomBarItem>[
         BubbleBottomBarItem(
-            backgroundColor: Colors.red,
+            backgroundColor: Colors.blue,
             icon: Icon(
               Icons.home,
               color: Colors.black,
             ),
             activeIcon: Icon(
               Icons.home,
-              color: Colors.red,
+              color: Colors.blue,
             ),
             title: Text("หน้าหลัก")),
         BubbleBottomBarItem(
-            backgroundColor: Colors.green,
+            backgroundColor: Colors.red,
             icon: Icon(
-              Icons.format_list_bulleted,
+              Icons.favorite,
               color: Colors.black,
             ),
             activeIcon: Icon(
-              Icons.format_list_bulleted,
+              Icons.favorite,
+              color: Colors.red,
+            ),
+            title: Text("รายการโปรด")),
+        BubbleBottomBarItem(
+            backgroundColor: Colors.green,
+            icon: Icon(
+              Icons.medical_services,
+              color: Colors.black,
+            ),
+            activeIcon: Icon(
+              Icons.medical_services,
               color: Colors.green,
             ),
             title: Text("สินค้า")),
         BubbleBottomBarItem(
-            backgroundColor: Colors.blue,
+            backgroundColor: Colors.brown,
             icon: Icon(
               Icons.shopping_cart,
               color: Colors.black,
             ),
             activeIcon: Icon(
               Icons.shopping_cart,
-              color: Colors.blue,
+              color: Colors.brown,
             ),
             title: Text("ตะกร้าสินค้า")),
         /*
@@ -645,7 +708,7 @@ class _MyServiceState extends State<MyService> {
             */
       ],
     );
-    readCategory();
+    // readCategory();
   }
 
   @override
@@ -657,7 +720,8 @@ class _MyServiceState extends State<MyService> {
           showCart(),
         ],
         backgroundColor: MyStyle().bgColor,
-        title: Text('Home'),
+        title: Text('หน้าหลัก'),
+        // centerTitle: true,
       ),
 
       body: currentWidget,
@@ -722,6 +786,40 @@ class _WebViewState extends State<WebView> {
       withLocalStorage: true,
       appCacheEnabled: false,
       ignoreSSLErrors: true,
+    );
+  }
+}
+
+class ScanPreviewPage extends StatefulWidget {
+  @override
+  _ScanPreviewPageState createState() => _ScanPreviewPageState();
+}
+
+class _ScanPreviewPageState extends State<ScanPreviewPage> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('PTN Pharma'),
+          backgroundColor: MyStyle().bgColor,
+        ),
+        body: SizedBox(
+          width: double.infinity,
+          height: double.infinity,
+          child: ScanPreviewWidget(
+            onScanResult: (result) {
+              debugPrint('scan result: $result');
+              Navigator.pop(context, result);
+            },
+          ),
+        ),
+      ),
     );
   }
 }

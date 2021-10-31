@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:barcode_scan/barcode_scan.dart';
+import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:ptncenter/models/price_list_model.dart';
@@ -13,9 +13,16 @@ import 'package:ptncenter/utility/my_style.dart';
 import 'package:ptncenter/utility/normal_dialog.dart';
 import 'package:ptncenter/widget/home.dart';
 import 'package:ptncenter/scaffold/list_product.dart';
+import 'package:ptncenter/scaffold/list_product_favorite.dart';
 import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
 import 'my_service.dart';
 import 'package:flutter_spinbox/flutter_spinbox.dart';
+
+import 'package:flutter/services.dart';
+
+import 'package:permission_handler/permission_handler.dart';
+import 'package:scan_preview/scan_preview_widget.dart';
+import 'package:flutter/foundation.dart';
 
 class DetailCart extends StatefulWidget {
   final UserModel userModel;
@@ -39,12 +46,17 @@ class _DetailCartState extends State<DetailCart> {
   List<Map<String, dynamic>> lMap = List();
   int amontCart = 0;
   double newQTY = 0;
+  double newQTYS = 0;
+  double newQTYM = 0;
+  double newQTYL = 0;
   int newQTYint = 0;
   double total = 0;
   String transport;
   int index = 0;
   String comment = '', memberID;
-  int currentIndex = 2;
+  int currentIndex = 3;
+  String _result = '';
+  String qrString;
 
   List<String> listTransport = [
     '',
@@ -92,7 +104,7 @@ class _DetailCartState extends State<DetailCart> {
     for (var map in cartList) {
       ProductAllModel2 productAllModel = ProductAllModel2.fromJson(map);
 
-      print('productAllModel = ${productAllModel.toJson().toString()}');
+      // print('productAllModel = ${productAllModel.toJson().toString()}');
 
       Map<String, dynamic> priceListMap = map['price_list'];
 
@@ -230,15 +242,15 @@ class _DetailCartState extends State<DetailCart> {
 
     if (size == 's') {
       quantity = double.parse(priceListSModels[index].quantity);
-      newQTY = (quantity).toDouble();
+      newQTYS = (quantity).toDouble();
       unitText = priceListSModels[index].lable;
     } else if (size == 'm') {
       quantity = double.parse(priceListMModels[index].quantity);
-      newQTY = (quantity).toDouble();
+      newQTYM = (quantity).toDouble();
       unitText = priceListMModels[index].lable;
     } else if (size == 'l') {
       quantity = double.parse(priceListLModels[index].quantity);
-      newQTY = (quantity).toDouble();
+      newQTYL = (quantity).toDouble();
       unitText = priceListLModels[index].lable;
     }
 
@@ -305,6 +317,22 @@ class _DetailCartState extends State<DetailCart> {
         );
   }
 
+  Widget changeQTY(String productID, String size, double quantity) {
+    String memberID = myUserModel.id.toString();
+    return SizedBox(
+      width: 140.0,
+      child: SpinBox(
+          value: (quantity).toDouble(),
+          min: 1,
+          onChanged: (changevalue) {
+            newQTY = (changevalue == 0) ? 0 : (changevalue).toDouble();
+            print(
+                'productID = $productID ,unitSize = $size ,memberID = $memberID, newQTY = $newQTY');
+            updateDetailCart(productID, size, memberID);
+          }),
+    );
+  }
+
   void myAlertDialog(int index, String size) {
     showDialog(
         context: context,
@@ -348,6 +376,77 @@ class _DetailCartState extends State<DetailCart> {
       setState(() {
         readCart();
       });
+    });
+  }
+
+  Future<void> updateDetailCart(
+      String productID, String unitSize, String memberID) async {
+    String url =
+        'http://ptnpharma.com/apishop/json_updatemycart.php?productID=$productID&unitSize=$unitSize&newQTY=$newQTY&memberId=$memberID';
+    print('url editDetailCart ====>>>>> $url');
+    await http.get(url).then((response) {});
+
+    String url2 = '${MyStyle().loadMyCart}$memberID';
+    http.Response response = await http.get(url2);
+    var result = json.decode(response.body);
+    var cartList = result['cart'];
+
+    double totalPrice = 0;
+    for (var map in cartList) {
+      ProductAllModel2 productAllModel = ProductAllModel2.fromJson(map);
+      // print('productAllModel = ${productAllModel.toJson().toString()}');
+      Map<String, dynamic> priceListMap = map['price_list'];
+
+      var priceDou = 0;
+      var quantityDou = 0;
+
+      Map<String, dynamic> sizeSmap = priceListMap['s'];
+      if (sizeSmap == null) {
+        sMap.add({'lable': ''});
+        PriceListModel priceListModel = PriceListModel.fromJson({'lable': ''});
+        priceListSModels.add(priceListModel);
+      } else {
+        sMap.add(sizeSmap);
+
+        PriceListModel priceListModel = PriceListModel.fromJson(sizeSmap);
+        priceListSModels.add(priceListModel);
+
+        double priceDou = double.parse(priceListModel.price);
+        double quantityDou = (double.parse(priceListModel.quantity));
+        totalPrice = totalPrice + (priceDou * quantityDou);
+      }
+
+      Map<String, dynamic> sizeMmap = priceListMap['m'];
+      if (sizeMmap == null) {
+        mMap.add({'lable': ''});
+        PriceListModel priceListModel = PriceListModel.fromJson({'lable': ''});
+        priceListMModels.add(priceListModel);
+      } else {
+        mMap.add(sizeMmap);
+        PriceListModel priceListModel = PriceListModel.fromJson(sizeMmap);
+        priceListMModels.add(priceListModel);
+        double priceDou = double.parse(priceListModel.price);
+        double quantityDou = (double.parse(priceListModel.quantity));
+        totalPrice = totalPrice + (priceDou * quantityDou);
+      }
+
+      Map<String, dynamic> sizeLmap = priceListMap['l'];
+      if (sizeLmap == null) {
+        lMap.add({'lable': ''});
+        PriceListModel priceListModel = PriceListModel.fromJson({'lable': ''});
+        priceListLModels.add(priceListModel);
+      } else {
+        lMap.add(sizeLmap);
+        PriceListModel priceListModel = PriceListModel.fromJson(sizeLmap);
+        priceListLModels.add(priceListModel);
+        double priceDou = double.parse(priceListModel.price);
+        double quantityDou = (double.parse(priceListModel.quantity));
+        totalPrice = totalPrice + (priceDou * quantityDou);
+      }
+    }
+    setState(() {
+      total = totalPrice;
+      showTotal();
     });
   }
 
@@ -424,31 +523,6 @@ class _DetailCartState extends State<DetailCart> {
     );
   }
 
-  Widget showSText(int index) {
-    String price = sMap[index]['price'].toString();
-    String lable = sMap[index]['lable'];
-    String quantity = sMap[index]['quantity'];
-
-    //calculateTotal(price, quantity);
-
-    return lable.isEmpty
-        ? SizedBox()
-        : Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: <Widget>[
-              Text(
-                '$price บาท/ $lable',
-                style: MyStyle().h3Style,
-              ),
-              Text(
-                'จำนวน $quantity',
-                style: MyStyle().h3Style,
-              ),
-              editAndDeleteButton(index, 's'),
-            ],
-          );
-  }
-
   void calculateTotal(String price, double quantity) {
     double priceDou = double.parse(price);
     print('price Dou ====>>>> $priceDou');
@@ -458,48 +532,68 @@ class _DetailCartState extends State<DetailCart> {
     print('total = $total');
   }
 
-  Widget showMText(int index) {
-    String price = mMap[index]['price'].toString();
-    String lable = mMap[index]['lable'];
-    String quantity = mMap[index]['quantity'];
+  Widget showSText(int index) {
+    String productID = productAllModels[index].id.toString();
+    String priceS = sMap[index]['price'].toString();
+    String lableS = sMap[index]['lable'];
+    String quantityS = sMap[index]['quantity'];
+    double showQTYS = (quantityS == null) ? 0.0 : double.parse(quantityS);
 
-    return lable.isEmpty
+    return lableS.isEmpty
         ? SizedBox()
         : Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: <Widget>[
               Text(
-                '$price บาท/ $lable',
+                '$priceS บาท/ $lableS',
                 style: MyStyle().h3Style,
               ),
+              changeQTY(productID, 's', showQTYS),
+              deleteButton(index, 's'),
+            ],
+          );
+  }
+
+  Widget showMText(int index) {
+    String productID = productAllModels[index].id.toString();
+    String priceM = mMap[index]['price'].toString();
+    String lableM = mMap[index]['lable'];
+    String quantityM = mMap[index]['quantity'];
+    double showQTYM = (quantityM == null) ? 0.0 : double.parse(quantityM);
+
+    return lableM.isEmpty
+        ? SizedBox()
+        : Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: <Widget>[
               Text(
-                'จำนวน $quantity',
+                '$priceM บาท/ $lableM',
                 style: MyStyle().h3Style,
               ),
-              editAndDeleteButton(index, 'm'),
+              changeQTY(productID, 'm', showQTYM),
+              deleteButton(index, 'm'),
             ],
           );
   }
 
   Widget showLText(int index) {
-    String price = lMap[index]['price'].toString();
-    String lable = lMap[index]['lable'];
-    String quantity = lMap[index]['quantity'];
+    String productID = productAllModels[index].id.toString();
+    String priceL = lMap[index]['price'].toString();
+    String lableL = lMap[index]['lable'];
+    String quantityL = lMap[index]['quantity'];
+    double showQTYL = (quantityL == null) ? 0.0 : double.parse(quantityL);
 
-    return lable.isEmpty
+    return lableL.isEmpty
         ? SizedBox()
         : Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: <Widget>[
               Text(
-                '$price บาท/ $lable',
+                '$priceL บาท/ $lableL',
                 style: MyStyle().h3Style,
               ),
-              Text(
-                'จำนวน $quantity',
-                style: MyStyle().h3Style,
-              ),
-              editAndDeleteButton(index, 'l'),
+              changeQTY(productID, 'l', showQTYL),
+              deleteButton(index, 'l'),
             ],
           );
   }
@@ -740,7 +834,8 @@ class _DetailCartState extends State<DetailCart> {
           );
           Navigator.of(context).pushAndRemoveUntil(route, (route) => false);
         } else if (index == 2) {
-          readQRcode();
+          // readQRcode();
+          readQRcodePreview();
         }
       },
     );
@@ -748,7 +843,7 @@ class _DetailCartState extends State<DetailCart> {
 
   Future<void> readQRcode() async {
     try {
-      String qrString = await BarcodeScanner.scan();
+      var qrString = await BarcodeScanner.scan();
       print('QR code = $qrString');
       if (qrString != null) {
         decodeQRcode(qrString);
@@ -758,7 +853,26 @@ class _DetailCartState extends State<DetailCart> {
     }
   }
 
-  Future<void> decodeQRcode(String code) async {
+  Future<void> readQRcodePreview() async {
+    try {
+      final qrScanString = await Navigator.push(this.context,
+          MaterialPageRoute(builder: (context) => ScanPreviewPage()));
+
+      print('Before scan');
+      // final qrScanString = await BarcodeScanner.scan();
+      print('After scan');
+      print('scanl result: $qrScanString');
+      qrString = qrScanString;
+      if (qrString != null) {
+        decodeQRcode(qrString);
+      }
+      // setState(() => scanResult = qrScanString);
+    } on PlatformException catch (e) {
+      print('e = $e');
+    }
+  }
+
+  Future<void> decodeQRcode(var code) async {
     try {
       String url =
           'http://ptnpharma.com/apishop/json_productlist.php?bqcode=$code';
@@ -805,6 +919,17 @@ class _DetailCartState extends State<DetailCart> {
     Navigator.of(context).push(materialPageRoute);
   }
 
+  void routeToListProductfav(int index) {
+    MaterialPageRoute materialPageRoute =
+        MaterialPageRoute(builder: (BuildContext buildContext) {
+      return ListProductfav(
+        index: index,
+        userModel: myUserModel,
+      );
+    });
+    Navigator.of(context).push(materialPageRoute);
+  }
+
   void changePage(int index) {
     setState(() {
       currentIndex = index;
@@ -822,9 +947,12 @@ class _DetailCartState extends State<DetailCart> {
 
         break; // home
       case 1:
-        routeToListProduct(0);
+        routeToListProductfav(0);
         break; // all product
       case 2:
+        routeToListProduct(0);
+        break; // all product
+      case 3:
         break; // promotion
 
     }
@@ -843,36 +971,47 @@ class _DetailCartState extends State<DetailCart> {
       onTap: changePage,
       items: <BubbleBottomBarItem>[
         BubbleBottomBarItem(
-            backgroundColor: Colors.red,
+            backgroundColor: Colors.blue,
             icon: Icon(
               Icons.home,
               color: Colors.black,
             ),
             activeIcon: Icon(
               Icons.home,
-              color: Colors.red,
+              color: Colors.blue,
             ),
             title: Text("หน้าหลัก")),
         BubbleBottomBarItem(
-            backgroundColor: Colors.green,
+            backgroundColor: Colors.red,
             icon: Icon(
-              Icons.format_list_bulleted,
+              Icons.favorite,
               color: Colors.black,
             ),
             activeIcon: Icon(
-              Icons.format_list_bulleted,
+              Icons.favorite,
+              color: Colors.red,
+            ),
+            title: Text("รายการโปรด")),
+        BubbleBottomBarItem(
+            backgroundColor: Colors.green,
+            icon: Icon(
+              Icons.medical_services,
+              color: Colors.black,
+            ),
+            activeIcon: Icon(
+              Icons.medical_services,
               color: Colors.green,
             ),
             title: Text("สินค้า")),
         BubbleBottomBarItem(
-            backgroundColor: Colors.blue,
+            backgroundColor: Colors.brown,
             icon: Icon(
               Icons.shopping_cart,
               color: Colors.black,
             ),
             activeIcon: Icon(
               Icons.shopping_cart,
-              color: Colors.blue,
+              color: Colors.brown,
             ),
             title: Text("ตะกร้าสินค้า")),
       ],
@@ -897,6 +1036,40 @@ class _DetailCartState extends State<DetailCart> {
         ],
       ),
       bottomNavigationBar: showBubbleBottomBarNav(), //showBottomBarNav
+    );
+  }
+}
+
+class ScanPreviewPage extends StatefulWidget {
+  @override
+  _ScanPreviewPageState createState() => _ScanPreviewPageState();
+}
+
+class _ScanPreviewPageState extends State<ScanPreviewPage> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('PTN Pharma'),
+            backgroundColor: MyStyle().bgColor,
+        ),
+        body: SizedBox(
+          width: double.infinity,
+          height: double.infinity,
+          child: ScanPreviewWidget(
+            onScanResult: (result) {
+              debugPrint('scan result: $result');
+              Navigator.pop(context, result);
+            },
+          ),
+        ),
+      ),
     );
   }
 }

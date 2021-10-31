@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:ptncenter/models/product_all_model.dart';
 import 'package:ptncenter/models/user_model.dart';
+import 'package:ptncenter/scaffold/list_product.dart';
 import 'package:ptncenter/utility/my_style.dart';
 import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:ptncenter/utility/normal_dialog.dart';
@@ -26,18 +27,19 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:scan_preview/scan_preview_widget.dart';
 import 'package:flutter/foundation.dart';
 
-class ListProduct extends StatefulWidget {
+class ListProductfav extends StatefulWidget {
   final int index;
   final UserModel userModel;
   final int cate;
   final String cateName;
   String _result = '';
 
-  ListProduct({Key key, this.index, this.userModel, this.cate, this.cateName})
+  ListProductfav(
+      {Key key, this.index, this.userModel, this.cate, this.cateName})
       : super(key: key);
 
   @override
-  _ListProductState createState() => _ListProductState();
+  _ListProductfavState createState() => _ListProductfavState();
 }
 
 //class
@@ -59,7 +61,7 @@ class Debouncer {
   }
 }
 
-class _ListProductState extends State<ListProduct> {
+class _ListProductfavState extends State<ListProductfav> {
   // Explicit
   int myIndex;
   List<ProductAllModel> productAllModels = List(); // []; // set array
@@ -81,7 +83,8 @@ class _ListProductState extends State<ListProduct> {
       Debouncer(milliseconds: 300); // ตั้งค่า เวลาที่จะ delay
   bool statusStart = true;
 
-  int currentIndex;
+  int currentIndex = 1;
+
   // List<ProductAllModel> productAllModels_buffer = List(); // []; //
 
   var _controller = TextEditingController();
@@ -99,20 +102,6 @@ class _ListProductState extends State<ListProduct> {
     myUserModel = widget.userModel;
     myCate = widget.cate;
     myCateName = widget.cateName;
-
-    if (myIndex == 0) {
-      currentIndex = 1;
-    } else if (myIndex == 1) {
-      currentIndex = 4;
-    } else if (myIndex == 2) {
-      currentIndex = 2;
-    } else if (myIndex == 3) {
-      currentIndex = 3;
-    } else if (myIndex == 4) {
-      currentIndex = 1;
-    } else if (myIndex == 5) {
-      currentIndex = 1;
-    }
 
     createController(); // เมื่อ scroll to bottom
 
@@ -212,26 +201,14 @@ class _ListProductState extends State<ListProduct> {
 
     String memberId = myUserModel.id.toString();
     String url =
-        'http://ptnpharma.com/apishop/json_productlist.php?memberId=$memberId&searchKey=$searchString&page=$page';
-    if (myIndex != 0) {
-      if (myIndex == 1 || myIndex == 2 || myIndex == 3) {
-        url =
-            'http://ptnpharma.com/apishop/json_productlist.php?memberId=$memberId&searchKey=$searchString&product_mode=$myIndex&page=$page';
-      } else if (myIndex == 4) {
-        url =
-            'http://ptnpharma.com/apishop/json_productnotreceive.php?memberId=$memberId&page=$page';
-      } else if (myIndex == 5) {
-        url =
-            'http://ptnpharma.com/apishop/json_productlist.php?memberId=$memberId&cate_id=$myCate&page=$page';
-      }
-    }
+        'http://ptnpharma.com/apishop/json_productfavoritelist.php?memberId=$memberId&searchKey=$searchString&page=$page';
 
     // url = '${MyStyle().readProductWhereMode}$myIndex';
     print("URL = $url");
 
     http.Response response = await http.get(url);
     var result = json.decode(response.body);
-    var itemProducts = result['itemsProduct'];
+    var itemProductfavs = result['itemsProduct'];
     // print('itemProducts >> ${itemProducts}');
     int i = 0;
     // print('Start >> ${filterProductAllModels.length}');
@@ -243,7 +220,7 @@ class _ListProductState extends State<ListProduct> {
 
     int len = (filterProductAllModels.length);
 
-    for (var map in itemProducts) {
+    for (var map in itemProductfavs) {
       ProductAllModel productAllModel = ProductAllModel.fromJson(map);
 
       setState(() {
@@ -472,7 +449,7 @@ class _ListProductState extends State<ListProduct> {
     );
   }
 
-  Widget showProductItem() {
+  Widget showProductfavItem() {
     int perpage = 15;
     bool loadingIcon = false;
 
@@ -586,7 +563,7 @@ class _ListProductState extends State<ListProduct> {
         return Center(child: Text(''));
       }
     } else {
-      return showProductItem();
+      return showProductfavItem();
     }
   }
 
@@ -688,8 +665,8 @@ class _ListProductState extends State<ListProduct> {
       if (status == 0) {
         normalDialog(context, 'Not found', 'ไม่พบ code :: $code ในระบบ');
       } else {
-        var itemProducts = result['itemsProduct'];
-        for (var map in itemProducts) {
+        var itemProductfavs = result['itemsProduct'];
+        for (var map in itemProductfavs) {
           // print('map ===*******>>>> $map');
 
           ProductAllModel productAllModel = ProductAllModel.fromJson(map);
@@ -719,7 +696,8 @@ class _ListProductState extends State<ListProduct> {
         onTap: () {
           print('You click barcode scan');
           // readQRcode();
-          readQRcodePreview(); // Navigator.of(context).pop();
+          readQRcodePreview();
+          // Navigator.of(context).pop();
         },
         title: TextField(
           controller: _controller,
@@ -765,6 +743,17 @@ class _ListProductState extends State<ListProduct> {
     Navigator.of(context).push(materialPageRoute);
   }
 
+  void routeToListProductfav(int index) {
+    MaterialPageRoute materialPageRoute =
+        MaterialPageRoute(builder: (BuildContext buildContext) {
+      return ListProductfav(
+        index: index,
+        userModel: myUserModel,
+      );
+    });
+    Navigator.of(context).push(materialPageRoute);
+  }
+
   void changePage(int index) {
     setState(() {
       currentIndex = index;
@@ -782,17 +771,26 @@ class _ListProductState extends State<ListProduct> {
 
         break; // home
       case 1:
-        routeToListProduct(0);
         break; // all product
       case 2:
-        routeToListProduct(2);
-        break; // promotion
+        routeToListProduct(0);
+        break; // all product
       case 3:
-        routeToListProduct(3);
-        break; // update price
-      case 4:
-        routeToListProduct(1);
-        break; // new item
+        routeToListProduct(2);
+        MaterialPageRoute materialPageRoute =
+            MaterialPageRoute(builder: (BuildContext buildContext) {
+          return DetailCart(
+            userModel: myUserModel,
+          );
+        });
+        Navigator.of(context).push(materialPageRoute).then((value) {
+          setState(() {
+            print('Here is change page');
+
+            readCart();
+          });
+        });
+        break; // Shopping cart
     }
   }
 
@@ -809,16 +807,27 @@ class _ListProductState extends State<ListProduct> {
       onTap: changePage,
       items: <BubbleBottomBarItem>[
         BubbleBottomBarItem(
-            backgroundColor: Colors.brown,
+            backgroundColor: Colors.blue,
             icon: Icon(
               Icons.home,
               color: Colors.black,
             ),
             activeIcon: Icon(
               Icons.home,
-              color: Colors.brown,
+              color: Colors.blue,
             ),
             title: Text("หน้าหลัก")),
+        BubbleBottomBarItem(
+            backgroundColor: Colors.red,
+            icon: Icon(
+              Icons.favorite,
+              color: Colors.black,
+            ),
+            activeIcon: Icon(
+              Icons.favorite,
+              color: Colors.red,
+            ),
+            title: Text("รายการโปรด")),
         BubbleBottomBarItem(
             backgroundColor: Colors.green,
             icon: Icon(
@@ -831,38 +840,16 @@ class _ListProductState extends State<ListProduct> {
             ),
             title: Text("สินค้า")),
         BubbleBottomBarItem(
-            backgroundColor: Colors.green,
+            backgroundColor: Colors.brown,
             icon: Icon(
-              Icons.bookmark,
+              Icons.shopping_cart,
               color: Colors.black,
             ),
             activeIcon: Icon(
-              Icons.bookmark,
-              color: Colors.green,
+              Icons.shopping_cart,
+              color: Colors.brown,
             ),
-            title: Text("โปรโมชัน")),
-        BubbleBottomBarItem(
-            backgroundColor: Colors.green,
-            icon: Icon(
-              Icons.arrow_upward,
-              color: Colors.black,
-            ),
-            activeIcon: Icon(
-              Icons.arrow_upward,
-              color: Colors.green,
-            ),
-            title: Text("ปรับราคา")),
-        BubbleBottomBarItem(
-            backgroundColor: Colors.green,
-            icon: Icon(
-              Icons.fiber_new,
-              color: Colors.black,
-            ),
-            activeIcon: Icon(
-              Icons.fiber_new,
-              color: Colors.green,
-            ),
-            title: Text("สินค้าใหม่")),
+            title: Text("ตะกร้าสินค้า")),
       ],
     );
   }
@@ -870,21 +857,7 @@ class _ListProductState extends State<ListProduct> {
   @override
   Widget build(BuildContext context) {
     String txtheader = '';
-    if (myIndex != 0) {
-      if (myIndex == 1) {
-        txtheader = 'สินค้าใหม่';
-      } else if (myIndex == 2) {
-        txtheader = 'สินค้าโปรโมชัน';
-      } else if (myIndex == 3) {
-        txtheader = 'สินค้าจะปรับราคา';
-      } else if (myIndex == 4) {
-        txtheader = 'สินค้าที่เคยสั่งแล้วไม่ได้รับ';
-      } else if (myIndex == 5) {
-        txtheader = myCateName;
-      }
-    } else {
-      txtheader = 'รายการสินค้า';
-    }
+    txtheader = 'รายการโปรด';
     return Scaffold(
       appBar: AppBar(
         backgroundColor: MyStyle().bgColor,
