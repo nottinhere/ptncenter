@@ -65,7 +65,6 @@ class _HomeState extends State<Home> {
     });
     directMessage();
     _requestPermission();
-
   }
 
   _requestPermission() async {
