@@ -551,7 +551,7 @@ class _DetailCartState extends State<DetailCart> {
               changeQTY(productID, 's', showQTYS),
               deleteButton(index, 's'),
             ],
-          );
+          ); 
   }
 
   Widget showMText(int index) {
