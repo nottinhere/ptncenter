@@ -729,21 +729,21 @@ class _DetailState extends State<Detail> {
   BottomNavigationBarItem homeBotton() {
     return BottomNavigationBarItem(
       icon: Icon(Icons.home),
-      title: Text('Home'),
+      label: 'Home',
     );
   }
 
   BottomNavigationBarItem cartBotton() {
     return BottomNavigationBarItem(
       icon: Icon(Icons.shopping_cart),
-      title: Text('Cart'),
+      label: 'Cart',
     );
   }
 
   BottomNavigationBarItem readQrBotton() {
     return BottomNavigationBarItem(
       icon: Icon(Icons.code),
-      title: Text('QR code'),
+      label: 'QR code',
     );
   }
 

@@ -551,7 +551,7 @@ class _DetailCartState extends State<DetailCart> {
               changeQTY(productID, 's', showQTYS),
               deleteButton(index, 's'),
             ],
-          ); 
+          );
   }
 
   Widget showMText(int index) {
@@ -797,21 +797,19 @@ class _DetailCartState extends State<DetailCart> {
   BottomNavigationBarItem homeBotton() {
     return BottomNavigationBarItem(
       icon: Icon(Icons.home),
-      title: Text('Home'),
+      label: 'Home',
     );
   }
 
   BottomNavigationBarItem cartBotton() {
     return BottomNavigationBarItem(
-      icon: Icon(Icons.shopping_cart),
-      title: Text('Cart'),
-    );
+        icon: Icon(Icons.shopping_cart), label: 'Cart');
   }
 
   BottomNavigationBarItem readQrBotton() {
     return BottomNavigationBarItem(
       icon: Icon(Icons.code),
-      title: Text('QR code'),
+      label: 'QR code',
     );
   }
 
@@ -1057,7 +1055,7 @@ class _ScanPreviewPageState extends State<ScanPreviewPage> {
       home: Scaffold(
         appBar: AppBar(
           title: const Text('PTN Pharma'),
-            backgroundColor: MyStyle().bgColor,
+          backgroundColor: MyStyle().bgColor,
         ),
         body: SizedBox(
           width: double.infinity,

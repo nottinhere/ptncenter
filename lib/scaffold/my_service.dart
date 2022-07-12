@@ -569,28 +569,28 @@ class _MyServiceState extends State<MyService> {
   BottomNavigationBarItem homeBotton() {
     return BottomNavigationBarItem(
       icon: Icon(Icons.home),
-      title: Text('Home'),
+      label: 'Home',
     );
   }
 
   BottomNavigationBarItem favoriteBotton() {
     return BottomNavigationBarItem(
       icon: Icon(Icons.favorite),
-      title: Text('Favorite'),
+      label: 'Favorite',
     );
   }
 
   BottomNavigationBarItem cartBotton() {
     return BottomNavigationBarItem(
       icon: Icon(Icons.shopping_cart),
-      title: Text('Cart'),
+      label: 'Cart',
     );
   }
 
   BottomNavigationBarItem readQrBotton() {
     return BottomNavigationBarItem(
       icon: Icon(Icons.code),
-      title: Text('QR code'),
+      label: 'QR code',
     );
   }
 
