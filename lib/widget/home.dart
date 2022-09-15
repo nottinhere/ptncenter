@@ -820,11 +820,11 @@ class _HomeState extends State<Home> {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           ////////////////////////////
-          // RaisedButton(
+          // ElevatedButton(
           //   child: Text('Basic Alert'),
           //   onPressed: () => _onBasicAlertPressed(context),
           // ),
-          // RaisedButton(
+          // ElevatedButton(
           //   child: Text('Custom Animation Alert'),
           //   onPressed: () => _onCustomAnimationAlertPressed(context),
           // ),
@@ -870,7 +870,7 @@ class _HomeState extends State<Home> {
             homeMenu(),
             // Padding(
             //   padding: const EdgeInsets.all(10.0),
-            //   child: RaisedButton(
+            //   child: ElevatedButton(
             //       child: Text('แสดงข้อความ'),
             //       onPressed: () => ToastView.createView(
             //           msg,
@@ -948,7 +948,7 @@ class _WebViewWidgetState extends State {
           child: Column(
             children: [
               Container(
-                child: FlatButton(
+                child: TextButton(
                     child: Text("Open my Blog"),
                     onPressed: () {
                       print("in");

@@ -182,7 +182,6 @@ class _DetailState extends State<Detail> {
     );
   }
 
-
   Widget showValue(int value) {
     return Text('$value');
   }
@@ -293,8 +292,8 @@ class _DetailState extends State<Detail> {
         Row(
           children: <Widget>[
             Expanded(
-              child: RaisedButton(
-                color: MyStyle().mainColor,
+              child: ElevatedButton(
+                // color: MyStyle().mainColor,
                 child: Text(
                   'Add to Cart',
                   style: TextStyle(

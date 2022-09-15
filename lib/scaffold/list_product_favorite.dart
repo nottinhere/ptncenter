@@ -896,8 +896,8 @@ class _ScanPreviewPageState extends State<ScanPreviewPage> {
       home: Scaffold(
         appBar: AppBar(
           title: const Text('PTN Pharma'),
-           backgroundColor: MyStyle().bgColor,
-       ),
+          backgroundColor: MyStyle().bgColor,
+        ),
         body: SizedBox(
           width: double.infinity,
           height: double.infinity,

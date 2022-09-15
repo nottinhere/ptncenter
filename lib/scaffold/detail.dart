@@ -966,8 +966,8 @@ class _DetailState extends State<Detail> {
         Row(
           children: <Widget>[
             Expanded(
-              child: RaisedButton(
-                color: MyStyle().mainColor,
+              child: ElevatedButton(
+                // color: MyStyle().mainColor,
                 child: Text(
                   'Add to Cart',
                   style: TextStyle(
@@ -1013,8 +1013,8 @@ class _DetailState extends State<Detail> {
         Row(
           children: <Widget>[
             Expanded(
-              child: RaisedButton(
-                color: MyStyle().mainColor,
+              child: ElevatedButton(
+                // color: MyStyle().mainColor,
                 child: Text(
                   'Add to Cart',
                   style: TextStyle(

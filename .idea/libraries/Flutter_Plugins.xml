@@ -1,9 +1,6 @@
 <component name="libraryTable">
-  <library name="Flutter Plugins">
-    <CLASSES>
-      <root url="file://D:/flutter/.pub-cache/hosted/pub.dartlang.org/shared_preferences-0.5.4+8" />
-      <root url="file://D:/flutter/.pub-cache/hosted/pub.dartlang.org/barcode_scan-1.0.0" />
-    </CLASSES>
+  <library name="Flutter Plugins" type="FlutterPluginsLibraryType">
+    <CLASSES />
     <JAVADOC />
     <SOURCES />
   </library>
