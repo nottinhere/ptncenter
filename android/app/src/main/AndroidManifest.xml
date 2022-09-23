@@ -1,5 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.mydemoproject">
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
    <application
         android:label="mydemoproject"
         android:name="${applicationName}"
@@ -27,6 +31,9 @@
         </activity>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
+        <activity android:name="com.apptreesoftware.barcodescan.BarcodeScannerActivity"/>
+        <meta-data android:name="com.google.android.geo.API_KEY"
+               android:value="AIzaSyB9n3rdhnosIujfXJ2v4MR2KB25ZNJ07KU"/>
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
