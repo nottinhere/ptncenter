@@ -12,6 +12,8 @@ import 'package:ptncenter/scaffold/detail.dart';
 import 'package:ptncenter/scaffold/detail_cart.dart';
 
 import 'package:ptncenter/scaffold/list_product.dart';
+import 'package:ptncenter/scaffold/list_product_favorite.dart';
+import 'package:ptncenter/scaffold/list_product_vote.dart';
 import 'package:ptncenter/utility/my_style.dart';
 import 'package:ptncenter/utility/normal_dialog.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
@@ -23,6 +25,8 @@ import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:scan_preview/scan_preview_widget.dart';
 import 'package:flutter/foundation.dart';
+
+import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 
 class Home extends StatefulWidget {
   final UserModel userModel;
@@ -70,24 +74,93 @@ class _HomeState extends State<Home> {
   _requestPermission() async {
     await Permission.camera.request();
   }
-//   // The easiest way for creating RFlutter Alert
-//   _onBasicAlertPressed(context) {
-//     Alert(
-//       context: context,
-//       title: "RFLUTTER ALERT",
-//       desc: "Flutter is more awesome with RFlutter Alert.",
-//     ).show();
-//   }
 
-// //Custom animation alert
-//   _onCustomAnimationAlertPressed(context) {
-//     Alert(
-//       context: context,
-//       title: "RFLUTTER ALERT",
-//       desc: "Flutter is more awesome with RFlutter Alert.",
-//       alertAnimation: FadeAlertAnimation,
-//     ).show();
-//   }
+/*************************** */
+  String _scanBarcode = 'Unknown';
+
+  Future<void> startBarcodeScanStream() async {
+    FlutterBarcodeScanner.getBarcodeStreamReceiver(
+            '#ff6666', 'Cancel', true, ScanMode.BARCODE)
+        .listen((barcode) => print(barcode));
+  }
+
+  Future<void> scanQR() async {
+    String barcodeScanRes;
+    // Platform messages may fail, so we use a try/catch PlatformException.
+    try {
+      barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
+          '#ff6666', 'Cancel', true, ScanMode.QR);
+      print(barcodeScanRes);
+    } on PlatformException {
+      barcodeScanRes = 'Failed to get platform version.';
+    }
+
+    // If the widget was removed from the tree while the asynchronous platform
+    // message was in flight, we want to discard the reply rather than calling
+    // setState to update our non-existent appearance.
+    if (!mounted) return;
+
+    setState(() {
+      _scanBarcode = barcodeScanRes;
+    });
+  }
+
+  // Platform messages are asynchronous, so we initialize in an async method.
+  Future<void> scanBarcodeNormal() async {
+    String barcodeScanRes;
+    // Platform messages may fail, so we use a try/catch PlatformException.
+    try {
+      barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
+          '#ff6666', 'Cancel', true, ScanMode.BARCODE);
+      print(barcodeScanRes);
+
+      String url =
+          'http://ptnpharma.com/apishop/json_productlist.php?bqcode=$barcodeScanRes';
+      http.Response response = await http.get(url);
+      var result = json.decode(response.body);
+      print('result ===*******>>>> $result');
+
+      int status = result['status'];
+      print('status ===>>> $status');
+      if (status == 0) {
+        normalDialog(
+            context, 'Not found', 'ไม่พบ code :: $barcodeScanRes ในระบบ');
+      } else {
+        var itemProducts = result['itemsProduct'];
+        for (var map in itemProducts) {
+          print('map ===*******>>>> $map');
+
+          ProductAllModel productAllModel = ProductAllModel.fromJson(map);
+          MaterialPageRoute route = MaterialPageRoute(
+            builder: (BuildContext context) => Detail(
+              userModel: myUserModel,
+              productAllModel: productAllModel,
+            ),
+          );
+          Navigator.of(context).push(route).then((value) => readCart());
+
+          // Navigator.of(context).push(route).then((value) {
+          //   setState(() {
+          //     // readCart();
+          //   });
+          // });
+        }
+      }
+    } on PlatformException {
+      barcodeScanRes = 'Failed to get platform version.';
+    }
+
+    // If the widget was removed from the tree while the asynchronous platform
+    // message was in flight, we want to discard the reply rather than calling
+    // setState to update our non-existent appearance.
+    if (!mounted) return;
+
+    setState(() {
+      _scanBarcode = barcodeScanRes;
+    });
+  }
+
+/*************************** */
 
   Future<void> readPromotion() async {
     String url = 'http://www.ptnpharma.com/apishop/json_promotion.php';
@@ -333,7 +406,7 @@ class _HomeState extends State<Home> {
                 Text(
                   'รายการสินค้า',
                   style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 17,
                       fontWeight: FontWeight.bold,
                       color: Colors.black),
                 ),
@@ -368,7 +441,7 @@ class _HomeState extends State<Home> {
                 Text(
                   'สินค้าโปรโมชัน',
                   style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 17,
                       fontWeight: FontWeight.bold,
                       color: Colors.black),
                 ),
@@ -403,7 +476,7 @@ class _HomeState extends State<Home> {
                 Text(
                   'จะปรับราคา',
                   style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 17,
                       fontWeight: FontWeight.bold,
                       color: Colors.black),
                 ),
@@ -438,7 +511,7 @@ class _HomeState extends State<Home> {
                 Text(
                   'สินค้าใหม่',
                   style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 17,
                       fontWeight: FontWeight.bold,
                       color: Colors.black),
                 ),
@@ -473,7 +546,7 @@ class _HomeState extends State<Home> {
                 Text(
                   'สั่งแล้วไม่ได้รับ',
                   style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 17,
                       fontWeight: FontWeight.bold,
                       color: Colors.black),
                 ),
@@ -508,7 +581,7 @@ class _HomeState extends State<Home> {
                 Text(
                   'ตะกร้าสินค้า',
                   style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 17,
                       fontWeight: FontWeight.bold,
                       color: Colors.black),
                 ),
@@ -549,7 +622,7 @@ class _HomeState extends State<Home> {
                 Text(
                   'ประวัติการสั่ง',
                   style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 17,
                       fontWeight: FontWeight.bold,
                       color: Colors.black),
                 ),
@@ -587,9 +660,9 @@ class _HomeState extends State<Home> {
                   child: Image.asset('images/icon_barcode.png'),
                 ),
                 Text(
-                  'Barcode scan',
+                  'Scan',
                   style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 17,
                       fontWeight: FontWeight.bold,
                       color: Colors.black),
                 ),
@@ -602,6 +675,89 @@ class _HomeState extends State<Home> {
           // readQRcode();
           readQRcodePreview();
           // Navigator.of(context).pop();
+        },
+      ),
+    );
+  }
+
+  Widget favariteBox() {
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.45,
+      // height: 80.0,
+      child: GestureDetector(
+        child: Card(
+          // color: Colors.green.shade100,
+          child: Container(
+            padding: EdgeInsets.all(16.0),
+            alignment: AlignmentDirectional(0.0, 0.0),
+            child: Column(
+              children: <Widget>[
+                Container(
+                  width: 45.0,
+                  child: Image.asset('images/icon_favarite.png'),
+                ),
+                Text(
+                  'สินค้าโปรด',
+                  style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black),
+                ),
+              ],
+            ),
+          ),
+        ),
+        onTap: () {
+          print('You click barcode scan');
+          MaterialPageRoute materialPageRoute =
+              MaterialPageRoute(builder: (BuildContext buildContext) {
+            return ListProductfav(
+              // index: index,
+              userModel: myUserModel,
+            );
+          });
+          Navigator.of(context).push(materialPageRoute);
+        },
+      ),
+    );
+  }
+
+  Widget voteBox() {
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.45,
+      // height: 80.0,
+      child: GestureDetector(
+        child: Card(
+          // color: Colors.green.shade100,
+          child: Container(
+            padding: EdgeInsets.all(16.0),
+            alignment: AlignmentDirectional(0.0, 0.0),
+            child: Column(
+              children: <Widget>[
+                Container(
+                  width: 45.0,
+                  child: Image.asset('images/icon_vote.png'),
+                ),
+                Text(
+                  'โหวตยาน่าขาย',
+                  style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black),
+                ),
+              ],
+            ),
+          ),
+        ),
+        onTap: () {
+          print('You click vote list');
+          MaterialPageRoute materialPageRoute =
+              MaterialPageRoute(builder: (BuildContext buildContext) {
+            return ListProductvote(
+              userModel: myUserModel,
+            );
+          });
+          Navigator.of(context).push(materialPageRoute);
         },
       ),
     );
@@ -626,7 +782,7 @@ class _HomeState extends State<Home> {
                 Text(
                   'Recommend',
                   style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 17,
                       fontWeight: FontWeight.bold,
                       color: Colors.black),
                 ),
@@ -649,7 +805,7 @@ class _HomeState extends State<Home> {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         productBox(),
-        notreceiveBox(),
+        favariteBox(),
       ],
     );
   }
@@ -660,8 +816,8 @@ class _HomeState extends State<Home> {
       // mainAxisSize: MainAxisSize.max,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
+        notreceiveBox(),
         promotionBox(),
-        newproductBox(),
       ],
     );
   }
@@ -672,8 +828,8 @@ class _HomeState extends State<Home> {
       // mainAxisSize: MainAxisSize.max,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
+        newproductBox(),
         updatepriceBox(),
-        cartBox(),
       ],
     );
   }
@@ -685,6 +841,18 @@ class _HomeState extends State<Home> {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         barcodeBox(),
+        voteBox(),
+      ],
+    );
+  }
+
+  Widget row5Menu() {
+    return Row(
+      // mainAxisAlignment: MainAxisAlignment.spaceAround,
+      // mainAxisSize: MainAxisSize.max,
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        cartBox(),
         historyBox(),
       ],
     );
@@ -837,6 +1005,8 @@ class _HomeState extends State<Home> {
           row3Menu(),
           // mySizebox(),
           row4Menu(),
+          // mySizebox(),
+          row5Menu(),
         ],
       ),
     );
@@ -868,24 +1038,27 @@ class _HomeState extends State<Home> {
             suggest(),
             headTitle('เมนู', Icons.home),
             homeMenu(),
-            // Padding(
-            //   padding: const EdgeInsets.all(10.0),
-            //   child: ElevatedButton(
-            //       child: Text('แสดงข้อความ'),
-            //       onPressed: () => ToastView.createView(
-            //           msg,
-            //           context,
-            //           Toast.LENGTH_LONG,
-            //           Toast.BOTTOM,
-            //           Colors.red,
-            //           Colors.white,
-            //           200,
-            //           null)),
-            // )
-            // productBox(),
-            // orderhistoryBox(),
-            // headTitle('สินค้าโปรโมชัน', Icons.bookmark),
-            // promotion(),
+            /************************** */
+            Container(
+                alignment: Alignment.center,
+                child: Flex(
+                    direction: Axis.vertical,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      ElevatedButton(
+                          onPressed: () => scanBarcodeNormal(),
+                          child: Text('Start barcode scan')),
+                      ElevatedButton(
+                          onPressed: () => scanQR(),
+                          child: Text('Start QR scan')),
+                      ElevatedButton(
+                          onPressed: () => startBarcodeScanStream(),
+                          child: Text('Start barcode scan stream')),
+                      Text('Scan result : $_scanBarcode\n',
+                          style: TextStyle(fontSize: 20))
+                    ])),
+
+            /************************** */
           ],
         ),
       );

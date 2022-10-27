@@ -12,16 +12,22 @@
 @import barcode_scan2;
 #endif
 
+#if __has_include(<flutter_barcode_scanner/SwiftFlutterBarcodeScannerPlugin.h>)
+#import <flutter_barcode_scanner/SwiftFlutterBarcodeScannerPlugin.h>
+#else
+@import flutter_barcode_scanner;
+#endif
+
 #if __has_include(<flutter_webview_plugin/FlutterWebviewPlugin.h>)
 #import <flutter_webview_plugin/FlutterWebviewPlugin.h>
 #else
 @import flutter_webview_plugin;
 #endif
 
-#if __has_include(<google_maps_flutter/FLTGoogleMapsPlugin.h>)
-#import <google_maps_flutter/FLTGoogleMapsPlugin.h>
+#if __has_include(<google_maps_flutter_ios/FLTGoogleMapsPlugin.h>)
+#import <google_maps_flutter_ios/FLTGoogleMapsPlugin.h>
 #else
-@import google_maps_flutter;
+@import google_maps_flutter_ios;
 #endif
 
 #if __has_include(<location/LocationPlugin.h>)
@@ -30,10 +36,10 @@
 @import location;
 #endif
 
-#if __has_include(<permission_handler/PermissionHandlerPlugin.h>)
-#import <permission_handler/PermissionHandlerPlugin.h>
+#if __has_include(<permission_handler_apple/PermissionHandlerPlugin.h>)
+#import <permission_handler_apple/PermissionHandlerPlugin.h>
 #else
-@import permission_handler;
+@import permission_handler_apple;
 #endif
 
 #if __has_include(<scan_preview/ScanPreviewPlugin.h>)
@@ -58,6 +64,7 @@
 
 + (void)registerWithRegistry:(NSObject<FlutterPluginRegistry>*)registry {
   [BarcodeScanPlugin registerWithRegistrar:[registry registrarForPlugin:@"BarcodeScanPlugin"]];
+  [SwiftFlutterBarcodeScannerPlugin registerWithRegistrar:[registry registrarForPlugin:@"SwiftFlutterBarcodeScannerPlugin"]];
   [FlutterWebviewPlugin registerWithRegistrar:[registry registrarForPlugin:@"FlutterWebviewPlugin"]];
   [FLTGoogleMapsPlugin registerWithRegistrar:[registry registrarForPlugin:@"FLTGoogleMapsPlugin"]];
   [LocationPlugin registerWithRegistrar:[registry registrarForPlugin:@"LocationPlugin"]];

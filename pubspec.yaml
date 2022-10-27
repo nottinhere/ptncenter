@@ -36,12 +36,14 @@ dependencies:
   loadmore: ^1.0.4
   location: ^2.3.5
   url_launcher: ^5.0.2
-  google_maps_flutter: ^1.2.0
+  google_maps_flutter: ^2.2.1
   font_awesome_flutter: ^8.2.0
   flutter_spinbox: ^0.6.0
   favorite_button: ^0.0.4
   barcode_scan2: ^4.2.1
-  permission_handler: ^5.0.0
+  permission_handler: ^9.2.0
+  flutter_barcode_scanner: ^2.0.0
+
 
   
 dev_dependencies:
