@@ -30,6 +30,8 @@ class _AuthenState extends State<Authen> {
   String imagePopup = '';
   String statusPopup = '';
 
+  bool firstLoadAds;
+
   // Method
   @override
   void initState() {
@@ -232,6 +234,7 @@ class _AuthenState extends State<Authen> {
         MaterialPageRoute(builder: (BuildContext buildContext) {
       return MyService(
         userModel: userModel,
+        firstLoadAds: true,
       );
     });
 

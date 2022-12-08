@@ -43,6 +43,8 @@ dependencies:
   barcode_scan2: ^4.2.1
   permission_handler: ^9.2.0
   flutter_barcode_scanner: ^2.0.0
+  add_to_cart_animation: ^1.0.1
+  popup_banner: ^1.0.0
 
 
   

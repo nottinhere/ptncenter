@@ -536,6 +536,8 @@ class _DetailState extends State<Detail> {
           children: <Widget>[
             Padding(
               child: SpinBox(
+                min: 1,
+                max: 10000,
                 value: (iniValue)
                     .toDouble(), //(iniValue == 0) ? 0 : (iniValue).toInt(),
                 onChanged: (changevalue) {

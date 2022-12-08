@@ -343,7 +343,7 @@ class _ListProductState extends State<ListProduct> {
                   filterProductAllModels[index].itemincartLunit != '0')
               ? 'ตะกร้า:'
               : '',
-          style: MyStyle().h4StyleBlue,
+          style: MyStyle().h4StyleRed,
         ),
       ),
       Container(
@@ -358,7 +358,7 @@ class _ListProductState extends State<ListProduct> {
               ((filterProductAllModels[index].itemincartLunit != '0')
                   ? '${filterProductAllModels[index].itemincartLunit} ${filterProductAllModels[index].itemLunit}'
                   : ''),
-          style: MyStyle().h4StyleBlue,
+          style: MyStyle().h4StyleRed,
         ),
       ),
     ]);
@@ -923,8 +923,8 @@ class _ScanPreviewPageState extends State<ScanPreviewPage> {
       home: Scaffold(
         appBar: AppBar(
           title: const Text('PTN Pharma'),
-           backgroundColor: MyStyle().bgColor,
-       ),
+          backgroundColor: MyStyle().bgColor,
+        ),
         body: SizedBox(
           width: double.infinity,
           height: double.infinity,

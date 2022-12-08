@@ -30,7 +30,9 @@ import 'package:flutter/foundation.dart';
 
 class MyService extends StatefulWidget {
   final UserModel userModel;
-  MyService({Key key, this.userModel}) : super(key: key);
+  bool firstLoadAds;
+  MyService({Key key, this.userModel, this.firstLoadAds = false})
+      : super(key: key);
 
   @override
   _MyServiceState createState() => _MyServiceState();
@@ -40,6 +42,7 @@ class _MyServiceState extends State<MyService> {
   //Explicit
   List<CategoryModel> categoryModels = List(); // set array
   UserModel myUserModel;
+
   String mywebPage;
 
   Widget currentWidget;
@@ -58,6 +61,7 @@ class _MyServiceState extends State<MyService> {
       myUserModel = widget.userModel;
       currentWidget = Home(
         userModel: myUserModel,
+        firstLoadAds: widget.firstLoadAds,
       );
       print('Here is initState');
       readCategory(); // read  ข้อมูลมาแสดง
@@ -75,7 +79,7 @@ class _MyServiceState extends State<MyService> {
     http.Response response = await http.get(url);
     var result = json.decode(response.body);
     var cartList = result['cart'];
-    print('cartList >> $cartList');
+    // print('cartList >> $cartList');
 
     if (cartList != null) {
       for (var map in cartList) {
@@ -84,7 +88,7 @@ class _MyServiceState extends State<MyService> {
         });
       }
     }
-    print('amontCart (service page))>>>> $amontCart');
+    // print('amontCart (service page))>>>> $amontCart');
   }
 
   Future<void> readCategory() async {

@@ -13,12 +13,16 @@ import 'package:ptncenter/scaffold/detail_cart.dart';
 
 import 'package:ptncenter/scaffold/list_product.dart';
 import 'package:ptncenter/scaffold/list_product_favorite.dart';
+import 'package:ptncenter/scaffold/list_product_frequent.dart';
 import 'package:ptncenter/scaffold/list_product_vote.dart';
+
 import 'package:ptncenter/utility/my_style.dart';
 import 'package:ptncenter/utility/normal_dialog.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:toast/toast.dart';
+
+import 'package:popup_banner/popup_banner.dart';
 
 import 'package:flutter/services.dart';
 
@@ -30,8 +34,9 @@ import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 
 class Home extends StatefulWidget {
   final UserModel userModel;
+  bool firstLoadAds;
 
-  Home({Key key, this.userModel}) : super(key: key);
+  Home({Key key, this.userModel, this.firstLoadAds = false}) : super(key: key);
 
   @override
   _HomeState createState() => _HomeState();
@@ -48,6 +53,7 @@ class _HomeState extends State<Home> {
 
   int amontCart = 0, banerIndex = 0, suggestIndex = 0;
   UserModel myUserModel;
+  bool firstLoad = false;
   List<ProductAllModel> promoteModels = List();
   List<ProductAllModel> suggestModels = List();
   String qrString;
@@ -58,8 +64,17 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
-    // WidgetsBinding.instance
-    //     .addPostFrameCallback((_) => _onBasicAlertPressed(context));
+
+    print('widget.firstLoadAds >> ${widget.firstLoadAds}');
+    firstLoad = widget.firstLoadAds;
+    print('firstLoad >> $firstLoad');
+    if (firstLoad == true) {
+      setState(() {
+        WidgetsBinding.instance.addPostFrameCallback((_) => showAdsPopup());
+        firstLoad = false;
+      });
+    }
+    print('BF firstLoad >> $firstLoad');
 
     readPromotion();
     myUserModel = widget.userModel;
@@ -118,17 +133,17 @@ class _HomeState extends State<Home> {
           'http://ptnpharma.com/apishop/json_productlist.php?bqcode=$barcodeScanRes';
       http.Response response = await http.get(url);
       var result = json.decode(response.body);
-      print('result ===*******>>>> $result');
+      // print('result ===*******>>>> $result');
 
       int status = result['status'];
-      print('status ===>>> $status');
+      // print('status ===>>> $status');
       if (status == 0) {
         normalDialog(
             context, 'Not found', 'ไม่พบ code :: $barcodeScanRes ในระบบ');
       } else {
         var itemProducts = result['itemsProduct'];
         for (var map in itemProducts) {
-          print('map ===*******>>>> $map');
+          // print('map ===*******>>>> $map');
 
           ProductAllModel productAllModel = ProductAllModel.fromJson(map);
           MaterialPageRoute route = MaterialPageRoute(
@@ -185,6 +200,8 @@ class _HomeState extends State<Home> {
     return Image.network(urlImage);
   }
 
+/*************************** */
+
   Future<void> readSuggest() async {
     String memId = myUserModel.id;
     String url =
@@ -207,6 +224,99 @@ class _HomeState extends State<Home> {
       });
     }
   }
+
+  Future<void> showAdsPopup() async {
+    PopupBanner(
+      context: context,
+      images: images,
+      onClick: (index) {
+        debugPrint("CLICKED $index");
+      },
+    ).show();
+  }
+
+/***************popup_banner ************ */
+  List<String> images = [
+    "https://tinyurl.com/popup-banner-image",
+    "https://tinyurl.com/popup-banner-image2",
+    "https://tinyurl.com/popup-banner-image3",
+    "https://tinyurl.com/popup-banner-image4"
+  ];
+
+  List<String> imagesLocal = [
+    "assets/images/popup-banner-local-image.jpg",
+    "assets/images/popup-banner-local-image2.jpg",
+    "assets/images/popup-banner-local-image3.jpeg",
+    "assets/images/popup-banner-local-image4.jpg"
+  ];
+
+  void showDefaultPopup() {
+    PopupBanner(
+      context: context,
+      images: images,
+      onClick: (index) {
+        debugPrint("CLICKED $index");
+      },
+    ).show();
+  }
+
+  void showHideDotsPopup() {
+    PopupBanner(
+      context: context,
+      images: images,
+      useDots: false,
+      onClick: (index) {
+        debugPrint("CLICKED $index");
+      },
+    ).show();
+  }
+
+  void showCustomizeDots() {
+    PopupBanner(
+      context: context,
+      images: images,
+      dotsAlignment: Alignment.bottomCenter,
+      dotsColorActive: Colors.blue,
+      dotsColorInactive: Colors.grey.withOpacity(0.5),
+      onClick: (index) {
+        debugPrint("CLICKED $index");
+      },
+    ).show();
+  }
+
+  void showNonactiveSlideCustomClose() {
+    PopupBanner(
+      context: context,
+      images: images,
+      autoSlide: false,
+      customCloseButton: ElevatedButton(
+        onPressed: () => Navigator.pop(context),
+        style: ElevatedButton.styleFrom(
+          primary: Colors.blue,
+        ),
+        child: const Text(
+          "Close",
+          style: TextStyle(
+            color: Colors.white,
+          ),
+        ),
+      ),
+      onClick: (index) {
+        debugPrint("CLICKED $index");
+      },
+    ).show();
+  }
+
+  void showFromLocal() {
+    PopupBanner(
+      context: context,
+      images: imagesLocal,
+      fromNetwork: false,
+      onClick: (index) {},
+    ).show();
+  }
+
+/*************popup_banner ************** */
 
   Widget myCircularProgress() {
     return Center(
@@ -417,6 +527,47 @@ class _HomeState extends State<Home> {
         onTap: () {
           print('You click product');
           routeToListProduct(0);
+        },
+      ),
+    );
+  }
+
+  Widget frequentBox() {
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.45,
+      // height: 80.0,
+      child: GestureDetector(
+        child: Card(
+          // color: Colors.green.shade100,
+          child: Container(
+            padding: EdgeInsets.all(16.0),
+            alignment: AlignmentDirectional(0.0, 0.0),
+            child: Column(
+              children: <Widget>[
+                Container(
+                  width: 45.0,
+                  child: Image.asset('images/icon_drugs.png'),
+                ),
+                Text(
+                  'สินค้าสั่งประจำ',
+                  style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black),
+                ),
+              ],
+            ),
+          ),
+        ),
+        onTap: () {
+          print('You click product');
+          MaterialPageRoute materialPageRoute =
+              MaterialPageRoute(builder: (BuildContext buildContext) {
+            return ListProductFrequent(
+              userModel: myUserModel,
+            );
+          });
+          Navigator.of(context).push(materialPageRoute);
         },
       ),
     );
@@ -672,9 +823,8 @@ class _HomeState extends State<Home> {
         ),
         onTap: () {
           print('You click barcode scan');
-          // readQRcode();
-          readQRcodePreview();
-          // Navigator.of(context).pop();
+          // readQRcodePreview();
+          scanBarcodeNormal();
         },
       ),
     );
@@ -805,7 +955,7 @@ class _HomeState extends State<Home> {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         productBox(),
-        favariteBox(),
+        notreceiveBox(),
       ],
     );
   }
@@ -816,8 +966,8 @@ class _HomeState extends State<Home> {
       // mainAxisSize: MainAxisSize.max,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        notreceiveBox(),
         promotionBox(),
+        newproductBox(),
       ],
     );
   }
@@ -828,8 +978,8 @@ class _HomeState extends State<Home> {
       // mainAxisSize: MainAxisSize.max,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        newproductBox(),
         updatepriceBox(),
+        frequentBox(),
       ],
     );
   }
@@ -840,7 +990,7 @@ class _HomeState extends State<Home> {
       // mainAxisSize: MainAxisSize.max,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        barcodeBox(),
+        favariteBox(),
         voteBox(),
       ],
     );
@@ -852,8 +1002,20 @@ class _HomeState extends State<Home> {
       // mainAxisSize: MainAxisSize.max,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        cartBox(),
+        barcodeBox(),
+        // cartBox(),
         historyBox(),
+      ],
+    );
+  }
+
+  Widget row6Menu() {
+    return Row(
+      // mainAxisAlignment: MainAxisAlignment.spaceAround,
+      // mainAxisSize: MainAxisSize.max,
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        // frequentBox(),
       ],
     );
   }
@@ -926,7 +1088,7 @@ class _HomeState extends State<Home> {
         setState(() {
           amontCart++;
         });
-        print('amontCart (service page))>>>> $amontCart');
+        // print('amontCart (service page))>>>> $amontCart');
       }
     }
   }
@@ -1007,6 +1169,8 @@ class _HomeState extends State<Home> {
           row4Menu(),
           // mySizebox(),
           row5Menu(),
+          // mySizebox(),
+          // row6Menu(),
         ],
       ),
     );
@@ -1039,6 +1203,37 @@ class _HomeState extends State<Home> {
             headTitle('เมนู', Icons.home),
             homeMenu(),
             /************************** */
+
+            // Center(
+            //   child: Column(
+            //     mainAxisAlignment: MainAxisAlignment.center,
+            //     children: [
+            //       _buttonWidget(
+            //         title: "Default Popup",
+            //         onClick: () => showDefaultPopup(),
+            //       ),
+            //       _buttonWidget(
+            //         title: "Hide Dots Popup",
+            //         onClick: () => showHideDotsPopup(),
+            //       ),
+            //       _buttonWidget(
+            //         title: "Customize Dots Popup",
+            //         onClick: () => showCustomizeDots(),
+            //       ),
+            //       _buttonWidget(
+            //         title: "Disable Auto Slide & Custom Close Popup",
+            //         onClick: () => showNonactiveSlideCustomClose(),
+            //       ),
+            //       _buttonWidget(
+            //         title: "Local Asset Popup",
+            //         onClick: () => showFromLocal(),
+            //       )
+            //     ],
+            //   ),
+            // ),
+
+            /************************** */
+            /*
             Container(
                 alignment: Alignment.center,
                 child: Flex(
@@ -1048,16 +1243,16 @@ class _HomeState extends State<Home> {
                       ElevatedButton(
                           onPressed: () => scanBarcodeNormal(),
                           child: Text('Start barcode scan')),
-                      ElevatedButton(
-                          onPressed: () => scanQR(),
-                          child: Text('Start QR scan')),
-                      ElevatedButton(
-                          onPressed: () => startBarcodeScanStream(),
-                          child: Text('Start barcode scan stream')),
-                      Text('Scan result : $_scanBarcode\n',
-                          style: TextStyle(fontSize: 20))
+                      // ElevatedButton(
+                      //     onPressed: () => scanQR(),
+                      //     child: Text('Start QR scan')),
+                      // ElevatedButton(
+                      //     onPressed: () => startBarcodeScanStream(),
+                      //     child: Text('Start barcode scan stream')),
+                      // Text('Scan result : $_scanBarcode\n',
+                      //     style: TextStyle(fontSize: 20))
                     ])),
-
+            */
             /************************** */
           ],
         ),
@@ -1092,6 +1287,24 @@ class _HomeState extends State<Home> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buttonWidget({
+    String title,
+    VoidCallback onClick,
+  }) {
+    return ElevatedButton(
+      onPressed: () => onClick(),
+      style: ElevatedButton.styleFrom(
+        primary: Colors.blue,
+      ),
+      child: Text(
+        title,
+        style: const TextStyle(
+          color: Colors.white,
+        ),
       ),
     );
   }

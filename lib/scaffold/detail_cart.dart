@@ -120,8 +120,9 @@ class _DetailCartState extends State<DetailCart> {
         // print('S is not null >> $priceSdisplay');
         PriceListModel priceListModel = PriceListModel.fromJson(sizeSmap);
         priceListSModels.add(priceListModel);
-        calculateTotal(
-            priceListModel.price, double.parse(priceListModel.quantity));
+        priceListModel.quantity = priceListModel.quantity.replaceAll(',', '');
+        print('quantity >> ' + priceListModel.quantity);
+        calculateTotal(priceListModel.price, (priceListModel.quantity));
       }
 
       //  print('sizeSmap = $sizeSmap');
@@ -135,8 +136,8 @@ class _DetailCartState extends State<DetailCart> {
         mMap.add(sizeMmap);
         PriceListModel priceListModel = PriceListModel.fromJson(sizeMmap);
         priceListMModels.add(priceListModel);
-        calculateTotal(priceListModel.price.toString(),
-            double.parse(priceListModel.quantity));
+        priceListModel.quantity = priceListModel.quantity.replaceAll(',', '');
+        calculateTotal(priceListModel.price, (priceListModel.quantity));
       }
       // print('sizeMmap = $sizeMmap');
 
@@ -149,8 +150,8 @@ class _DetailCartState extends State<DetailCart> {
         lMap.add(sizeLmap);
         PriceListModel priceListModel = PriceListModel.fromJson(sizeLmap);
         priceListLModels.add(priceListModel);
-        calculateTotal(priceListModel.price.toString(),
-            double.parse(priceListModel.quantity));
+        priceListModel.quantity = priceListModel.quantity.replaceAll(',', '');
+        calculateTotal(priceListModel.price, (priceListModel.quantity));
       }
       // print('sizeLmap = $sizeLmap');
 
@@ -239,7 +240,6 @@ class _DetailCartState extends State<DetailCart> {
   Widget alertContent(int index, String size) {
     double quantity = 0;
     String unitText = '';
-
     if (size == 's') {
       quantity = double.parse(priceListSModels[index].quantity);
       newQTYS = (quantity).toDouble();
@@ -293,9 +293,10 @@ class _DetailCartState extends State<DetailCart> {
     //   },
     //   initialValue: quantity,
     // );
-
     return SpinBox(
         value: (quantity).toDouble(),
+        min: 1,
+        max: 10000,
         onChanged: (changevalue) {
           newQTY = (changevalue == 0) ? 0 : (changevalue).toDouble();
 
@@ -324,6 +325,7 @@ class _DetailCartState extends State<DetailCart> {
       child: SpinBox(
           value: (quantity).toDouble(),
           min: 1,
+          max: 10000,
           onChanged: (changevalue) {
             newQTY = (changevalue == 0) ? 0 : (changevalue).toDouble();
             print(
@@ -412,7 +414,8 @@ class _DetailCartState extends State<DetailCart> {
         priceListSModels.add(priceListModel);
 
         double priceDou = double.parse(priceListModel.price);
-        double quantityDou = (double.parse(priceListModel.quantity));
+        double quantityDou =
+            (double.parse(priceListModel.quantity.replaceAll(',', '')));
         totalPrice = totalPrice + (priceDou * quantityDou);
       }
 
@@ -426,7 +429,8 @@ class _DetailCartState extends State<DetailCart> {
         PriceListModel priceListModel = PriceListModel.fromJson(sizeMmap);
         priceListMModels.add(priceListModel);
         double priceDou = double.parse(priceListModel.price);
-        double quantityDou = (double.parse(priceListModel.quantity));
+        double quantityDou =
+            (double.parse(priceListModel.quantity.replaceAll(',', '')));
         totalPrice = totalPrice + (priceDou * quantityDou);
       }
 
@@ -440,7 +444,8 @@ class _DetailCartState extends State<DetailCart> {
         PriceListModel priceListModel = PriceListModel.fromJson(sizeLmap);
         priceListLModels.add(priceListModel);
         double priceDou = double.parse(priceListModel.price);
-        double quantityDou = (double.parse(priceListModel.quantity));
+        double quantityDou =
+            (double.parse(priceListModel.quantity.replaceAll(',', '')));
         totalPrice = totalPrice + (priceDou * quantityDou);
       }
     }
@@ -523,10 +528,11 @@ class _DetailCartState extends State<DetailCart> {
     );
   }
 
-  void calculateTotal(String price, double quantity) {
+  void calculateTotal(String price, String quantity) {
     double priceDou = double.parse(price);
     print('price Dou ====>>>> $priceDou');
-    double quantityDou = (quantity);
+    quantity = quantity.replaceAll(',', '');
+    double quantityDou = double.parse(quantity);
     print('quantityDou ====>> $quantityDou');
     total = total + (priceDou * quantityDou);
     print('total = $total');
@@ -537,7 +543,8 @@ class _DetailCartState extends State<DetailCart> {
     String priceS = sMap[index]['price'].toString();
     String lableS = sMap[index]['lable'];
     String quantityS = sMap[index]['quantity'];
-    double showQTYS = (quantityS == null) ? 0.0 : double.parse(quantityS);
+    double showQTYS =
+        (quantityS == null) ? 0.0 : double.parse(quantityS.replaceAll(',', ''));
 
     return lableS.isEmpty
         ? SizedBox()
@@ -559,7 +566,8 @@ class _DetailCartState extends State<DetailCart> {
     String priceM = mMap[index]['price'].toString();
     String lableM = mMap[index]['lable'];
     String quantityM = mMap[index]['quantity'];
-    double showQTYM = (quantityM == null) ? 0.0 : double.parse(quantityM);
+    double showQTYM =
+        (quantityM == null) ? 0.0 : double.parse(quantityM.replaceAll(',', ''));
 
     return lableM.isEmpty
         ? SizedBox()
@@ -581,7 +589,8 @@ class _DetailCartState extends State<DetailCart> {
     String priceL = lMap[index]['price'].toString();
     String lableL = lMap[index]['lable'];
     String quantityL = lMap[index]['quantity'];
-    double showQTYL = (quantityL == null) ? 0.0 : double.parse(quantityL);
+    double showQTYL =
+        (quantityL == null) ? 0.0 : double.parse(quantityL.replaceAll(',', ''));
 
     return lableL.isEmpty
         ? SizedBox()

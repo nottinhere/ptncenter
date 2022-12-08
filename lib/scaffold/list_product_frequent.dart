@@ -3,9 +3,12 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:ptncenter/models/product_vote_model.dart';
+import 'package:ptncenter/models/product_all_model.dart';
 import 'package:ptncenter/models/user_model.dart';
 import 'package:ptncenter/scaffold/list_product.dart';
+import 'package:ptncenter/scaffold/list_product_favorite.dart';
+import 'package:ptncenter/scaffold/list_product_frequent.dart';
+
 import 'package:ptncenter/utility/my_style.dart';
 import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:ptncenter/utility/normal_dialog.dart';
@@ -23,26 +26,23 @@ import 'package:flutter/cupertino.dart';
 
 import 'package:flutter/services.dart';
 
-import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
-
 import 'package:permission_handler/permission_handler.dart';
 import 'package:scan_preview/scan_preview_widget.dart';
 import 'package:flutter/foundation.dart';
-// import 'package:favorite_button/favorite_button.dart';
 
-class ListProductvote extends StatefulWidget {
+class ListProductFrequent extends StatefulWidget {
   final int index;
   final UserModel userModel;
   final int cate;
   final String cateName;
   String _result = '';
 
-  ListProductvote(
+  ListProductFrequent(
       {Key key, this.index, this.userModel, this.cate, this.cateName})
       : super(key: key);
 
   @override
-  _ListProductvoteState createState() => _ListProductvoteState();
+  _ListProductFrequent createState() => _ListProductFrequent();
 }
 
 //class
@@ -64,11 +64,11 @@ class Debouncer {
   }
 }
 
-class _ListProductvoteState extends State<ListProductvote> {
+class _ListProductFrequent extends State<ListProductFrequent> {
   // Explicit
   int myIndex;
-  List<ProductVoteModel> productVoteModels = List(); // []; // set array
-  List<ProductVoteModel> filterProductVoteModels = List(); // []; //
+  List<ProductAllModel> productAllModels = List(); // []; // set array
+  List<ProductAllModel> filterProductAllModels = List(); // []; //
 
   int amontCart = 0;
   UserModel myUserModel;
@@ -88,7 +88,7 @@ class _ListProductvoteState extends State<ListProductvote> {
 
   int currentIndex = 1;
 
-  // List<ProductVoteModel> productVoteModels_buffer = List(); // []; //
+  // List<ProductAllModel> productAllModels_buffer = List(); // []; //
 
   var _controller = TextEditingController();
 
@@ -141,7 +141,7 @@ class _ListProductvoteState extends State<ListProductvote> {
     String url =
         'http://ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId';
 
-    print('url Detail =====>>>>>>>> $url');
+    // print('url Detail =====>>>>>>>> $url');
 
     http.Response response = await http.get(url);
     var result = json.decode(response.body);
@@ -195,7 +195,7 @@ class _ListProductvoteState extends State<ListProductvote> {
   }
 
   Future<void> readData() async {
-    // List<ProductVoteModel> productVoteModels_buffer = List(); // []; //
+    // List<ProductAllModel> productAllModels_buffer = List(); // []; //
     // String url = MyStyle().readAllProduct;
     print('Here is readdata function');
     setState(() {
@@ -204,34 +204,34 @@ class _ListProductvoteState extends State<ListProductvote> {
 
     String memberId = myUserModel.id.toString();
     String url =
-        'http://ptnpharma.com/apishop/json_productvotelist.php?memberId=$memberId&searchKey=$searchString&page=$page';
+        'http://ptnpharma.com/apishop/json_productfrequentlist.php?memberId=$memberId&searchKey=$searchString&page=$page';
 
     // url = '${MyStyle().readProductWhereMode}$myIndex';
     print("URL = $url");
 
     http.Response response = await http.get(url);
     var result = json.decode(response.body);
-    var itemProductvotes = result['itemsProduct'];
+    var itemProductfavs = result['itemsProduct'];
     // print('itemProducts >> ${itemProducts}');
     int i = 0;
-    // print('Start >> ${filterProductVoteModels.length}');
-    // int s = (filterProductVoteModels.length);
-    // if (filterProductVoteModels.length == 0)
+    // print('Start >> ${filterProductAllModels.length}');
+    // int s = (filterProductAllModels.length);
+    // if (filterProductAllModels.length == 0)
     //   int substart = 0;
     // else
     //   int substart = 20;
 
-    int len = (filterProductVoteModels.length);
+    int len = (filterProductAllModels.length);
 
-    for (var map in itemProductvotes) {
-      ProductVoteModel productVoteModel = ProductVoteModel.fromJson(map);
+    for (var map in itemProductfavs) {
+      ProductAllModel productAllModel = ProductAllModel.fromJson(map);
 
       setState(() {
-        productVoteModels.add(productVoteModel);
-        filterProductVoteModels = productVoteModels;
+        productAllModels.add(productAllModel);
+        filterProductAllModels = productAllModels;
       });
       print(
-          ' >> ${len} =>($i)  ${productVoteModel.id}  || ${productVoteModels[i].title} (${filterProductVoteModels[i].votescore}) <<  (${productVoteModel.votescore})');
+          ' >> ${len} =>($i)  ${productAllModel.id}  || ${productAllModels[i].title} (${filterProductAllModels[i].itemincartSunit}) <<  (${productAllModel.itemincartSunit})');
 
       i = i + 1;
     }
@@ -241,12 +241,12 @@ class _ListProductvoteState extends State<ListProductvote> {
   }
 
   Future<void> updateDatalist(index) async {
-    // List<ProductVoteModel> productVoteModels_buffer = List(); // []; //
+    // List<ProductAllModel> productAllModels_buffer = List(); // []; //
     // String url = MyStyle().readAllProduct;
     print('Here is updateDatalist function');
 
     String memberId = myUserModel.id.toString();
-    int productID = filterProductVoteModels[index].id;
+    int productID = filterProductAllModels[index].id;
     String url =
         'http://ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId';
 
@@ -254,6 +254,24 @@ class _ListProductvoteState extends State<ListProductvote> {
     http.Response response = await http.get(url);
     var result = json.decode(response.body);
     var cartList = result['cart'];
+    for (var mapCart in cartList) {
+      if (mapCart['id'] == productID) {
+        setState(() {
+          if (mapCart['price_list'].containsKey('s')) {
+            filterProductAllModels[index].itemincartSunit =
+                mapCart['price_list']['s']['quantity'];
+          }
+          if (mapCart['price_list'].containsKey('m')) {
+            filterProductAllModels[index].itemincartMunit =
+                mapCart['price_list']['m']['quantity'];
+          }
+          if (mapCart['price_list'].containsKey('l')) {
+            filterProductAllModels[index].itemincartLunit =
+                mapCart['price_list']['l']['quantity'];
+          }
+        });
+      }
+    }
   }
 
   Widget showName(int index) {
@@ -262,7 +280,7 @@ class _ListProductvoteState extends State<ListProductvote> {
         Container(
           width: MediaQuery.of(context).size.width * 0.7 - 10,
           child: Text(
-            filterProductVoteModels[index].title,
+            filterProductAllModels[index].title,
             style: MyStyle().h3Style,
           ),
         ),
@@ -273,20 +291,32 @@ class _ListProductvoteState extends State<ListProductvote> {
   Widget showStock(int index) {
     return Row(
       children: <Widget>[
-        // Container(
-        //   width: MediaQuery.of(context).size.width * 0.11,
-        //   child: Text(
-        //     'ใช้เพื่อ:',
-        //     style: MyStyle().h4StyleGray,
-        //   ),
-        // ),
         Container(
-          width: MediaQuery.of(context).size.width * 0.66,
+          width: MediaQuery.of(context).size.width * 0.15,
           child: Text(
-            'ใช้เพื่อ:' + ' ${filterProductVoteModels[index].usefor}',
-            style: MyStyle().h4StyleGray,
+            'สั่งประจำ:',
+            style: TextStyle(
+              fontSize: 12.0,
+              color: Colors.blue,
+            ),
           ),
         ),
+        Container(
+          width: MediaQuery.of(context).size.width * 0.15,
+          child: Text(
+            ((filterProductAllModels[index].itemFeqSunit != '0')
+                    ? '${filterProductAllModels[index].itemFeqSunit} ${filterProductAllModels[index].itemSunit}  '
+                    : '') +
+                ((filterProductAllModels[index].itemFeqMunit != '0')
+                    ? '${filterProductAllModels[index].itemFeqMunit} ${filterProductAllModels[index].itemMunit}  '
+                    : '') +
+                ((filterProductAllModels[index].itemFeqLunit != '0')
+                    ? '${filterProductAllModels[index].itemFeqLunit} ${filterProductAllModels[index].itemLunit}'
+                    : ''),
+            style: MyStyle().h4StyleBlue,
+          ),
+        ),
+        showIncart(index),
       ],
     );
     // return Text('na');
@@ -297,16 +327,26 @@ class _ListProductvoteState extends State<ListProductvote> {
       Container(
         width: MediaQuery.of(context).size.width * 0.13,
         child: Text(
-          (filterProductVoteModels[index].votescore != '0') ? 'ตะกร้า:' : '',
+          (filterProductAllModels[index].itemincartSunit != '0' ||
+                  filterProductAllModels[index].itemincartMunit != '0' ||
+                  filterProductAllModels[index].itemincartLunit != '0')
+              ? 'ตะกร้า:'
+              : '',
           style: MyStyle().h4StyleRed,
         ),
       ),
       Container(
         width: MediaQuery.of(context).size.width * 0.25,
         child: Text(
-          ((filterProductVoteModels[index].votescore != '0')
-              ? '${filterProductVoteModels[index].votescore} ${filterProductVoteModels[index].votescore}  '
-              : ''),
+          ((filterProductAllModels[index].itemincartSunit != '0')
+                  ? '${filterProductAllModels[index].itemincartSunit} ${filterProductAllModels[index].itemSunit}  '
+                  : '') +
+              ((filterProductAllModels[index].itemincartMunit != '0')
+                  ? '${filterProductAllModels[index].itemincartMunit} ${filterProductAllModels[index].itemMunit}  '
+                  : '') +
+              ((filterProductAllModels[index].itemincartLunit != '0')
+                  ? '${filterProductAllModels[index].itemincartLunit} ${filterProductAllModels[index].itemLunit}'
+                  : ''),
           style: MyStyle().h4StyleRed,
         ),
       ),
@@ -317,8 +357,21 @@ class _ListProductvoteState extends State<ListProductvote> {
     String txtShowPrice;
     String txtShowUnit;
     String txtPriceUnit = '';
-    if (filterProductVoteModels[index].pricelabel.toString() != '0') {
-      txtShowPrice = filterProductVoteModels[index].pricesale.toString();
+    if (filterProductAllModels[index].itemSprice.toString() != '0') {
+      txtShowPrice = filterProductAllModels[index].itemSprice.toString();
+      txtShowUnit = filterProductAllModels[index].itemSunit.toString();
+      if (txtShowPrice != '' && txtShowUnit != '')
+        txtPriceUnit = '$txtPriceUnit' + " [$txtShowPrice/$txtShowUnit] ";
+    }
+    if (filterProductAllModels[index].itemMprice.toString() != '0') {
+      txtShowPrice = filterProductAllModels[index].itemMprice.toString();
+      txtShowUnit = filterProductAllModels[index].itemMunit.toString();
+      if (txtShowPrice != '' && txtShowUnit != '')
+        txtPriceUnit = '$txtPriceUnit' + " [$txtShowPrice/$txtShowUnit] ";
+    }
+    if (filterProductAllModels[index].itemLprice.toString() != '0') {
+      txtShowPrice = filterProductAllModels[index].itemLprice.toString();
+      txtShowUnit = filterProductAllModels[index].itemLunit.toString();
       if (txtShowPrice != '' && txtShowUnit != '')
         txtPriceUnit = '$txtPriceUnit' + " [$txtShowPrice/$txtShowUnit] ";
     }
@@ -340,11 +393,11 @@ class _ListProductvoteState extends State<ListProductvote> {
 
   Widget showText(int index) {
     return Container(
-      padding: EdgeInsets.only(left: 2.0, right: 2.0),
+      padding: EdgeInsets.only(left: 5.0, right: 2.0),
       // height: MediaQuery.of(context).size.width * 0.5,
-      width: MediaQuery.of(context).size.width * 0.69,
+      width: MediaQuery.of(context).size.width * 0.65,
       child: Container(
-        padding: EdgeInsets.only(bottom: 2.0, top: 2.0),
+        padding: EdgeInsets.only(bottom: 5.0, top: 5.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
@@ -361,54 +414,15 @@ class _ListProductvoteState extends State<ListProductvote> {
     return Container(
       padding: EdgeInsets.all(5.0),
       // width: MediaQuery.of(context).size.width * 0.25,
-      // child: Image.network(filterProductVoteModels[index].photo),
-      width: 60,
-      height: 60,
+      // child: Image.network(filterProductAllModels[index].photo),
+      width: 80,
+      height: 80,
       decoration: new BoxDecoration(
           image: new DecorationImage(
         fit: BoxFit.cover,
         alignment: FractionalOffset.topCenter,
-        image: new NetworkImage(filterProductVoteModels[index].photo),
+        image: new NetworkImage(filterProductAllModels[index].photo),
       )),
-    );
-  }
-
-  Future<void> thumbLike(
-      String productID, String memberID, bool _isFavorite) async {
-    String url =
-        'http://ptnpharma.com/apishop/json_productvote.php?productID=$productID&memberId=$memberID&status=$_isFavorite';
-
-    print('url Favorites url ====>>>>> $url');
-    await http.get(url).then((response) {
-      setState(() {
-        //readCart();
-      });
-    });
-  }
-
-  Widget showThumb(int index) {
-    bool favStatus =
-        (filterProductVoteModels[index].yourvote == true) ? true : false;
-    String productID = filterProductVoteModels[index].id.toString();
-    String memberID = myUserModel.id.toString();
-    return Container(
-      width: MediaQuery.of(context).size.width * 0.06,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          FavoriteButton(
-            isFavorite: favStatus,
-            iconSize: 40.0,
-            // iconDisabledColor: Colors.white,
-            valueChanged: (_isFavorite) {
-              // print('Is Favorite : $_isFavorite');
-              thumbLike(productID, memberID, _isFavorite);
-
-              // http.Response response =  http.get(url);
-            },
-          ),
-        ],
-      ),
     );
   }
 
@@ -447,7 +461,78 @@ class _ListProductvoteState extends State<ListProductvote> {
     );
   }
 
-  Widget showProductvoteItem() {
+  Future<void> iconAddCart(String memberID, String productID, String selectUnit,
+      String qty, bool _isFavorite) async {
+    String url =
+        'http://ptnpharma.com/apishop/json_addfeqitemtocart.php?memberId=$memberID&productID=$productID&selectUnit=$selectUnit&qty=$qty&status=$_isFavorite';
+
+    print('url Favorites url ====>>>>> $url');
+    await http.get(url).then((response) {
+      setState(() {
+        //readCart();
+      });
+    });
+  }
+
+  Widget showThumb(int index) {
+    bool favStatus = ((filterProductAllModels[index].itemFeqSunit != '0' &&
+                filterProductAllModels[index].itemFeqSunit ==
+                    filterProductAllModels[index].itemincartSunit) ||
+            (filterProductAllModels[index].itemFeqMunit != '0' &&
+                filterProductAllModels[index].itemFeqMunit ==
+                    filterProductAllModels[index].itemincartMunit) ||
+            (filterProductAllModels[index].itemFeqLunit != '0' &&
+                filterProductAllModels[index].itemFeqLunit ==
+                    filterProductAllModels[index].itemincartLunit))
+        ? false
+        : true;
+    String qty;
+    String productID = filterProductAllModels[index].id.toString();
+    String memberID = myUserModel.id.toString();
+    String selectUnit = filterProductAllModels[index].selectUnit;
+    switch (selectUnit) {
+      case 's':
+        qty = filterProductAllModels[index].itemFeqSunit;
+        break;
+      case 'm':
+        qty = filterProductAllModels[index].itemFeqMunit;
+        break;
+      case 'l':
+        qty = filterProductAllModels[index].itemFeqLunit;
+        break;
+    }
+
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.06,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          (favStatus == true)
+              ? FavoriteButton(
+                  isFavorite: true, //favStatus,
+                  iconSize: 40.0,
+                  // iconDisabledColor: Colors.white,
+                  valueChanged: (_isFavorite) {
+                    // print('Is Favorite : $_isFavorite');
+                    iconAddCart(
+                        memberID, productID, selectUnit, qty, _isFavorite);
+                    setState(() {
+                      readCart();
+                      updateDatalist(index);
+                    });
+                    // http.Response response =  http.get(url);
+                  },
+                )
+              : Icon(
+                  Icons.add_shopping_cart,
+                  color: Colors.grey.shade400,
+                ),
+        ],
+      ),
+    );
+  }
+
+  Widget showProductfavItem() {
     int perpage = 15;
     bool loadingIcon = false;
 
@@ -455,7 +540,7 @@ class _ListProductvoteState extends State<ListProductvote> {
     return Expanded(
       child: ListView.builder(
         controller: scrollController,
-        itemCount: productVoteModels.length,
+        itemCount: productAllModels.length,
         itemBuilder: (BuildContext buildContext, int index) {
           // print('perpage >> ${perpage} || index >> $index');
 
@@ -485,6 +570,24 @@ class _ListProductvoteState extends State<ListProductvote> {
                       ),
                     ),
                   ),
+                  onTap: () {
+                    // print(
+                    //     'index select item => ${filterProductAllModels[index]}');
+                    // MaterialPageRoute materialPageRoute =
+                    //     MaterialPageRoute(builder: (BuildContext buildContext) {
+                    //   return Detail(
+                    //     productAllModel: filterProductAllModels[index],
+                    //     userModel: myUserModel,
+                    //   );
+                    // });
+
+                    // Navigator.of(context)
+                    //     .push(materialPageRoute)
+                    //     .then((value) => setState(() {
+                    //           readCart();
+                    //           updateDatalist(index);
+                    //         }));
+                  },
                 ),
                 myCircularProgress(),
               ],
@@ -507,6 +610,23 @@ class _ListProductvoteState extends State<ListProductvote> {
                 ),
               ),
             ),
+            onTap: () {
+              // print('index select item => ${filterProductAllModels[index]}');
+              // MaterialPageRoute materialPageRoute =
+              //     MaterialPageRoute(builder: (BuildContext buildContext) {
+              //   return Detail(
+              //     productAllModel: filterProductAllModels[index],
+              //     userModel: myUserModel,
+              //   );
+              // });
+
+              // Navigator.of(context)
+              //     .push(materialPageRoute)
+              //     .then((value) => setState(() {
+              //           readCart();
+              //           updateDatalist(index);
+              //         }));
+            },
           );
         },
       ),
@@ -519,14 +639,14 @@ class _ListProductvoteState extends State<ListProductvote> {
       searchKey = true;
     }
 
-    if (filterProductVoteModels.length == 0) {
+    if (filterProductAllModels.length == 0) {
       if (myIndex != 4) {
         return showProgressIndicate(searchKey);
       } else {
         return Center(child: Text(''));
       }
     } else {
-      return showProductvoteItem();
+      return showProductfavItem();
     }
   }
 
@@ -534,7 +654,7 @@ class _ListProductvoteState extends State<ListProductvote> {
     // print('searchKey >> $searchKey');
 
     if (searchKey == true) {
-      if (filterProductVoteModels.length == 0) {
+      if (filterProductAllModels.length == 0) {
         return Center(child: Text('')); // Search not found
       } else {
         return Center(child: Text(''));
@@ -584,53 +704,73 @@ class _ListProductvoteState extends State<ListProductvote> {
     );
   }
 
-  Widget searchForm() {
-    return Container(
-      decoration: MyStyle().boxLightGray,
-      // color: Colors.grey,
-      padding: EdgeInsets.only(left: 5.0, right: 5.0, top: 2.0, bottom: 2.0),
-      child: ListTile(
-        trailing: Container(
-          width: 45.0,
-          child: Image.asset('images/icon_barcode.png'),
-        ),
-        onTap: () {
-          print('You click barcode scan');
-          // readQRcode();
-          // readQRcodePreview();
-          // Navigator.of(context).pop();
-        },
-        title: TextField(
-          controller: _controller,
-          textAlign: TextAlign.center,
-          scrollPadding: EdgeInsets.all(1.00),
-          style: TextStyle(
-              color: Colors.blue.shade900,
-              fontWeight: FontWeight.w300,
-              fontSize: 18.00),
-          decoration: InputDecoration(
-            border: OutlineInputBorder(),
-            hintText: 'ค้นหาสินค้า',
-            suffixIcon: IconButton(
-              onPressed: () => _controller.clear(),
-              icon: Icon(Icons.clear),
-            ),
-          ),
-          onChanged: (String string) {
-            searchString = string.trim();
-          },
-          textInputAction: TextInputAction.search,
-          onSubmitted: (value) {
-            setState(() {
-              page = 1;
-              myIndex = 0;
-              productVoteModels.clear();
-              readData();
-            });
-          },
-        ),
-      ),
+  Future<void> addAlltoCart() async {
+    String memberID = myUserModel.id.toString();
+    String url =
+        'http://ptnpharma.com/apishop/json_addallfeqitemtocart.php?memberId=$memberID';
+
+    print('url Favorites url ====>>>>> $url');
+    await http.get(url).then((response) {
+      setState(() {
+        page = 1;
+        myIndex = 0;
+        // productAllModels.clear();
+        filterProductAllModels.clear();
+        readData();
+        readCart();
+      });
+    });
+  }
+
+  void confirmAddAll() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('ยืนยันเพิ่มสินค้า'),
+            content: Text('เพิ่มทุกรายการลงตะกร้า'),
+            actions: <Widget>[
+              cancelButton(),
+              comfirmButton(),
+            ],
+          );
+        });
+  }
+
+  Widget cancelButton() {
+    return TextButton(
+      child: Text('Cancel'),
+      onPressed: () {
+        Navigator.of(context).pop();
+      },
     );
+  }
+
+  Widget comfirmButton() {
+    return TextButton(
+      child: Text('Confirm'),
+      onPressed: () {
+        addAlltoCart();
+        Navigator.of(context).pop();
+      },
+    );
+  }
+
+  Widget addAllBTN() {
+    final ButtonStyle style =
+        ElevatedButton.styleFrom(textStyle: const TextStyle(fontSize: 18));
+    return Padding(
+        padding: const EdgeInsets.all(2.0),
+        child: Align(
+          alignment: Alignment.topRight,
+          child: ElevatedButton(
+            style: style,
+            child: const Text('เพิ่มทั้งหมดลงตะกร้า'),
+            onPressed: () {
+              confirmAddAll();
+            },
+          ),
+        ));
   }
 
   void routeToListProduct(int index) {
@@ -644,10 +784,10 @@ class _ListProductvoteState extends State<ListProductvote> {
     Navigator.of(context).push(materialPageRoute);
   }
 
-  void routeToListProductvote(int index) {
+  void routeToListProductfav(int index) {
     MaterialPageRoute materialPageRoute =
         MaterialPageRoute(builder: (BuildContext buildContext) {
-      return ListProductvote(
+      return ListProductfav(
         index: index,
         userModel: myUserModel,
       );
@@ -674,19 +814,24 @@ class _ListProductvoteState extends State<ListProductvote> {
       case 1:
         break; // all product
       case 2:
-        String webPage = 'request';
-
-        print('You click $webPage');
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => WebView(
-                      userModel: myUserModel,
-                      webPage: webPage,
-                    )));
-
+        routeToListProduct(0);
         break; // all product
+      case 3:
+        routeToListProduct(2);
+        MaterialPageRoute materialPageRoute =
+            MaterialPageRoute(builder: (BuildContext buildContext) {
+          return DetailCart(
+            userModel: myUserModel,
+          );
+        });
+        Navigator.of(context).push(materialPageRoute).then((value) {
+          setState(() {
+            print('Here is change page');
 
+            readCart();
+          });
+        });
+        break; // Shopping cart
     }
   }
 
@@ -723,7 +868,7 @@ class _ListProductvoteState extends State<ListProductvote> {
               Icons.favorite,
               color: Colors.red,
             ),
-            title: Text("โหวตยาเข้าร้าน")),
+            title: Text("สินค้าสั่งประจำ")),
         BubbleBottomBarItem(
             backgroundColor: Colors.green,
             icon: Icon(
@@ -734,7 +879,18 @@ class _ListProductvoteState extends State<ListProductvote> {
               Icons.medical_services,
               color: Colors.green,
             ),
-            title: Text("แนะนำยาที่ต้องการ")),
+            title: Text("สินค้า")),
+        BubbleBottomBarItem(
+            backgroundColor: Colors.brown,
+            icon: Icon(
+              Icons.shopping_cart,
+              color: Colors.black,
+            ),
+            activeIcon: Icon(
+              Icons.shopping_cart,
+              color: Colors.brown,
+            ),
+            title: Text("ตะกร้าสินค้า")),
       ],
     );
   }
@@ -742,7 +898,7 @@ class _ListProductvoteState extends State<ListProductvote> {
   @override
   Widget build(BuildContext context) {
     String txtheader = '';
-    txtheader = 'โหวตยาน่าขาย';
+    txtheader = 'สินค้าสั่งประจำ';
     return Scaffold(
       appBar: AppBar(
         backgroundColor: MyStyle().bgColor,
@@ -754,7 +910,7 @@ class _ListProductvoteState extends State<ListProductvote> {
 
       body: Column(
         children: <Widget>[
-          // searchForm(),
+          addAllBTN(),
           // lastItemInCart(),
           showContent(),
         ],
@@ -891,61 +1047,12 @@ class _FavoriteButtonState extends State<FavoriteButton>
             });
           },
           child: Icon(
-            (Icons.thumb_up),
+            (Icons.add_shopping_cart),
             color: _colorAnimation.value,
             size: _sizeAnimation.value,
           ),
         );
       },
-    );
-  }
-}
-
-class WebView extends StatefulWidget {
-  final UserModel userModel;
-  final String webPage;
-
-  WebView({Key key, this.userModel, this.webPage}) : super(key: key);
-
-  @override
-  _WebViewState createState() => _WebViewState();
-}
-
-class _WebViewState extends State<WebView> {
-  UserModel myUserModel;
-  String mywebPage;
-
-  @override
-  void initState() {
-    super.initState();
-    myUserModel = widget.userModel;
-    mywebPage = widget.webPage;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    String memberId = myUserModel.id;
-    String memberCode = myUserModel.customerCode;
-    String webPage = mywebPage.toString();
-
-    String url =
-        'https://ptnpharma.com/shop/pages/forms/product_request_mobile.php?memberId=$memberId&memberCode=$memberCode'; //
-    String txtTitle = 'แนะนำยาที่ต้องการ';
-
-    print('Click open ==>> $webPage');
-
-    print('URL ==>> $url');
-    return WebviewScaffold(
-      url: url, //"https://www.androidmonks.com",
-      appBar: AppBar(
-        backgroundColor: MyStyle().bgColor,
-        title: Text(txtTitle),
-      ),
-      withZoom: true,
-      withJavascript: true,
-      withLocalStorage: true,
-      appCacheEnabled: false,
-      ignoreSSLErrors: true,
     );
   }
 }

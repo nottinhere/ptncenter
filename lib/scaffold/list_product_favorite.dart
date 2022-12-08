@@ -320,7 +320,7 @@ class _ListProductfavState extends State<ListProductfav> {
                   filterProductAllModels[index].itemincartLunit != '0')
               ? 'ตะกร้า:'
               : '',
-          style: MyStyle().h4StyleBlue,
+          style: MyStyle().h4StyleRed,
         ),
       ),
       Container(
@@ -335,7 +335,7 @@ class _ListProductfavState extends State<ListProductfav> {
               ((filterProductAllModels[index].itemincartLunit != '0')
                   ? '${filterProductAllModels[index].itemincartLunit} ${filterProductAllModels[index].itemLunit}'
                   : ''),
-          style: MyStyle().h4StyleBlue,
+          style: MyStyle().h4StyleRed,
         ),
       ),
     ]);
