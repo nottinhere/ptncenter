@@ -96,7 +96,7 @@ class _DetailCartState extends State<DetailCart> {
     String url = '${MyStyle().loadMyCart}$memberId';
     print('url Detail Cart ====>>>>> $url');
 
-    http.Response response = await http.get(url);
+    http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var cartList = result['cart'];
     // print('cartList =======>>> $cartList');
@@ -374,7 +374,7 @@ class _DetailCartState extends State<DetailCart> {
 
     print('url editDetailCart ====>>>>> $url');
 
-    await http.get(url).then((response) {
+    await http.get(Uri.parse(url)).then((response) {
       setState(() {
         readCart();
       });
@@ -386,10 +386,10 @@ class _DetailCartState extends State<DetailCart> {
     String url =
         'http://ptnpharma.com/apishop/json_updatemycart.php?productID=$productID&unitSize=$unitSize&newQTY=$newQTY&memberId=$memberID';
     print('url editDetailCart ====>>>>> $url');
-    await http.get(url).then((response) {});
+    await http.get(Uri.parse(url)).then((response) {});
 
     String url2 = '${MyStyle().loadMyCart}$memberID';
-    http.Response response = await http.get(url2);
+    http.Response response = await http.get(Uri.parse(url2));
     var result = json.decode(response.body);
     var cartList = result['cart'];
 
@@ -511,7 +511,7 @@ class _DetailCartState extends State<DetailCart> {
         'http://ptnpharma.com/apishop/json_removeitemincart.php?productID=$productID&unitSize=$unitSize&memberId=$memberID';
     print('url DeleteCart#######################======>>>> $url');
 
-    await http.get(url).then((response) {
+    await http.get(Uri.parse(url)).then((response) {
       setState(() {
         readCart();
       });
@@ -774,7 +774,7 @@ class _DetailCartState extends State<DetailCart> {
           'http://ptnpharma.com/apishop/json_submit_myorder.php?memberId=$memberID&transport=$transport&comment=$comment';
       print('url ==> $url');
 
-      await http.get(url).then((value) {
+      await http.get(Uri.parse(url)).then((value) {
         confirmSubmit();
       });
     } catch (e) {}
@@ -883,7 +883,7 @@ class _DetailCartState extends State<DetailCart> {
     try {
       String url =
           'http://ptnpharma.com/apishop/json_productlist.php?bqcode=$code';
-      http.Response response = await http.get(url);
+      http.Response response = await http.get(Uri.parse(url));
       var result = json.decode(response.body);
       print('result ===*******>>>> $result');
 

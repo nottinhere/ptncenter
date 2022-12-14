@@ -140,7 +140,7 @@ class _ListProductfavState extends State<ListProductfav> {
 
     print('url Detail =====>>>>>>>> $url');
 
-    http.Response response = await http.get(url);
+    http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var cartList = result['cart'];
     for (var map in cartList) {
@@ -206,7 +206,7 @@ class _ListProductfavState extends State<ListProductfav> {
     // url = '${MyStyle().readProductWhereMode}$myIndex';
     print("URL = $url");
 
-    http.Response response = await http.get(url);
+    http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var itemProductfavs = result['itemsProduct'];
     // print('itemProducts >> ${itemProducts}');
@@ -248,7 +248,7 @@ class _ListProductfavState extends State<ListProductfav> {
         'http://ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId';
 
     print("URL update item = $url");
-    http.Response response = await http.get(url);
+    http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var cartList = result['cart'];
     for (var mapCart in cartList) {
@@ -656,7 +656,7 @@ class _ListProductfavState extends State<ListProductfav> {
     try {
       String url =
           'http://ptnpharma.com/apishop/json_productlist.php?bqcode=$code';
-      http.Response response = await http.get(url);
+      http.Response response = await http.get(Uri.parse(url));
       var result = json.decode(response.body);
       // print('result ===*******>>>> $result');
 

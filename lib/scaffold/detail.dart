@@ -82,7 +82,7 @@ class _DetailState extends State<Detail> {
       id = currentProductAllModel.id.toString();
       String url = '${MyStyle().getProductWhereId}$id&memberId=$memberId';
       print('url Detaillll ====>>> $url');
-      http.Response response = await http.get(url);
+      http.Response response = await http.get(Uri.parse(url));
       var result = json.decode(response.body);
       // print('result =0000000>>> $result');
 
@@ -134,7 +134,7 @@ class _DetailState extends State<Detail> {
         'http://www.ptnpharma.com/apishop/json_relate.php?memberId=$memId&productId=$id'; // ?memberId=$memberId
 
     print('URL relate >> $url');
-    http.Response response = await http.get(url);
+    http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var mapItemProduct =
         result['itemsProduct']; // dynamic    จะส่ง value อะไรก็ได้ รวมถึง null
@@ -380,7 +380,7 @@ class _DetailState extends State<Detail> {
         'http://ptnpharma.com/apishop/json_favorite.php?productID=$productID&memberId=$memberID&status=$_isFavorite';
 
     print('url Favorites url ====>>>>> $url');
-    await http.get(url).then((response) {
+    await http.get(Uri.parse(url)).then((response) {
       setState(() {
         //readCart();
       });
@@ -407,7 +407,7 @@ class _DetailState extends State<Detail> {
             // print('Is Favorite : $_isFavorite');
             editFavorite(productID, memberID, _isFavorite);
 
-            // http.Response response =  http.get(url);
+            // http.Response response =  http.get(Uri.parse(url));
           },
         ),
       ],
@@ -679,7 +679,7 @@ class _DetailState extends State<Detail> {
 
     print('url Detail =====>>>>>>>> $url');
 
-    http.Response response = await http.get(url);
+    http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var cartList = result['cart'];
     for (var map in cartList) {
@@ -810,7 +810,7 @@ class _DetailState extends State<Detail> {
     try {
       String url =
           'http://ptnpharma.com/apishop/json_productlist.php?bqcode=$code';
-      http.Response response = await http.get(url);
+      http.Response response = await http.get(Uri.parse(url));
       var result = json.decode(response.body);
       print('result ===*******>>>> $result');
 
@@ -1064,7 +1064,7 @@ class _DetailState extends State<Detail> {
     String url =
         'http://www.ptnpharma.com/apishop/json_savemycart.php?productID=$productID&unitSize=$unitSize&QTY=$qTY&memberId=$memberID';
     print('urlAddcart = $url');
-    await http.get(url).then((response) {});
+    await http.get(Uri.parse(url)).then((response) {});
     print('upload ok');
 
     Navigator.pop(context, true);

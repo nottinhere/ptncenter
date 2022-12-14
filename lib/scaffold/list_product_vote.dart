@@ -143,7 +143,7 @@ class _ListProductvoteState extends State<ListProductvote> {
 
     print('url Detail =====>>>>>>>> $url');
 
-    http.Response response = await http.get(url);
+    http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var cartList = result['cart'];
     for (var map in cartList) {
@@ -209,7 +209,7 @@ class _ListProductvoteState extends State<ListProductvote> {
     // url = '${MyStyle().readProductWhereMode}$myIndex';
     print("URL = $url");
 
-    http.Response response = await http.get(url);
+    http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var itemProductvotes = result['itemsProduct'];
     // print('itemProducts >> ${itemProducts}');
@@ -251,7 +251,7 @@ class _ListProductvoteState extends State<ListProductvote> {
         'http://ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId';
 
     print("URL update item = $url");
-    http.Response response = await http.get(url);
+    http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var cartList = result['cart'];
   }
@@ -379,7 +379,7 @@ class _ListProductvoteState extends State<ListProductvote> {
         'http://ptnpharma.com/apishop/json_productvote.php?productID=$productID&memberId=$memberID&status=$_isFavorite';
 
     print('url Favorites url ====>>>>> $url');
-    await http.get(url).then((response) {
+    await http.get(Uri.parse(url)).then((response) {
       setState(() {
         //readCart();
       });
@@ -404,7 +404,7 @@ class _ListProductvoteState extends State<ListProductvote> {
               // print('Is Favorite : $_isFavorite');
               thumbLike(productID, memberID, _isFavorite);
 
-              // http.Response response =  http.get(url);
+              // http.Response response =  http.get(Uri.parse(url));
             },
           ),
         ],

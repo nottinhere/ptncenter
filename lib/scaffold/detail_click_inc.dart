@@ -54,7 +54,7 @@ class _DetailState extends State<Detail> {
       id = currentProductAllModel.id.toString();
       String url = '${MyStyle().getProductWhereId}$id&memberId=$memberId';
       print('url Detaillll ====>>> $url');
-      http.Response response = await http.get(url);
+      http.Response response = await http.get(Uri.parse(url));
       var result = json.decode(response.body);
       print('result =0000000>>> $result');
 
@@ -219,7 +219,7 @@ class _DetailState extends State<Detail> {
         'http://ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId';
 
     // print('url Detail =====>>>>>>>> $url');
-    http.Response response = await http.get(url);
+    http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var cartList = result['cart'];
     for (var map in cartList) {
@@ -356,7 +356,7 @@ class _DetailState extends State<Detail> {
     String url =
         'http://www.ptnpharma.com/apishop/json_savemycart.php?productID=$productID&unitSize=$unitSize&QTY=$qTY&memberId=$memberID';
     print('urlAddcart = $url');
-    await http.get(url).then((response) {});
+    await http.get(Uri.parse(url)).then((response) {});
     print('upload ok');
     Navigator.pop(context, true);
   }

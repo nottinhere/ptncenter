@@ -131,7 +131,7 @@ class _HomeState extends State<Home> {
 
       String url =
           'http://ptnpharma.com/apishop/json_productlist.php?bqcode=$barcodeScanRes';
-      http.Response response = await http.get(url);
+      http.Response response = await http.get(Uri.parse(url));
       var result = json.decode(response.body);
       // print('result ===*******>>>> $result');
 
@@ -179,7 +179,7 @@ class _HomeState extends State<Home> {
 
   Future<void> readPromotion() async {
     String url = 'http://www.ptnpharma.com/apishop/json_promotion.php';
-    http.Response response = await http.get(url);
+    http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var mapItemProduct =
         result['itemsProduct']; // dynamic    จะส่ง value อะไรก็ได้ รวมถึง null
@@ -206,7 +206,7 @@ class _HomeState extends State<Home> {
     String memId = myUserModel.id;
     String url =
         'http://www.ptnpharma.com/apishop/json_suggest.php?memberId=$memId'; // ?memberId=$memberId
-    http.Response response = await http.get(url);
+    http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var mapItemProduct =
         result['itemsProduct']; // dynamic    จะส่ง value อะไรก็ได้ รวมถึง null
@@ -1080,7 +1080,7 @@ class _HomeState extends State<Home> {
     String url =
         'http://ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId';
 
-    http.Response response = await http.get(url);
+    http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var cartList = result['cart'];
     if (cartList != null) {
@@ -1097,7 +1097,7 @@ class _HomeState extends State<Home> {
     try {
       String url =
           'http://ptnpharma.com/apishop/json_productlist.php?bqcode=$code';
-      http.Response response = await http.get(url);
+      http.Response response = await http.get(Uri.parse(url));
       var result = json.decode(response.body);
       print('result ===*******>>>> $result');
 

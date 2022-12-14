@@ -63,7 +63,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> readPromotion() async {
     String url = 'http://www.ptnpharma.com/apishop/json_promotion.php';
-    http.Response response = await http.get(url);
+    http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var mapItemProduct =
         result['itemsProduct']; // dynamic    จะส่ง value อะไรก็ได้ รวมถึง null
@@ -88,7 +88,7 @@ class _HomeScreenState extends State<HomeScreen> {
     String memId = myUserModel.id;
     String url =
         'http://www.ptnpharma.com/apishop/json_suggest.php?memberId=$memId'; // ?memberId=$memberId
-    http.Response response = await http.get(url);
+    http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var mapItemProduct =
         result['itemsProduct']; // dynamic    จะส่ง value อะไรก็ได้ รวมถึง null
@@ -676,7 +676,7 @@ class _HomeScreenState extends State<HomeScreen> {
     String url =
         'http://ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId';
 
-    http.Response response = await http.get(url);
+    http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var cartList = result['cart'];
 
@@ -692,7 +692,7 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       String url =
           'http://ptnpharma.com/apishop/json_productlist.php?bqcode=$code';
-      http.Response response = await http.get(url);
+      http.Response response = await http.get(Uri.parse(url));
       var result = json.decode(response.body);
       print('result ===*******>>>> $result');
 

@@ -76,7 +76,7 @@ class _MyServiceState extends State<MyService> {
     String url =
         'http://ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId';
 
-    http.Response response = await http.get(url);
+    http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var cartList = result['cart'];
     // print('cartList >> $cartList');
@@ -95,7 +95,7 @@ class _MyServiceState extends State<MyService> {
     String url = 'http://ptnpharma.com/apishop/json_category.php';
     // print('url readCategory >> $url');
 
-    http.Response response = await http.get(url);
+    http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var cateList = result['data'];
     for (var map in cateList) {
@@ -402,7 +402,7 @@ class _MyServiceState extends State<MyService> {
     try {
       String url =
           'http://ptnpharma.com/apishop/json_productlist.php?bqcode=$code';
-      http.Response response = await http.get(url);
+      http.Response response = await http.get(Uri.parse(url));
       var result = json.decode(response.body);
       print('result ===*******>>>> $result');
 

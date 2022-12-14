@@ -47,7 +47,7 @@ class _DetailState extends State<DetailPopup> {
     String url = 'http://ptnpharma.com/apishop/json_popupdetail.php';
     print('urlPopup >> $url');
 
-    http.Response response = await http.get(url);
+    http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
 
     var mapItemPopup =

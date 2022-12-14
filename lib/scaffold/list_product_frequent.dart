@@ -143,7 +143,7 @@ class _ListProductFrequent extends State<ListProductFrequent> {
 
     // print('url Detail =====>>>>>>>> $url');
 
-    http.Response response = await http.get(url);
+    http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var cartList = result['cart'];
     for (var map in cartList) {
@@ -209,7 +209,7 @@ class _ListProductFrequent extends State<ListProductFrequent> {
     // url = '${MyStyle().readProductWhereMode}$myIndex';
     print("URL = $url");
 
-    http.Response response = await http.get(url);
+    http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var itemProductfavs = result['itemsProduct'];
     // print('itemProducts >> ${itemProducts}');
@@ -251,7 +251,7 @@ class _ListProductFrequent extends State<ListProductFrequent> {
         'http://ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId';
 
     print("URL update item = $url");
-    http.Response response = await http.get(url);
+    http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var cartList = result['cart'];
     for (var mapCart in cartList) {
@@ -467,7 +467,7 @@ class _ListProductFrequent extends State<ListProductFrequent> {
         'http://ptnpharma.com/apishop/json_addfeqitemtocart.php?memberId=$memberID&productID=$productID&selectUnit=$selectUnit&qty=$qty&status=$_isFavorite';
 
     print('url Favorites url ====>>>>> $url');
-    await http.get(url).then((response) {
+    await http.get(Uri.parse(url)).then((response) {
       setState(() {
         //readCart();
       });
@@ -520,7 +520,7 @@ class _ListProductFrequent extends State<ListProductFrequent> {
                       readCart();
                       updateDatalist(index);
                     });
-                    // http.Response response =  http.get(url);
+                    // http.Response response =  http.get(Uri.parse(url));
                   },
                 )
               : Icon(
@@ -710,7 +710,7 @@ class _ListProductFrequent extends State<ListProductFrequent> {
         'http://ptnpharma.com/apishop/json_addallfeqitemtocart.php?memberId=$memberID';
 
     print('url Favorites url ====>>>>> $url');
-    await http.get(url).then((response) {
+    await http.get(Uri.parse(url)).then((response) {
       setState(() {
         page = 1;
         myIndex = 0;
