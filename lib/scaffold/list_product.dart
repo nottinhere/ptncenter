@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:ptncenter/models/product_all_model.dart';
 import 'package:ptncenter/models/user_model.dart';
 import 'package:ptncenter/utility/my_style.dart';
-import 'package:barcode_scan2/barcode_scan2.dart';
+// import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:ptncenter/utility/normal_dialog.dart';
 import 'detail.dart';
 import 'detail_cart.dart';
@@ -25,6 +25,9 @@ import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:scan_preview/scan_preview_widget.dart';
 import 'package:flutter/foundation.dart';
+
+import 'package:flutter_overlay_loader/flutter_overlay_loader.dart';
+import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 
 class ListProduct extends StatefulWidget {
   final int index;
@@ -135,6 +138,19 @@ class _ListProductState extends State<ListProduct> {
         setState(() {
           visible = false;
         });
+        // Loader.show(context,
+        //     isAppbarOverlay: false,
+        //     overlayFromTop: 100,
+        //     progressIndicator: CircularProgressIndicator(),
+        //     themeData: Theme.of(context).copyWith(
+        //         colorScheme: ColorScheme.fromSwatch()
+        //             .copyWith(secondary: Colors.black38)),
+        //     overlayColor: Color(0x99E8EAF6));
+
+        // ///loader hide after 3 seconds
+        // Future.delayed(Duration(seconds: 3), () {
+        //   Loader.hide();
+        // });
       }
     });
   }
@@ -165,6 +181,93 @@ class _ListProductState extends State<ListProduct> {
       amontCart;
     });
   }
+
+/*************************** */
+  String _scanBarcode = 'Unknown';
+
+  Future<void> startBarcodeScanStream() async {
+    FlutterBarcodeScanner.getBarcodeStreamReceiver(
+            '#ff6666', 'Cancel', true, ScanMode.BARCODE)
+        .listen((barcode) => print(barcode));
+  }
+
+  Future<void> scanQR() async {
+    String barcodeScanRes;
+    // Platform messages may fail, so we use a try/catch PlatformException.
+    try {
+      barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
+          '#ff6666', 'Cancel', true, ScanMode.QR);
+      print(barcodeScanRes);
+    } on PlatformException {
+      barcodeScanRes = 'Failed to get platform version.';
+    }
+
+    // If the widget was removed from the tree while the asynchronous platform
+    // message was in flight, we want to discard the reply rather than calling
+    // setState to update our non-existent appearance.
+    if (!mounted) return;
+
+    setState(() {
+      _scanBarcode = barcodeScanRes;
+    });
+  }
+
+  // Platform messages are asynchronous, so we initialize in an async method.
+  Future<void> scanBarcodeNormal() async {
+    String barcodeScanRes;
+    // Platform messages may fail, so we use a try/catch PlatformException.
+    try {
+      barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
+          '#ff6666', 'Cancel', true, ScanMode.BARCODE);
+      print(barcodeScanRes);
+
+      String url =
+          'http://ptnpharma.com/apishop/json_productlist.php?bqcode=$barcodeScanRes';
+      http.Response response = await http.get(Uri.parse(url));
+      var result = json.decode(response.body);
+      // print('result ===*******>>>> $result');
+
+      int status = result['status'];
+      // print('status ===>>> $status');
+      if (status == 0) {
+        normalDialog(
+            context, 'Not found', 'ไม่พบ code :: $barcodeScanRes ในระบบ');
+      } else {
+        var itemProducts = result['itemsProduct'];
+        for (var map in itemProducts) {
+          // print('map ===*******>>>> $map');
+
+          ProductAllModel productAllModel = ProductAllModel.fromJson(map);
+          MaterialPageRoute route = MaterialPageRoute(
+            builder: (BuildContext context) => Detail(
+              userModel: myUserModel,
+              productAllModel: productAllModel,
+            ),
+          );
+          Navigator.of(context).push(route).then((value) => readCart());
+
+          // Navigator.of(context).push(route).then((value) {
+          //   setState(() {
+          //     // readCart();
+          //   });
+          // });
+        }
+      }
+    } on PlatformException {
+      barcodeScanRes = 'Failed to get platform version.';
+    }
+
+    // If the widget was removed from the tree while the asynchronous platform
+    // message was in flight, we want to discard the reply rather than calling
+    // setState to update our non-existent appearance.
+    if (!mounted) return;
+
+    setState(() {
+      _scanBarcode = barcodeScanRes;
+    });
+  }
+
+/*************************** */
 
   Widget showCart() {
     return GestureDetector(
@@ -644,17 +747,17 @@ class _ListProductState extends State<ListProduct> {
     );
   }
 
-  Future<void> readQRcode() async {
-    try {
-      var qrString = await BarcodeScanner.scan();
-      print('QR code = $qrString');
-      if (qrString != null) {
-        decodeQRcode(qrString);
-      }
-    } catch (e) {
-      print('e = $e');
-    }
-  }
+  // Future<void> readQRcode() async {
+  //   try {
+  //     var qrString = await BarcodeScanner.scan();
+  //     print('QR code = $qrString');
+  //     if (qrString != null) {
+  //       decodeQRcode(qrString);
+  //     }
+  //   } catch (e) {
+  //     print('e = $e');
+  //   }
+  // }
 
   Future<void> readQRcodePreview() async {
     try {
@@ -719,7 +822,8 @@ class _ListProductState extends State<ListProduct> {
         onTap: () {
           print('You click barcode scan');
           // readQRcode();
-          readQRcodePreview(); // Navigator.of(context).pop();
+          // readQRcodePreview();
+          scanBarcodeNormal();
         },
         title: TextField(
           controller: _controller,

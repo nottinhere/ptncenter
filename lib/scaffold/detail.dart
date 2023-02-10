@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:barcode_scan2/barcode_scan2.dart';
+// import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:ptncenter/models/product_all_model.dart';
 import 'package:ptncenter/models/product_all_model2.dart';
 import 'package:ptncenter/models/unit_size_model.dart';
@@ -775,17 +775,17 @@ class _DetailState extends State<Detail> {
     );
   }
 
-  Future<void> readQRcode() async {
-    try {
-      var qrString = await BarcodeScanner.scan();
-      print('QR code = $qrString');
-      if (qrString != null) {
-        decodeQRcode(qrString);
-      }
-    } catch (e) {
-      print('e = $e');
-    }
-  }
+  // Future<void> readQRcode() async {
+  //   try {
+  //     var qrString = await BarcodeScanner.scan();
+  //     print('QR code = $qrString');
+  //     if (qrString != null) {
+  //       decodeQRcode(qrString);
+  //     }
+  //   } catch (e) {
+  //     print('e = $e');
+  //   }
+  // }
 
   Future<void> readQRcodePreview() async {
     try {

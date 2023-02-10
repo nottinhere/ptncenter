@@ -1,14 +1,17 @@
 import 'dart:convert';
 import 'dart:async';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:barcode_scan2/barcode_scan2.dart';
+// import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:ptncenter/models/product_all_model.dart';
+import 'package:ptncenter/models/popup_model.dart';
+
 import 'package:ptncenter/models/promote_model.dart';
 import 'package:ptncenter/models/user_model.dart';
 import 'package:ptncenter/scaffold/authen.dart';
 import 'package:ptncenter/scaffold/detail.dart';
+import 'package:ptncenter/scaffold/detail_news.dart';
 import 'package:ptncenter/scaffold/detail_cart.dart';
 
 import 'package:ptncenter/scaffold/list_product.dart';
@@ -47,15 +50,26 @@ class _HomeState extends State<Home> {
   // List<PromoteModel> promoteModels = List();
   List<Widget> promoteLists = List();
   List<Widget> suggestLists = List();
+  List<Widget> newsLists = List();
   List<String> urlImages = List();
   List<String> urlImagesSuggest = List();
   List<String> productsName = List();
+  // List<String> subjectList = List();
+  // List<String> postdateList = List();
+
+  ScrollController scrollController = ScrollController();
 
   int amontCart = 0, banerIndex = 0, suggestIndex = 0;
   UserModel myUserModel;
+  PopupModel popupModel;
+  PopupModel newsModel;
+
   bool firstLoad = false;
   List<ProductAllModel> promoteModels = List();
   List<ProductAllModel> suggestModels = List();
+  List<PopupModel> popupAllModel = List();
+  List<PopupModel> newsModels = List();
+
   String qrString;
   int currentIndex = 0;
   String _result = '';
@@ -65,6 +79,7 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
 
+    /*   Ads banner  next upload 
     print('widget.firstLoadAds >> ${widget.firstLoadAds}');
     firstLoad = widget.firstLoadAds;
     print('firstLoad >> $firstLoad');
@@ -75,7 +90,7 @@ class _HomeState extends State<Home> {
       });
     }
     print('BF firstLoad >> $firstLoad');
-
+    */
     readPromotion();
     myUserModel = widget.userModel;
     readSuggest();
@@ -84,13 +99,14 @@ class _HomeState extends State<Home> {
     });
     directMessage();
     _requestPermission();
+    readNews();
   }
 
   _requestPermission() async {
     await Permission.camera.request();
   }
 
-/*************************** */
+  /*************************** */
   String _scanBarcode = 'Unknown';
 
   Future<void> startBarcodeScanStream() async {
@@ -175,7 +191,7 @@ class _HomeState extends State<Home> {
     });
   }
 
-/*************************** */
+  /*************************** */
 
   Future<void> readPromotion() async {
     String url = 'http://www.ptnpharma.com/apishop/json_promotion.php';
@@ -200,7 +216,7 @@ class _HomeState extends State<Home> {
     return Image.network(urlImage);
   }
 
-/*************************** */
+  /*************************** */
 
   Future<void> readSuggest() async {
     String memId = myUserModel.id;
@@ -225,6 +241,33 @@ class _HomeState extends State<Home> {
     }
   }
 
+  /*************************** */
+
+  Future<void> readNews() async {
+    String memId = myUserModel.id;
+    String url =
+        'http://www.ptnpharma.com/apishop/json_news.php?limit=5'; // ?memberId=$memberId
+    print('urlNews >> $url');
+
+    http.Response response = await http.get(Uri.parse(url));
+    var result = json.decode(response.body);
+    var mapItemNews =
+        result['itemsData']; // dynamic    จะส่ง value อะไรก็ได้ รวมถึง null
+
+    for (var map in mapItemNews) {
+      PopupModel popupModel = PopupModel.fromJson(map);
+      String postdate = popupModel.postdate;
+      String subject = popupModel.subject;
+      setState(() {
+        //promoteModels.add(promoteModel); // push ค่าลง array
+        newsModels.add(popupModel);
+        // subjectList.add(subject);
+        // postdateList.add(postdate);
+      });
+    }
+    // print('newsModels.length (readNews) >> ' + newsModels.length.toString());
+  }
+
   Future<void> showAdsPopup() async {
     PopupBanner(
       context: context,
@@ -235,7 +278,7 @@ class _HomeState extends State<Home> {
     ).show();
   }
 
-/***************popup_banner ************ */
+  /***************popup_banner ************ */
   List<String> images = [
     "https://tinyurl.com/popup-banner-image",
     "https://tinyurl.com/popup-banner-image2",
@@ -316,7 +359,7 @@ class _HomeState extends State<Home> {
     ).show();
   }
 
-/*************popup_banner ************** */
+  /*************popup_banner ************** */
 
   Widget myCircularProgress() {
     return Center(
@@ -445,6 +488,18 @@ class _HomeState extends State<Home> {
         child: suggestLists.length == 0
             ? myCircularProgress()
             : showCarouseSliderSuggest(),
+      ),
+    );
+  }
+
+  Widget showNews() {
+    print('newsModels.length (showNews) >> ' + newsModels.length.toString());
+
+    return Card(
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        height: MediaQuery.of(context).size.height * 0.4,
+        child: newsModels.length > 0 ? listNews() : Container(),
       ),
     );
   }
@@ -913,6 +968,21 @@ class _HomeState extends State<Home> {
     );
   }
 
+  BoxDecoration myBoxDecoration() {
+    return BoxDecoration(
+      border: Border(
+        top: BorderSide(
+          color: Colors.blueGrey.shade100,
+          width: 1.0,
+        ),
+        // bottom: BorderSide(
+        //   color: Colors.blueGrey.shade100,
+        //   width: 1.0,
+        // ),
+      ),
+    );
+  }
+
   Widget bottomRight() {
     return Container(
       width: MediaQuery.of(context).size.width * 0.4,
@@ -945,6 +1015,51 @@ class _HomeState extends State<Home> {
           routeToListProduct(3);
         },
       ),
+    );
+  }
+
+  Widget listNews() {
+    return ListView.builder(
+      controller: scrollController,
+      itemCount: newsModels.length,
+      itemBuilder: (BuildContext buildContext, int index) {
+        return Column(
+          children: [
+            // Text(newsLists.length.toString()),
+            GestureDetector(
+              child: Container(
+                height: 70,
+                child: Card(
+                  child: Container(
+                    decoration: myBoxDecoration(),
+                    padding: EdgeInsets.only(top: 1.5),
+                    child: Row(
+                      children: <Widget>[
+                        Flexible(
+                          child: Text(
+                            newsModels[index].subject,
+                            style: MyStyle().h3Style,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              onTap: () {
+                MaterialPageRoute materialPageRoute =
+                    MaterialPageRoute(builder: (BuildContext buildContext) {
+                  return DetailNews(
+                    popupModel: newsModels[index],
+                    userModel: myUserModel,
+                  );
+                });
+                Navigator.of(context).push(materialPageRoute);
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -1043,17 +1158,17 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Future<void> readQRcode() async {
-    try {
-      var qrString = await BarcodeScanner.scan();
-      print('QR code = $qrString');
-      if (qrString != null) {
-        decodeQRcode(qrString);
-      }
-    } catch (e) {
-      print('e = $e');
-    }
-  }
+  // Future<void> readQRcode() async {
+  //   try {
+  //     var qrString = await BarcodeScanner.scan();
+  //     print('QR code = $qrString');
+  //     if (qrString != null) {
+  //       decodeQRcode(qrString);
+  //     }
+  //   } catch (e) {
+  //     print('e = $e');
+  //   }
+  // }
 
   Future<void> readQRcodePreview() async {
     try {
@@ -1202,58 +1317,8 @@ class _HomeState extends State<Home> {
             suggest(),
             headTitle('เมนู', Icons.home),
             homeMenu(),
-            /************************** */
-
-            // Center(
-            //   child: Column(
-            //     mainAxisAlignment: MainAxisAlignment.center,
-            //     children: [
-            //       _buttonWidget(
-            //         title: "Default Popup",
-            //         onClick: () => showDefaultPopup(),
-            //       ),
-            //       _buttonWidget(
-            //         title: "Hide Dots Popup",
-            //         onClick: () => showHideDotsPopup(),
-            //       ),
-            //       _buttonWidget(
-            //         title: "Customize Dots Popup",
-            //         onClick: () => showCustomizeDots(),
-            //       ),
-            //       _buttonWidget(
-            //         title: "Disable Auto Slide & Custom Close Popup",
-            //         onClick: () => showNonactiveSlideCustomClose(),
-            //       ),
-            //       _buttonWidget(
-            //         title: "Local Asset Popup",
-            //         onClick: () => showFromLocal(),
-            //       )
-            //     ],
-            //   ),
-            // ),
-
-            /************************** */
-            /*
-            Container(
-                alignment: Alignment.center,
-                child: Flex(
-                    direction: Axis.vertical,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      ElevatedButton(
-                          onPressed: () => scanBarcodeNormal(),
-                          child: Text('Start barcode scan')),
-                      // ElevatedButton(
-                      //     onPressed: () => scanQR(),
-                      //     child: Text('Start QR scan')),
-                      // ElevatedButton(
-                      //     onPressed: () => startBarcodeScanStream(),
-                      //     child: Text('Start barcode scan stream')),
-                      // Text('Scan result : $_scanBarcode\n',
-                      //     style: TextStyle(fontSize: 20))
-                    ])),
-            */
-            /************************** */
+            headTitle('ข่าวสาร', Icons.home),
+            showNews(),
           ],
         ),
       );

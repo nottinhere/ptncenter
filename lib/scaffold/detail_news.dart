@@ -10,17 +10,17 @@ import 'package:ptncenter/scaffold/list_product.dart';
 import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
 import 'my_service.dart';
 
-class DetailPopup extends StatefulWidget {
+class DetailNews extends StatefulWidget {
   final PopupModel popupModel;
   final UserModel userModel;
 
-  DetailPopup({Key key, this.popupModel, this.userModel}) : super(key: key);
+  DetailNews({Key key, this.popupModel, this.userModel}) : super(key: key);
 
   @override
   _DetailState createState() => _DetailState();
 }
 
-class _DetailState extends State<DetailPopup> {
+class _DetailState extends State<DetailNews> {
   // Explicit
   PopupModel currentPopupModel;
   PopupModel popupModel;
@@ -29,7 +29,7 @@ class _DetailState extends State<DetailPopup> {
   String memberID;
   String imagePopup = '';
   String subjectPopup = '';
-  String detailPopup = '';
+  String DetailNews = '';
   String postdatePopup = '';
   int currentIndex = 1;
   // Method
@@ -44,7 +44,9 @@ class _DetailState extends State<DetailPopup> {
   }
 
   Future<void> getPopupWhereID() async {
-    String url = 'http://ptnpharma.com/apishop/json_popupdetail.php';
+    String id = currentPopupModel.id.toString();
+
+    String url = 'http://ptnpharma.com/apishop/json_newsdetail.php?id=$id';
     print('urlPopup >> $url');
 
     http.Response response = await http.get(Uri.parse(url));
@@ -63,7 +65,7 @@ class _DetailState extends State<DetailPopup> {
         //promoteModels.add(promoteModel); // push ค่าลง arra
         subjectPopup = subject;
         imagePopup = urlImage;
-        detailPopup = detail;
+        DetailNews = detail;
         postdatePopup = postdate;
       });
     } // for
@@ -141,7 +143,7 @@ class _DetailState extends State<DetailPopup> {
               height: 10.0,
             ),
             Text(
-              detailPopup.replaceAll('\\n', '\n'),
+              DetailNews.replaceAll('\\n', '\n'),
               style: TextStyle(
                 fontSize: 19.0,
                 // fontWeight: FontWeight.bold,

@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:barcode_scan2/barcode_scan2.dart';
+// import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:ptncenter/models/price_list_model.dart';
@@ -848,17 +848,17 @@ class _DetailCartState extends State<DetailCart> {
     );
   }
 
-  Future<void> readQRcode() async {
-    try {
-      var qrString = await BarcodeScanner.scan();
-      print('QR code = $qrString');
-      if (qrString != null) {
-        decodeQRcode(qrString);
-      }
-    } catch (e) {
-      print('e = $e');
-    }
-  }
+  // Future<void> readQRcode() async {
+  //   try {
+  //     var qrString = await BarcodeScanner.scan();
+  //     print('QR code = $qrString');
+  //     if (qrString != null) {
+  //       decodeQRcode(qrString);
+  //     }
+  //   } catch (e) {
+  //     print('e = $e');
+  //   }
+  // }
 
   Future<void> readQRcodePreview() async {
     try {

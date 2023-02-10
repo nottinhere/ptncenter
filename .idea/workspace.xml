@@ -5,8 +5,28 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="eb79dd87-7282-4c63-b3ed-fb5885cd5498" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.flutter-plugins" beforeDir="false" afterPath="$PROJECT_DIR$/.flutter-plugins" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.flutter-plugins-dependencies" beforeDir="false" afterPath="$PROJECT_DIR$/.flutter-plugins-dependencies" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Flutter_Plugins.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Flutter_Plugins.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/ptncenter.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/ptncenter.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/android--/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/android--/app/src/main/AndroidManifest.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/android/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" afterPath="$PROJECT_DIR$/android/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/android/local.properties" beforeDir="false" afterPath="$PROJECT_DIR$/android/local.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/scaffold/detail.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/scaffold/detail.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/scaffold/detail_cart.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/scaffold/detail_cart.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/scaffold/detail_popup.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/scaffold/detail_popup.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/scaffold/list_item.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/scaffold/list_item.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/scaffold/list_product.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/scaffold/list_product.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/scaffold/list_product_favorite.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/scaffold/list_product_favorite.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/scaffold/list_product_frequent.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/scaffold/list_product_frequent.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/scaffold/list_product_frequent_test.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/scaffold/list_product_vote.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/scaffold/list_product_vote.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/scaffold/my_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/scaffold/my_service.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/widget/home.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/widget/home.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/widget/homescreen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/widget/homescreen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/pubspec.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/pubspec.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -28,6 +48,7 @@
     <property name="android.sdk.path" value="$USER_HOME$/AppData/Local/Android/Sdk" />
     <property name="cidr.known.project.marker" value="true" />
     <property name="dart.analysis.tool.window.visible" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/android" />
     <property name="settings.editor.selected.configurable" value="emulator" />
     <property name="show.migrate.to.gradle.popup" value="false" />
   </component>

@@ -7,7 +7,7 @@ import 'package:ptncenter/models/product_vote_model.dart';
 import 'package:ptncenter/models/user_model.dart';
 import 'package:ptncenter/scaffold/list_product.dart';
 import 'package:ptncenter/utility/my_style.dart';
-import 'package:barcode_scan2/barcode_scan2.dart';
+// import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:ptncenter/utility/normal_dialog.dart';
 import 'detail.dart';
 import 'detail_cart.dart';

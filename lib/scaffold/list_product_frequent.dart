@@ -10,7 +10,7 @@ import 'package:ptncenter/scaffold/list_product_favorite.dart';
 import 'package:ptncenter/scaffold/list_product_frequent.dart';
 
 import 'package:ptncenter/utility/my_style.dart';
-import 'package:barcode_scan2/barcode_scan2.dart';
+// import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:ptncenter/utility/normal_dialog.dart';
 import 'detail.dart';
 import 'detail_cart.dart';
@@ -85,9 +85,11 @@ class _ListProductFrequent extends State<ListProductFrequent> {
   final Debouncer debouncer =
       Debouncer(milliseconds: 300); // ตั้งค่า เวลาที่จะ delay
   bool statusStart = true;
+  bool _showbyaddcart = false;
 
   int currentIndex = 1;
 
+  var _isShowincart = {};
   // List<ProductAllModel> productAllModels_buffer = List(); // []; //
 
   var _controller = TextEditingController();
@@ -240,117 +242,33 @@ class _ListProductFrequent extends State<ListProductFrequent> {
     });
   }
 
-  Future<void> updateDatalist(index) async {
-    // List<ProductAllModel> productAllModels_buffer = List(); // []; //
-    // String url = MyStyle().readAllProduct;
-    print('Here is updateDatalist function');
-
-    String memberId = myUserModel.id.toString();
-    int productID = filterProductAllModels[index].id;
-    String url =
-        'http://ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId';
-
-    print("URL update item = $url");
-    http.Response response = await http.get(Uri.parse(url));
-    var result = json.decode(response.body);
-    var cartList = result['cart'];
-    for (var mapCart in cartList) {
-      if (mapCart['id'] == productID) {
-        setState(() {
-          if (mapCart['price_list'].containsKey('s')) {
-            filterProductAllModels[index].itemincartSunit =
-                mapCart['price_list']['s']['quantity'];
-          }
-          if (mapCart['price_list'].containsKey('m')) {
-            filterProductAllModels[index].itemincartMunit =
-                mapCart['price_list']['m']['quantity'];
-          }
-          if (mapCart['price_list'].containsKey('l')) {
-            filterProductAllModels[index].itemincartLunit =
-                mapCart['price_list']['l']['quantity'];
-          }
-        });
-      }
-    }
-  }
-
   Widget showName(int index) {
-    return Row(
-      children: <Widget>[
-        Container(
-          width: MediaQuery.of(context).size.width * 0.7 - 10,
-          child: Text(
-            filterProductAllModels[index].title,
-            style: MyStyle().h3Style,
-          ),
-        ),
-      ],
-    );
-  }
+    bool favStatus = ((filterProductAllModels[index].itemFeqSunit != '0' &&
+                filterProductAllModels[index].itemFeqSunit ==
+                    filterProductAllModels[index].itemincartSunit) ||
+            (filterProductAllModels[index].itemFeqMunit != '0' &&
+                filterProductAllModels[index].itemFeqMunit ==
+                    filterProductAllModels[index].itemincartMunit) ||
+            (filterProductAllModels[index].itemFeqLunit != '0' &&
+                filterProductAllModels[index].itemFeqLunit ==
+                    filterProductAllModels[index].itemincartLunit))
+        ? false
+        : true;
 
-  Widget showStock(int index) {
-    return Row(
-      children: <Widget>[
-        Container(
-          width: MediaQuery.of(context).size.width * 0.15,
-          child: Text(
-            'สั่งประจำ:',
-            style: TextStyle(
-              fontSize: 12.0,
-              color: Colors.blue,
+    return Visibility(
+      visible: true,
+      child: Row(
+        children: <Widget>[
+          Container(
+            width: MediaQuery.of(context).size.width * 0.7 - 10,
+            child: Text(
+              filterProductAllModels[index].title,
+              style: MyStyle().h3Style,
             ),
           ),
-        ),
-        Container(
-          width: MediaQuery.of(context).size.width * 0.15,
-          child: Text(
-            ((filterProductAllModels[index].itemFeqSunit != '0')
-                    ? '${filterProductAllModels[index].itemFeqSunit} ${filterProductAllModels[index].itemSunit}  '
-                    : '') +
-                ((filterProductAllModels[index].itemFeqMunit != '0')
-                    ? '${filterProductAllModels[index].itemFeqMunit} ${filterProductAllModels[index].itemMunit}  '
-                    : '') +
-                ((filterProductAllModels[index].itemFeqLunit != '0')
-                    ? '${filterProductAllModels[index].itemFeqLunit} ${filterProductAllModels[index].itemLunit}'
-                    : ''),
-            style: MyStyle().h4StyleBlue,
-          ),
-        ),
-        showIncart(index),
-      ],
+        ],
+      ),
     );
-    // return Text('na');
-  }
-
-  Widget showIncart(int index) {
-    return Row(children: <Widget>[
-      Container(
-        width: MediaQuery.of(context).size.width * 0.13,
-        child: Text(
-          (filterProductAllModels[index].itemincartSunit != '0' ||
-                  filterProductAllModels[index].itemincartMunit != '0' ||
-                  filterProductAllModels[index].itemincartLunit != '0')
-              ? 'ตะกร้า:'
-              : '',
-          style: MyStyle().h4StyleRed,
-        ),
-      ),
-      Container(
-        width: MediaQuery.of(context).size.width * 0.25,
-        child: Text(
-          ((filterProductAllModels[index].itemincartSunit != '0')
-                  ? '${filterProductAllModels[index].itemincartSunit} ${filterProductAllModels[index].itemSunit}  '
-                  : '') +
-              ((filterProductAllModels[index].itemincartMunit != '0')
-                  ? '${filterProductAllModels[index].itemincartMunit} ${filterProductAllModels[index].itemMunit}  '
-                  : '') +
-              ((filterProductAllModels[index].itemincartLunit != '0')
-                  ? '${filterProductAllModels[index].itemincartLunit} ${filterProductAllModels[index].itemLunit}'
-                  : ''),
-          style: MyStyle().h4StyleRed,
-        ),
-      ),
-    ]);
   }
 
   Widget showPrice(int index) {
@@ -395,7 +313,7 @@ class _ListProductFrequent extends State<ListProductFrequent> {
     return Container(
       padding: EdgeInsets.only(left: 5.0, right: 2.0),
       // height: MediaQuery.of(context).size.width * 0.5,
-      width: MediaQuery.of(context).size.width * 0.65,
+      width: MediaQuery.of(context).size.width * 0.69,
       child: Container(
         padding: EdgeInsets.only(bottom: 5.0, top: 5.0),
         child: Column(
@@ -469,7 +387,7 @@ class _ListProductFrequent extends State<ListProductFrequent> {
     print('url Favorites url ====>>>>> $url');
     await http.get(Uri.parse(url)).then((response) {
       setState(() {
-        //readCart();
+        // readCart();
       });
     });
   }
@@ -503,7 +421,8 @@ class _ListProductFrequent extends State<ListProductFrequent> {
     }
 
     return Container(
-      width: MediaQuery.of(context).size.width * 0.06,
+      width: MediaQuery.of(context).size.width * 0.07,
+      margin: const EdgeInsets.only(right: 5.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
@@ -516,11 +435,13 @@ class _ListProductFrequent extends State<ListProductFrequent> {
                     // print('Is Favorite : $_isFavorite');
                     iconAddCart(
                         memberID, productID, selectUnit, qty, _isFavorite);
+
                     setState(() {
+                      _isShowincart[index] = true;
+                      showName(index);
+                      favStatus = true;
                       readCart();
-                      updateDatalist(index);
                     });
-                    // http.Response response =  http.get(Uri.parse(url));
                   },
                 )
               : Icon(
@@ -530,6 +451,109 @@ class _ListProductFrequent extends State<ListProductFrequent> {
         ],
       ),
     );
+  }
+
+  Widget showStock(int index) {
+    bool favStatus = ((filterProductAllModels[index].itemFeqSunit != '0' &&
+                filterProductAllModels[index].itemFeqSunit ==
+                    filterProductAllModels[index].itemincartSunit) ||
+            (filterProductAllModels[index].itemFeqMunit != '0' &&
+                filterProductAllModels[index].itemFeqMunit ==
+                    filterProductAllModels[index].itemincartMunit) ||
+            (filterProductAllModels[index].itemFeqLunit != '0' &&
+                filterProductAllModels[index].itemFeqLunit ==
+                    filterProductAllModels[index].itemincartLunit))
+        ? false
+        : true;
+    _isShowincart[index] =
+        (favStatus == false || _isShowincart[index] == true) ? true : false;
+
+    print(
+        '($index)_isShowincart[$index] >> ' + _isShowincart[index].toString());
+
+    String qty;
+    String productID = filterProductAllModels[index].id.toString();
+    String memberID = myUserModel.id.toString();
+    String selectUnit = filterProductAllModels[index].selectUnit;
+    switch (selectUnit) {
+      case 's':
+        qty = filterProductAllModels[index].itemFeqSunit;
+        break;
+      case 'm':
+        qty = filterProductAllModels[index].itemFeqMunit;
+        break;
+      case 'l':
+        qty = filterProductAllModels[index].itemFeqLunit;
+        break;
+    }
+
+    return Row(
+      children: <Widget>[
+        Container(
+          width: MediaQuery.of(context).size.width * 0.15,
+          child: Text(
+            'สั่งประจำ:',
+            style: TextStyle(
+              fontSize: 12.0,
+              color: Colors.blue,
+            ),
+          ),
+        ),
+        Container(
+          width: MediaQuery.of(context).size.width * 0.16,
+          child: Text(
+            ((filterProductAllModels[index].itemFeqSunit != '0')
+                    ? '${filterProductAllModels[index].itemFeqSunit} ${filterProductAllModels[index].itemSunit}  '
+                    : '') +
+                ((filterProductAllModels[index].itemFeqMunit != '0')
+                    ? '${filterProductAllModels[index].itemFeqMunit} ${filterProductAllModels[index].itemMunit}  '
+                    : '') +
+                ((filterProductAllModels[index].itemFeqLunit != '0')
+                    ? '${filterProductAllModels[index].itemFeqLunit} ${filterProductAllModels[index].itemLunit}'
+                    : ''),
+            style: TextStyle(
+              fontSize: 12.0,
+              color: Colors.blue,
+            ),
+          ),
+        ),
+        ///////////////  show  incart     ////////////////
+        Visibility(
+          visible: _isShowincart[index],
+          child: Row(children: <Widget>[
+            Container(
+              width: MediaQuery.of(context).size.width * 0.15,
+              child: Text(
+                ' ตะกร้า:',
+                style: TextStyle(
+                  fontSize: 12.0,
+                  color: Colors.red,
+                ),
+              ),
+            ),
+            Container(
+              width: MediaQuery.of(context).size.width * 0.15,
+              child: Text(
+                ((filterProductAllModels[index].itemFeqSunit != '0')
+                        ? '${filterProductAllModels[index].itemFeqSunit} ${filterProductAllModels[index].itemSunit}  '
+                        : '') +
+                    ((filterProductAllModels[index].itemFeqMunit != '0')
+                        ? '${filterProductAllModels[index].itemFeqMunit} ${filterProductAllModels[index].itemMunit}  '
+                        : '') +
+                    ((filterProductAllModels[index].itemFeqLunit != '0')
+                        ? '${filterProductAllModels[index].itemFeqLunit} ${filterProductAllModels[index].itemLunit}'
+                        : ''),
+                style: TextStyle(
+                  fontSize: 12.0,
+                  color: Colors.red,
+                ),
+              ),
+            ),
+          ]),
+        ),
+      ],
+    );
+    // return Text('na');
   }
 
   Widget showProductfavItem() {
@@ -570,24 +594,7 @@ class _ListProductFrequent extends State<ListProductFrequent> {
                       ),
                     ),
                   ),
-                  onTap: () {
-                    // print(
-                    //     'index select item => ${filterProductAllModels[index]}');
-                    // MaterialPageRoute materialPageRoute =
-                    //     MaterialPageRoute(builder: (BuildContext buildContext) {
-                    //   return Detail(
-                    //     productAllModel: filterProductAllModels[index],
-                    //     userModel: myUserModel,
-                    //   );
-                    // });
-
-                    // Navigator.of(context)
-                    //     .push(materialPageRoute)
-                    //     .then((value) => setState(() {
-                    //           readCart();
-                    //           updateDatalist(index);
-                    //         }));
-                  },
+                  onTap: () {},
                 ),
                 myCircularProgress(),
               ],
@@ -610,23 +617,7 @@ class _ListProductFrequent extends State<ListProductFrequent> {
                 ),
               ),
             ),
-            onTap: () {
-              // print('index select item => ${filterProductAllModels[index]}');
-              // MaterialPageRoute materialPageRoute =
-              //     MaterialPageRoute(builder: (BuildContext buildContext) {
-              //   return Detail(
-              //     productAllModel: filterProductAllModels[index],
-              //     userModel: myUserModel,
-              //   );
-              // });
-
-              // Navigator.of(context)
-              //     .push(materialPageRoute)
-              //     .then((value) => setState(() {
-              //           readCart();
-              //           updateDatalist(index);
-              //         }));
-            },
+            onTap: () {},
           );
         },
       ),
@@ -662,46 +653,6 @@ class _ListProductFrequent extends State<ListProductFrequent> {
     } else {
       return Center(child: CircularProgressIndicator());
     }
-    /*
-    return Center(
-      child:
-          statusStart ? CircularProgressIndicator() : Text('Search not found'),
-    );
-    */
-  }
-
-  /*
-  Widget myLayout() {
-    return Column(
-      children: <Widget>[
-        searchForm(),
-        showProductItem(),
-      ],
-    );
-  }
-  */
-
-  Widget lastItemInCart() {
-    return Column(
-      children: <Widget>[
-        Container(
-          width: MediaQuery.of(context).size.width * 0.9,
-          child: Text(
-            'รายการล่าสุดในตะกร้า',
-            style: MyStyle().h3bStyle,
-          ),
-        ),
-        Container(
-          width: MediaQuery.of(context).size.width * 0.9,
-          child: Text(lastItemName.toString(),
-              style: TextStyle(
-                fontSize: 14.0,
-                // fontWeight: FontWeight.bold,
-                color: Color.fromARGB(0xff, 0x00, 0x73, 0x26),
-              )),
-        ),
-      ],
-    );
   }
 
   Future<void> addAlltoCart() async {
