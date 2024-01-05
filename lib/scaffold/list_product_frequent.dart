@@ -311,7 +311,7 @@ class _ListProductFrequent extends State<ListProductFrequent> {
 
   Widget showText(int index) {
     return Container(
-      padding: EdgeInsets.only(left: 5.0, right: 2.0),
+      padding: EdgeInsets.only(left: 5.0, right: 0.0),
       // height: MediaQuery.of(context).size.width * 0.5,
       width: MediaQuery.of(context).size.width * 0.69,
       child: Container(
