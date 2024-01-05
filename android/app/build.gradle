@@ -20,8 +20,8 @@ def flutterVersionName = localProperties.getProperty('flutter.versionName')
 if (flutterVersionName == null) {
     flutterVersionName = '1.0.6'
 }
-    flutterVersionCode = '7'
-    flutterVersionName = '1.0.6'
+    flutterVersionCode = '8'
+    flutterVersionName = '1.0.7'
 
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'

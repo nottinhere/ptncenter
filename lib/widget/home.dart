@@ -7,6 +7,8 @@ import 'package:http/http.dart' as http;
 import 'package:ptncenter/models/product_all_model.dart';
 import 'package:ptncenter/models/popup_model.dart';
 
+import 'package:ptncenter/analytics.dart';
+
 import 'package:ptncenter/models/promote_model.dart';
 import 'package:ptncenter/models/user_model.dart';
 import 'package:ptncenter/scaffold/authen.dart';
@@ -14,10 +16,13 @@ import 'package:ptncenter/scaffold/detail.dart';
 import 'package:ptncenter/scaffold/detail_news.dart';
 import 'package:ptncenter/scaffold/detail_cart.dart';
 
+import 'package:ptncenter/scaffold/list_news.dart';
+
 import 'package:ptncenter/scaffold/list_product.dart';
 import 'package:ptncenter/scaffold/list_product_favorite.dart';
 import 'package:ptncenter/scaffold/list_product_frequent.dart';
 import 'package:ptncenter/scaffold/list_product_vote.dart';
+import 'package:ptncenter/scaffold/map.dart';
 
 import 'package:ptncenter/utility/my_style.dart';
 import 'package:ptncenter/utility/normal_dialog.dart';
@@ -35,6 +40,10 @@ import 'package:flutter/foundation.dart';
 
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_core/firebase_core.dart';
+import '../firebase_options.dart';
+
 class Home extends StatefulWidget {
   final UserModel userModel;
   bool firstLoadAds;
@@ -50,6 +59,7 @@ class _HomeState extends State<Home> {
   // List<PromoteModel> promoteModels = List();
   List<Widget> promoteLists = List();
   List<Widget> suggestLists = List();
+  List<Widget> slideshowLists = List();
   List<Widget> newsLists = List();
   List<String> urlImages = List();
   List<String> urlImagesSuggest = List();
@@ -67,6 +77,7 @@ class _HomeState extends State<Home> {
   bool firstLoad = false;
   List<ProductAllModel> promoteModels = List();
   List<ProductAllModel> suggestModels = List();
+  List<ProductAllModel> slideshowModels = List();
   List<PopupModel> popupAllModel = List();
   List<PopupModel> newsModels = List();
 
@@ -74,10 +85,17 @@ class _HomeState extends State<Home> {
   int currentIndex = 0;
   String _result = '';
 
+  /*******       FirebaseAnalytics      *********/
+
+  /*******       FirebaseAnalytics      *********/
+
   // Method
   @override
   void initState() {
     super.initState();
+
+    // AnalyticsService.observer.analytics.setCurrentScreen(screenName: "home");
+    // AnalyticsService.observer.analytics.logEvent(name: "homePage");
 
     /*   Ads banner  next upload 
     print('widget.firstLoadAds >> ${widget.firstLoadAds}');
@@ -94,6 +112,7 @@ class _HomeState extends State<Home> {
     readPromotion();
     myUserModel = widget.userModel;
     readSuggest();
+    readSlide();
     setState(() {
       readCart();
     });
@@ -199,6 +218,9 @@ class _HomeState extends State<Home> {
     var result = json.decode(response.body);
     var mapItemProduct =
         result['itemsProduct']; // dynamic    จะส่ง value อะไรก็ได้ รวมถึง null
+
+    // Map<String, dynamic> map = result['data'];
+
     for (var map in mapItemProduct) {
       PromoteModel promoteModel = PromoteModel.fromJson(map);
       ProductAllModel productAllModel = ProductAllModel.fromJson(map);
@@ -214,6 +236,27 @@ class _HomeState extends State<Home> {
 
   Image showImageNetWork(String urlImage) {
     return Image.network(urlImage);
+  }
+
+  /*************************** */
+
+  Future<void> readSlide() async {
+    String url = 'http://www.ptnpharma.com/apishop/json_slideshow.php';
+    http.Response response = await http.get(Uri.parse(url));
+    var result = json.decode(response.body);
+    var mapItemProduct =
+        result['itemsProduct']; // dynamic    จะส่ง value อะไรก็ได้ รวมถึง null
+    for (var map in mapItemProduct) {
+      PromoteModel slideshowModel = PromoteModel.fromJson(map);
+      ProductAllModel productAllModel = ProductAllModel.fromJson(map);
+      String urlImage = slideshowModel.photo;
+      setState(() {
+        //promoteModels.add(promoteModel); // push ค่าลง array
+        slideshowModels.add(productAllModel);
+        slideshowLists.add(showImageNetWork(urlImage));
+        urlImages.add(urlImage);
+      });
+    }
   }
 
   /*************************** */
@@ -437,7 +480,7 @@ class _HomeState extends State<Home> {
                     ),
                   ),
                   onTap: () {
-                    print('You Click index >> $idx');
+                    // print('You Click index >> $idx');
                     /*
                     MaterialPageRoute route = MaterialPageRoute(
                       builder: (BuildContext context) => Detail(
@@ -467,6 +510,63 @@ class _HomeState extends State<Home> {
     );
   }
 
+  void routeToListProductByCate(int index, int cate, String cateName) {
+    MaterialPageRoute materialPageRoute =
+        MaterialPageRoute(builder: (BuildContext buildContext) {
+      return ListProduct(
+        index: index,
+        userModel: myUserModel,
+        cate: cate,
+        cateName: cateName,
+      );
+    });
+    Navigator.of(context).push(materialPageRoute);
+  }
+
+  Widget showCarouseSlideshow() {
+    return GestureDetector(
+      child: CarouselSlider.builder(
+        options: CarouselOptions(
+          // pauseAutoPlayOnTouch: Duration(seconds: 5),
+          autoPlay: true,
+          autoPlayAnimationDuration: Duration(seconds: 5),
+        ),
+        itemCount: (slideshowLists.length).round(),
+        itemBuilder: (context, index, realIdx) {
+          final int first = index;
+          // final int second = first + 1;
+          return Row(
+            children: [first].map((idx) {
+              return InkWell(
+                child: Container(
+                  padding: EdgeInsets.all(1.0),
+                  child: Center(
+                    child: Image.network(urlImages[idx],
+                        fit: BoxFit.cover, width: 280),
+                  ),
+                ),
+                onTap: () {
+                  print('You Click index >> $idx');
+                  MaterialPageRoute materialPageRoute =
+                      MaterialPageRoute(builder: (BuildContext buildContext) {
+                    return ListProduct(
+                      index: 6,
+                      userModel: myUserModel,
+                      searchStr: slideshowModels[idx].productCode.toString(),
+                    );
+                  });
+                  Navigator.of(context)
+                      .push(materialPageRoute)
+                      .then((value) => readCart());
+                },
+              );
+            }).toList(),
+          );
+        },
+      ),
+    );
+  }
+
   Widget promotion() {
     return Card(
       child: Container(
@@ -488,6 +588,18 @@ class _HomeState extends State<Home> {
         child: suggestLists.length == 0
             ? myCircularProgress()
             : showCarouseSliderSuggest(),
+      ),
+    );
+  }
+
+  Widget slideshow() {
+    return Card(
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        height: MediaQuery.of(context).size.height * 0.25,
+        child: suggestLists.length == 0
+            ? myCircularProgress()
+            : showCarouseSlideshow(),
       ),
     );
   }
@@ -579,9 +691,44 @@ class _HomeState extends State<Home> {
             ),
           ),
         ),
-        onTap: () {
+        onTap: () async {
           print('You click product');
           routeToListProduct(0);
+        },
+      ),
+    );
+  }
+
+  Widget notreceiveBox() {
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.45,
+      // height: 80.0,
+      child: GestureDetector(
+        child: Card(
+          // color: Colors.green.shade100,
+          child: Container(
+            padding: EdgeInsets.all(16.0),
+            alignment: AlignmentDirectional(0.0, 0.0),
+            child: Column(
+              children: <Widget>[
+                Container(
+                  width: 45.0,
+                  child: Image.asset('images/icon_cancel.png'),
+                ),
+                Text(
+                  'สั่งแล้วไม่ได้รับ',
+                  style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black),
+                ),
+              ],
+            ),
+          ),
+        ),
+        onTap: () async {
+          print('You click not receive');
+          routeToListProduct(4);
         },
       ),
     );
@@ -728,41 +875,6 @@ class _HomeState extends State<Home> {
         onTap: () {
           print('You click new item');
           routeToListProduct(1);
-        },
-      ),
-    );
-  }
-
-  Widget notreceiveBox() {
-    return Container(
-      width: MediaQuery.of(context).size.width * 0.45,
-      // height: 80.0,
-      child: GestureDetector(
-        child: Card(
-          // color: Colors.green.shade100,
-          child: Container(
-            padding: EdgeInsets.all(16.0),
-            alignment: AlignmentDirectional(0.0, 0.0),
-            child: Column(
-              children: <Widget>[
-                Container(
-                  width: 45.0,
-                  child: Image.asset('images/icon_cancel.png'),
-                ),
-                Text(
-                  'สั่งแล้วไม่ได้รับ',
-                  style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black),
-                ),
-              ],
-            ),
-          ),
-        ),
-        onTap: () {
-          print('You click not receive');
-          routeToListProduct(4);
         },
       ),
     );
@@ -1308,13 +1420,15 @@ class _HomeState extends State<Home> {
     String login = myUserModel.name;
     String loginStatus = myUserModel.status;
     String msg = myUserModel.msg;
+    int unread = myUserModel.lastNewsId - myUserModel.lastNewsOpen;
 
     if (loginStatus == '1') {
       return SingleChildScrollView(
         child: Column(
           children: <Widget>[
             headTitle('สินค้าแนะนำ $login ', Icons.thumb_up), //($loginStatus)
-            suggest(),
+            // suggest(),
+            slideshow(),
             headTitle('เมนู', Icons.home),
             homeMenu(),
             headTitle('ข่าวสาร', Icons.home),

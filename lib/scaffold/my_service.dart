@@ -9,6 +9,8 @@ import 'package:ptncenter/models/user_model.dart';
 import 'package:ptncenter/models/category_model.dart';
 import 'package:ptncenter/scaffold/detail.dart';
 
+import 'package:ptncenter/scaffold/list_news.dart';
+
 import 'package:ptncenter/utility/my_style.dart';
 import 'package:ptncenter/utility/normal_dialog.dart';
 import 'package:ptncenter/widget/contact.dart';
@@ -229,6 +231,16 @@ class _MyServiceState extends State<MyService> {
     Navigator.of(context).push(materialPageRoute);
   }
 
+  void routeToNews() {
+    MaterialPageRoute materialPageRoute =
+        MaterialPageRoute(builder: (BuildContext buildContext) {
+      return News(
+        userModel: myUserModel,
+      );
+    });
+    Navigator.of(context).push(materialPageRoute);
+  }
+
   void changePage(int index) {
     setState(() {
       currentIndex = index;
@@ -245,20 +257,7 @@ class _MyServiceState extends State<MyService> {
         routeToListProduct(0);
         break; // all product
       case 3:
-        routeToListProduct(2);
-        MaterialPageRoute materialPageRoute =
-            MaterialPageRoute(builder: (BuildContext buildContext) {
-          return DetailCart(
-            userModel: myUserModel,
-          );
-        });
-        Navigator.of(context).push(materialPageRoute).then((value) {
-          setState(() {
-            print('Here is change page');
-
-            readCart();
-          });
-        });
+        routeToNews();
         break; // Shopping cart
 
       // case 2:  routeToListProduct(2);   break;  // promotion
@@ -597,7 +596,7 @@ class _MyServiceState extends State<MyService> {
         routeToDetailCart();
       },
       child: Container(
-        margin: EdgeInsets.only(top: 5.0, right: 5.0),
+        margin: EdgeInsets.only(top: 5.0, right: 5.0, left: 5.0),
         width: 32.0,
         height: 32.0,
         child: Stack(
@@ -702,13 +701,15 @@ class _MyServiceState extends State<MyService> {
         } else if (index == 2) {
           routeToListProduct(0);
         } else if (index == 3) {
-          routeToDetailCart();
+          routeToNews();
         }
       },
     );
   }
 
   Widget showBubbleBottomBarNav() {
+    int unread = myUserModel.lastNewsId - myUserModel.lastNewsOpen;
+
     return BubbleBottomBar(
       hasNotch: true,
       // fabLocation: BubbleBottomBarFabLocation.end,
@@ -755,15 +756,42 @@ class _MyServiceState extends State<MyService> {
             title: Text("สินค้า")),
         BubbleBottomBarItem(
             backgroundColor: Colors.brown,
-            icon: Icon(
-              Icons.shopping_cart,
-              color: Colors.black,
+            icon: Stack(
+              children: <Widget>[
+                Icon(
+                  Icons.newspaper,
+                  color: Colors.black,
+                ),
+                (unread != 0)
+                    ? Text(
+                        ' $unread ',
+                        style: TextStyle(
+                          fontSize: 13,
+                          backgroundColor: Colors.red.shade600,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          wordSpacing: 100.0,
+                        ),
+                      )
+                    : Text(''),
+                // CircleAvatar(
+                //   radius: 8,
+                //   backgroundColor: Colors.red,
+                //   child: Text(
+                //     ' 5 ',
+                //     style: TextStyle(
+                //       color: Colors.white,
+                //       fontWeight: FontWeight.bold,
+                //     ),
+                //   ),
+                // ),
+              ],
             ),
             activeIcon: Icon(
-              Icons.shopping_cart,
+              Icons.newspaper,
               color: Colors.brown,
             ),
-            title: Text("ตะกร้าสินค้า")),
+            title: Text("ข่าวสาร")),
         /*
         BubbleBottomBarItem(
             backgroundColor: Colors.green,

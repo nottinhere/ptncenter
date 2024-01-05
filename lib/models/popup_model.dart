@@ -3,6 +3,7 @@ class PopupModel {
   String subject;
   String detail;
   String postdate;
+  String diffdate;
   String photo;
   String document;
   String popstatus;
@@ -12,6 +13,7 @@ class PopupModel {
       this.subject,
       this.detail,
       this.postdate,
+      this.diffdate,
       this.photo,
       this.document,
       this.popstatus});
@@ -21,6 +23,7 @@ class PopupModel {
     subject = json['subject'];
     detail = json['detail'];
     postdate = json['postdate'];
+    diffdate = json['diffdate'];
     photo = json['photo'];
     document = json['document'];
     popstatus = json['popstatus'];
@@ -32,6 +35,7 @@ class PopupModel {
     data['subject'] = this.subject;
     data['detail'] = this.detail;
     data['postdate'] = this.postdate;
+    data['diffdate'] = this.diffdate;
     data['photo'] = this.photo;
     data['document'] = this.document;
     data['popstatus'] = this.popstatus;

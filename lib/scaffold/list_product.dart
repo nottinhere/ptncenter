@@ -34,9 +34,16 @@ class ListProduct extends StatefulWidget {
   final UserModel userModel;
   final int cate;
   final String cateName;
+  final String searchStr;
   String _result = '';
 
-  ListProduct({Key key, this.index, this.userModel, this.cate, this.cateName})
+  ListProduct(
+      {Key key,
+      this.index,
+      this.userModel,
+      this.cate,
+      this.cateName,
+      this.searchStr})
       : super(key: key);
 
   @override
@@ -78,7 +85,7 @@ class _ListProductState extends State<ListProduct> {
 
   String qrString;
   int myCate = 0;
-  String myCateName = '';
+  String myCateName = '', mysearchString = '';
   ScrollController scrollController = ScrollController();
   final Debouncer debouncer =
       Debouncer(milliseconds: 300); // ตั้งค่า เวลาที่จะ delay
@@ -102,6 +109,13 @@ class _ListProductState extends State<ListProduct> {
     myUserModel = widget.userModel;
     myCate = widget.cate;
     myCateName = widget.cateName;
+    mysearchString = widget.searchStr;
+
+    if (mysearchString != null) {
+      searchString = mysearchString;
+    } else {
+      searchString = '';
+    }
 
     if (myIndex == 0) {
       currentIndex = 1;
@@ -114,6 +128,8 @@ class _ListProductState extends State<ListProduct> {
     } else if (myIndex == 4) {
       currentIndex = 1;
     } else if (myIndex == 5) {
+      currentIndex = 1;
+    } else if (myIndex == 6) {
       currentIndex = 1;
     }
 
@@ -985,6 +1001,8 @@ class _ListProductState extends State<ListProduct> {
         txtheader = 'สินค้าที่เคยสั่งแล้วไม่ได้รับ';
       } else if (myIndex == 5) {
         txtheader = myCateName;
+      } else if (myIndex == 6) {
+        txtheader = searchString;
       }
     } else {
       txtheader = 'รายการสินค้า';

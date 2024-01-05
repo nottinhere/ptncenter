@@ -26,6 +26,8 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:scan_preview/scan_preview_widget.dart';
 import 'package:flutter/foundation.dart';
 
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+
 class Detail extends StatefulWidget {
   final ProductAllModel productAllModel;
   final UserModel userModel;
@@ -41,6 +43,8 @@ class _DetailState extends State<Detail> {
   ProductAllModel currentProductAllModel;
   ProductAllModel2 productAllModel;
   List<UnitSizeModel> unitSizeModels = List();
+  List<ProductAllModel> slideshowModels = List();
+
   List<int> amounts = [0, 0, 0];
   int amontCart = 0;
   UserModel myUserModel;
@@ -58,10 +62,13 @@ class _DetailState extends State<Detail> {
   List<String> productsName = List();
   List<ProductAllModel> promoteModels = List();
   List<ProductAllModel> relateModels = List();
+  List<Widget> slideshowLists = List();
+
   int banerIndex = 0, relateIndex = 0;
   int currentIndex = 1;
   String _result = '';
   String qrString;
+  String videoCode;
 
   // Method
   @override
@@ -73,6 +80,7 @@ class _DetailState extends State<Detail> {
       readCart();
       getProductWhereID();
     });
+    readSlide();
     readRelate();
   }
 
@@ -122,10 +130,50 @@ class _DetailState extends State<Detail> {
         showSincart = productAllModel.itemincartSunit;
         showMincart = productAllModel.itemincartMunit;
         showLincart = productAllModel.itemincartLunit;
+
+        videoCode = productAllModel.youtube;
       });
     }
   }
 
+  /*************************** */
+
+  Image showImageNetWork(String urlImage) {
+    return Image.network(urlImage);
+  }
+
+  Future<void> readSlide() async {
+    String memId = myUserModel.id;
+    id = currentProductAllModel.id.toString();
+
+    String url =
+        'http://www.ptnpharma.com/apishop/json_productimage.php?memberId=$memId&id=$id';
+    // String url = 'http://www.ptnpharma.com/apishop/json_slideshow.php';
+
+    print('URL image detail >> $url');
+
+    http.Response response = await http.get(Uri.parse(url));
+    var result = json.decode(response.body);
+    var mapItemProduct =
+        result['itemsProduct']; // dynamic    จะส่ง value อะไรก็ได้ รวมถึง null
+
+    for (var map in mapItemProduct) {
+      PromoteModel slideshowModel = PromoteModel.fromJson(map);
+      ProductAllModel productAllModel = ProductAllModel.fromJson(map);
+      String urlImage = slideshowModel.photo;
+      print('urlImage >> $urlImage');
+
+      setState(() {
+        //promoteModels.add(promoteModel); // push ค่าลง array
+        slideshowModels.add(productAllModel);
+        slideshowLists.add(showImageNetWork(urlImage));
+
+        urlImages.add(urlImage);
+      });
+    }
+  }
+
+  /*************************** */
   Future<void> readRelate() async {
     String memId = myUserModel.id;
     id = currentProductAllModel.id.toString();
@@ -159,9 +207,57 @@ class _DetailState extends State<Detail> {
     );
   }
 
+  void routeToListProductByCate(int index, int cate, String cateName) {
+    MaterialPageRoute materialPageRoute =
+        MaterialPageRoute(builder: (BuildContext buildContext) {
+      return ListProduct(
+        index: index,
+        userModel: myUserModel,
+        cate: cate,
+        cateName: cateName,
+      );
+    });
+    Navigator.of(context).push(materialPageRoute);
+  }
+
+  Widget categoryTag() {
+    return Container(
+      // width: MediaQuery.of(context).size.width * 0.20,
+      // height: 80.0,
+      child: GestureDetector(
+        child: Card(
+          color: Colors.blueGrey.shade400,
+          child: Container(
+            padding: EdgeInsets.all(4.0),
+            alignment: AlignmentDirectional(0.0, 0.0),
+            child: Column(
+              children: <Widget>[
+                Text(
+                  productAllModel.cateName,
+                  style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white),
+                ),
+              ],
+            ),
+          ),
+        ),
+        onTap: () {
+          print('You click promotion');
+          routeToListProductByCate(
+            6,
+            int.parse(productAllModel.cateID),
+            productAllModel.cateName,
+          );
+        },
+      ),
+    );
+  }
+
   Widget promotionTag() {
     return Container(
-      width: MediaQuery.of(context).size.width * 0.18,
+      width: MediaQuery.of(context).size.width * 0.20,
       // height: 80.0,
       child: GestureDetector(
         child: Card(
@@ -223,7 +319,7 @@ class _DetailState extends State<Detail> {
 
   Widget newproductTag() {
     return Container(
-      width: MediaQuery.of(context).size.width * 0.18,
+      width: MediaQuery.of(context).size.width * 0.20,
       // height: 80.0,
       child: GestureDetector(
         child: Card(
@@ -293,6 +389,7 @@ class _DetailState extends State<Detail> {
           width: 5.0,
           height: 8.0,
         ),
+        // categoryTag(),
         productAllModel.promotion == 1 ? promotionTag() : Container(),
         productAllModel.newproduct == 1 ? newproductTag() : Container(),
         productAllModel.updateprice == 1 ? updatepriceTag() : Container(),
@@ -302,6 +399,37 @@ class _DetailState extends State<Detail> {
           height: 8.0,
         )
       ],
+    );
+  }
+
+  Widget showCarouseSlideshow() {
+    return GestureDetector(
+      child: CarouselSlider.builder(
+        options: CarouselOptions(
+          // pauseAutoPlayOnTouch: Duration(seconds: 5),
+          autoPlay: true,
+          autoPlayAnimationDuration: Duration(seconds: 5),
+        ),
+        itemCount: (slideshowLists.length).round(),
+        itemBuilder: (context, index, realIdx) {
+          final int first = index;
+          // final int second = first + 1;
+
+          return Row(
+            children: [first].map((idx) {
+              return Expanded(
+                child: Container(
+                  padding: EdgeInsets.all(1.0),
+                  child: Center(
+                    child: Image.network(urlImages[idx],
+                        fit: BoxFit.cover, width: 1000),
+                  ),
+                ),
+              );
+            }).toList(),
+          );
+        },
+      ),
     );
   }
 
@@ -417,13 +545,13 @@ class _DetailState extends State<Detail> {
   Widget showTitle() {
     return Text(
       productAllModel.title,
-      style: MyStyle().h2Style,
+      style: MyStyle().h3bStyle,
     );
   }
 
-  Widget showDetail() {
-    return Text(productAllModel.detail);
-  }
+  // Widget showDetail() {
+  //   return Text(productAllModel.detail);
+  // }
 
   Widget showPackage(int index) {
     if (unitSizeModels[index].price.toString() == '0') {
@@ -576,7 +704,7 @@ class _DetailState extends State<Detail> {
           Container(
             width: MediaQuery.of(context).size.width * 0.16,
             child: Text(
-              'Stock :',
+              'สต๊อก :',
               style: MyStyle().h3StyleGray,
             ),
           ),
@@ -588,14 +716,14 @@ class _DetailState extends State<Detail> {
                     : MyStyle().h3StyleRed),
           ),
           Container(
-            width: MediaQuery.of(context).size.width * 0.14,
+            width: MediaQuery.of(context).size.width * 0.25,
             child: Text(
-              'Exp :',
+              'วันหมดอายุ :',
               style: MyStyle().h3StyleGray,
             ),
           ),
           Container(
-            width: MediaQuery.of(context).size.width * 0.35,
+            width: MediaQuery.of(context).size.width * 0.28,
             child: Text(
               ' ${productAllModel.expire}',
               style: TextStyle(
@@ -609,6 +737,146 @@ class _DetailState extends State<Detail> {
           ),
         ],
       ),
+    );
+  }
+
+  final List<YoutubePlayerController> _controllers =
+      ['nIIBhbmZPM0'] // videoCode 'nIIBhbmZPM0',
+          .map<YoutubePlayerController>(
+            (videoId) => YoutubePlayerController(
+              initialVideoId: videoId,
+              flags: const YoutubePlayerFlags(
+                mute: false,
+                autoPlay: false,
+                disableDragSeek: true,
+                loop: false,
+                isLive: false,
+                forceHD: false,
+                enableCaption: true,
+              ),
+            ),
+          )
+          .toList();
+
+  Widget showVideo() {
+    return Column(
+      children: [
+        Align(
+          alignment: Alignment.centerLeft,
+          // width: MediaQuery.of(context).size.width * 0.20,
+          child: Text(
+            'Video :',
+            style: MyStyle().h4bStyleGray,
+          ),
+        ),
+        YoutubePlayer(
+          key: ObjectKey(_controllers[0]),
+          controller: _controllers[0],
+          actionsPadding: const EdgeInsets.only(left: 16.0),
+          bottomActions: [
+            CurrentPosition(),
+            const SizedBox(width: 10.0),
+            ProgressBar(isExpanded: true),
+            const SizedBox(width: 10.0),
+            RemainingDuration(),
+            FullScreenButton(),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget showDetail() {
+    return Column(
+      children: [
+        Align(
+          alignment: Alignment.centerLeft,
+          // width: MediaQuery.of(context).size.width * 0.20,
+          child: Text(
+            'รายละเอียด :',
+            style: MyStyle().h4bStyleGray,
+          ),
+        ),
+        Container(
+          // width: MediaQuery.of(context).size.width * 0.75,
+          child: Text(
+            productAllModel.detail,
+            style: MyStyle().h4StyleGray,
+          ),
+        ),
+        SizedBox(
+          height: 10.0,
+        ),
+      ],
+    );
+  }
+
+  Widget moreinfo() {
+    return Column(
+      children: [
+        Align(
+          // width: MediaQuery.of(context).size.width * 0.16,
+          alignment: Alignment.centerLeft,
+          child: Text(
+            'ข้อมูลเพิ่มเติม',
+            style: MyStyle().h3bStyleGreen,
+          ),
+        ),
+        SizedBox(
+          height: 10.0,
+        ),
+        Container(
+          width: MediaQuery.of(context).size.width * 0.98,
+          child: Row(
+            children: <Widget>[
+              Container(
+                width: MediaQuery.of(context).size.width * 0.10,
+                child: Text(
+                  'ราคา ',
+                  style: MyStyle().h4bStyleRed,
+                ),
+              ),
+              Container(
+                width: MediaQuery.of(context).size.width * 0.18,
+                child: Text(
+                  'ตามป้าย :',
+                  style: MyStyle().h4bStyleGray,
+                ),
+              ),
+              Container(
+                width: MediaQuery.of(context).size.width * 0.18,
+                child: Text(
+                  productAllModel.pricelabel,
+                  style: MyStyle().h4StyleGray,
+                ),
+              ),
+              Container(
+                width: MediaQuery.of(context).size.width * 0.31,
+                child: Text(
+                  'แนะนำขายปลีก :',
+                  style: MyStyle().h4bStyleGray,
+                ),
+              ),
+              Container(
+                width: MediaQuery.of(context).size.width * 0.18,
+                child: Text(
+                  productAllModel.pricesale,
+                  style: MyStyle().h4StyleGray,
+                ),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(
+          height: 10.0,
+        ),
+        Container(
+          child: productAllModel.detail == '' ? Container() : showDetail(),
+        ),
+        Container(
+          child: productAllModel.youtube == '-' ? Container() : showVideo(),
+        ),
+      ],
     );
   }
 
@@ -887,7 +1155,6 @@ class _DetailState extends State<Detail> {
           });
         });
         break; // promotion
-
     }
   }
 
@@ -928,14 +1195,14 @@ class _DetailState extends State<Detail> {
         BubbleBottomBarItem(
             backgroundColor: Colors.blue,
             icon: Icon(
-              Icons.shopping_cart,
+              Icons.newspaper,
               color: Colors.black,
             ),
             activeIcon: Icon(
-              Icons.shopping_cart,
+              Icons.newspaper,
               color: Colors.blue,
             ),
-            title: Text("ตะกร้าสินค้า")),
+            title: Text("ข่าวสาร")),
       ],
     );
   }
@@ -1110,7 +1377,10 @@ class _DetailState extends State<Detail> {
         // addButtonfix(),
         // MyStyle().mySizebox(),
         showImage(),
-
+        MyStyle().mySizebox(),
+        (slideshowLists.length > 0) ? showCarouseSlideshow() : Container(),
+        MyStyle().mySizebox(),
+        moreinfo(),
         MyStyle().mySizebox(),
         headTitle('สินค้าที่เกี่ยวข้อง', Icons.thumb_up),
         relate(),

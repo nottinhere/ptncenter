@@ -183,7 +183,7 @@ class _DetailCartState extends State<DetailCart> {
         children: <Widget>[
           Image.asset('images/shopping_cart.png'),
           Text(
-            ' $amontCart ',
+            ' $amontCart \u{2605}',
             style: TextStyle(
               backgroundColor: Colors.red.shade600,
               color: Colors.white,
@@ -961,11 +961,11 @@ class _DetailCartState extends State<DetailCart> {
         break; // all product
       case 3:
         break; // promotion
-
     }
   }
 
   Widget showBubbleBottomBarNav() {
+    int unread = myUserModel.lastNewsId - myUserModel.lastNewsOpen;
     return BubbleBottomBar(
       hasNotch: true,
       // fabLocation: BubbleBottomBarFabLocation.end,
@@ -1012,15 +1012,39 @@ class _DetailCartState extends State<DetailCart> {
             title: Text("สินค้า")),
         BubbleBottomBarItem(
             backgroundColor: Colors.brown,
-            icon: Icon(
-              Icons.shopping_cart,
-              color: Colors.black,
+            icon: Stack(
+              children: <Widget>[
+                Icon(
+                  Icons.newspaper,
+                  color: Colors.black,
+                ),
+                Text(
+                  ' $unread \u{2605}',
+                  style: TextStyle(
+                    fontSize: 13,
+                    backgroundColor: Colors.red.shade600,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                // CircleAvatar(
+                //   radius: 8,
+                //   backgroundColor: Colors.red,
+                //   child: Text(
+                //     ' 5 ',
+                //     style: TextStyle(
+                //       color: Colors.white,
+                //       fontWeight: FontWeight.bold,
+                //     ),
+                //   ),
+                // ),
+              ],
             ),
             activeIcon: Icon(
-              Icons.shopping_cart,
+              Icons.newspaper,
               color: Colors.brown,
             ),
-            title: Text("ตะกร้าสินค้า")),
+            title: Text("ข่าวสาร")),
       ],
     );
   }

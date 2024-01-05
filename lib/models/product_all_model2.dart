@@ -16,6 +16,11 @@ class ProductAllModel2 {
   int notreceive;
   bool favorite;
   int stock;
+  String cateID;
+  String cateName;
+  String youtube;
+  String pricelabel;
+  String pricesale;
   int id;
 
   ProductAllModel2(
@@ -36,6 +41,11 @@ class ProductAllModel2 {
       this.notreceive,
       this.favorite,
       this.stock,
+      this.cateID,
+      this.cateName,
+      this.youtube,
+      this.pricelabel,
+      this.pricesale,
       this.id});
 
   ProductAllModel2.fromJson(Map<String, dynamic> json) {
@@ -58,6 +68,11 @@ class ProductAllModel2 {
     notreceive = json['notreceive'];
     favorite = json['favorite'];
     stock = json['stock'];
+    cateID = json['cateID'];
+    cateName = json['cateName'];
+    youtube = json['youtube'];
+    pricelabel = json['pricelabel'];
+    pricesale = json['pricesale'];
     id = json['id'];
   }
 
@@ -83,6 +98,11 @@ class ProductAllModel2 {
     data['favorite'] = this.favorite;
     data['stock'] = this.stock;
     data['id'] = this.id;
+    data['cateID'] = this.cateID;
+    data['cateName'] = this.cateName;
+    data['youtube'] = this.youtube;
+    data['pricelabel'] = this.pricelabel;
+    data['pricesale'] = this.pricesale;
     return data;
   }
 }

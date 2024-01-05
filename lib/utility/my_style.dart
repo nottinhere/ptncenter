@@ -67,9 +67,21 @@ class MyStyle {
     color: Colors.blue,
   );
 
+  TextStyle h4bStyleGray = TextStyle(
+    fontSize: 14.0,
+    fontWeight: FontWeight.bold,
+    color: Colors.grey.shade900,
+  );
+
   TextStyle h4StyleGray = TextStyle(
     fontSize: 14.0,
     color: Colors.grey.shade900,
+  );
+
+  TextStyle h4bStyleRed = TextStyle(
+    fontSize: 14.0,
+    fontWeight: FontWeight.bold,
+    color: Colors.red,
   );
 
   TextStyle h4StyleRed = TextStyle(

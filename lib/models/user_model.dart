@@ -28,6 +28,8 @@ class UserModel {
   String cartJson;
   String lineID;
   String facebook;
+  int lastNewsOpen;
+  int lastNewsId;
   String msg;
 
   UserModel(
@@ -60,6 +62,8 @@ class UserModel {
       this.cartJson,
       this.lineID,
       this.facebook,
+      this.lastNewsOpen,
+      this.lastNewsId,
       this.msg});
 
   UserModel.fromJson(Map<String, dynamic> json) {
@@ -92,6 +96,8 @@ class UserModel {
     cartJson = json['cart_json'];
     lineID = json['lineID'];
     facebook = json['facebook'];
+    lastNewsOpen = json['last_news_open'];
+    lastNewsId = json['last_news_id'];
     msg = json['msg'];
   }
 
@@ -126,6 +132,8 @@ class UserModel {
     data['cart_json'] = this.cartJson;
     data['lineID'] = this.lineID;
     data['facebook'] = this.facebook;
+    data['last_news_open'] = this.lastNewsOpen;
+    data['last_news_id'] = this.lastNewsId;
     data['msg'] = this.msg;
     return data;
   }
