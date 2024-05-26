@@ -509,7 +509,7 @@ class _DetailCartState extends State<DetailCart> {
 
     String url =
         'http://ptnpharma.com/apishop/json_removeitemincart.php?productID=$productID&unitSize=$unitSize&memberId=$memberID';
-    print('url DeleteCart#######################======>>>> $url');
+    print('url DeleteCart======>>>> $url');
 
     await http.get(Uri.parse(url)).then((response) {
       setState(() {
@@ -543,6 +543,7 @@ class _DetailCartState extends State<DetailCart> {
     String priceS = sMap[index]['price'].toString();
     String lableS = sMap[index]['lable'];
     String quantityS = sMap[index]['quantity'];
+    String pricechange = sMap[index]['pricechange'];
     double showQTYS =
         (quantityS == null) ? 0.0 : double.parse(quantityS.replaceAll(',', ''));
 
@@ -551,10 +552,27 @@ class _DetailCartState extends State<DetailCart> {
         : Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: <Widget>[
-              Text(
-                '$priceS บาท/ $lableS',
-                style: MyStyle().h3Style,
-              ),
+              (pricechange != '-')
+                  ? Column(
+                      children: [
+                        Text(
+                          '$priceS บาท/ $lableS',
+                          style: MyStyle().h3Style,
+                        ),
+                        (pricechange != '-')
+                            ? Text(
+                                'ปรับราคา ' + pricechange + ' บาท',
+                                style: (int.parse(pricechange) > 0)
+                                    ? MyStyle().h5StyleRed
+                                    : MyStyle().h5StyleBlue,
+                              )
+                            : '',
+                      ],
+                    )
+                  : Text(
+                      '$priceS บาท/ $lableS',
+                      style: MyStyle().h3Style,
+                    ),
               changeQTY(productID, 's', showQTYS),
               deleteButton(index, 's'),
             ],
@@ -566,6 +584,7 @@ class _DetailCartState extends State<DetailCart> {
     String priceM = mMap[index]['price'].toString();
     String lableM = mMap[index]['lable'];
     String quantityM = mMap[index]['quantity'];
+    String pricechange = mMap[index]['pricechange'];
     double showQTYM =
         (quantityM == null) ? 0.0 : double.parse(quantityM.replaceAll(',', ''));
 
@@ -574,10 +593,27 @@ class _DetailCartState extends State<DetailCart> {
         : Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: <Widget>[
-              Text(
-                '$priceM บาท/ $lableM',
-                style: MyStyle().h3Style,
-              ),
+              (pricechange != '-')
+                  ? Column(
+                      children: [
+                        Text(
+                          '$priceM บาท/ $lableM',
+                          style: MyStyle().h3Style,
+                        ),
+                        (pricechange != '-')
+                            ? Text(
+                                'ปรับราคา ' + pricechange + ' บาท',
+                                style: (int.parse(pricechange) > 0)
+                                    ? MyStyle().h5StyleRed
+                                    : MyStyle().h5StyleBlue,
+                              )
+                            : '',
+                      ],
+                    )
+                  : Text(
+                      '$priceM บาท/ $lableM',
+                      style: MyStyle().h3Style,
+                    ),
               changeQTY(productID, 'm', showQTYM),
               deleteButton(index, 'm'),
             ],
@@ -589,6 +625,7 @@ class _DetailCartState extends State<DetailCart> {
     String priceL = lMap[index]['price'].toString();
     String lableL = lMap[index]['lable'];
     String quantityL = lMap[index]['quantity'];
+    String pricechange = lMap[index]['pricechange'];
     double showQTYL =
         (quantityL == null) ? 0.0 : double.parse(quantityL.replaceAll(',', ''));
 
@@ -597,10 +634,27 @@ class _DetailCartState extends State<DetailCart> {
         : Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: <Widget>[
-              Text(
-                '$priceL บาท/ $lableL',
-                style: MyStyle().h3Style,
-              ),
+              (pricechange != '-')
+                  ? Column(
+                      children: [
+                        Text(
+                          '$priceL บาท/ $lableL',
+                          style: MyStyle().h3Style,
+                        ),
+                        (pricechange != '-')
+                            ? Text(
+                                'ปรับราคา ' + pricechange + ' บาท',
+                                style: (int.parse(pricechange) > 0)
+                                    ? MyStyle().h5StyleRed
+                                    : MyStyle().h5StyleBlue,
+                              )
+                            : '',
+                      ],
+                    )
+                  : Text(
+                      '$priceL บาท/ $lableL',
+                      style: MyStyle().h3Style,
+                    ),
               changeQTY(productID, 'l', showQTYL),
               deleteButton(index, 'l'),
             ],

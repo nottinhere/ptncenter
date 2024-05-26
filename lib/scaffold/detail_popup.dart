@@ -8,6 +8,7 @@ import 'package:ptncenter/models/popup_model.dart';
 import 'package:ptncenter/scaffold/detail_cart.dart';
 import 'package:ptncenter/scaffold/list_product.dart';
 import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
+import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 import 'my_service.dart';
 
 class DetailPopup extends StatefulWidget {
@@ -28,6 +29,8 @@ class _DetailState extends State<DetailPopup> {
   String id; // productID
   String memberID;
   String imagePopup = '';
+  String textButton = '';
+  String textURL = '';
   String subjectPopup = '';
   String detailPopup = '';
   String postdatePopup = '';
@@ -59,12 +62,16 @@ class _DetailState extends State<DetailPopup> {
       String subject = popupModel.subject;
       String postdate = popupModel.postdate;
       String detail = popupModel.detail;
+      String txtBTN = popupModel.txtBTN;
+      String txtURL = popupModel.url;
       setState(() {
         //promoteModels.add(promoteModel); // push ค่าลง arra
         subjectPopup = subject;
         imagePopup = urlImage;
         detailPopup = detail;
         postdatePopup = postdate;
+        textButton = txtBTN;
+        textURL = txtURL;
       });
     } // for
   }
@@ -115,6 +122,34 @@ class _DetailState extends State<DetailPopup> {
     );
   }
 
+  Widget showButton() {
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.9,
+      padding: new EdgeInsets.all(10.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue,
+              textStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            onPressed: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => WebView(
+                            userModel: myUserModel,
+                            urlTarget: textURL,
+                          )));
+            },
+            child: Text(textButton),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget showDetail() {
     return Card(
       child: Container(
@@ -148,6 +183,7 @@ class _DetailState extends State<DetailPopup> {
                 color: Color.fromARGB(0xff, 0, 0, 0),
               ),
             ),
+            (textButton != '') ? showButton() : Container(),
           ],
         ),
       ),
@@ -199,7 +235,6 @@ class _DetailState extends State<DetailPopup> {
           });
         });
         break; // promotion
-
     }
   }
 
@@ -254,50 +289,55 @@ class _DetailState extends State<DetailPopup> {
 
   Widget gotoHome() {
     // all product
-    return Container(
-      width: MediaQuery.of(context).size.width * 0.39,
-      // color: Colors.greenAccent,
-      // height: 80.0,
-      child: GestureDetector(
-        child: Card(
-          color: Color.fromARGB(0xff, 0x2c, 0xb5, 0x1b),
-          child: Container(
-            padding: EdgeInsets.all(12.0),
-            alignment: AlignmentDirectional(0.0, 0.0),
-            child: Row(
-              children: <Widget>[
-                Icon(
-                  Icons.home,
-                  size: 24.0,
-                  color: Colors.white,
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        Container(
+          width: MediaQuery.of(context).size.width * 0.30,
+          // color: Colors.greenAccent,
+          // height: 80.0,
+          child: GestureDetector(
+            child: Card(
+              color: Color.fromARGB(0xff, 0x2c, 0xb5, 0x1b),
+              child: Container(
+                padding: EdgeInsets.all(5.0),
+                alignment: AlignmentDirectional(0.0, 0.0),
+                child: Row(
+                  children: <Widget>[
+                    Icon(
+                      Icons.home,
+                      size: 20.0,
+                      color: Colors.white,
+                    ),
+                    Text(
+                      '  หน้าหลัก',
+                      style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white),
+                    ),
+                  ],
                 ),
-                Text(
-                  '  หน้าหลัก',
-                  style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white),
-                ),
-              ],
+              ),
             ),
+            onTap: () {
+              print('You click home');
+              MaterialPageRoute materialPageRoute =
+                  MaterialPageRoute(builder: (BuildContext buildContext) {
+                return MyService(
+                  userModel: myUserModel,
+                );
+              });
+
+              Navigator.of(context).pushAndRemoveUntil(
+                  materialPageRoute, // pushAndRemoveUntil  clear หน้าก่อนหน้า route with out airrow back
+                  (Route<dynamic> route) {
+                return false;
+              });
+            },
           ),
         ),
-        onTap: () {
-          print('You click home');
-          MaterialPageRoute materialPageRoute =
-              MaterialPageRoute(builder: (BuildContext buildContext) {
-            return MyService(
-              userModel: myUserModel,
-            );
-          });
-
-          Navigator.of(context).pushAndRemoveUntil(
-              materialPageRoute, // pushAndRemoveUntil  clear หน้าก่อนหน้า route with out airrow back
-              (Route<dynamic> route) {
-            return false;
-          });
-        },
-      ),
+      ],
     );
   }
 
@@ -366,4 +406,46 @@ class _DetailState extends State<DetailPopup> {
   //     ],
   //   );
   // }
+}
+
+class WebView extends StatefulWidget {
+  final UserModel userModel;
+  final String urlTarget;
+
+  WebView({Key key, this.userModel, this.urlTarget}) : super(key: key);
+
+  @override
+  _WebViewState createState() => _WebViewState();
+}
+
+class _WebViewState extends State<WebView> {
+  UserModel myUserModel;
+  String myUrlTarget;
+
+  @override
+  void initState() {
+    super.initState();
+    myUserModel = widget.userModel;
+    myUrlTarget = widget.urlTarget;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    String memberId = myUserModel.id;
+    String memberCode = myUserModel.customerCode;
+    String url = myUrlTarget; //
+    print('URL ==>> $url');
+    return WebviewScaffold(
+      url: url, //"https://www.androidmonks.com",
+      appBar: AppBar(
+        backgroundColor: MyStyle().bgColor,
+        title: Text("PTN Pharma"),
+      ),
+      withZoom: true,
+      withJavascript: true,
+      withLocalStorage: true,
+      appCacheEnabled: false,
+      ignoreSSLErrors: true,
+    );
+  }
 }

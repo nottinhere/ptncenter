@@ -131,8 +131,9 @@ class _DetailState extends State<Detail> {
         showMincart = productAllModel.itemincartMunit;
         showLincart = productAllModel.itemincartLunit;
 
-        videoCode = productAllModel.youtube;
+        videoCode = productAllModel.youtube.toString();
       });
+      print('videoCode >> $videoCode');
     }
   }
 
@@ -740,25 +741,21 @@ class _DetailState extends State<Detail> {
     );
   }
 
-  final List<YoutubePlayerController> _controllers =
-      ['nIIBhbmZPM0'] // videoCode 'nIIBhbmZPM0',
-          .map<YoutubePlayerController>(
-            (videoId) => YoutubePlayerController(
-              initialVideoId: videoId,
-              flags: const YoutubePlayerFlags(
-                mute: false,
-                autoPlay: false,
-                disableDragSeek: true,
-                loop: false,
-                isLive: false,
-                forceHD: false,
-                enableCaption: true,
-              ),
-            ),
-          )
-          .toList();
-
   Widget showVideo() {
+    String videoSelectCode = videoCode;
+    final _controllers = YoutubePlayerController(
+      initialVideoId: videoSelectCode,
+      flags: const YoutubePlayerFlags(
+        mute: false,
+        autoPlay: false,
+        disableDragSeek: true,
+        loop: false,
+        isLive: false,
+        forceHD: false,
+        enableCaption: true,
+      ),
+    );
+
     return Column(
       children: [
         Align(
@@ -770,8 +767,8 @@ class _DetailState extends State<Detail> {
           ),
         ),
         YoutubePlayer(
-          key: ObjectKey(_controllers[0]),
-          controller: _controllers[0],
+          key: ObjectKey(_controllers),
+          controller: _controllers,
           actionsPadding: const EdgeInsets.only(left: 16.0),
           bottomActions: [
             CurrentPosition(),
@@ -847,7 +844,7 @@ class _DetailState extends State<Detail> {
                 width: MediaQuery.of(context).size.width * 0.18,
                 child: Text(
                   productAllModel.pricelabel,
-                  style: MyStyle().h4StyleGray,
+                  style: MyStyle().h3bStyleGray,
                 ),
               ),
               Container(
@@ -861,20 +858,17 @@ class _DetailState extends State<Detail> {
                 width: MediaQuery.of(context).size.width * 0.18,
                 child: Text(
                   productAllModel.pricesale,
-                  style: MyStyle().h4StyleGray,
+                  style: MyStyle().h3bStyleGray,
                 ),
               ),
             ],
           ),
         ),
         SizedBox(
-          height: 10.0,
+          height: 5.0,
         ),
         Container(
           child: productAllModel.detail == '' ? Container() : showDetail(),
-        ),
-        Container(
-          child: productAllModel.youtube == '-' ? Container() : showVideo(),
         ),
       ],
     );
@@ -887,6 +881,11 @@ class _DetailState extends State<Detail> {
       child: ListView.builder(
         itemCount: unitSizeModels.length,
         itemBuilder: (BuildContext buildContext, int index) {
+          print('price >> ' + unitSizeModels[index].price.toString());
+          // return (unitSizeModels[index].price.isNotEmpty &&
+          //         unitSizeModels[index].price != '0')
+          //     ? showChoosePricePackage(index)
+          //     : widget;
           return showChoosePricePackage(index);
         },
       ),
@@ -1366,21 +1365,15 @@ class _DetailState extends State<Detail> {
         // MyStyle().mySizebox(),
         // showExpire(),
         showStockExpire(),
-        //  Padding(
-        //     child: SpinBox(
-        //       value: int.parse('intVL'),
-        //       decoration: InputDecoration(labelText: 'Basic'),
-        //     ),
-        //     padding: const EdgeInsets.all(16),
-        //   ),
         showPrice(),
-        // addButtonfix(),
-        // MyStyle().mySizebox(),
-        showImage(),
+        MyStyle().mySizebox(),
+        moreinfo(),
+
         MyStyle().mySizebox(),
         (slideshowLists.length > 0) ? showCarouseSlideshow() : Container(),
         MyStyle().mySizebox(),
-        moreinfo(),
+        (productAllModel.youtube == '-') ? Container() : showVideo(),
+
         MyStyle().mySizebox(),
         headTitle('สินค้าที่เกี่ยวข้อง', Icons.thumb_up),
         relate(),

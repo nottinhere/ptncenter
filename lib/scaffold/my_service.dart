@@ -238,7 +238,9 @@ class _MyServiceState extends State<MyService> {
         userModel: myUserModel,
       );
     });
-    Navigator.of(context).push(materialPageRoute);
+    int unread;
+    // Navigator.of(context).push(materialPageRoute);
+    Navigator.of(context).push(materialPageRoute).then((value) => unread = 0);
   }
 
   void changePage(int index) {

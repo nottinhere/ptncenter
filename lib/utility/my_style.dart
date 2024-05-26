@@ -46,6 +46,12 @@ class MyStyle {
     color: Colors.grey.shade900,
   );
 
+  TextStyle h3bStyleGray = TextStyle(
+    fontSize: 16.0,
+    fontWeight: FontWeight.bold,
+    color: Colors.grey.shade900,
+  );
+
   TextStyle h3bStyleRed = TextStyle(
     fontSize: 16.0,
     fontWeight: FontWeight.bold,
@@ -87,6 +93,20 @@ class MyStyle {
   TextStyle h4StyleRed = TextStyle(
     fontSize: 14.0,
     color: Colors.red,
+  );
+
+  TextStyle h5StyleRed = TextStyle(
+    fontSize: 11.0,
+    color: Colors.red,
+  );
+  TextStyle h5StyleGreen = TextStyle(
+    fontSize: 11.0,
+    color: Colors.green,
+  );
+  TextStyle h5StyleBlue = TextStyle(
+    fontSize: 11.0,
+    color: Colors.blue,
+    fontWeight: FontWeight.bold,
   );
 
   BoxDecoration boxLightGreen = BoxDecoration(
