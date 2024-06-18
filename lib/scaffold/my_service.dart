@@ -35,7 +35,12 @@ import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 class MyService extends StatefulWidget {
   final UserModel userModel;
   bool firstLoadAds;
-  MyService({Key key, this.userModel, this.firstLoadAds = false})
+  bool orderSuccess;
+  MyService(
+      {Key key,
+      this.userModel,
+      this.firstLoadAds = false,
+      this.orderSuccess = false})
       : super(key: key);
 
   @override
@@ -66,6 +71,7 @@ class _MyServiceState extends State<MyService> {
       currentWidget = Home(
         userModel: myUserModel,
         firstLoadAds: widget.firstLoadAds,
+        orderSuccess: widget.orderSuccess,
       );
       print('Here is initState');
       readCategory(); // read  ข้อมูลมาแสดง
@@ -78,7 +84,7 @@ class _MyServiceState extends State<MyService> {
     // List map;
     String memberId = myUserModel.id.toString();
     String url =
-        'http://ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId';
+        'https://ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId';
 
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
@@ -96,7 +102,7 @@ class _MyServiceState extends State<MyService> {
   }
 
   Future<void> readCategory() async {
-    String url = 'http://ptnpharma.com/apishop/json_category.php';
+    String url = 'https://ptnpharma.com/apishop/json_category.php';
     // print('url readCategory >> $url');
 
     http.Response response = await http.get(Uri.parse(url));
@@ -149,7 +155,7 @@ class _MyServiceState extends State<MyService> {
       print(barcodeScanRes);
 
       String url =
-          'http://ptnpharma.com/apishop/json_productlist.php?bqcode=$barcodeScanRes';
+          'https://ptnpharma.com/apishop/json_productlist.php?bqcode=$barcodeScanRes';
       http.Response response = await http.get(Uri.parse(url));
       var result = json.decode(response.body);
       // print('result ===*******>>>> $result');
@@ -491,7 +497,7 @@ class _MyServiceState extends State<MyService> {
   Future<void> decodeQRcode(var code) async {
     try {
       String url =
-          'http://ptnpharma.com/apishop/json_productlist.php?bqcode=$code';
+          'https://ptnpharma.com/apishop/json_productlist.php?bqcode=$code';
       http.Response response = await http.get(Uri.parse(url));
       var result = json.decode(response.body);
       print('result ===*******>>>> $result');

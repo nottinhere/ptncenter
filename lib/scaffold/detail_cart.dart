@@ -57,6 +57,7 @@ class _DetailCartState extends State<DetailCart> {
   int currentIndex = 3;
   String _result = '';
   String qrString;
+  bool _isPressed = false;
 
   List<String> listTransport = [
     '',
@@ -88,6 +89,12 @@ class _DetailCartState extends State<DetailCart> {
       readCart();
     });
   }
+
+  // void _myCallback() {
+  //   setState(() {
+  //     _isPressed = true;
+  //   });
+  // }
 
   Future<void> readCart() async {
     clearArray();
@@ -370,7 +377,7 @@ class _DetailCartState extends State<DetailCart> {
   Future<void> editDetailCart(
       String productID, String unitSize, String memberID) async {
     String url =
-        'http://ptnpharma.com/apishop/json_updatemycart.php?productID=$productID&unitSize=$unitSize&newQTY=$newQTY&memberId=$memberID';
+        'https://ptnpharma.com/apishop/json_updatemycart.php?productID=$productID&unitSize=$unitSize&newQTY=$newQTY&memberId=$memberID';
 
     print('url editDetailCart ====>>>>> $url');
 
@@ -384,7 +391,7 @@ class _DetailCartState extends State<DetailCart> {
   Future<void> updateDetailCart(
       String productID, String unitSize, String memberID) async {
     String url =
-        'http://ptnpharma.com/apishop/json_updatemycart.php?productID=$productID&unitSize=$unitSize&newQTY=$newQTY&memberId=$memberID';
+        'https://ptnpharma.com/apishop/json_updatemycart.php?productID=$productID&unitSize=$unitSize&newQTY=$newQTY&memberId=$memberID';
     print('url editDetailCart ====>>>>> $url');
     await http.get(Uri.parse(url)).then((response) {});
 
@@ -508,11 +515,12 @@ class _DetailCartState extends State<DetailCart> {
     print('productID = $productID ,unitSize = $unitSize ,memberID = $memberID');
 
     String url =
-        'http://ptnpharma.com/apishop/json_removeitemincart.php?productID=$productID&unitSize=$unitSize&memberId=$memberID';
+        'https://ptnpharma.com/apishop/json_removeitemincart.php?productID=$productID&unitSize=$unitSize&memberId=$memberID';
     print('url DeleteCart======>>>> $url');
 
     await http.get(Uri.parse(url)).then((response) {
       setState(() {
+        print('amontCart after remove item>> $amontCart');
         readCart();
       });
     });
@@ -796,18 +804,29 @@ class _DetailCartState extends State<DetailCart> {
           margin: EdgeInsets.only(right: 30.0),
           child: ElevatedButton(
             // color: MyStyle().textColor,
-            onPressed: () {
-              if (transport == null) {
-                normalDialog(context, 'ยังไม่เลือก  การจัดส่ง',
-                    'กรุณา เลือกการจัดส่ง ด้วยค่ะ');
-              } else {
-                memberID = myUserModel.id.toString();
-                print(
-                    'transport = $transport, comment = $comment, memberId = $memberID');
-
-                submitThread();
-              }
-            },
+            onPressed: _isPressed == false
+                ? () {
+                    setState(() {
+                      print('amontCart submit >> $amontCart');
+                      if (amontCart == 0) {
+                        normalDialog(context, 'ไม่มีสินค้าในตะกร้า',
+                            'กรุณา เลือกสินค้า ด้วยค่ะ');
+                        null;
+                      } else {
+                        if (transport == null) {
+                          normalDialog(context, 'ยังไม่เลือก  การจัดส่ง',
+                              'กรุณา เลือกการจัดส่ง ด้วยค่ะ');
+                        } else {
+                          _isPressed = true;
+                          memberID = myUserModel.id.toString();
+                          print(
+                              'transport = $transport, comment = $comment, memberId = $memberID');
+                          submitThread();
+                        }
+                      }
+                    });
+                  }
+                : null,
             child: Text(
               'Submit',
               style: TextStyle(color: Colors.white),
@@ -825,11 +844,12 @@ class _DetailCartState extends State<DetailCart> {
   Future<void> submitThread() async {
     try {
       String url =
-          'http://ptnpharma.com/apishop/json_submit_myorder.php?memberId=$memberID&transport=$transport&comment=$comment';
+          'https://ptnpharma.com/apishop/json_submit_myorder.php?memberId=$memberID&transport=$transport&comment=$comment';
       print('url ==> $url');
 
       await http.get(Uri.parse(url)).then((value) {
-        confirmSubmit();
+        // confirmSubmit();
+        routeToHome();
       });
     } catch (e) {}
   }
@@ -936,7 +956,7 @@ class _DetailCartState extends State<DetailCart> {
   Future<void> decodeQRcode(var code) async {
     try {
       String url =
-          'http://ptnpharma.com/apishop/json_productlist.php?bqcode=$code';
+          'https://ptnpharma.com/apishop/json_productlist.php?bqcode=$code';
       http.Response response = await http.get(Uri.parse(url));
       var result = json.decode(response.body);
       print('result ===*******>>>> $result');
@@ -991,6 +1011,18 @@ class _DetailCartState extends State<DetailCart> {
     Navigator.of(context).push(materialPageRoute);
   }
 
+  void routeToHome() {
+    MaterialPageRoute materialPageRoute =
+        MaterialPageRoute(builder: (BuildContext buildContext) {
+      return MyService(
+        userModel: myUserModel,
+        firstLoadAds: false,
+        orderSuccess: true,
+      );
+    });
+    Navigator.of(context).push(materialPageRoute);
+  }
+
   void changePage(int index) {
     setState(() {
       currentIndex = index;
@@ -1013,6 +1045,10 @@ class _DetailCartState extends State<DetailCart> {
       case 2:
         routeToListProduct(0);
         break; // all product
+      case 2:
+        routeToHome();
+        break; // all product
+
       case 3:
         break; // promotion
     }

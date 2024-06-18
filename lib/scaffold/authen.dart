@@ -43,7 +43,7 @@ class _AuthenState extends State<Authen> {
   }
 
   // Future<void> readPopup() async {
-  //   String url = 'http://ptnpharma.com/apishop/json_popup.php';
+  //   String url = 'https://ptnpharma.com/apishop/json_popup.php';
   //   http.Response response = await http.get(Uri.parse(url));
   //   var result = json.decode(response.body);
   //   var mapItemPopup =
@@ -170,7 +170,7 @@ class _AuthenState extends State<Authen> {
       // Have space
       normalDialog(context, 'ข้อมูลไม่ครบ', 'กรุณากรอกข้อมูลให้ครบ');
     } else {
-      String urlPop = 'http://ptnpharma.com/apishop/json_popup.php';
+      String urlPop = 'https://ptnpharma.com/apishop/json_popup.php';
       http.Response responsePop = await http.get(Uri.parse(urlPop));
       var resultPop = json.decode(responsePop.body);
       var mapItemPopup = resultPop[
@@ -193,8 +193,8 @@ class _AuthenState extends State<Authen> {
       String url =
           '${MyStyle().getUserWhereUserAndPass}?username=$user&password=$password';
       print('url = $url');
-      http.Response response = await http
-          .get(Uri.parse(url)); // await จะต้องทำงานใน await จะเสร็จจึงจะไปทำ process ต่อไป
+      http.Response response = await http.get(Uri.parse(
+          url)); // await จะต้องทำงานใน await จะเสร็จจึงจะไปทำ process ต่อไป
       var result = json.decode(response.body);
       int statusInt = result['status'];
 

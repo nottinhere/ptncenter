@@ -148,8 +148,8 @@ class _DetailState extends State<Detail> {
     id = currentProductAllModel.id.toString();
 
     String url =
-        'http://www.ptnpharma.com/apishop/json_productimage.php?memberId=$memId&id=$id';
-    // String url = 'http://www.ptnpharma.com/apishop/json_slideshow.php';
+        'https://www.ptnpharma.com/apishop/json_productimage.php?memberId=$memId&id=$id';
+    // String url = 'https://www.ptnpharma.com/apishop/json_slideshow.php';
 
     print('URL image detail >> $url');
 
@@ -180,7 +180,7 @@ class _DetailState extends State<Detail> {
     id = currentProductAllModel.id.toString();
 
     String url =
-        'http://www.ptnpharma.com/apishop/json_relate.php?memberId=$memId&productId=$id'; // ?memberId=$memberId
+        'https://www.ptnpharma.com/apishop/json_relate.php?memberId=$memId&productId=$id'; // ?memberId=$memberId
 
     print('URL relate >> $url');
     http.Response response = await http.get(Uri.parse(url));
@@ -506,7 +506,7 @@ class _DetailState extends State<Detail> {
   Future<void> editFavorite(
       String productID, String memberID, bool _isFavorite) async {
     String url =
-        'http://ptnpharma.com/apishop/json_favorite.php?productID=$productID&memberId=$memberID&status=$_isFavorite';
+        'https://ptnpharma.com/apishop/json_favorite.php?productID=$productID&memberId=$memberID&status=$_isFavorite';
 
     print('url Favorites url ====>>>>> $url');
     await http.get(Uri.parse(url)).then((response) {
@@ -942,7 +942,7 @@ class _DetailState extends State<Detail> {
     amontCart = 0;
     String memberId = myUserModel.id.toString();
     String url =
-        'http://ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId';
+        'https://ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId';
 
     print('url Detail =====>>>>>>>> $url');
 
@@ -1076,7 +1076,7 @@ class _DetailState extends State<Detail> {
   Future<void> decodeQRcode(var code) async {
     try {
       String url =
-          'http://ptnpharma.com/apishop/json_productlist.php?bqcode=$code';
+          'https://ptnpharma.com/apishop/json_productlist.php?bqcode=$code';
       http.Response response = await http.get(Uri.parse(url));
       var result = json.decode(response.body);
       print('result ===*******>>>> $result');
@@ -1328,7 +1328,7 @@ class _DetailState extends State<Detail> {
   Future<void> addCart(
       String productID, String unitSize, int qTY, String memberID) async {
     String url =
-        'http://www.ptnpharma.com/apishop/json_savemycart.php?productID=$productID&unitSize=$unitSize&QTY=$qTY&memberId=$memberID';
+        'https://www.ptnpharma.com/apishop/json_savemycart.php?productID=$productID&unitSize=$unitSize&QTY=$qTY&memberId=$memberID';
     print('urlAddcart = $url');
     await http.get(Uri.parse(url)).then((response) {});
     print('upload ok');

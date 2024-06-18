@@ -44,11 +44,20 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
 import '../firebase_options.dart';
 
+import 'package:rflutter_alert/rflutter_alert.dart';
+import 'package:status_alert/status_alert.dart';
+
 class Home extends StatefulWidget {
   final UserModel userModel;
   bool firstLoadAds;
+  bool orderSuccess;
 
-  Home({Key key, this.userModel, this.firstLoadAds = false}) : super(key: key);
+  Home(
+      {Key key,
+      this.userModel,
+      this.firstLoadAds = false,
+      this.orderSuccess = false})
+      : super(key: key);
 
   @override
   _HomeState createState() => _HomeState();
@@ -73,6 +82,8 @@ class _HomeState extends State<Home> {
   UserModel myUserModel;
   PopupModel popupModel;
   PopupModel newsModel;
+
+  bool orderSuccess;
 
   bool firstLoad = false;
   List<ProductAllModel> promoteModels = List();
@@ -111,6 +122,8 @@ class _HomeState extends State<Home> {
     */
     readPromotion();
     myUserModel = widget.userModel;
+    orderSuccess = widget.orderSuccess;
+
     readSuggest();
     readSlide();
     setState(() {
@@ -119,6 +132,7 @@ class _HomeState extends State<Home> {
     directMessage();
     _requestPermission();
     readNews();
+    showOrderSuccessPopup();
   }
 
   _requestPermission() async {
@@ -165,7 +179,7 @@ class _HomeState extends State<Home> {
       print(barcodeScanRes);
 
       String url =
-          'http://ptnpharma.com/apishop/json_productlist.php?bqcode=$barcodeScanRes';
+          'https://ptnpharma.com/apishop/json_productlist.php?bqcode=$barcodeScanRes';
       http.Response response = await http.get(Uri.parse(url));
       var result = json.decode(response.body);
       // print('result ===*******>>>> $result');
@@ -213,7 +227,7 @@ class _HomeState extends State<Home> {
   /*************************** */
 
   Future<void> readPromotion() async {
-    String url = 'http://www.ptnpharma.com/apishop/json_promotion.php';
+    String url = 'https://www.ptnpharma.com/apishop/json_promotion.php';
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var mapItemProduct =
@@ -241,7 +255,7 @@ class _HomeState extends State<Home> {
   /*************************** */
 
   Future<void> readSlide() async {
-    String url = 'http://www.ptnpharma.com/apishop/json_slideshow.php';
+    String url = 'https://www.ptnpharma.com/apishop/json_slideshow.php';
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var mapItemProduct =
@@ -264,7 +278,7 @@ class _HomeState extends State<Home> {
   Future<void> readSuggest() async {
     String memId = myUserModel.id;
     String url =
-        'http://www.ptnpharma.com/apishop/json_suggest.php?memberId=$memId'; // ?memberId=$memberId
+        'https://www.ptnpharma.com/apishop/json_suggest.php?memberId=$memId'; // ?memberId=$memberId
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var mapItemProduct =
@@ -289,7 +303,7 @@ class _HomeState extends State<Home> {
   Future<void> readNews() async {
     String memId = myUserModel.id;
     String url =
-        'http://www.ptnpharma.com/apishop/json_news.php?limit=5'; // ?memberId=$memberId
+        'https://www.ptnpharma.com/apishop/json_news.php?limit=5'; // ?memberId=$memberId
     print('urlNews >> $url');
 
     http.Response response = await http.get(Uri.parse(url));
@@ -319,6 +333,62 @@ class _HomeState extends State<Home> {
         debugPrint("CLICKED $index");
       },
     ).show();
+  }
+
+  Future<void> showOrderSuccessPopup() async {
+    if (orderSuccess == true) {
+      print('--------------- *showOrderSuccessPopup* ------------');
+      StatusAlert.show(
+        context,
+        duration: Duration(seconds: 3),
+        title: 'Success',
+        subtitle: 'สั่งซื้อเรียบร้อย',
+        configuration: IconConfiguration(icon: Icons.done),
+        maxWidth: 260,
+      );
+
+      // successAlertBox()
+      //     .animate()
+      //     .fadeOut(duration: 3.seconds)
+      //     .then(delay: 5.seconds) // baseline=800ms
+      //     .slide();
+    }
+  }
+
+  Widget successAlertBox() {
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => Alert(
+        context: context,
+        type: AlertType.success,
+        title: "สั่งซื้อเรียบร้อย",
+        desc: "ทางเราจะจัดส่งสินค้าโดยเร็ว",
+        alertAnimation: fadeAlertAnimation,
+        buttons: [
+          // DialogButton(
+          //   child: Text(
+          //     "OK",
+          //     style: TextStyle(color: Colors.white, fontSize: 18),
+          //   ),
+          //   onPressed: () => Navigator.pop(context),
+          //   color: Color.fromRGBO(0, 179, 134, 1.0),
+          // ),
+        ],
+      ).show(),
+    );
+  }
+
+  Widget fadeAlertAnimation(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    return Align(
+      child: FadeTransition(
+        opacity: animation,
+        child: child,
+      ),
+    );
   }
 
   /***************popup_banner ************ */
@@ -1305,7 +1375,7 @@ class _HomeState extends State<Home> {
     amontCart = 0;
     String memberId = myUserModel.id.toString();
     String url =
-        'http://ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId';
+        'https://ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId';
 
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
@@ -1323,7 +1393,7 @@ class _HomeState extends State<Home> {
   Future<void> decodeQRcode(var code) async {
     try {
       String url =
-          'http://ptnpharma.com/apishop/json_productlist.php?bqcode=$code';
+          'https://ptnpharma.com/apishop/json_productlist.php?bqcode=$code';
       http.Response response = await http.get(Uri.parse(url));
       var result = json.decode(response.body);
       print('result ===*******>>>> $result');
@@ -1365,6 +1435,21 @@ class _HomeState extends State<Home> {
       ),
     );
   }
+
+  // Widget successBox() {
+  //   return Text(
+  //     'สั่งซื้อเรียบร้อย',
+  //     style: TextStyle(
+  //       fontSize: 32,
+  //       fontWeight: FontWeight.bold,
+  //       color: MyStyle().textColor,
+  //     ),
+  //   )
+  //       .animate()
+  //       .fadeOut(duration: 3.seconds)
+  //       .then(delay: 5.seconds) // baseline=800ms
+  //       .slide();
+  // }
 
   Widget homeMenu() {
     return Container(
@@ -1427,7 +1512,6 @@ class _HomeState extends State<Home> {
         child: Column(
           children: <Widget>[
             headTitle('สินค้าแนะนำ $login ', Icons.thumb_up), //($loginStatus)
-            // suggest(),
             slideshow(),
             headTitle('เมนู', Icons.home),
             homeMenu(),
