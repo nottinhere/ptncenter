@@ -4,6 +4,7 @@ import 'dart:io';
 // import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:ptncenter/main.dart';
 import 'package:ptncenter/models/product_all_model.dart';
 import 'package:ptncenter/models/user_model.dart';
 import 'package:ptncenter/models/category_model.dart';
@@ -382,7 +383,12 @@ class _MyServiceState extends State<MyService> {
   Future<void> logOut() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     await sharedPreferences.clear();
-    exit(0);
+    // exit(0);
+    MaterialPageRoute materialPageRoute =
+        MaterialPageRoute(builder: (BuildContext buildContext) {
+      return MyApp();
+    });
+    Navigator.of(context).push(materialPageRoute);
   }
 
   Widget menuContact() {

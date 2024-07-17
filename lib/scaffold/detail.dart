@@ -882,11 +882,11 @@ class _DetailState extends State<Detail> {
         itemCount: unitSizeModels.length,
         itemBuilder: (BuildContext buildContext, int index) {
           print('price >> ' + unitSizeModels[index].price.toString());
-          // return (unitSizeModels[index].price.isNotEmpty &&
-          //         unitSizeModels[index].price != '0')
-          //     ? showChoosePricePackage(index)
-          //     : widget;
-          return showChoosePricePackage(index);
+          return (unitSizeModels[index].price.isNotEmpty &&
+                  unitSizeModels[index].price != '0')
+              ? showChoosePricePackage(index)
+              : Container();
+          // return showChoosePricePackage(index);
         },
       ),
     );
