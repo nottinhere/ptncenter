@@ -413,10 +413,56 @@ class _MyServiceState extends State<MyService> {
 
     return ListTile(
       leading: Icon(
-        Icons.payment,
+        Icons.payments,
         size: 36.0,
       ),
       title: Text('แจ้งชำระเงิน'),
+      // subtitle: Text('Read QR code or barcode'),
+      onTap: () {
+        print('You click $webPage');
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => WebView(
+                      userModel: myUserModel,
+                      webPage: webPage,
+                    )));
+      },
+    );
+  }
+
+  Widget menuORN() {
+    String webPage = 'orn';
+
+    return ListTile(
+      leading: Icon(
+        Icons.checklist,
+        size: 36.0,
+      ),
+      title: Text('ตรวจสอบใบส่งของ'),
+      // subtitle: Text('Read QR code or barcode'),
+      onTap: () {
+        print('You click $webPage');
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => WebView(
+                      userModel: myUserModel,
+                      webPage: webPage,
+                    )));
+      },
+    );
+  }
+
+  Widget menuReward() {
+    String webPage = 'reward';
+
+    return ListTile(
+      leading: Icon(
+        Icons.workspace_premium,
+        size: 36.0,
+      ),
+      title: Text('ของสมนาคุณ'),
       // subtitle: Text('Read QR code or barcode'),
       onTap: () {
         print('You click $webPage');
@@ -594,10 +640,12 @@ class _MyServiceState extends State<MyService> {
           headDrawer(),
           menuHome(),
           menuCategory(),
-          menuContact(),
+          menuORN(),
           menuPay(),
+          menuReward(),
+          // menuReadQRcode(),
+          menuContact(),
           menuComplain(),
-          menuReadQRcode(),
           menuLogOut(),
         ],
       ),
@@ -901,6 +949,14 @@ class _WebViewState extends State<WebView> {
       url =
           'https://ptnpharma.com/shop/pages/forms/pay_mobile.php?memberId=$memberId&memberCode=$memberCode'; //
       txtTitle = 'แจ้งชำระเงิน';
+    } else if (webPage == 'orn') {
+      url =
+          'https://ptnpharma.com/shop/pages/tables/orn_list_mobile.php?memberId=$memberId&memberCode=$memberCode'; //
+      txtTitle = 'ตรวจสอบใบส่งของ';
+    } else if (webPage == 'reward') {
+      url =
+          'https://ptnpharma.com/shop/pages/tables/reward_list_mobile.php?memberId=$memberId&memberCode=$memberCode'; //
+      txtTitle = 'รายการของสมนาคุณ ';
     } else {
       url =
           'https://ptnpharma.com/shop/pages/forms/complain_mobile.php?memberId=$memberId&memberCode=$memberCode'; //
