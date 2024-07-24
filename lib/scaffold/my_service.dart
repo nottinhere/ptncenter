@@ -11,6 +11,7 @@ import 'package:ptncenter/models/category_model.dart';
 import 'package:ptncenter/scaffold/detail.dart';
 
 import 'package:ptncenter/scaffold/list_news.dart';
+import 'package:ptncenter/scaffold/list_notify.dart';
 
 import 'package:ptncenter/utility/my_style.dart';
 import 'package:ptncenter/utility/normal_dialog.dart';
@@ -86,11 +87,11 @@ class _MyServiceState extends State<MyService> {
     String memberId = myUserModel.id.toString();
     String url =
         'https://ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId';
-
+    print('url readCart >> $url');
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var cartList = result['cart'];
-    // print('cartList >> $cartList');
+    print('cartList >> $cartList');
 
     if (cartList != null) {
       for (var map in cartList) {
@@ -245,6 +246,18 @@ class _MyServiceState extends State<MyService> {
         userModel: myUserModel,
       );
     });
+    Navigator.of(context).push(materialPageRoute);
+    // int unread;
+    // Navigator.of(context).push(materialPageRoute).then((value) => unread = 0);
+  }
+
+  void routeToNotify() {
+    MaterialPageRoute materialPageRoute =
+        MaterialPageRoute(builder: (BuildContext buildContext) {
+      return Notify(
+        userModel: myUserModel,
+      );
+    });
     int unread;
     // Navigator.of(context).push(materialPageRoute);
     Navigator.of(context).push(materialPageRoute).then((value) => unread = 0);
@@ -266,7 +279,7 @@ class _MyServiceState extends State<MyService> {
         routeToListProduct(0);
         break; // all product
       case 3:
-        routeToNews();
+        routeToNotify();
         break; // Shopping cart
 
       // case 2:  routeToListProduct(2);   break;  // promotion
@@ -763,7 +776,7 @@ class _MyServiceState extends State<MyService> {
         } else if (index == 2) {
           routeToListProduct(0);
         } else if (index == 3) {
-          routeToNews();
+          routeToNotify();
         }
       },
     );
@@ -853,7 +866,7 @@ class _MyServiceState extends State<MyService> {
               Icons.newspaper,
               color: Colors.brown,
             ),
-            title: Text("ข่าวสาร")),
+            title: Text("การแจ้งเตือน")),
         /*
         BubbleBottomBarItem(
             backgroundColor: Colors.green,

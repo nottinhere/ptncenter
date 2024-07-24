@@ -1,11 +1,14 @@
 class ProductAllModel2 {
   String title;
+  String hilight;
   String productCode;
   String photo;
   PriceList priceList;
   String expire;
   String expireColor;
   String detail;
+  String usefor;
+  String method;
   int itemincartSunit;
   int itemincartMunit;
   int itemincartLunit;
@@ -25,12 +28,15 @@ class ProductAllModel2 {
 
   ProductAllModel2(
       {this.title,
+      this.hilight,
       this.productCode,
       this.photo,
       this.priceList,
       this.expire,
       this.expireColor,
       this.detail,
+      this.usefor,
+      this.method,
       this.itemincartSunit,
       this.itemincartMunit,
       this.itemincartLunit,
@@ -50,6 +56,7 @@ class ProductAllModel2 {
 
   ProductAllModel2.fromJson(Map<String, dynamic> json) {
     title = json['title'];
+    hilight = json['hilight'];
     productCode = json['product_code'];
     photo = json['photo'];
     priceList = json['price_list'] != null
@@ -58,6 +65,8 @@ class ProductAllModel2 {
     expire = json['expire'];
     expireColor = json['expire_color'];
     detail = json['detail'];
+    usefor = json['usefor'];
+    method = json['method'];
     itemincartSunit = json['itemincartSunit'];
     itemincartMunit = json['itemincartMunit'];
     itemincartLunit = json['itemincartLunit'];
@@ -79,6 +88,7 @@ class ProductAllModel2 {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['title'] = this.title;
+    data['hilight'] = this.hilight;
     data['product_code'] = this.productCode;
     data['photo'] = this.photo;
     if (this.priceList != null) {
@@ -87,6 +97,8 @@ class ProductAllModel2 {
     data['expire'] = this.expire;
     data['expire_color'] = this.expireColor;
     data['detail'] = this.detail;
+    data['usefor'] = this.usefor;
+    data['method'] = this.method;
     data['itemincartSunit'] = this.itemincartSunit;
     data['itemincartMunit'] = this.itemincartMunit;
     data['itemincartLunit'] = this.itemincartLunit;

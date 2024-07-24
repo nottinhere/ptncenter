@@ -179,7 +179,7 @@ class _ListProductState extends State<ListProduct> {
     lastItemName = '';
     String memberId = myUserModel.id.toString();
     String url =
-        'http://ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId';
+        'https://ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId';
 
     print('url Detail =====>>>>>>>> $url');
 
@@ -238,7 +238,7 @@ class _ListProductState extends State<ListProduct> {
       print(barcodeScanRes);
 
       String url =
-          'http://ptnpharma.com/apishop/json_productlist.php?bqcode=$barcodeScanRes';
+          'https://ptnpharma.com/apishop/json_productlist.php?bqcode=$barcodeScanRes';
       http.Response response = await http.get(Uri.parse(url));
       var result = json.decode(response.body);
       // print('result ===*******>>>> $result');
@@ -331,17 +331,17 @@ class _ListProductState extends State<ListProduct> {
 
     String memberId = myUserModel.id.toString();
     String url =
-        'http://ptnpharma.com/apishop/json_productlist.php?memberId=$memberId&searchKey=$searchString&page=$page';
+        'https://ptnpharma.com/apishop/json_productlist.php?memberId=$memberId&searchKey=$searchString&page=$page';
     if (myIndex != 0) {
       if (myIndex == 1 || myIndex == 2 || myIndex == 3) {
         url =
-            'http://ptnpharma.com/apishop/json_productlist.php?memberId=$memberId&searchKey=$searchString&product_mode=$myIndex&page=$page';
+            'https://ptnpharma.com/apishop/json_productlist.php?memberId=$memberId&searchKey=$searchString&product_mode=$myIndex&page=$page';
       } else if (myIndex == 4) {
         url =
-            'http://ptnpharma.com/apishop/json_productnotreceive.php?memberId=$memberId&page=$page';
+            'https://ptnpharma.com/apishop/json_productnotreceive.php?memberId=$memberId&page=$page';
       } else if (myIndex == 5) {
         url =
-            'http://ptnpharma.com/apishop/json_productlist.php?memberId=$memberId&cate_id=$myCate&page=$page';
+            'https://ptnpharma.com/apishop/json_productlist.php?memberId=$memberId&cate_id=$myCate&page=$page';
       }
     }
 
@@ -387,7 +387,7 @@ class _ListProductState extends State<ListProduct> {
     String memberId = myUserModel.id.toString();
     int productID = filterProductAllModels[index].id;
     String url =
-        'http://ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId';
+        'https://ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId';
 
     print("URL update item = $url");
     http.Response response = await http.get(Uri.parse(url));
@@ -421,6 +421,20 @@ class _ListProductState extends State<ListProduct> {
           child: Text(
             filterProductAllModels[index].title,
             style: MyStyle().h3Style,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget showHilight(int index) {
+    return Row(
+      children: <Widget>[
+        Container(
+          width: MediaQuery.of(context).size.width * 0.7 - 10,
+          child: Text(
+            filterProductAllModels[index].hilight,
+            style: MyStyle().h3StyleRed,
           ),
         ),
       ],
@@ -532,6 +546,9 @@ class _ListProductState extends State<ListProduct> {
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
             showName(index),
+            (filterProductAllModels[index].hilight != '')
+                ? showHilight(index)
+                : Container(),
             showPrice(index),
             showStock(index),
           ],
@@ -797,7 +814,7 @@ class _ListProductState extends State<ListProduct> {
   Future<void> decodeQRcode(var code) async {
     try {
       String url =
-          'http://ptnpharma.com/apishop/json_productlist.php?bqcode=$code';
+          'https://ptnpharma.com/apishop/json_productlist.php?bqcode=$code';
       http.Response response = await http.get(Uri.parse(url));
       var result = json.decode(response.body);
       // print('result ===*******>>>> $result');

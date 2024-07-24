@@ -141,7 +141,7 @@ class _ListProductFrequent extends State<ListProductFrequent> {
     lastItemName = '';
     String memberId = myUserModel.id.toString();
     String url =
-        'http://ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId';
+        'https://ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId';
 
     // print('url Detail =====>>>>>>>> $url');
 
@@ -206,7 +206,7 @@ class _ListProductFrequent extends State<ListProductFrequent> {
 
     String memberId = myUserModel.id.toString();
     String url =
-        'http://ptnpharma.com/apishop/json_productfrequentlist.php?memberId=$memberId&searchKey=$searchString&page=$page';
+        'https://ptnpharma.com/apishop/json_productfrequentlist.php?memberId=$memberId&searchKey=$searchString&page=$page';
 
     // url = '${MyStyle().readProductWhereMode}$myIndex';
     print("URL = $url");
@@ -271,6 +271,20 @@ class _ListProductFrequent extends State<ListProductFrequent> {
     );
   }
 
+  Widget showHilight(int index) {
+    return Row(
+      children: <Widget>[
+        Container(
+          width: MediaQuery.of(context).size.width * 0.7 - 10,
+          child: Text(
+            filterProductAllModels[index].hilight,
+            style: MyStyle().h3StyleRed,
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget showPrice(int index) {
     String txtShowPrice;
     String txtShowUnit;
@@ -320,6 +334,9 @@ class _ListProductFrequent extends State<ListProductFrequent> {
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
             showName(index),
+            (filterProductAllModels[index].hilight != '')
+                ? showHilight(index)
+                : Container(),
             // showPrice(index),
             showStock(index),
           ],
@@ -382,7 +399,7 @@ class _ListProductFrequent extends State<ListProductFrequent> {
   Future<void> iconAddCart(String memberID, String productID, String selectUnit,
       String qty, bool _isFavorite) async {
     String url =
-        'http://ptnpharma.com/apishop/json_addfeqitemtocart.php?memberId=$memberID&productID=$productID&selectUnit=$selectUnit&qty=$qty&status=$_isFavorite';
+        'https://ptnpharma.com/apishop/json_addfeqitemtocart.php?memberId=$memberID&productID=$productID&selectUnit=$selectUnit&qty=$qty&status=$_isFavorite';
 
     print('url Favorites url ====>>>>> $url');
     await http.get(Uri.parse(url)).then((response) {
@@ -658,7 +675,7 @@ class _ListProductFrequent extends State<ListProductFrequent> {
   Future<void> addAlltoCart() async {
     String memberID = myUserModel.id.toString();
     String url =
-        'http://ptnpharma.com/apishop/json_addallfeqitemtocart.php?memberId=$memberID';
+        'https://ptnpharma.com/apishop/json_addallfeqitemtocart.php?memberId=$memberID';
 
     print('url Favorites url ====>>>>> $url');
     await http.get(Uri.parse(url)).then((response) {

@@ -388,7 +388,7 @@ class _DetailState extends State<Detail> {
       children: <Widget>[
         SizedBox(
           width: 5.0,
-          height: 8.0,
+          height: 5.0,
         ),
         // categoryTag(),
         productAllModel.promotion == 1 ? promotionTag() : Container(),
@@ -404,42 +404,48 @@ class _DetailState extends State<Detail> {
   }
 
   Widget showCarouseSlideshow() {
-    return GestureDetector(
-      child: CarouselSlider.builder(
-        options: CarouselOptions(
-          // pauseAutoPlayOnTouch: Duration(seconds: 5),
-          autoPlay: true,
-          autoPlayAnimationDuration: Duration(seconds: 5),
-        ),
-        itemCount: (slideshowLists.length).round(),
-        itemBuilder: (context, index, realIdx) {
-          final int first = index;
-          // final int second = first + 1;
-
-          return Row(
-            children: [first].map((idx) {
-              return Expanded(
-                child: Container(
-                  padding: EdgeInsets.all(1.0),
-                  child: Center(
-                    child: Image.network(urlImages[idx],
-                        fit: BoxFit.cover, width: 1000),
-                  ),
-                ),
+    print('slideshowLists.length >> ' + slideshowLists.length.toString());
+    return Column(
+      children: [
+        GestureDetector(
+          child: CarouselSlider.builder(
+            options: CarouselOptions(
+              // pauseAutoPlayOnTouch: Duration(seconds: 5),
+              autoPlay: (slideshowLists.length) > 0 ? true : false,
+              autoPlayAnimationDuration: Duration(seconds: 5),
+            ),
+            itemCount: (slideshowLists.length).round(),
+            itemBuilder: (context, index, realIdx) {
+              final int first = index;
+              // final int second = first + 1;
+              return Row(
+                children: [first].map((idx) {
+                  return Expanded(
+                    child: Container(
+                      padding: EdgeInsets.all(1.0),
+                      child: Center(
+                        child: Image.network(urlImages[idx],
+                            fit: BoxFit.cover, width: 1000),
+                      ),
+                    ),
+                  );
+                }).toList(),
               );
-            }).toList(),
-          );
-        },
-      ),
+            },
+          ),
+        ),
+        Divider(),
+      ],
     );
   }
 
   Widget showCarouseSliderRelate() {
+    print('relateModels.length > ' + relateModels.length.toString());
     return GestureDetector(
       child: CarouselSlider.builder(
         options: CarouselOptions(
           // pauseAutoPlayOnTouch: Duration(seconds: 5),
-          autoPlay: true,
+          autoPlay: (relateModels.length >= 1) ? true : false,
           autoPlayAnimationDuration: Duration(seconds: 5),
         ),
         itemCount: (relateModels.length / 2).round(),
@@ -550,6 +556,19 @@ class _DetailState extends State<Detail> {
     );
   }
 
+  Widget showHilight() {
+    return Row(
+      children: <Widget>[
+        Container(
+          width: MediaQuery.of(context).size.width * 0.7 - 10,
+          child: Text(
+            productAllModel.hilight,
+            style: MyStyle().h3StyleRed,
+          ),
+        ),
+      ],
+    );
+  }
   // Widget showDetail() {
   //   return Text(productAllModel.detail);
   // }
@@ -762,7 +781,7 @@ class _DetailState extends State<Detail> {
           alignment: Alignment.centerLeft,
           // width: MediaQuery.of(context).size.width * 0.20,
           child: Text(
-            'Video :',
+            'Video ',
             style: MyStyle().h4bStyleGray,
           ),
         ),
@@ -778,6 +797,57 @@ class _DetailState extends State<Detail> {
             RemainingDuration(),
             FullScreenButton(),
           ],
+        ),
+        Divider(),
+      ],
+    );
+  }
+
+  Widget showUsefor() {
+    return Column(
+      children: [
+        Align(
+          alignment: Alignment.centerLeft,
+          // width: MediaQuery.of(context).size.width * 0.20,
+          child: Text(
+            'ใช้รักษา',
+            style: MyStyle().h4bStyleGray,
+          ),
+        ),
+        Container(
+          // width: MediaQuery.of(context).size.width * 0.75,
+          child: Text(
+            productAllModel.usefor,
+            style: MyStyle().h4StyleGray,
+          ),
+        ),
+        SizedBox(
+          height: 20.0,
+        ),
+      ],
+    );
+  }
+
+  Widget showMethod() {
+    return Column(
+      children: [
+        Align(
+          alignment: Alignment.centerLeft,
+          // width: MediaQuery.of(context).size.width * 0.20,
+          child: Text(
+            'วิธีการใช้',
+            style: MyStyle().h4bStyleGray,
+          ),
+        ),
+        Container(
+          // width: MediaQuery.of(context).size.width * 0.75,
+          child: Text(
+            productAllModel.method,
+            style: MyStyle().h4StyleGray,
+          ),
+        ),
+        SizedBox(
+          height: 20.0,
         ),
       ],
     );
@@ -802,26 +872,26 @@ class _DetailState extends State<Detail> {
           ),
         ),
         SizedBox(
-          height: 10.0,
+          height: 20.0,
         ),
       ],
     );
   }
 
-  Widget moreinfo() {
+  Widget salepriceinfo() {
     return Column(
       children: [
-        Align(
-          // width: MediaQuery.of(context).size.width * 0.16,
-          alignment: Alignment.centerLeft,
-          child: Text(
-            'ข้อมูลเพิ่มเติม',
-            style: MyStyle().h3bStyleGreen,
-          ),
-        ),
-        SizedBox(
-          height: 10.0,
-        ),
+        // Align(
+        //   // width: MediaQuery.of(context).size.width * 0.16,
+        //   alignment: Alignment.centerLeft,
+        //   child: Text(
+        //     'ข้อมูลเพิ่มเติม',
+        //     style: MyStyle().h3bStyleGreen,
+        //   ),
+        // ),
+        // SizedBox(
+        //   height: 10.0,
+        // ),
         Container(
           width: MediaQuery.of(context).size.width * 0.98,
           child: Row(
@@ -865,7 +935,28 @@ class _DetailState extends State<Detail> {
           ),
         ),
         SizedBox(
-          height: 5.0,
+          height: 20.0,
+        ),
+      ],
+    );
+  }
+
+  Widget moreinfo() {
+    return Column(
+      children: [
+        // Align(
+        //   // width: MediaQuery.of(context).size.width * 0.16,
+        //   alignment: Alignment.centerLeft,
+        //   child: Text(
+        //     'ข้อมูลเพิ่มเติม',
+        //     style: MyStyle().h3bStyleGreen,
+        //   ),
+        // ),
+        Container(
+          child: productAllModel.usefor == '' ? Container() : showUsefor(),
+        ),
+        Container(
+          child: productAllModel.method == '' ? Container() : showMethod(),
         ),
         Container(
           child: productAllModel.detail == '' ? Container() : showDetail(),
@@ -876,16 +967,15 @@ class _DetailState extends State<Detail> {
 
   Widget showPrice() {
     return Container(
-      height: 150.0,
+      decoration: BoxDecoration(
+          border: Border.all(color: Color.fromARGB(255, 255, 255, 255))),
+      height: (53 * unitSizeModels.length.toDouble()),
       // color: Colors.grey,
       child: ListView.builder(
         itemCount: unitSizeModels.length,
         itemBuilder: (BuildContext buildContext, int index) {
           print('price >> ' + unitSizeModels[index].price.toString());
-          return (unitSizeModels[index].price.isNotEmpty &&
-                  unitSizeModels[index].price != '0')
-              ? showChoosePricePackage(index)
-              : Container();
+          return showChoosePricePackage(index);
           // return showChoosePricePackage(index);
         },
       ),
@@ -919,14 +1009,14 @@ class _DetailState extends State<Detail> {
         children: <Widget>[
           Icon(
             iconData,
-            size: 24.0,
+            size: 18.0,
             color: MyStyle().textColor,
           ),
           mySizebox(),
           Text(
             string,
             style: TextStyle(
-              fontSize: 22,
+              fontSize: 18,
               fontWeight: FontWeight.bold,
               color: MyStyle().textColor,
             ),
@@ -1247,6 +1337,12 @@ class _DetailState extends State<Detail> {
                   String productID = id;
                   String memberID = myUserModel.id.toString();
 
+                  if ((qtyS == 0 || qtyS == null) &&
+                      (qtyM == 0 || qtyM == null) &&
+                      (qtyL == 0 || qtyL == null)) {
+                    normalDialog(context, 'แจ้งเตือน', 'กรุณาระบุจำนวน');
+                  }
+
                   if (qtyS != 0) {
                     String unitSize = 's';
                     print(
@@ -1293,6 +1389,12 @@ class _DetailState extends State<Detail> {
                 onPressed: () {
                   String productID = id;
                   String memberID = myUserModel.id.toString();
+
+                  if ((qtyS == 0 || qtyS == null) &&
+                      (qtyM == 0 || qtyM == null) &&
+                      (qtyL == 0 || qtyL == null)) {
+                    normalDialog(context, 'แจ้งเตือน', 'กรุณาระบุจำนวน');
+                  }
 
                   if (qtyS != 0) {
                     String unitSize = 's';
@@ -1359,25 +1461,18 @@ class _DetailState extends State<Detail> {
       children: <Widget>[
         favButton(),
         showTitle(),
-        // MyStyle().mySizebox(),
+        (productAllModel.hilight == '-') ? Container() : showHilight(),
         showTag(),
-        // showStock(),
-        // MyStyle().mySizebox(),
-        // showExpire(),
         showStockExpire(),
+        Divider(),
         showPrice(),
-        MyStyle().mySizebox(),
-        moreinfo(),
-
-        MyStyle().mySizebox(),
+        Divider(), //MyStyle().mySizebox(),
         (slideshowLists.length > 0) ? showCarouseSlideshow() : Container(),
-        MyStyle().mySizebox(),
         (productAllModel.youtube == '-') ? Container() : showVideo(),
-
-        MyStyle().mySizebox(),
+        salepriceinfo(),
+        moreinfo(),
         headTitle('สินค้าที่เกี่ยวข้อง', Icons.thumb_up),
         relate(),
-        MyStyle().mySizebox(),
         MyStyle().mySizebox(),
       ],
     );

@@ -674,7 +674,7 @@ class _HomeScreenState extends State<HomeScreen> {
     amontCart = 0;
     String memberId = myUserModel.id.toString();
     String url =
-        'http://ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId';
+        'https://ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId';
 
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
@@ -691,7 +691,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> decodeQRcode(var code) async {
     try {
       String url =
-          'http://ptnpharma.com/apishop/json_productlist.php?bqcode=$code';
+          'https://ptnpharma.com/apishop/json_productlist.php?bqcode=$code';
       http.Response response = await http.get(Uri.parse(url));
       var result = json.decode(response.body);
       print('result ===*******>>>> $result');

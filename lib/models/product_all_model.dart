@@ -1,5 +1,6 @@
 class ProductAllModel {
   String title;
+  String hilight;
   String productCode;
   String photo;
   String selectUnit;
@@ -17,11 +18,14 @@ class ProductAllModel {
   String itemFeqMunit;
   String itemFeqLunit;
   String detail;
+  String usefor;
+  String method;
   int stock;
   int id;
 
   ProductAllModel(
       {this.title,
+      this.hilight,
       this.productCode,
       this.photo,
       this.priceList,
@@ -39,11 +43,14 @@ class ProductAllModel {
       this.itemFeqMunit,
       this.itemFeqLunit,
       this.detail,
+      this.usefor,
+      this.method,
       this.stock,
       this.id});
 
   ProductAllModel.fromJson(Map<String, dynamic> json) {
     title = json['title'];
+    hilight = json['hilight'];
     productCode = json['product_code'];
     photo = json['photo'];
     priceList = json['price_list'];
@@ -61,6 +68,8 @@ class ProductAllModel {
     itemFeqMunit = json['itemFeqMunit'];
     itemFeqLunit = json['itemFeqLunit'];
     detail = json['detail'];
+    usefor = json['usefor'];
+    method = json['method'];
     stock = json['stock'];
     id = json['id'];
   }
@@ -68,6 +77,7 @@ class ProductAllModel {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['title'] = this.title;
+    data['hilight'] = this.hilight;
     data['product_code'] = this.productCode;
     data['photo'] = this.photo;
     data['price_list'] = this.priceList;
@@ -85,6 +95,8 @@ class ProductAllModel {
     data['itemFeqMunit'] = this.itemFeqMunit;
     data['itemFeqLunit'] = this.itemFeqLunit;
     data['detail'] = this.detail;
+    data['usefor'] = this.usefor;
+    data['method'] = this.method;
     data['stock'] = this.stock;
     data['id'] = this.id;
     return data;

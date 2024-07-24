@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:ptncenter/models/user_model.dart';
 import 'package:ptncenter/models/popup_model.dart';
 import 'package:ptncenter/scaffold/authen.dart';
-import 'package:ptncenter/scaffold/detail_news.dart';
+import 'package:ptncenter/scaffold/detail_notify.dart';
 import 'package:ptncenter/scaffold/detail_cart.dart';
 
 import 'package:ptncenter/utility/my_style.dart';
@@ -17,23 +17,24 @@ import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:chat_bubbles/chat_bubbles.dart';
 
-class News extends StatefulWidget {
+class Notify extends StatefulWidget {
   final UserModel userModel;
   bool firstLoadAds;
 
-  News({Key key, this.userModel, this.firstLoadAds = false}) : super(key: key);
+  Notify({Key key, this.userModel, this.firstLoadAds = false})
+      : super(key: key);
 
   @override
-  _NewsState createState() => _NewsState();
+  _NotifyState createState() => _NotifyState();
 }
 
-class _NewsState extends State<News> {
+class _NotifyState extends State<Notify> {
   // Explicit
   // List<PromoteModel> promoteModels = List();
   List<Widget> promoteLists = List();
   List<Widget> suggestLists = List();
   List<Widget> slideshowLists = List();
-  List<Widget> newsLists = List();
+  List<Widget> notifyLists = List();
   List<String> urlImages = List();
   List<String> urlImagesSuggest = List();
   List<String> productsName = List();
@@ -45,11 +46,11 @@ class _NewsState extends State<News> {
   int amontCart = 0, banerIndex = 0, suggestIndex = 0;
   UserModel myUserModel;
   PopupModel popupModel;
-  PopupModel newsModel;
+  PopupModel notifyModel;
 
   bool firstLoad = false;
   List<PopupModel> popupAllModel = List();
-  List<PopupModel> newsModels = List();
+  List<PopupModel> notifyModels = List();
 
   String qrString;
   int currentIndex = 0;
@@ -64,43 +65,44 @@ class _NewsState extends State<News> {
     setState(() {
       readCart();
     });
-    readNews();
+    readNotify();
   }
 
   /*************************** */
 
-  Future<void> readNews() async {
+  Future<void> readNotify() async {
     String memberId = myUserModel.id;
     String url =
-        'https://www.ptnpharma.com/apishop/json_news.php?limit=5&memberId=$memberId'; // ?memberId=$memberId
-    print('urlNews >> $url');
+        'https://www.ptnpharma.com/apishop/json_notify.php?limit=10&memberId=$memberId'; // ?memberId=$memberId
+    print('urlNotify >> $url');
 
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
-    var mapItemNews =
+    var mapItemNotify =
         result['itemsData']; // dynamic    จะส่ง value อะไรก็ได้ รวมถึง null
 
-    for (var map in mapItemNews) {
+    for (var map in mapItemNotify) {
       PopupModel popupModel = PopupModel.fromJson(map);
       String postdate = popupModel.postdate;
       String subject = popupModel.subject;
       setState(() {
         //promoteModels.add(promoteModel); // push ค่าลง array
-        newsModels.add(popupModel);
+        notifyModels.add(popupModel);
         // subjectList.add(subject);
         // postdateList.add(postdate);
       });
     }
-    // print('newsModels.length (readNews) >> ' + newsModels.length.toString());
+    // print('notifyModels.length (readNotify) >> ' + notifyModels.length.toString());
   }
 
-  Widget showNews() {
-    print('newsModels.length (showNews) >> ' + newsModels.length.toString());
+  Widget showNotify() {
+    print('notifyModels.length (showNotify) >> ' +
+        notifyModels.length.toString());
 
     return Container(
       width: MediaQuery.of(context).size.width * 0.9,
       height: MediaQuery.of(context).size.height * 0.8,
-      child: newsModels.length > 0 ? listNews() : Container(),
+      child: notifyModels.length > 0 ? listNotify() : Container(),
     );
   }
 
@@ -160,28 +162,28 @@ class _NewsState extends State<News> {
     );
   }
 
-  Widget listNews() {
+  Widget listNotify() {
     Duration duration = new Duration();
     final now = new DateTime.now();
     return ListView.builder(
       controller: scrollController,
-      itemCount: newsModels.length,
+      itemCount: notifyModels.length,
       itemBuilder: (BuildContext buildContext, int index) {
         return Column(
           children: [
-            // Text(newsLists.length.toString()),
+            // Text(notifyLists.length.toString()),
             GestureDetector(
               child: Column(
                 children: [
                   DateChip(
                     // date: new DateTime(now.year, now.month, now.day - 1),
                     date: new DateTime(now.year, now.month,
-                        now.day - int.parse(newsModels[index].diffdate)),
+                        now.day - int.parse(notifyModels[index].diffdate)),
                   ),
                   Container(
                       height: 70,
                       child: BubbleSpecialOne(
-                        text: newsModels[index].subject,
+                        text: notifyModels[index].subject,
                         isSender: false,
                         color: Color(0xFF1B97F3),
                         tail: true,
@@ -198,7 +200,7 @@ class _NewsState extends State<News> {
                       //       children: <Widget>[
                       //         Flexible(
                       //           child: Text(
-                      //             newsModels[index].subject,
+                      //             notifyModels[index].subject,
                       //             style: MyStyle().h3Style,
                       //           ),
                       //         ),
@@ -212,8 +214,8 @@ class _NewsState extends State<News> {
               onTap: () {
                 MaterialPageRoute materialPageRoute =
                     MaterialPageRoute(builder: (BuildContext buildContext) {
-                  return DetailNews(
-                    popupModel: newsModels[index],
+                  return DetailNotify(
+                    popupModel: notifyModels[index],
                     userModel: myUserModel,
                   );
                 });
@@ -303,11 +305,11 @@ class _NewsState extends State<News> {
           //showCart(),
         ],
         backgroundColor: MyStyle().barColor,
-        title: Text('ข่าวสาร'),
+        title: Text('การแจ้งเตือน'),
       ),
       body: Column(
         children: <Widget>[
-          showNews(),
+          showNotify(),
         ],
       ),
       // bottomNavigationBar: showBubbleBottomBarNav(), //showBottomBarNav

@@ -47,7 +47,7 @@ class _DetailState extends State<DetailPopup> {
   }
 
   Future<void> getPopupWhereID() async {
-    String url = 'http://ptnpharma.com/apishop/json_popupdetail.php';
+    String url = 'https://ptnpharma.com/apishop/json_popupdetail.php';
     print('urlPopup >> $url');
 
     http.Response response = await http.get(Uri.parse(url));

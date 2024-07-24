@@ -216,7 +216,7 @@ class _DetailState extends State<Detail> {
     amontCart = 0;
     String memberId = myUserModel.id.toString();
     String url =
-        'http://ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId';
+        'https://ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId';
 
     // print('url Detail =====>>>>>>>> $url');
     http.Response response = await http.get(Uri.parse(url));

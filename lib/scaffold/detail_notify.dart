@@ -11,17 +11,17 @@ import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 import 'my_service.dart';
 
-class DetailNews extends StatefulWidget {
+class DetailNotify extends StatefulWidget {
   final PopupModel popupModel;
   final UserModel userModel;
 
-  DetailNews({Key key, this.popupModel, this.userModel}) : super(key: key);
+  DetailNotify({Key key, this.popupModel, this.userModel}) : super(key: key);
 
   @override
   _DetailState createState() => _DetailState();
 }
 
-class _DetailState extends State<DetailNews> {
+class _DetailState extends State<DetailNotify> {
   // Explicit
   PopupModel currentPopupModel;
   PopupModel popupModel;
@@ -32,7 +32,7 @@ class _DetailState extends State<DetailNews> {
   String textButton = '';
   String textURL = '';
   String subjectPopup = '';
-  String DetailNews = '';
+  String DetailNotify = '';
   String postdatePopup = '';
   int currentIndex = 1;
   // Method
@@ -49,7 +49,7 @@ class _DetailState extends State<DetailNews> {
   Future<void> getPopupWhereID() async {
     String id = currentPopupModel.id.toString();
 
-    String url = 'https://ptnpharma.com/apishop/json_newsdetail.php?id=$id';
+    String url = 'https://ptnpharma.com/apishop/json_notifydetail.php?id=$id';
     print('urlPopup >> $url');
 
     http.Response response = await http.get(Uri.parse(url));
@@ -70,7 +70,7 @@ class _DetailState extends State<DetailNews> {
         //promoteModels.add(promoteModel); // push ค่าลง arra
         subjectPopup = subject;
         imagePopup = urlImage;
-        DetailNews = detail;
+        DetailNotify = detail;
         postdatePopup = postdate;
         textButton = txtBTN;
         textURL = txtURL;
@@ -180,7 +180,7 @@ class _DetailState extends State<DetailNews> {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Text(
-                DetailNews.replaceAll('\\n', '\n\n'),
+                DetailNotify.replaceAll('\\n', '\n\n'),
                 /* 'Like\nAndroidRide\n\nShare Posts', */
                 style: TextStyle(
                   fontSize: 19.0,
@@ -370,7 +370,7 @@ class _DetailState extends State<DetailNews> {
           //showCart(),
         ],
         backgroundColor: MyStyle().barColor,
-        title: Text('ข่าวสาร'),
+        title: Text('การแจ้งเตือน'),
       ),
       body: ListView(
         children: <Widget>[

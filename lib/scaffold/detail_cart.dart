@@ -1134,7 +1134,7 @@ class _DetailCartState extends State<DetailCart> {
               Icons.newspaper,
               color: Colors.brown,
             ),
-            title: Text("ข่าวสาร")),
+            title: Text("การแจ้งเตือน")),
       ],
     );
   }

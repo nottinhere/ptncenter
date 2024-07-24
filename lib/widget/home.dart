@@ -17,6 +17,7 @@ import 'package:ptncenter/scaffold/detail_news.dart';
 import 'package:ptncenter/scaffold/detail_cart.dart';
 
 import 'package:ptncenter/scaffold/list_news.dart';
+import 'package:ptncenter/scaffold/list_notify.dart';
 
 import 'package:ptncenter/scaffold/list_product.dart';
 import 'package:ptncenter/scaffold/list_product_favorite.dart';
@@ -729,6 +730,58 @@ class _HomeState extends State<Home> {
         onTap: () {
           print('You click product');
           routeToListProduct(0);
+        },
+      ),
+    );
+  }
+
+  Widget profileBox() {
+    String login = myUserModel.name;
+    String address = myUserModel.address;
+    // int loginStatus = myUserModel.status;
+
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.9,
+      // height: 80.0,
+      child: GestureDetector(
+        child: Card(
+          color: Color.fromARGB(255, 255, 255, 255),
+          child: Container(
+            padding: EdgeInsets.all(7.0),
+            alignment: AlignmentDirectional(0.0, 0.0),
+            child: Row(
+              children: <Widget>[
+                Container(
+                    width: 45.0,
+                    child: Image.asset('images/icon_user.png'),
+                    padding: EdgeInsets.only(right: 8.0)),
+                Column(
+                  children: [
+                    Text(
+                      '$login', // 'ผู้แทน : $login',
+                      textAlign: TextAlign.left,
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black),
+                    ),
+                    Text(
+                      '$address', // 'ผู้แทน : $login',
+                      textAlign: TextAlign.left,
+                      style: TextStyle(
+                          fontSize: 16,
+                          // fontWeight: FontWeight.bold,
+                          color: Colors.black),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+        onTap: () {
+          print('You click profile');
+          // routeToListProduct(0);
         },
       ),
     );
@@ -1511,7 +1564,8 @@ class _HomeState extends State<Home> {
       return SingleChildScrollView(
         child: Column(
           children: <Widget>[
-            headTitle('สินค้าแนะนำ $login ', Icons.thumb_up), //($loginStatus)
+            profileBox(),
+            headTitle('สินค้าแนะนำ', Icons.thumb_up), //($loginStatus)
             slideshow(),
             headTitle('เมนู', Icons.home),
             homeMenu(),
