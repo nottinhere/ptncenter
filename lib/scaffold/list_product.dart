@@ -1019,7 +1019,10 @@ class _ListProductState extends State<ListProduct> {
       } else if (myIndex == 5) {
         txtheader = myCateName;
       } else if (myIndex == 6) {
-        txtheader = searchString;
+        // searchString = Uri.decodeFull(searchString);
+        // searchString = json.decode(searchString);
+        // txtheader = searchString;
+        txtheader = 'รายการสินค้า';
       }
     } else {
       txtheader = 'รายการสินค้า';

@@ -112,7 +112,9 @@ class _MyServiceState extends State<MyService> {
     var cateList = result['data'];
     for (var map in cateList) {
       CategoryModel categoryModel = CategoryModel.fromJson(map);
-      categoryModels.add(categoryModel);
+      setState(() {
+        categoryModels.add(categoryModel);
+      });
     }
     // print(' cateList ()>> $categoryModels');
   }
@@ -321,7 +323,7 @@ class _MyServiceState extends State<MyService> {
   }
 
   Widget menuCategory() {
-    print('menuCategory');
+    print('menuCategory >> ' + categoryModels.length.toString());
     return ExpansionTile(
       leading: Icon(
         Icons.category,
@@ -378,6 +380,8 @@ class _MyServiceState extends State<MyService> {
       ],
     );
   }
+
+  Widget menuexpandCate() {}
 
   Widget menuLogOut() {
     return ListTile(
