@@ -1,10 +1,10 @@
 class ProductInCartModel {
-  String title;
-  String productCode;
-  String photo;
-  PriceList priceList;
-  String detail;
-  int id;
+  String? title;
+  String? productCode;
+  String? photo;
+  PriceList? priceList;
+  String? detail;
+  int? id;
 
   ProductInCartModel(
       {this.title,
@@ -31,7 +31,7 @@ class ProductInCartModel {
     data['product_code'] = this.productCode;
     data['photo'] = this.photo;
     if (this.priceList != null) {
-      data['price_list'] = this.priceList.toJson();
+      data['price_list'] = this.priceList!.toJson();
     }
     data['detail'] = this.detail;
     data['id'] = this.id;
@@ -40,9 +40,9 @@ class ProductInCartModel {
 }
 
 class PriceList {
-  S s;
-  S m;
-  L l;
+  S? s;
+  S? m;
+  L? l;
 
   PriceList({this.s, this.m, this.l});
 
@@ -55,23 +55,23 @@ class PriceList {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     if (this.s != null) {
-      data['s'] = this.s.toJson();
+      data['s'] = this.s!.toJson();
     }
     if (this.m != null) {
-      data['m'] = this.m.toJson();
+      data['m'] = this.m!.toJson();
     }
     if (this.l != null) {
-      data['l'] = this.l.toJson();
+      data['l'] = this.l!.toJson();
     }
     return data;
   }
 }
 
 class S {
-  String lable;
-  double price;
-  String unit;
-  String quantity;
+  String? lable;
+  double? price;
+  String? unit;
+  String? quantity;
 
   S({this.lable, this.price, this.unit, this.quantity});
 
@@ -93,10 +93,10 @@ class S {
 }
 
 class L {
-  String lable;
-  int price;
-  String unit;
-  String quantity;
+  String? lable;
+  int? price;
+  String? unit;
+  String? quantity;
 
   L({this.lable, this.price, this.unit, this.quantity});
 

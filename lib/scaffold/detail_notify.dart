@@ -7,15 +7,25 @@ import 'package:ptncenter/utility/my_style.dart';
 import 'package:ptncenter/models/popup_model.dart';
 import 'package:ptncenter/scaffold/detail_cart.dart';
 import 'package:ptncenter/scaffold/list_product.dart';
-import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
-import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
+import 'package:ptncenter/scaffold/list_notify.dart';
+import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
+import 'package:ptncenter/scaffold/list_product_favorite.dart';
+
 import 'my_service.dart';
 
-class DetailNotify extends StatefulWidget {
-  final PopupModel popupModel;
-  final UserModel userModel;
+import 'package:webview_flutter/webview_flutter.dart';
+// Import for Android features.
+import 'package:webview_flutter_android/webview_flutter_android.dart';
+// Import for iOS/macOS features.
+import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
-  DetailNotify({Key key, this.popupModel, this.userModel}) : super(key: key);
+
+
+class DetailNotify extends StatefulWidget {
+  final PopupModel? popupModel;
+  final UserModel? userModel;
+
+  DetailNotify({Key? key, this.popupModel, this.userModel}) : super(key: key);
 
   @override
   _DetailState createState() => _DetailState();
@@ -23,18 +33,20 @@ class DetailNotify extends StatefulWidget {
 
 class _DetailState extends State<DetailNotify> {
   // Explicit
-  PopupModel currentPopupModel;
-  PopupModel popupModel;
-  UserModel myUserModel;
-  String id; // productID
-  String memberID;
-  String imagePopup = '';
-  String textButton = '';
-  String textURL = '';
-  String subjectPopup = '';
-  String DetailNotify = '';
-  String postdatePopup = '';
-  int currentIndex = 1;
+  PopupModel? currentPopupModel;
+  PopupModel? popupModel;
+  UserModel? myUserModel;
+  String? id; // productID
+  String? memberID;
+  String? imagePopup = '';
+  String? textButton = '';
+  String? textURL = '';
+  String? subjectPopup = '';
+  String? DetailNotify = '';
+  String? postdatePopup = '';
+  int? currentIndex = 1;
+  int selectIndex = 3;
+
   // Method
   @override
   void initState() {
@@ -47,9 +59,9 @@ class _DetailState extends State<DetailNotify> {
   }
 
   Future<void> getPopupWhereID() async {
-    String id = currentPopupModel.id.toString();
+    String id = currentPopupModel!.id.toString();
 
-    String url = 'https://ptnpharma.com/apishop/json_notifydetail.php?id=$id';
+    String url = 'https://www.ptnpharma.com/apishop/json_notifydetail.php?id=$id';
     print('urlPopup >> $url');
 
     http.Response response = await http.get(Uri.parse(url));
@@ -59,13 +71,13 @@ class _DetailState extends State<DetailNotify> {
         result['itemsData']; // dynamic    จะส่ง value อะไรก็ได้ รวมถึง null
 
     for (var map in mapItemPopup) {
-      PopupModel popupModel = PopupModel.fromJson(map);
-      String urlImage = popupModel.photo;
-      String subject = popupModel.subject;
-      String postdate = popupModel.postdate;
-      String detail = popupModel.detail;
-      String txtBTN = popupModel.txtBTN;
-      String txtURL = popupModel.url;
+      PopupModel? popupModel = PopupModel.fromJson(map);
+      String? urlImage = popupModel.photo;
+      String? subject = popupModel.subject;
+      String? postdate = popupModel.postdate;
+      String? detail = popupModel.detail;
+      String? txtBTN = popupModel.txtBTN;
+      String? txtURL = popupModel.url;
       setState(() {
         //promoteModels.add(promoteModel); // push ค่าลง arra
         subjectPopup = subject;
@@ -90,9 +102,9 @@ class _DetailState extends State<DetailNotify> {
       child: Column(
         children: <Widget>[
           Text(
-            subjectPopup,
+            subjectPopup!,
             style: TextStyle(
-              fontSize: 22.0,
+              fontSize: 18.0,
               fontWeight: FontWeight.bold,
               color: Color.fromARGB(0xff, 56, 80, 82),
             ),
@@ -115,7 +127,7 @@ class _DetailState extends State<DetailNotify> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
             Image.network(
-              imagePopup,
+              imagePopup!,
               width: MediaQuery.of(context).size.width * 0.9,
             ),
           ],
@@ -140,12 +152,12 @@ class _DetailState extends State<DetailNotify> {
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => WebView(
-                            userModel: myUserModel,
-                            urlTarget: textURL,
+                      builder: (context) => WebViewExample(
+                            userModel: myUserModel!,
+                            webPage: textURL!,
                           )));
-            },
-            child: Text(textButton),
+              },
+            child: Text('เพิ่มเติม',style: TextStyle(fontSize: 16, color: Colors.white)),
           ),
         ],
       ),
@@ -166,7 +178,7 @@ class _DetailState extends State<DetailNotify> {
               height: 5.0,
             ),
             Text(
-              'โพสเมื่อ :' + postdatePopup,
+              'โพสเมื่อ :' + postdatePopup!,
               style: TextStyle(
                 fontSize: 16.0,
                 fontWeight: FontWeight.bold,
@@ -180,7 +192,7 @@ class _DetailState extends State<DetailNotify> {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Text(
-                DetailNotify.replaceAll('\\n', '\n\n'),
+                DetailNotify!.replaceAll('\\n', '\n\n'),
                 /* 'Like\nAndroidRide\n\nShare Posts', */
                 style: TextStyle(
                   fontSize: 19.0,
@@ -189,7 +201,7 @@ class _DetailState extends State<DetailNotify> {
                 ),
               ),
             ),
-            (textButton != '') ? showButton() : Container(),
+            (textURL != '') ? showButton() : Container(),
           ],
         ),
       ),
@@ -207,90 +219,198 @@ class _DetailState extends State<DetailNotify> {
     Navigator.of(context).push(materialPageRoute);
   }
 
-  void changePage(int index) {
-    // selected  >>  BubbleBottomBar
-    setState(() {
-      currentIndex = index;
+  void routeToListProductfav(int index) {
+    MaterialPageRoute materialPageRoute =
+        MaterialPageRoute(builder: (BuildContext buildContext) {
+      return ListProductfav(
+        index: index,
+        userModel: myUserModel!,
+      );
     });
-
-    //You can have a switch case to Navigate to different pages
-    switch (currentIndex) {
-      case 0:
-        MaterialPageRoute route = MaterialPageRoute(
-          builder: (value) => MyService(
-            userModel: myUserModel,
-          ),
-        );
-        Navigator.of(context).pushAndRemoveUntil(route, (route) => false);
-
-        break; // home
-      case 1:
-        routeToListProduct(0);
-        break; // all product
-      case 2:
-        routeToListProduct(2);
-        MaterialPageRoute materialPageRoute =
-            MaterialPageRoute(builder: (BuildContext buildContext) {
-          return DetailCart(
-            userModel: myUserModel,
-          );
-        });
-        Navigator.of(context).push(materialPageRoute).then((value) {
-          setState(() {
-            // readCart();
-          });
-        });
-        break; // promotion
-    }
+    Navigator.of(context).push(materialPageRoute);
   }
 
-  Widget showBubbleBottomBarNav() {
-    return BubbleBottomBar(
-      hasNotch: true,
-      // fabLocation: BubbleBottomBarFabLocation.end,
-      opacity: .2,
-      borderRadius: BorderRadius.vertical(
-          top: Radius.circular(
-              16)), //border radius doesn't work when the notch is enabled.
-      elevation: 8,
-      currentIndex: currentIndex,
-      onTap: changePage,
-      items: <BubbleBottomBarItem>[
-        BubbleBottomBarItem(
-            backgroundColor: Colors.red,
-            icon: Icon(
-              Icons.home,
-              color: Colors.black,
-            ),
-            activeIcon: Icon(
-              Icons.home,
-              color: Colors.red,
-            ),
-            title: Text("หน้าหลัก")),
-        BubbleBottomBarItem(
-            backgroundColor: Colors.green,
-            icon: Icon(
-              Icons.medical_services,
-              color: Colors.black,
-            ),
-            activeIcon: Icon(
-              Icons.medical_services,
-              color: Colors.green,
-            ),
-            title: Text("สินค้า")),
-        BubbleBottomBarItem(
-            backgroundColor: Colors.blue,
-            icon: Icon(
-              Icons.shopping_cart,
-              color: Colors.black,
-            ),
-            activeIcon: Icon(
-              Icons.shopping_cart,
-              color: Colors.blue,
-            ),
-            title: Text("ตะกร้าสินค้า")),
+  // void changePage(int? index) {
+  //   // selected  >>  BubbleBottomBar
+  //   setState(() {
+  //     currentIndex = index;
+  //   });
+
+  //   //You can have a switch case to Navigate to different pages
+  //   switch (currentIndex) {
+  //     case 0:
+  //       MaterialPageRoute route = MaterialPageRoute(
+  //         builder: (value) => MyService(
+  //           userModel: myUserModel,
+  //         ),
+  //       );
+  //       Navigator.of(context).pushAndRemoveUntil(route, (route) => false);
+
+  //       break; // home
+  //     case 1:
+  //       routeToListProduct(0);
+  //       break; // all product
+  //     case 2:
+  //       routeToListProduct(2);
+  //       MaterialPageRoute materialPageRoute =
+  //           MaterialPageRoute(builder: (BuildContext buildContext) {
+  //         return DetailCart(
+  //           userModel: myUserModel,
+  //         );
+  //       });
+  //       Navigator.of(context).push(materialPageRoute).then((value) {
+  //         setState(() {
+  //           // readCart();
+  //         });
+  //       });
+  //       break; // promotion
+  //   }
+  // }
+
+  // Widget showBubbleBottomBarNav() {
+  //   return BubbleBottomBar(
+  //     hasNotch: true,
+  //     // fabLocation: BubbleBottomBarFabLocation.end,
+  //     opacity: .2,
+  //     borderRadius: BorderRadius.vertical(
+  //         top: Radius.circular(
+  //             16)), //border radius doesn't work when the notch is enabled.
+  //     elevation: 8,
+  //     currentIndex: currentIndex,
+  //     onTap: changePage,
+  //     items: <BubbleBottomBarItem>[
+  //       BubbleBottomBarItem(
+  //           backgroundColor: Colors.red,
+  //           icon: Icon(
+  //             Icons.home,
+  //             color: Colors.black,
+  //           ),
+  //           activeIcon: Icon(
+  //             Icons.home,
+  //             color: Colors.red,
+  //           ),
+  //           title: Text("หน้าหลัก")),
+  //       BubbleBottomBarItem(
+  //           backgroundColor: Colors.green,
+  //           icon: Icon(
+  //             Icons.medical_services,
+  //             color: Colors.black,
+  //           ),
+  //           activeIcon: Icon(
+  //             Icons.medical_services,
+  //             color: Colors.green,
+  //           ),
+  //           title: Text("สินค้า")),
+  //       BubbleBottomBarItem(
+  //           backgroundColor: Colors.blue,
+  //           icon: Icon(
+  //             Icons.shopping_cart,
+  //             color: Colors.black,
+  //           ),
+  //           activeIcon: Icon(
+  //             Icons.shopping_cart,
+  //             color: Colors.blue,
+  //           ),
+  //           title: Text("ตะกร้าสินค้า")),
+  //     ],
+  //   );
+  // }
+
+  Widget stylishBottomBar() {
+    int? unread =
+        myUserModel!.lastNewsId!.toInt() - myUserModel!.lastNewsOpen!.toInt();
+
+    return StylishBottomBar(
+      //  option: AnimatedBarOptions(
+      //    iconSize: 32,
+      //    barAnimation: BarAnimation.liquid,
+      //    iconStyle: IconStyle.animated,
+      //    opacity: 0.3,
+      //  ),
+
+      // option: BubbleBarOptions(
+      //   barStyle: BubbleBarStyle.horizontal,
+      //   // barStyle: BubbleBarStyle.vertical,
+      //   bubbleFillStyle: BubbleFillStyle.fill,
+      //   // bubbleFillStyle: BubbleFillStyle.outlined,
+      //   opacity: 0.3,
+      // ),
+
+      // option: DotBarOptions(
+      //   dotStyle: DotStyle.tile,
+      //   gradient: const LinearGradient(
+      //     colors: [
+      //       Colors.deepPurple,
+      //       Colors.pink,
+      //     ],
+      //     begin: Alignment.topLeft,
+      //     end: Alignment.bottomRight,
+      //   ),
+      // ),
+      option: AnimatedBarOptions(
+        iconStyle: IconStyle.animated,
+        opacity: 0.3,
+      ),
+      items: [
+        BottomBarItem(
+          icon: const Icon(Icons.home),
+          title: const Text('Home'),
+          backgroundColor: Colors.blue,
+          // selectedIcon: const Icon(Icons.home),
+        ),
+        BottomBarItem(
+          icon: const Icon(Icons.medical_services),
+          title: const Text('Medicine'),
+          backgroundColor: Colors.green,
+        ),
+        BottomBarItem(
+          icon: const Icon(Icons.favorite),
+          title: const Text('Favorite'),
+          backgroundColor: Colors.red,
+        ),
+        BottomBarItem(
+          icon: const Icon(Icons.notifications),
+          title: const Text('Notify'),
+          backgroundColor: Colors.orange,
+        ),
       ],
+      // fabLocation: StylishBarFabLocation.end,
+      hasNotch: true,
+      currentIndex: selectIndex,
+      onTap: (index) {
+        setState(() {
+          myUserModel!.lastNotifyOpen = myUserModel!.lastNotifyId;
+          selectIndex = index;
+          // controller.jumpToPage(index);
+          if (index == 0) {
+            MaterialPageRoute route = MaterialPageRoute(
+              builder: (value) => MyService(
+                userModel: myUserModel,
+              ),
+            );
+            Navigator.of(context).pushAndRemoveUntil(route, (route) => false);
+          } else if (index == 1) {
+            routeToListProduct(0);
+          } else if (index == 2) {
+            routeToListProductfav(0);
+          } else if (index == 3) {
+            routeToNotify();
+          }
+        });
+      },
     );
+  }
+
+  void routeToNotify() {
+    MaterialPageRoute materialPageRoute =
+        MaterialPageRoute(builder: (BuildContext buildContext) {
+      return Notify(
+        userModel: myUserModel!,
+      );
+    });
+    int unread;
+    // Navigator.of(context).push(materialPageRoute);
+    Navigator.of(context).push(materialPageRoute).then((value) => unread = 0);
   }
 
   Widget gotoHome() {
@@ -366,22 +486,23 @@ class _DetailState extends State<DetailNotify> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        iconTheme: IconThemeData(color: Colors.white),
         actions: <Widget>[
           //showCart(),
         ],
         backgroundColor: MyStyle().barColor,
-        title: Text('การแจ้งเตือน'),
+        title: Text('การแจ้งเตือน', style: TextStyle(color: Colors.white)),
       ),
       body: ListView(
         children: <Widget>[
-          homeMenu(),
-          spaceBox(),
+          // homeMenu(),
+          // spaceBox(),
           showTitle(),
           (imagePopup != '') ? showImage() : Container(),
           showDetail(), //  popupModel == null ? showProgress() : detailBox(),
         ],
       ),
-      // bottomNavigationBar: showBubbleBottomBarNav(), //showBottomBarNav
+      bottomNavigationBar: stylishBottomBar(), //showBottomBarNav
     );
   }
 
@@ -414,44 +535,73 @@ class _DetailState extends State<DetailNotify> {
   // }
 }
 
-class WebView extends StatefulWidget {
-  final UserModel userModel;
-  final String urlTarget;
 
-  WebView({Key key, this.userModel, this.urlTarget}) : super(key: key);
-
+class WebViewExample extends StatefulWidget {
+  final UserModel? userModel;
+  final String? webPage;
+  const WebViewExample({super.key, this.userModel, this.webPage});
   @override
-  _WebViewState createState() => _WebViewState();
+  State<WebViewExample> createState() => _WebViewExampleState();
 }
 
-class _WebViewState extends State<WebView> {
-  UserModel myUserModel;
-  String myUrlTarget;
+class _WebViewExampleState extends State<WebViewExample> {
+  UserModel? myUserModel;
+  String? mywebPage;
+  late final WebViewController controller;
 
   @override
   void initState() {
     super.initState();
     myUserModel = widget.userModel;
-    myUrlTarget = widget.urlTarget;
+    mywebPage = widget.webPage;
+    String? memberId = myUserModel!.id;
+    String? memberCode = myUserModel!.customerCode;
+    String webPage = mywebPage.toString();
+
+    
+    String? url = mywebPage!; //
+    print('URL ==>> $url');
+
+    String? urlView =  url!;
+    
+
+    // #docregion webview_controller
+    controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onProgress: (int progress) {
+            // Update loading bar.
+          },
+          onPageStarted: (String url) {},
+          onPageFinished: (String url) {},
+          onHttpError: (HttpResponseError error) {},
+          onWebResourceError: (WebResourceError error) {},
+          onNavigationRequest: (NavigationRequest request) {
+            if (request.url.startsWith('https://www.youtube.com/')) {
+              return NavigationDecision.prevent;
+            }
+            return NavigationDecision.navigate;
+          },
+        ),
+      )
+      ..loadRequest(Uri.parse(urlView));
+    // #enddocregion webview_controller
   }
 
+  // #docregion webview_widget
   @override
   Widget build(BuildContext context) {
-    String memberId = myUserModel.id;
-    String memberCode = myUserModel.customerCode;
-    String url = myUrlTarget; //
-    print('URL ==>> $url');
-    return WebviewScaffold(
-      url: url, //"https://www.androidmonks.com",
+    return Scaffold(
       appBar: AppBar(
-        backgroundColor: MyStyle().bgColor,
-        title: Text("PTN Pharma"),
-      ),
-      withZoom: true,
-      withJavascript: true,
-      withLocalStorage: true,
-      appCacheEnabled: false,
-      ignoreSSLErrors: true,
+          backgroundColor: Colors.green,
+          iconTheme: IconThemeData(color: Colors.white),
+          title:
+              const Text('PTN Pharma', style: TextStyle(color: Colors.white))),
+      body: WebViewWidget(controller: controller),
     );
   }
+  // #enddocregion webview_widget
 }
+
+

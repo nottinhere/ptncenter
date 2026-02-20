@@ -1,7 +1,7 @@
 class UnitSizeModel {
-  String lable;
-  String price;
-  String unit;
+  String? lable;
+  String? price;
+  String? unit;
 
   UnitSizeModel({this.lable, this.price, this.unit});
 

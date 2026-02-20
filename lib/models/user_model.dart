@@ -1,36 +1,49 @@
 class UserModel {
-  String id;
-  String customerCode;
-  String user;
-  String pass;
-  String level;
-  String type;
-  String name;
-  String address;
-  String province;
-  String zipcode;
-  String phone;
-  String email;
-  String cart;
-  String status;
-  String proId;
-  String telecart;
-  String contactPerson;
-  String idcart;
-  String payment;
-  String area;
-  String note;
-  String licenseID;
-  String licenseType;
-  String number;
-  String discount;
-  String financialAmount;
-  String cartJson;
-  String lineID;
-  String facebook;
-  int lastNewsOpen;
-  int lastNewsId;
-  String msg;
+  String? id;
+  String? customerCode;
+  String? user;
+  String? pass;
+  String? level;
+  String? type;
+  String? name;
+  String? address;
+  String? province;
+  String? zipcode;
+  String? phone;
+  String? email;
+  String? cart;
+  String? status;
+  String? proId;
+  String? telecart;
+  String? contactPerson;
+  String? idcart;
+  String? payment;
+  String? area;
+  String? note;
+  String? licenseID;
+  String? licenseType;
+  String? number;
+  String? discount;
+  String? financialAmount;
+  String? cartJson;
+  String? lineID;
+  String? facebook;
+  int? lastNewsOpen;
+  int? lastNotifyOpen;
+  int? point;
+  int? lastNewsId;
+  int? lastNotifyId;
+  int? unpaidorn;
+  int? unpaidorder;
+  int? totalIncart;
+  String? firsunpaiddate;
+  String? credittermAlert;
+  String? financialamountAlert;
+  String? contactAdminAlert;
+  int? countpricechange;
+  String? promotionalert;
+  String? promotionsuccess;
+  String? msg;
 
   UserModel(
       {this.id,
@@ -63,7 +76,20 @@ class UserModel {
       this.lineID,
       this.facebook,
       this.lastNewsOpen,
+      this.lastNotifyOpen,
+      this.point,
       this.lastNewsId,
+      this.lastNotifyId,
+      this.unpaidorn,
+      this.unpaidorder,
+      this.totalIncart,
+      this.firsunpaiddate,
+      this.credittermAlert,
+      this.financialamountAlert,
+      this.contactAdminAlert,
+      this.countpricechange,
+      this.promotionalert,
+      this.promotionsuccess,
       this.msg});
 
   UserModel.fromJson(Map<String, dynamic> json) {
@@ -97,7 +123,20 @@ class UserModel {
     lineID = json['lineID'];
     facebook = json['facebook'];
     lastNewsOpen = json['last_news_open'];
+    lastNotifyOpen = json['last_notify_open'];
+    point = json['point'];
     lastNewsId = json['last_news_id'];
+    lastNotifyId = json['last_notify_id'];
+    unpaidorn = json['unpaidorn'];
+    unpaidorder = json['unpaidorder'];
+    totalIncart = json['totalIncart'];
+    firsunpaiddate = json['firsunpaiddate'];
+    credittermAlert = json['credittermAlert'];
+    financialamountAlert = json['financialamountAlert'];
+    contactAdminAlert = json['contactAdminAlert'];
+    countpricechange = json['countpricechange'];
+    promotionalert = json['promotionalert'];
+    promotionsuccess = json['promotionsuccess'];
     msg = json['msg'];
   }
 
@@ -133,7 +172,20 @@ class UserModel {
     data['lineID'] = this.lineID;
     data['facebook'] = this.facebook;
     data['last_news_open'] = this.lastNewsOpen;
+    data['last_notify_open'] = this.lastNotifyOpen;
+    data['point'] = this.point;
     data['last_news_id'] = this.lastNewsId;
+    data['last_notify_id'] = this.lastNotifyId;
+    data['unpaidorn'] = this.unpaidorn;
+    data['unpaidorder'] = this.unpaidorder;
+    data['totalIncart'] = this.totalIncart;
+    data['firsunpaiddate'] = this.firsunpaiddate;
+    data['credittermAlert'] = this.credittermAlert;
+    data['financialamountAlert'] = this.financialamountAlert;
+    data['contactAdminAlert'] = this.contactAdminAlert;
+    data['countpricechange'] = this.countpricechange;
+    data['promotionalert'] = this.promotionalert;
+    data['promotionsuccess'] = this.promotionsuccess;
     data['msg'] = this.msg;
     return data;
   }

@@ -7,38 +7,33 @@ import 'package:ptncenter/models/product_vote_model.dart';
 import 'package:ptncenter/models/user_model.dart';
 import 'package:ptncenter/scaffold/list_product.dart';
 import 'package:ptncenter/utility/my_style.dart';
-// import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:ptncenter/utility/normal_dialog.dart';
 import 'detail.dart';
 import 'detail_cart.dart';
 import 'package:ptncenter/widget/home.dart';
 
-import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
+import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
 
 import 'my_service.dart';
 
-import 'package:loading/loading.dart';
-import 'package:loading/indicator/ball_pulse_indicator.dart';
+import 'package:loading_indicator/loading_indicator.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:favorite_button/favorite_button.dart';
 
 import 'package:flutter/services.dart';
 
-import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
-
 import 'package:permission_handler/permission_handler.dart';
-import 'package:scan_preview/scan_preview_widget.dart';
 import 'package:flutter/foundation.dart';
-// import 'package:favorite_button/favorite_button.dart';
 
 class ListProductvote extends StatefulWidget {
-  final int index;
-  final UserModel userModel;
-  final int cate;
-  final String cateName;
-  String _result = '';
+  final int? index;
+  final UserModel? userModel;
+  final int? cate;
+  final String? cateName;
+  String? _result = '';
 
   ListProductvote(
-      {Key key, this.index, this.userModel, this.cate, this.cateName})
+      {Key? key, this.index, this.userModel, this.cate, this.cateName})
       : super(key: key);
 
   @override
@@ -50,50 +45,50 @@ class Debouncer {
   // delay เวลาให้มีการหน่วง เมื่อ key searchview
 
   //Explicit
-  final int milliseconds;
-  VoidCallback action;
-  Timer timer;
+  final int? milliseconds;
+  VoidCallback? action;
+  Timer? timer;
 
   //constructor
   Debouncer({this.milliseconds});
   run(VoidCallback action) {
     if (timer != null) {
-      timer.cancel();
+      timer!.cancel();
     }
-    timer = Timer(Duration(microseconds: milliseconds), action);
+    timer = Timer(Duration(microseconds: milliseconds!), action);
   }
 }
 
 class _ListProductvoteState extends State<ListProductvote> {
   // Explicit
-  int myIndex;
-  List<ProductVoteModel> productVoteModels = List(); // []; // set array
-  List<ProductVoteModel> filterProductVoteModels = List(); // []; //
+  int? myIndex;
+  List<ProductVoteModel>? productVoteModels = []; // []; // set array
+  List<ProductVoteModel>? filterProductVoteModels = []; // []; //
 
-  int amontCart = 0;
-  UserModel myUserModel;
-  String searchString = '';
-  String lastItemName = '';
+  int? amontCart = 0;
+  UserModel? myUserModel;
+  String? searchString = '';
+  String? lastItemName = '';
 
-  int amountListView = 6;
-  int page = 1;
+  int? amountListView = 6;
+  int? page = 1;
 
-  String qrString;
-  int myCate = 0;
-  String myCateName = '';
+  String? qrString;
+  int? myCate = 0;
+  String? myCateName = '';
   ScrollController scrollController = ScrollController();
   final Debouncer debouncer =
       Debouncer(milliseconds: 300); // ตั้งค่า เวลาที่จะ delay
-  bool statusStart = true;
+  bool? statusStart = true;
 
-  int currentIndex = 1;
+  int? currentIndex = 1;
 
   // List<ProductVoteModel> productVoteModels_buffer = List(); // []; //
 
   var _controller = TextEditingController();
 
-  int substart = 0;
-  bool visible = true;
+  int? substart = 0;
+  bool? visible = true;
 
   // Method
   @override
@@ -119,7 +114,7 @@ class _ListProductvoteState extends State<ListProductvote> {
       if (scrollController.position.atEdge) {
         if (scrollController.position.pixels ==
             scrollController.position.maxScrollExtent) {
-          page++;
+          page = page! + 1;
           readData();
           print('in the end');
         }
@@ -137,9 +132,9 @@ class _ListProductvoteState extends State<ListProductvote> {
 
     amontCart = 0;
     lastItemName = '';
-    String memberId = myUserModel.id.toString();
+    String memberId = myUserModel!.id.toString();
     String url =
-        'https://ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId';
+        'https://www.ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId&screen=listproductvote';
 
     print('url Detail =====>>>>>>>> $url');
 
@@ -149,7 +144,7 @@ class _ListProductvoteState extends State<ListProductvote> {
     for (var map in cartList) {
       lastItemName = map['title'];
       // setState(() {
-      amontCart++;
+      amontCart = amontCart! + 1;
       // });
     }
     setState(() {
@@ -202,9 +197,9 @@ class _ListProductvoteState extends State<ListProductvote> {
       visible = true;
     });
 
-    String memberId = myUserModel.id.toString();
+    String memberId = myUserModel!.id.toString();
     String url =
-        'https://ptnpharma.com/apishop/json_productvotelist.php?memberId=$memberId&searchKey=$searchString&page=$page';
+        'https://www.ptnpharma.com/apishop/json_productvotelist.php?memberId=$memberId&searchKey=$searchString&page=$page';
 
     // url = '${MyStyle().readProductWhereMode}$myIndex';
     print("URL = $url");
@@ -221,17 +216,17 @@ class _ListProductvoteState extends State<ListProductvote> {
     // else
     //   int substart = 20;
 
-    int len = (filterProductVoteModels.length);
+    int len = (filterProductVoteModels!.length);
 
     for (var map in itemProductvotes) {
       ProductVoteModel productVoteModel = ProductVoteModel.fromJson(map);
 
       setState(() {
-        productVoteModels.add(productVoteModel);
+        productVoteModels!.add(productVoteModel);
         filterProductVoteModels = productVoteModels;
       });
       print(
-          ' >> ${len} =>($i)  ${productVoteModel.id}  || ${productVoteModels[i].title} (${filterProductVoteModels[i].votescore}) <<  (${productVoteModel.votescore})');
+          ' >> ${len} =>($i)  ${productVoteModel.id}  || ${productVoteModels![i].title} (${filterProductVoteModels![i].votescore}) <<  (${productVoteModel.votescore})');
 
       i = i + 1;
     }
@@ -245,10 +240,10 @@ class _ListProductvoteState extends State<ListProductvote> {
     // String url = MyStyle().readAllProduct;
     print('Here is updateDatalist function');
 
-    String memberId = myUserModel.id.toString();
-    int productID = filterProductVoteModels[index].id;
+    String memberId = myUserModel!.id.toString();
+    int productID = filterProductVoteModels![index].id!;
     String url =
-        'https://ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId';
+        'https://www.ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId';
 
     print("URL update item = $url");
     http.Response response = await http.get(Uri.parse(url));
@@ -262,7 +257,7 @@ class _ListProductvoteState extends State<ListProductvote> {
         Container(
           width: MediaQuery.of(context).size.width * 0.7 - 10,
           child: Text(
-            filterProductVoteModels[index].title,
+            filterProductVoteModels![index].title!,
             style: MyStyle().h3Style,
           ),
         ),
@@ -283,7 +278,7 @@ class _ListProductvoteState extends State<ListProductvote> {
         Container(
           width: MediaQuery.of(context).size.width * 0.66,
           child: Text(
-            'ใช้เพื่อ:' + ' ${filterProductVoteModels[index].usefor}',
+            'ใช้เพื่อ:' + ' ${filterProductVoteModels![index].usefor}',
             style: MyStyle().h4StyleGray,
           ),
         ),
@@ -297,15 +292,15 @@ class _ListProductvoteState extends State<ListProductvote> {
       Container(
         width: MediaQuery.of(context).size.width * 0.13,
         child: Text(
-          (filterProductVoteModels[index].votescore != '0') ? 'ตะกร้า:' : '',
+          (filterProductVoteModels![index].votescore != '0') ? 'ตะกร้า:' : '',
           style: MyStyle().h4StyleRed,
         ),
       ),
       Container(
         width: MediaQuery.of(context).size.width * 0.25,
         child: Text(
-          ((filterProductVoteModels[index].votescore != '0')
-              ? '${filterProductVoteModels[index].votescore} ${filterProductVoteModels[index].votescore}  '
+          ((filterProductVoteModels![index].votescore != '0')
+              ? '${filterProductVoteModels![index].votescore} ${filterProductVoteModels![index].votescore}  '
               : ''),
           style: MyStyle().h4StyleRed,
         ),
@@ -314,11 +309,11 @@ class _ListProductvoteState extends State<ListProductvote> {
   }
 
   Widget showPrice(int index) {
-    String txtShowPrice;
-    String txtShowUnit;
-    String txtPriceUnit = '';
-    if (filterProductVoteModels[index].pricelabel.toString() != '0') {
-      txtShowPrice = filterProductVoteModels[index].pricesale.toString();
+    String? txtShowPrice;
+    String? txtShowUnit;
+    String? txtPriceUnit = '';
+    if (filterProductVoteModels![index].pricelabel.toString() != '0') {
+      txtShowPrice = filterProductVoteModels![index].pricesale.toString();
       if (txtShowPrice != '' && txtShowUnit != '')
         txtPriceUnit = '$txtPriceUnit' + " [$txtShowPrice/$txtShowUnit] ";
     }
@@ -361,14 +356,14 @@ class _ListProductvoteState extends State<ListProductvote> {
     return Container(
       padding: EdgeInsets.all(5.0),
       // width: MediaQuery.of(context).size.width * 0.25,
-      // child: Image.network(filterProductVoteModels[index].photo),
+      // child: Image.network(filterProductVoteModels![index].photo),
       width: 60,
       height: 60,
       decoration: new BoxDecoration(
           image: new DecorationImage(
         fit: BoxFit.cover,
         alignment: FractionalOffset.topCenter,
-        image: new NetworkImage(filterProductVoteModels[index].photo),
+        image: new NetworkImage(filterProductVoteModels![index].photo!),
       )),
     );
   }
@@ -376,7 +371,7 @@ class _ListProductvoteState extends State<ListProductvote> {
   Future<void> thumbLike(
       String productID, String memberID, bool _isFavorite) async {
     String url =
-        'https://ptnpharma.com/apishop/json_productvote.php?productID=$productID&memberId=$memberID&status=$_isFavorite';
+        'https://www.ptnpharma.com/apishop/json_productvote.php?productID=$productID&memberId=$memberID&status=$_isFavorite';
 
     print('url Favorites url ====>>>>> $url');
     await http.get(Uri.parse(url)).then((response) {
@@ -388,9 +383,9 @@ class _ListProductvoteState extends State<ListProductvote> {
 
   Widget showThumb(int index) {
     bool favStatus =
-        (filterProductVoteModels[index].yourvote == true) ? true : false;
-    String productID = filterProductVoteModels[index].id.toString();
-    String memberID = myUserModel.id.toString();
+        (filterProductVoteModels![index].yourvote == true) ? true : false;
+    String productID = filterProductVoteModels![index].id.toString();
+    String memberID = myUserModel!.id.toString();
     return Container(
       width: MediaQuery.of(context).size.width * 0.06,
       child: Column(
@@ -432,8 +427,25 @@ class _ListProductvoteState extends State<ListProductvote> {
       maintainSize: true,
       maintainAnimation: true,
       maintainState: true,
-      visible: visible,
-      child: Loading(indicator: BallPulseIndicator(), size: 10.0),
+      visible: visible!,
+      // child: Loading(indicator: BallPulseIndicator(), size: 10.0),
+      child: LoadingIndicator(
+          indicatorType: Indicator.ballPulse,
+
+          /// Required, The loading type of the widget
+          colors: const [Colors.white],
+
+          /// Optional, The color collections
+          strokeWidth: 2,
+
+          /// Optional, The stroke of the line, only applicable to widget which contains line
+          backgroundColor: Colors.black,
+
+          /// Optional, Background of the widget
+          pathBackgroundColor: Colors.black
+
+          /// Optional, the stroke backgroundColor
+          ),
     );
   }
 
@@ -442,7 +454,7 @@ class _ListProductvoteState extends State<ListProductvote> {
       maintainSize: true,
       maintainAnimation: true,
       maintainState: true,
-      visible: visible,
+      visible: visible!,
       child: Center(child: CupertinoActivityIndicator()),
     );
   }
@@ -455,7 +467,7 @@ class _ListProductvoteState extends State<ListProductvote> {
     return Expanded(
       child: ListView.builder(
         controller: scrollController,
-        itemCount: productVoteModels.length,
+        itemCount: productVoteModels!.length,
         itemBuilder: (BuildContext buildContext, int index) {
           // print('perpage >> ${perpage} || index >> $index');
 
@@ -514,12 +526,12 @@ class _ListProductvoteState extends State<ListProductvote> {
   }
 
   Widget showContent() {
-    bool searchKey;
+    bool? searchKey;
     if (searchString != '') {
       searchKey = true;
     }
 
-    if (filterProductVoteModels.length == 0) {
+    if (filterProductVoteModels!.length == 0) {
       if (myIndex != 4) {
         return showProgressIndicate(searchKey);
       } else {
@@ -534,7 +546,7 @@ class _ListProductvoteState extends State<ListProductvote> {
     // print('searchKey >> $searchKey');
 
     if (searchKey == true) {
-      if (filterProductVoteModels.length == 0) {
+      if (filterProductVoteModels!.length == 0) {
         return Center(child: Text('')); // Search not found
       } else {
         return Center(child: Text(''));
@@ -624,7 +636,7 @@ class _ListProductvoteState extends State<ListProductvote> {
             setState(() {
               page = 1;
               myIndex = 0;
-              productVoteModels.clear();
+              productVoteModels!.clear();
               readData();
             });
           },
@@ -638,7 +650,7 @@ class _ListProductvoteState extends State<ListProductvote> {
         MaterialPageRoute(builder: (BuildContext buildContext) {
       return ListProduct(
         index: index,
-        userModel: myUserModel,
+        userModel: myUserModel!,
       );
     });
     Navigator.of(context).push(materialPageRoute);
@@ -649,13 +661,13 @@ class _ListProductvoteState extends State<ListProductvote> {
         MaterialPageRoute(builder: (BuildContext buildContext) {
       return ListProductvote(
         index: index,
-        userModel: myUserModel,
+        userModel: myUserModel!,
       );
     });
     Navigator.of(context).push(materialPageRoute);
   }
 
-  void changePage(int index) {
+  void changePage(int? index) {
     setState(() {
       currentIndex = index;
     });
@@ -665,7 +677,7 @@ class _ListProductvoteState extends State<ListProductvote> {
       case 0:
         MaterialPageRoute route = MaterialPageRoute(
           builder: (value) => MyService(
-            userModel: myUserModel,
+            userModel: myUserModel!,
           ),
         );
         Navigator.of(context).pushAndRemoveUntil(route, (route) => false);
@@ -677,65 +689,16 @@ class _ListProductvoteState extends State<ListProductvote> {
         String webPage = 'request';
 
         print('You click $webPage');
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => WebView(
-                      userModel: myUserModel,
-                      webPage: webPage,
-                    )));
+        // Navigator.push(
+        //     context,
+        //     MaterialPageRoute(
+        //         builder: (context) => WebView(
+        //               userModel: myUserModel!,
+        //               webPage: webPage,
+        //             )));
 
         break; // all product
     }
-  }
-
-  Widget showBubbleBottomBarNav() {
-    return BubbleBottomBar(
-      hasNotch: true,
-      // fabLocation: BubbleBottomBarFabLocation.end,
-      opacity: .2,
-      borderRadius: BorderRadius.vertical(
-          top: Radius.circular(
-              16)), //border radius doesn't work when the notch is enabled.
-      elevation: 8,
-      currentIndex: currentIndex,
-      onTap: changePage,
-      items: <BubbleBottomBarItem>[
-        BubbleBottomBarItem(
-            backgroundColor: Colors.blue,
-            icon: Icon(
-              Icons.home,
-              color: Colors.black,
-            ),
-            activeIcon: Icon(
-              Icons.home,
-              color: Colors.blue,
-            ),
-            title: Text("หน้าหลัก")),
-        BubbleBottomBarItem(
-            backgroundColor: Colors.red,
-            icon: Icon(
-              Icons.favorite,
-              color: Colors.black,
-            ),
-            activeIcon: Icon(
-              Icons.favorite,
-              color: Colors.red,
-            ),
-            title: Text("โหวตยาเข้าร้าน")),
-        BubbleBottomBarItem(
-            backgroundColor: Colors.green,
-            icon: Icon(
-              Icons.medical_services,
-              color: Colors.black,
-            ),
-            activeIcon: Icon(
-              Icons.medical_services,
-              color: Colors.green,
-            ),
-            title: Text("แนะนำยาที่ต้องการ")),
-      ],
-    );
   }
 
   @override
@@ -744,8 +707,9 @@ class _ListProductvoteState extends State<ListProductvote> {
     txtheader = 'โหวตยาน่าขาย';
     return Scaffold(
       appBar: AppBar(
+        iconTheme: IconThemeData(color: Colors.white),
         backgroundColor: MyStyle().bgColor,
-        title: Text(txtheader),
+        title: Text(txtheader, style: TextStyle(color: Colors.white)),
         actions: <Widget>[
           showCart(),
         ],
@@ -758,196 +722,12 @@ class _ListProductvoteState extends State<ListProductvote> {
           showContent(),
         ],
       ),
-      bottomNavigationBar: showBubbleBottomBarNav(), //showBottomBarNav
+      // bottomNavigationBar: showBubbleBottomBarNav(), //showBottomBarNav
     );
   }
 }
 
-class FavoriteButton extends StatefulWidget {
-  FavoriteButton({
-    double iconSize,
-    Color iconColor,
-    Color iconDisabledColor,
-    bool isFavorite,
-    Function valueChanged,
-    Key key,
-  })  : _iconSize = iconSize ?? 60.0,
-        _iconColor = iconColor ?? Colors.blueAccent,
-        _iconDisabledColor = iconDisabledColor ?? Colors.grey[400],
-        _isFavorite = isFavorite ?? false,
-        _valueChanged = valueChanged,
-        super(key: key);
 
-  final double _iconSize;
-  final Color _iconColor;
-  final bool _isFavorite;
-  final Function _valueChanged;
-  final Color _iconDisabledColor;
-
-  @override
-  _FavoriteButtonState createState() => _FavoriteButtonState();
-}
-
-class _FavoriteButtonState extends State<FavoriteButton>
-    with TickerProviderStateMixin {
-  AnimationController _controller;
-  Animation<Color> _colorAnimation;
-  Animation<double> _sizeAnimation;
-
-  CurvedAnimation _curve;
-
-  double _maxIconSize = 0.0;
-  double _minIconSize = 0.0;
-
-  final int _animationTime = 400;
-
-  bool _isFavorite = false;
-  bool _isAnimationCompleted = false;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _isFavorite = widget._isFavorite;
-    _maxIconSize = (widget._iconSize < 20.0)
-        ? 20.0
-        : (widget._iconSize > 100.0)
-            ? 100.0
-            : widget._iconSize;
-    final double _sizeDifference = _maxIconSize * 0.30;
-    _minIconSize = _maxIconSize - _sizeDifference;
-
-    _controller = AnimationController(
-      vsync: this,
-      duration: Duration(milliseconds: _animationTime),
-    );
-
-    _curve = CurvedAnimation(curve: Curves.slowMiddle, parent: _controller);
-    Animation<Color> _selectedColorAnimation = ColorTween(
-      begin: widget._iconColor,
-      end: widget._iconDisabledColor,
-    ).animate(_curve);
-
-    Animation<Color> _deSelectedColorAnimation = ColorTween(
-      begin: widget._iconDisabledColor,
-      end: widget._iconColor,
-    ).animate(_curve);
-
-    _colorAnimation = (_isFavorite == true)
-        ? _selectedColorAnimation
-        : _deSelectedColorAnimation;
-    _sizeAnimation = TweenSequence(
-      <TweenSequenceItem<double>>[
-        TweenSequenceItem<double>(
-          tween: Tween<double>(
-            begin: _minIconSize,
-            end: _maxIconSize,
-          ),
-          weight: 50,
-        ),
-        TweenSequenceItem<double>(
-          tween: Tween<double>(
-            begin: _maxIconSize,
-            end: _minIconSize,
-          ),
-          weight: 50,
-        ),
-      ],
-    ).animate(_curve);
-
-    _controller.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        _isAnimationCompleted = true;
-        _isFavorite = !_isFavorite;
-        widget._valueChanged(_isFavorite);
-      } else if (status == AnimationStatus.dismissed) {
-        _isAnimationCompleted = false;
-        _isFavorite = !_isFavorite;
-        widget._valueChanged(_isFavorite);
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _controller.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (BuildContext context, _) {
-        return InkResponse(
-          onTap: () {
-            setState(() {
-              if (_isAnimationCompleted == true) {
-                _controller.reverse();
-              } else {
-                _controller.forward();
-              }
-            });
-          },
-          child: Icon(
-            (Icons.thumb_up),
-            color: _colorAnimation.value,
-            size: _sizeAnimation.value,
-          ),
-        );
-      },
-    );
-  }
-}
-
-class WebView extends StatefulWidget {
-  final UserModel userModel;
-  final String webPage;
-
-  WebView({Key key, this.userModel, this.webPage}) : super(key: key);
-
-  @override
-  _WebViewState createState() => _WebViewState();
-}
-
-class _WebViewState extends State<WebView> {
-  UserModel myUserModel;
-  String mywebPage;
-
-  @override
-  void initState() {
-    super.initState();
-    myUserModel = widget.userModel;
-    mywebPage = widget.webPage;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    String memberId = myUserModel.id;
-    String memberCode = myUserModel.customerCode;
-    String webPage = mywebPage.toString();
-
-    String url =
-        'https://ptnpharma.com/shop/pages/forms/product_request_mobile.php?memberId=$memberId&memberCode=$memberCode'; //
-    String txtTitle = 'แนะนำยาที่ต้องการ';
-
-    print('Click open ==>> $webPage');
-
-    print('URL ==>> $url');
-    return WebviewScaffold(
-      url: url, //"https://www.androidmonks.com",
-      appBar: AppBar(
-        backgroundColor: MyStyle().bgColor,
-        title: Text(txtTitle),
-      ),
-      withZoom: true,
-      withJavascript: true,
-      withLocalStorage: true,
-      appCacheEnabled: false,
-      ignoreSSLErrors: true,
-    );
-  }
-}
 
 class ScanPreviewPage extends StatefulWidget {
   @override
@@ -971,12 +751,12 @@ class _ScanPreviewPageState extends State<ScanPreviewPage> {
         body: SizedBox(
           width: double.infinity,
           height: double.infinity,
-          child: ScanPreviewWidget(
-            onScanResult: (result) {
-              debugPrint('scan result: $result');
-              Navigator.pop(context, result);
-            },
-          ),
+          // child: ScanPreviewWidget(
+          //   onScanResult: (result) {
+          //     debugPrint('scan result: $result');
+          //     Navigator.pop(context, result);
+          //   },
+          // ),
         ),
       ),
     );

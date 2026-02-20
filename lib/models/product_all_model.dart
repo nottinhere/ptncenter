@@ -1,31 +1,33 @@
 class ProductAllModel {
-  String title;
-  String hilight;
-  String productCode;
-  String photo;
-  String selectUnit;
-  String priceList;
-  String itemSprice;
-  String itemSunit;
-  String itemincartSunit;
-  String itemMprice;
-  String itemMunit;
-  String itemincartMunit;
-  String itemLprice;
-  String itemLunit;
-  String itemincartLunit;
-  String itemFeqSunit;
-  String itemFeqMunit;
-  String itemFeqLunit;
-  String detail;
-  String usefor;
-  String method;
-  int stock;
-  int id;
+  String? title;
+  String? hilight;
+  String? extrapoint;
+  String? productCode;
+  String? photo;
+  String? selectUnit;
+  String? priceList;
+  String? itemSprice;
+  String? itemSunit;
+  String? itemincartSunit;
+  String? itemMprice;
+  String? itemMunit;
+  String? itemincartMunit;
+  String? itemLprice;
+  String? itemLunit;
+  String? itemincartLunit;
+  String? itemFeqSunit;
+  String? itemFeqMunit;
+  String? itemFeqLunit;
+  String? detail;
+  String? usefor;
+  String? method;
+  int? stock;
+  int? id;
 
   ProductAllModel(
       {this.title,
       this.hilight,
+      this.extrapoint,
       this.productCode,
       this.photo,
       this.priceList,
@@ -51,6 +53,7 @@ class ProductAllModel {
   ProductAllModel.fromJson(Map<String, dynamic> json) {
     title = json['title'];
     hilight = json['hilight'];
+    extrapoint = json['extrapoint'];
     productCode = json['product_code'];
     photo = json['photo'];
     priceList = json['price_list'];
@@ -78,6 +81,7 @@ class ProductAllModel {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['title'] = this.title;
     data['hilight'] = this.hilight;
+    data['extrapoint'] = this.extrapoint;
     data['product_code'] = this.productCode;
     data['photo'] = this.photo;
     data['price_list'] = this.priceList;

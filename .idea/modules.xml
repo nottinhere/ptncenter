@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/ptncenter.iml" filepath="$PROJECT_DIR$/.idea/ptncenter.iml" />
+      <module fileurl="file://$PROJECT_DIR$/android/ptncenter_android.iml" filepath="$PROJECT_DIR$/android/ptncenter_android.iml" />
     </modules>
   </component>
 </project>

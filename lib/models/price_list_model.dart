@@ -1,9 +1,9 @@
 class PriceListModel {
-  String lable;
-  String price;
-  String unit;
-  String quantity;
-  String pricechange;
+  String? lable;
+  String? price;
+  String? unit;
+  String? quantity;
+  String? pricechange;
 
   PriceListModel(
       {this.lable, this.price, this.unit, this.quantity, this.pricechange});

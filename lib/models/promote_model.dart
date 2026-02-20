@@ -1,11 +1,11 @@
 class PromoteModel {
-  String title;
-  String productCode;
-  String photo;
-  String price;
-  String unit;
-  int stock;
-  int id;
+  String? title;
+  String? productCode;
+  String? photo;
+  String? price;
+  String? unit;
+  int? stock;
+  int? id;
 
   PromoteModel(
       {this.title,

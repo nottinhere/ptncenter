@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-// import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:ptncenter/models/product_all_model.dart';
 import 'package:ptncenter/models/product_all_model2.dart';
 import 'package:ptncenter/models/unit_size_model.dart';
@@ -12,10 +11,10 @@ import 'package:ptncenter/utility/my_style.dart';
 import 'package:ptncenter/utility/normal_dialog.dart';
 
 import 'package:ptncenter/scaffold/list_product.dart';
+import 'package:ptncenter/scaffold/list_product_favorite.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:ptncenter/models/promote_model.dart';
 import 'package:ptncenter/widget/home.dart';
-import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
 import 'my_service.dart';
 import 'package:flutter_spinbox/flutter_spinbox.dart';
 import 'package:favorite_button/favorite_button.dart';
@@ -23,16 +22,18 @@ import 'package:favorite_button/favorite_button.dart';
 import 'package:flutter/services.dart';
 
 import 'package:permission_handler/permission_handler.dart';
-import 'package:scan_preview/scan_preview_widget.dart';
 import 'package:flutter/foundation.dart';
 
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+// import 'package:youtube_player_iframe/youtube_player_iframe.dart';
+
+import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
 
 class Detail extends StatefulWidget {
-  final ProductAllModel productAllModel;
-  final UserModel userModel;
+  final ProductAllModel? productAllModel;
+  final UserModel? userModel;
 
-  Detail({Key key, this.productAllModel, this.userModel}) : super(key: key);
+  Detail({Key? key, this.productAllModel, this.userModel}) : super(key: key);
 
   @override
   _DetailState createState() => _DetailState();
@@ -40,35 +41,40 @@ class Detail extends StatefulWidget {
 
 class _DetailState extends State<Detail> {
   // Explicit
-  ProductAllModel currentProductAllModel;
-  ProductAllModel2 productAllModel;
-  List<UnitSizeModel> unitSizeModels = List();
-  List<ProductAllModel> slideshowModels = List();
+  ProductAllModel? currentProductAllModel;
+  ProductAllModel2? productAllModel;
+  ProductAllModel? relateAllModel;
 
-  List<int> amounts = [0, 0, 0];
-  int amontCart = 0;
-  UserModel myUserModel;
-  String id; // productID
+  List<UnitSizeModel>? unitSizeModels = [];
+  List<ProductAllModel>? slideshowModels = [];
+  List<ProductAllModel>? relateslideshowModels = [];
+
+  List<int>? amounts = [0, 0, 0];
+  int? amontCart = 0;
+  UserModel? myUserModel;
+  String? id; // productID
   // String qtyS = '', qtyM = '', qtyL = '';
-  int sizeSincart = 0, sizeMincart = 0, sizeLincart = 0;
-  int qtyS = 0, qtyM = 0, qtyL = 0;
-  int showSincart = 0, showMincart = 0, showLincart = 0;
+  int? sizeSincart = 0, sizeMincart = 0, sizeLincart = 0;
+  int? qtyS = 0, qtyM = 0, qtyL = 0;
+  int? showSincart = 0, showMincart = 0, showLincart = 0;
   // var showSincart = '', showMincart = '', showLincart = '';
 
-  List<Widget> promoteLists = List();
-  List<Widget> relateLists = List();
-  List<String> urlImages = List();
-  List<String> urlImagesRelate = List();
-  List<String> productsName = List();
-  List<ProductAllModel> promoteModels = List();
-  List<ProductAllModel> relateModels = List();
-  List<Widget> slideshowLists = List();
+  List<Widget>? promoteLists = [];
+  List<Widget>? relateLists = [];
+  List<String>? urlImages = [];
+  List<String>? urlImagesRelate = [];
+  List<String>? productsName = [];
+  List<String>? productsNameRelate = [];
+  List<ProductAllModel>? promoteModels = [];
+  List<ProductAllModel>? relateModels = [];
+  List<Widget>? slideshowLists = [];
+  List<Widget>? relateslideshowLists = [];
 
-  int banerIndex = 0, relateIndex = 0;
-  int currentIndex = 1;
-  String _result = '';
-  String qrString;
-  String videoCode;
+  int? banerIndex = 0, relateIndex = 0;
+  int? currentIndex = 1;
+  String? qrString;
+  String? videoCode = "";
+  int selectIndex = 1;
 
   // Method
   @override
@@ -85,10 +91,10 @@ class _DetailState extends State<Detail> {
   }
 
   Future<void> getProductWhereID() async {
-    if (currentProductAllModel != null) {
-      String memberId = myUserModel.id.toString();
-      id = currentProductAllModel.id.toString();
-      String url = '${MyStyle().getProductWhereId}$id&memberId=$memberId';
+    if (currentProductAllModel! != '') {
+      String? memberId = myUserModel!.id.toString();
+      id = currentProductAllModel!.id.toString();
+      String? url = '${MyStyle().getProductWhereId}$id&memberId=$memberId';
       print('url Detaillll ====>>> $url');
       http.Response response = await http.get(Uri.parse(url));
       var result = json.decode(response.body);
@@ -103,22 +109,22 @@ class _DetailState extends State<Detail> {
           productAllModel = ProductAllModel2.fromJson(map);
 
           Map<String, dynamic> priceListMap = map['price_list'];
-          print('priceListMap = $priceListMap');
+          print('currentProductAllModel = $currentProductAllModel');
 
-          Map<String, dynamic> sizeSmap = priceListMap['s'];
+          Map<String, dynamic>? sizeSmap = priceListMap['s'];
           if (sizeSmap != null) {
             UnitSizeModel unitSizeModel = UnitSizeModel.fromJson(sizeSmap);
-            unitSizeModels.add(unitSizeModel);
+            unitSizeModels!.add(unitSizeModel);
           }
-          Map<String, dynamic> sizeMmap = priceListMap['m'];
+          Map<String, dynamic>? sizeMmap = priceListMap['m'];
           if (sizeMmap != null) {
             UnitSizeModel unitSizeModel = UnitSizeModel.fromJson(sizeMmap);
-            unitSizeModels.add(unitSizeModel);
+            unitSizeModels!.add(unitSizeModel);
           }
-          Map<String, dynamic> sizeLmap = priceListMap['l'];
+          Map<String, dynamic>? sizeLmap = priceListMap['l'];
           if (sizeLmap != null) {
             UnitSizeModel unitSizeModel = UnitSizeModel.fromJson(sizeLmap);
-            unitSizeModels.add(unitSizeModel);
+            unitSizeModels!.add(unitSizeModel);
           }
           print('sizeSmap = $sizeSmap');
           print('sizeMmap = $sizeMmap');
@@ -127,11 +133,11 @@ class _DetailState extends State<Detail> {
       } // for
 
       setState(() {
-        showSincart = productAllModel.itemincartSunit;
-        showMincart = productAllModel.itemincartMunit;
-        showLincart = productAllModel.itemincartLunit;
+        showSincart = productAllModel!.itemincartSunit;
+        showMincart = productAllModel!.itemincartMunit;
+        showLincart = productAllModel!.itemincartLunit;
 
-        videoCode = productAllModel.youtube.toString();
+        videoCode = productAllModel?.youtube?.toString();
       });
       print('videoCode >> $videoCode');
     }
@@ -143,9 +149,11 @@ class _DetailState extends State<Detail> {
     return Image.network(urlImage);
   }
 
+  /*************************** */
+
   Future<void> readSlide() async {
-    String memId = myUserModel.id;
-    id = currentProductAllModel.id.toString();
+    String? memId = myUserModel!.id;
+    id = currentProductAllModel!.id.toString();
 
     String url =
         'https://www.ptnpharma.com/apishop/json_productimage.php?memberId=$memId&id=$id';
@@ -159,25 +167,25 @@ class _DetailState extends State<Detail> {
         result['itemsProduct']; // dynamic    จะส่ง value อะไรก็ได้ รวมถึง null
 
     for (var map in mapItemProduct) {
-      PromoteModel slideshowModel = PromoteModel.fromJson(map);
-      ProductAllModel productAllModel = ProductAllModel.fromJson(map);
-      String urlImage = slideshowModel.photo;
-      print('urlImage >> $urlImage');
+      PromoteModel? slideshowModel = PromoteModel.fromJson(map);
+      ProductAllModel? productAllModel = ProductAllModel.fromJson(map);
+      String? urlImage = slideshowModel.photo;
+      // print('urlImage >> $urlImage');
 
       setState(() {
         //promoteModels.add(promoteModel); // push ค่าลง array
-        slideshowModels.add(productAllModel);
-        slideshowLists.add(showImageNetWork(urlImage));
+        slideshowModels!.add(productAllModel);
+        slideshowLists!.add(showImageNetWork(urlImage!));
 
-        urlImages.add(urlImage);
+        urlImages!.add(urlImage);
       });
     }
   }
 
-  /*************************** */
+  // /*************************** */
   Future<void> readRelate() async {
-    String memId = myUserModel.id;
-    id = currentProductAllModel.id.toString();
+    String? memId = myUserModel!.id;
+    id = currentProductAllModel!.id.toString();
 
     String url =
         'https://www.ptnpharma.com/apishop/json_relate.php?memberId=$memId&productId=$id'; // ?memberId=$memberId
@@ -187,37 +195,49 @@ class _DetailState extends State<Detail> {
     var result = json.decode(response.body);
     var mapItemProduct =
         result['itemsProduct']; // dynamic    จะส่ง value อะไรก็ได้ รวมถึง null
+    print('mapItemProduct >> $mapItemProduct');
+
     for (var map in mapItemProduct) {
-      PromoteModel promoteModel = PromoteModel.fromJson(map);
-      ProductAllModel productAllModel = ProductAllModel.fromJson(map);
-      String urlImage = promoteModel.photo;
-      String productName = promoteModel.title;
+      PromoteModel? relateslideshowModel = PromoteModel.fromJson(map);
+      ProductAllModel? productAllModel = ProductAllModel.fromJson(map);
+      String? urlImage = relateslideshowModel.photo;
+      String? productName = relateslideshowModel.title;
+
       setState(() {
         //promoteModels.add(promoteModel); // push ค่าลง array
-        relateModels.add(productAllModel);
-        relateLists.add(Image.network(urlImage));
-        urlImagesRelate.add(urlImage);
-        productsName.add(productName);
+        relateslideshowModels!.add(productAllModel);
+        relateslideshowLists!.add(showImageNetWork(urlImage!));
+        // productsNameRelate!.add(productName!);
+        urlImagesRelate!.add(urlImage);
       });
     }
+    print('relateslideshowModels >> $relateslideshowModels');
   }
 
   Widget myCircularProgress() {
-    return Center(
-      child: CircularProgressIndicator(),
-    );
+    return Center(child: CircularProgressIndicator());
   }
 
   void routeToListProductByCate(int index, int cate, String cateName) {
-    MaterialPageRoute materialPageRoute =
-        MaterialPageRoute(builder: (BuildContext buildContext) {
-      return ListProduct(
-        index: index,
-        userModel: myUserModel,
-        cate: cate,
-        cateName: cateName,
-      );
-    });
+    MaterialPageRoute materialPageRoute = MaterialPageRoute(
+      builder: (BuildContext buildContext) {
+        return ListProduct(
+          index: index,
+          userModel: myUserModel!,
+          cate: cate,
+          cateName: cateName,
+        );
+      },
+    );
+    Navigator.of(context).push(materialPageRoute);
+  }
+
+  void routeToListProductfav(int index) {
+    MaterialPageRoute materialPageRoute = MaterialPageRoute(
+      builder: (BuildContext buildContext) {
+        return ListProductfav(index: index, userModel: myUserModel!);
+      },
+    );
     Navigator.of(context).push(materialPageRoute);
   }
 
@@ -234,11 +254,12 @@ class _DetailState extends State<Detail> {
             child: Column(
               children: <Widget>[
                 Text(
-                  productAllModel.cateName,
+                  productAllModel!.cateName!,
                   style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white),
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
               ],
             ),
@@ -248,8 +269,8 @@ class _DetailState extends State<Detail> {
           print('You click promotion');
           routeToListProductByCate(
             6,
-            int.parse(productAllModel.cateID),
-            productAllModel.cateName,
+            int.parse(productAllModel!.cateID!),
+            productAllModel!.cateName!,
           );
         },
       ),
@@ -271,9 +292,10 @@ class _DetailState extends State<Detail> {
                 Text(
                   'โปรโมชัน',
                   style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white),
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
               ],
             ),
@@ -302,9 +324,10 @@ class _DetailState extends State<Detail> {
                 Text(
                   'จะปรับราคา',
                   style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white),
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
               ],
             ),
@@ -333,9 +356,10 @@ class _DetailState extends State<Detail> {
                 Text(
                   'สินค้าใหม่',
                   style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white),
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
               ],
             ),
@@ -364,9 +388,10 @@ class _DetailState extends State<Detail> {
                 Text(
                   'สั่งแล้วไม่ได้รับ',
                   style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white),
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
               ],
             ),
@@ -386,35 +411,29 @@ class _DetailState extends State<Detail> {
       // mainAxisSize: MainAxisSize.max,
       // mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        SizedBox(
-          width: 5.0,
-          height: 5.0,
-        ),
+        SizedBox(width: 5.0, height: 5.0),
         // categoryTag(),
-        productAllModel.promotion == 1 ? promotionTag() : Container(),
-        productAllModel.newproduct == 1 ? newproductTag() : Container(),
-        productAllModel.updateprice == 1 ? updatepriceTag() : Container(),
-        productAllModel.notreceive == 1 ? notreceiveTag() : Container(),
-        SizedBox(
-          width: 5.0,
-          height: 8.0,
-        )
+        productAllModel!.promotion == 1 ? promotionTag() : Container(),
+        productAllModel!.newproduct == 1 ? newproductTag() : Container(),
+        productAllModel!.updateprice == 1 ? updatepriceTag() : Container(),
+        productAllModel!.notreceive == 1 ? notreceiveTag() : Container(),
+        SizedBox(width: 5.0, height: 8.0),
       ],
     );
   }
 
   Widget showCarouseSlideshow() {
-    print('slideshowLists.length >> ' + slideshowLists.length.toString());
+    print('slideshowLists.length >> ' + slideshowLists!.length.toString());
     return Column(
       children: [
         GestureDetector(
           child: CarouselSlider.builder(
             options: CarouselOptions(
               // pauseAutoPlayOnTouch: Duration(seconds: 5),
-              autoPlay: (slideshowLists.length) > 0 ? true : false,
+              autoPlay: slideshowLists!.isNotEmpty ? true : false,
               autoPlayAnimationDuration: Duration(seconds: 5),
             ),
-            itemCount: (slideshowLists.length).round(),
+            itemCount: (slideshowLists!.length).round(),
             itemBuilder: (context, index, realIdx) {
               final int first = index;
               // final int second = first + 1;
@@ -424,8 +443,11 @@ class _DetailState extends State<Detail> {
                     child: Container(
                       padding: EdgeInsets.all(1.0),
                       child: Center(
-                        child: Image.network(urlImages[idx],
-                            fit: BoxFit.cover, width: 1000),
+                        child: Image.network(
+                          urlImages![idx],
+                          fit: BoxFit.cover,
+                          width: 1000,
+                        ),
                       ),
                     ),
                   );
@@ -440,58 +462,105 @@ class _DetailState extends State<Detail> {
   }
 
   Widget showCarouseSliderRelate() {
-    print('relateModels.length > ' + relateModels.length.toString());
+    print(
+      'relateslideshowLists.length  (Widget) > ' +
+          relateslideshowLists!.length.toString(),
+    );
     return GestureDetector(
       child: CarouselSlider.builder(
         options: CarouselOptions(
           // pauseAutoPlayOnTouch: Duration(seconds: 5),
-          autoPlay: (relateModels.length >= 1) ? true : false,
+          autoPlay: (relateslideshowLists!.isNotEmpty) ? true : false,
           autoPlayAnimationDuration: Duration(seconds: 5),
         ),
-        itemCount: (relateModels.length / 2).round(),
+        itemCount: (relateslideshowLists!.length / 2).round(),
         itemBuilder: (context, index, realIdx) {
           final int first = index * 2;
           final int second = first + 1;
-
           return Row(
             children: [first, second].map((idx) {
-                  return Expanded(
-                    child: GestureDetector(
-                      child: Card(
-                        // flex: 1,
-                        child: Column(
-                          children: <Widget>[
-                            Container(
-                              // width: MediaQuery.of(context).size.width * 0.50,
-                              height: 100.00,
-                              child: relateLists[idx],
-                              padding: EdgeInsets.all(8.0),
-                            ),
-                            Text(
-                              productsName[idx].toString(),
-                              style: TextStyle(
-                                  fontSize: 12,
-                                  // fontWeight: FontWeight.bold,
-                                  color: Colors.black),
-                            ),
-                          ],
-                        ),
-                      ),
-                      onTap: () {
-                        print('You Click index >> $idx');
-                        MaterialPageRoute route = MaterialPageRoute(
-                          builder: (BuildContext context) => Detail(
-                            productAllModel: relateModels[idx],
-                            userModel: myUserModel,
+              return Expanded(
+                child: GestureDetector(
+                  child: Card(
+                    child: Column(
+                      children: [
+                        Container(
+                          child: Image.network(
+                            urlImagesRelate![idx],
+                            fit: BoxFit.cover,
+                            width: 1000,
                           ),
-                        );
-                        Navigator.of(context).push(route).then((value) {});
-                      },
+                          height: 100.00,
+                          padding: EdgeInsets.all(8.0),
+                        ),
+                        Text(
+                          relateslideshowModels![idx].title!,
+                          style: TextStyle(
+                            fontSize: 12,
+                            // fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ],
                     ),
-                  );
-                }).toList() ??
-                [],
+                  ),
+                  onTap: () {
+                    print('You Click index >> $idx');
+                    MaterialPageRoute route = MaterialPageRoute(
+                      builder: (BuildContext context) => Detail(
+                        productAllModel: relateslideshowModels![idx],
+                        userModel: myUserModel,
+                      ),
+                    );
+                    Navigator.of(context).push(route).then((value) {});
+                  },
+                ),
+              );
+            }).toList(),
           );
+
+          // return Row(
+          //   children: [first, second].map((idx) {
+          //         return Expanded(
+          //           child: GestureDetector(
+          //             child: Card(
+          //               // flex: 1,
+          //               child: Column(
+          //                 children: <Widget>[
+          //                   Container(
+          //                     child: Image.network(urlImages![idx],
+          //                         fit: BoxFit.cover, width: 1000),
+
+          //                     // width: MediaQuery.of(context).size.width * 0.50,
+          //                     height: 100.00,
+          //                     // child: relateslideshowLists![idx],
+          //                     padding: EdgeInsets.all(8.0),
+          //                   ),
+          //                   Text(
+          //                     productsName![idx].toString(),
+          //                     style: TextStyle(
+          //                         fontSize: 12,
+          //                         // fontWeight: FontWeight.bold,
+          //                         color: Colors.black),
+          //                   ),
+          //                 ],
+          //               ),
+          //             ),
+          //             onTap: () {
+          //               print('You Click index >> $idx');
+          //               MaterialPageRoute route = MaterialPageRoute(
+          //                 builder: (BuildContext context) => Detail(
+          //                   productAllModel: relateslideshowModels![idx],
+          //                   userModel: myUserModel,
+          //                 ),
+          //               );
+          //               Navigator.of(context).push(route).then((value) {});
+          //             },
+          //           ),
+          //         );
+          //       }).toList() ??
+          //       [],
+          // );
         },
       ),
     );
@@ -501,18 +570,18 @@ class _DetailState extends State<Detail> {
     return Container(
       // height: MediaQuery.of(context).size.height * 0.5 - 50,
       height: MediaQuery.of(context).size.height * 0.5 - 150,
-      child: Image.network(
-        productAllModel.photo,
-        fit: BoxFit.contain,
-      ),
+      child: Image.network(productAllModel!.photo!, fit: BoxFit.contain),
     );
   }
 
   // Post ค่าไปยัง API ที่ต้องการ
   Future<void> editFavorite(
-      String productID, String memberID, bool _isFavorite) async {
+    String productID,
+    String memberID,
+    bool _isFavorite,
+  ) async {
     String url =
-        'https://ptnpharma.com/apishop/json_favorite.php?productID=$productID&memberId=$memberID&status=$_isFavorite';
+        'https://www.ptnpharma.com/apishop/json_favorite.php?productID=$productID&memberId=$memberID&status=$_isFavorite';
 
     print('url Favorites url ====>>>>> $url');
     await http.get(Uri.parse(url)).then((response) {
@@ -523,10 +592,10 @@ class _DetailState extends State<Detail> {
   }
 
   Widget favButton() {
-    bool favStatus = (productAllModel.favorite == true) ? true : false;
+    bool? favStatus = (productAllModel!.favorite == true) ? true : false;
 
-    String productID = id;
-    String memberID = myUserModel.id.toString();
+    String? productID = id;
+    String? memberID = myUserModel!.id.toString();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
@@ -540,7 +609,7 @@ class _DetailState extends State<Detail> {
           // iconDisabledColor: Colors.white,
           valueChanged: (_isFavorite) {
             // print('Is Favorite : $_isFavorite');
-            editFavorite(productID, memberID, _isFavorite);
+            editFavorite(productID!, memberID, _isFavorite);
 
             // http.Response response =  http.get(Uri.parse(url));
           },
@@ -550,10 +619,7 @@ class _DetailState extends State<Detail> {
   }
 
   Widget showTitle() {
-    return Text(
-      productAllModel.title,
-      style: MyStyle().h3bStyle,
-    );
+    return Text(productAllModel!.title!, style: MyStyle().h3bStyle);
   }
 
   Widget showHilight() {
@@ -561,10 +627,19 @@ class _DetailState extends State<Detail> {
       children: <Widget>[
         Container(
           width: MediaQuery.of(context).size.width * 0.7 - 10,
-          child: Text(
-            productAllModel.hilight,
-            style: MyStyle().h3StyleRed,
-          ),
+          child: Text(productAllModel!.hilight!, style: MyStyle().h3StyleRed),
+        ),
+      ],
+    );
+  }
+
+  Widget showExtrapoint() {
+    return Row(
+      children: <Widget>[
+        Container(
+          width: MediaQuery.of(context).size.width * 0.7 - 10,
+          child: Text(productAllModel!.extrapoint!,
+              style: MyStyle().h3StyleOrange),
         ),
       ],
     );
@@ -574,28 +649,19 @@ class _DetailState extends State<Detail> {
   // }
 
   Widget showPackage(int index) {
-    if (unitSizeModels[index].price.toString() == '0') {
-      return Text(
-        unitSizeModels[index].lable,
-        style: MyStyle().h3bStyleRed,
-      );
+    if (unitSizeModels![index].price.toString() == '0') {
+      return Text(unitSizeModels![index].lable!, style: MyStyle().h3bStyleRed);
     } else {
-      return Text(
-        unitSizeModels[index].lable,
-        style: MyStyle().h3Style,
-      );
+      return Text(unitSizeModels![index].lable!, style: MyStyle().h3Style);
     }
   }
 
   Widget showPricePackage(int index) {
-    if (unitSizeModels[index].price.toString() == '0') {
-      return Text(
-        'งดจำหน่าย / ',
-        style: MyStyle().h3bStyleRed,
-      );
+    if (unitSizeModels![index].price.toString() == '0') {
+      return Text('งดจำหน่าย / ', style: MyStyle().h3bStyleRed);
     } else {
       return Text(
-        '${unitSizeModels[index].price.toString()} บาท / ',
+        '${unitSizeModels![index].price.toString()} บาท / ',
         style: MyStyle().h3bStyleGreen,
       );
     }
@@ -615,21 +681,18 @@ class _DetailState extends State<Detail> {
   Widget showDetailPrice(int index) {
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        showPricePackage(index),
-        showPackage(index),
-      ],
+      children: <Widget>[showPricePackage(index), showPackage(index)],
     );
   }
 
   Widget showValue(int index) {
     //  int value = amounts[index];
     //  return Text('$value');
-    int iniValue = 0;
-    bool readOnlyMode;
+    int? iniValue = 0;
+    bool? readOnlyMode;
     var iconName;
     var iconColor;
-    // print('$sizeSincart / $sizeMincart / $sizeLincart ');
+    print('incart all size -> $sizeSincart / $sizeMincart / $sizeLincart ');
     if (index == 0) {
       iniValue = showSincart;
     } else if (index == 1) {
@@ -638,10 +701,10 @@ class _DetailState extends State<Detail> {
       iniValue = showLincart;
     }
 
-    iniValue = (iniValue).toInt();
+    iniValue = (iniValue); // (iniValue).toInt();
 
     /////////////////////////////////////////////////////////
-    if (unitSizeModels[index].price.toString() == '0') {
+    if (unitSizeModels![index].price.toString() == '0') {
       readOnlyMode = true;
       iconName = Icons.cancel;
       iconColor = Color.fromARGB(0xff, 0xff, 0x99, 0x99);
@@ -654,16 +717,14 @@ class _DetailState extends State<Detail> {
           children: <Widget>[
             TextFormField(
               style: TextStyle(color: Colors.black),
-              // initialValue: '$iniValue',
+              initialValue: '$iniValue',
               // controller: TextEditingController()..text = '$iniValue',
               readOnly: readOnlyMode,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
-                contentPadding: EdgeInsets.only(
-                  top: 6.0,
-                ),
+                contentPadding: EdgeInsets.only(top: 3.0),
                 prefixIcon: Icon(iconName, color: iconColor),
-                // border: InputBorder.none,
+                border: InputBorder.none,
                 // hintText: 'ระบุจำนวน',
                 hintStyle: TextStyle(color: iconColor),
               ),
@@ -679,14 +740,14 @@ class _DetailState extends State<Detail> {
         // decoration: MyStyle().boxLightGreen,
         // height: 35.0,
         width: MediaQuery.of(context).size.width * 0.50,
-        padding: EdgeInsets.only(left: 20.0, right: 10.0),
+        padding: EdgeInsets.only(left: 10.0, right: 10.0),
         child: Column(
           children: <Widget>[
             Padding(
               child: SpinBox(
                 min: 1,
                 max: 10000,
-                value: (iniValue)
+                value: (iniValue)!
                     .toDouble(), //(iniValue == 0) ? 0 : (iniValue).toInt(),
                 onChanged: (changevalue) {
                   if (index == 0) {
@@ -704,8 +765,11 @@ class _DetailState extends State<Detail> {
                   }
                 },
                 // decoration: InputDecoration(labelText: 'Decimals'),
+                decoration: InputDecoration(
+                  border: UnderlineInputBorder(), // InputBorder.none,
+                ),
               ),
-              padding: const EdgeInsets.all(2),
+              padding: const EdgeInsets.all(0),
             ),
           ],
         ),
@@ -723,36 +787,33 @@ class _DetailState extends State<Detail> {
         children: <Widget>[
           Container(
             width: MediaQuery.of(context).size.width * 0.16,
-            child: Text(
-              'สต๊อก :',
-              style: MyStyle().h3StyleGray,
-            ),
+            child: Text('สต๊อก :', style: MyStyle().h3StyleGray),
           ),
           Container(
-            width: MediaQuery.of(context).size.width * 0.22,
-            child: Text(' ${productAllModel.stock}',
-                style: (productAllModel.stock.toString() != '0')
-                    ? MyStyle().h3StyleGray
-                    : MyStyle().h3StyleRed),
-          ),
-          Container(
-            width: MediaQuery.of(context).size.width * 0.25,
+            width: MediaQuery.of(context).size.width * 0.19,
             child: Text(
-              'วันหมดอายุ :',
-              style: MyStyle().h3StyleGray,
+              ' ${productAllModel!.stock}',
+              style: (productAllModel!.stock.toString() != '0')
+                  ? MyStyle().h3StyleGray
+                  : MyStyle().h3StyleRed,
             ),
           ),
           Container(
             width: MediaQuery.of(context).size.width * 0.28,
+            child: Text('วันหมดอายุ :', style: MyStyle().h3StyleGray),
+          ),
+          Container(
+            width: MediaQuery.of(context).size.width * 0.28,
             child: Text(
-              ' ${productAllModel.expire}',
+              ' ${productAllModel!.expire}',
               style: TextStyle(
-                  fontSize: 16.0,
-                  color: (productAllModel.expireColor == 'red')
-                      ? Colors.red
-                      : (productAllModel.expireColor == 'blue')
-                          ? Colors.blue.shade700
-                          : Colors.black),
+                fontSize: 16.0,
+                color: (productAllModel!.expireColor == 'red')
+                    ? Colors.red
+                    : (productAllModel!.expireColor == 'blue')
+                        ? Colors.blue.shade700
+                        : Colors.black,
+              ),
             ),
           ),
         ],
@@ -761,7 +822,9 @@ class _DetailState extends State<Detail> {
   }
 
   Widget showVideo() {
-    String videoSelectCode = videoCode;
+    // String videoSelectCode = videoCode!;
+    String videoSelectCode = productAllModel!.youtube!;
+    print('videoSelectCode ====>>>>> $videoSelectCode');
     final _controllers = YoutubePlayerController(
       initialVideoId: videoSelectCode,
       flags: const YoutubePlayerFlags(
@@ -777,14 +840,14 @@ class _DetailState extends State<Detail> {
 
     return Column(
       children: [
-        Align(
-          alignment: Alignment.centerLeft,
-          // width: MediaQuery.of(context).size.width * 0.20,
-          child: Text(
-            'Video ',
-            style: MyStyle().h4bStyleGray,
-          ),
-        ),
+        // Align(
+        //   alignment: Alignment.centerLeft,
+        //   // width: MediaQuery.of(context).size.width * 0.20,
+        //   child: Text(
+        //     'Video ',
+        //     style: MyStyle().h4bStyleGray,
+        //   ),
+        // ),
         YoutubePlayer(
           key: ObjectKey(_controllers),
           controller: _controllers,
@@ -803,27 +866,41 @@ class _DetailState extends State<Detail> {
     );
   }
 
+  // Widget showVideo() {
+  //   String videoSelectCode = productAllModel!.youtube!;
+  //   print('videoSelectCode ====>>>>> $videoSelectCode');
+  //   final _controller = YoutubePlayerController(
+  //     params: YoutubePlayerParams(
+  //       mute: false,
+  //       showControls: true,
+  //       showFullscreenButton: true,
+  //     ),
+  //   );
+  //   // _controller.loadVideoById(...); // Auto Play
+  //   // _controller.cueVideoById(...); // Manual Play
+  //   // _controller.loadPlaylist(...); // Auto Play with playlist
+  //   // _controller.cuePlaylist(...); // Manual Play with playlist
+  //   _controller.loadVideoById(videoId: videoSelectCode);
+  //   // If the requirement is just to play a single video.
+  //   return YoutubePlayer(
+  //     controller: _controller,
+  //     aspectRatio: 16 / 9,
+  //   );
+  // }
+
   Widget showUsefor() {
     return Column(
       children: [
         Align(
           alignment: Alignment.centerLeft,
           // width: MediaQuery.of(context).size.width * 0.20,
-          child: Text(
-            'ใช้รักษา',
-            style: MyStyle().h4bStyleGray,
-          ),
+          child: Text('ใช้รักษา', style: MyStyle().h4bStyleGray),
         ),
         Container(
           // width: MediaQuery.of(context).size.width * 0.75,
-          child: Text(
-            productAllModel.usefor,
-            style: MyStyle().h4StyleGray,
-          ),
+          child: Text(productAllModel!.usefor!, style: MyStyle().h4StyleGray),
         ),
-        SizedBox(
-          height: 20.0,
-        ),
+        SizedBox(height: 20.0),
       ],
     );
   }
@@ -834,21 +911,13 @@ class _DetailState extends State<Detail> {
         Align(
           alignment: Alignment.centerLeft,
           // width: MediaQuery.of(context).size.width * 0.20,
-          child: Text(
-            'วิธีการใช้',
-            style: MyStyle().h4bStyleGray,
-          ),
+          child: Text('วิธีการใช้', style: MyStyle().h4bStyleGray),
         ),
         Container(
           // width: MediaQuery.of(context).size.width * 0.75,
-          child: Text(
-            productAllModel.method,
-            style: MyStyle().h4StyleGray,
-          ),
+          child: Text(productAllModel!.method!, style: MyStyle().h4StyleGray),
         ),
-        SizedBox(
-          height: 20.0,
-        ),
+        SizedBox(height: 20.0),
       ],
     );
   }
@@ -859,21 +928,13 @@ class _DetailState extends State<Detail> {
         Align(
           alignment: Alignment.centerLeft,
           // width: MediaQuery.of(context).size.width * 0.20,
-          child: Text(
-            'รายละเอียด :',
-            style: MyStyle().h4bStyleGray,
-          ),
+          child: Text('รายละเอียด :', style: MyStyle().h4bStyleGray),
         ),
         Container(
           // width: MediaQuery.of(context).size.width * 0.75,
-          child: Text(
-            productAllModel.detail,
-            style: MyStyle().h4StyleGray,
-          ),
+          child: Text(productAllModel!.detail!, style: MyStyle().h4StyleGray),
         ),
-        SizedBox(
-          height: 20.0,
-        ),
+        SizedBox(height: 20.0),
       ],
     );
   }
@@ -893,50 +954,39 @@ class _DetailState extends State<Detail> {
         //   height: 10.0,
         // ),
         Container(
-          width: MediaQuery.of(context).size.width * 0.98,
+          width: MediaQuery.of(context).size.width * 0.99,
           child: Row(
             children: <Widget>[
               Container(
                 width: MediaQuery.of(context).size.width * 0.10,
-                child: Text(
-                  'ราคา ',
-                  style: MyStyle().h4bStyleRed,
-                ),
+                child: Text('ราคา', style: MyStyle().h4bStyleRed),
               ),
               Container(
                 width: MediaQuery.of(context).size.width * 0.18,
-                child: Text(
-                  'ตามป้าย :',
-                  style: MyStyle().h4bStyleGray,
-                ),
+                child: Text('ป้าย :', style: MyStyle().h4bStyleGray),
               ),
               Container(
-                width: MediaQuery.of(context).size.width * 0.18,
+                width: MediaQuery.of(context).size.width * 0.15,
                 child: Text(
-                  productAllModel.pricelabel,
+                  productAllModel!.pricelabel!,
                   style: MyStyle().h3bStyleGray,
                 ),
               ),
               Container(
-                width: MediaQuery.of(context).size.width * 0.31,
-                child: Text(
-                  'แนะนำขายปลีก :',
-                  style: MyStyle().h4bStyleGray,
-                ),
+                width: MediaQuery.of(context).size.width * 0.34,
+                child: Text('แนะนำขายปลีก :', style: MyStyle().h4bStyleGray),
               ),
               Container(
-                width: MediaQuery.of(context).size.width * 0.18,
+                width: MediaQuery.of(context).size.width * 0.15,
                 child: Text(
-                  productAllModel.pricesale,
+                  productAllModel!.pricesale!,
                   style: MyStyle().h3bStyleGray,
                 ),
               ),
             ],
           ),
         ),
-        SizedBox(
-          height: 20.0,
-        ),
+        SizedBox(height: 20.0),
       ],
     );
   }
@@ -953,13 +1003,13 @@ class _DetailState extends State<Detail> {
         //   ),
         // ),
         Container(
-          child: productAllModel.usefor == '' ? Container() : showUsefor(),
+          child: productAllModel!.usefor == '' ? Container() : showUsefor(),
         ),
         Container(
-          child: productAllModel.method == '' ? Container() : showMethod(),
+          child: productAllModel!.method == '' ? Container() : showMethod(),
         ),
         Container(
-          child: productAllModel.detail == '' ? Container() : showDetail(),
+          child: productAllModel!.detail == '' ? Container() : showDetail(),
         ),
       ],
     );
@@ -968,13 +1018,14 @@ class _DetailState extends State<Detail> {
   Widget showPrice() {
     return Container(
       decoration: BoxDecoration(
-          border: Border.all(color: Color.fromARGB(255, 255, 255, 255))),
-      height: (53 * unitSizeModels.length.toDouble()),
+        border: Border.all(color: Color.fromARGB(255, 255, 255, 255)),
+      ),
+      height: (53 * unitSizeModels!.length.toDouble()),
       // color: Colors.grey,
       child: ListView.builder(
-        itemCount: unitSizeModels.length,
+        itemCount: unitSizeModels!.length,
         itemBuilder: (BuildContext buildContext, int index) {
-          print('price >> ' + unitSizeModels[index].price.toString());
+          print('price >> ' + unitSizeModels![index].price.toString());
           return showChoosePricePackage(index);
           // return showChoosePricePackage(index);
         },
@@ -983,11 +1034,15 @@ class _DetailState extends State<Detail> {
   }
 
   Widget relate() {
+    print(
+      'relateslideshowLists!.length (Widget relate)>> ' +
+          relateslideshowLists!.length.toString(),
+    );
     return Card(
       child: Container(
         width: MediaQuery.of(context).size.width * 0.9,
         height: MediaQuery.of(context).size.height * 0.25,
-        child: relateLists.length == 0
+        child: relateslideshowLists!.isEmpty
             ? myCircularProgress()
             : showCarouseSliderRelate(),
       ),
@@ -995,10 +1050,7 @@ class _DetailState extends State<Detail> {
   }
 
   Widget mySizebox() {
-    return SizedBox(
-      width: 10.0,
-      height: 30.0,
-    );
+    return SizedBox(width: 10.0, height: 30.0);
   }
 
   Widget headTitle(String string, IconData iconData) {
@@ -1007,11 +1059,7 @@ class _DetailState extends State<Detail> {
       padding: EdgeInsets.all(5.0),
       child: Row(
         children: <Widget>[
-          Icon(
-            iconData,
-            size: 18.0,
-            color: MyStyle().textColor,
-          ),
+          Icon(iconData, size: 18.0, color: MyStyle().textColor),
           mySizebox(),
           Text(
             string,
@@ -1030,9 +1078,9 @@ class _DetailState extends State<Detail> {
     print('Here is readcart function');
 
     amontCart = 0;
-    String memberId = myUserModel.id.toString();
+    String memberId = myUserModel!.id.toString();
     String url =
-        'https://ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId';
+        'https://www.ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId&screen=detaiil';
 
     print('url Detail =====>>>>>>>> $url');
 
@@ -1041,7 +1089,7 @@ class _DetailState extends State<Detail> {
     var cartList = result['cart'];
     for (var map in cartList) {
       // setState(() {
-      amontCart++;
+      amontCart = amontCart! + 1;
       // });
     }
     setState(() {
@@ -1076,245 +1124,93 @@ class _DetailState extends State<Detail> {
   }
 
   void routeToDetailCart() {
-    MaterialPageRoute materialPageRoute =
-        MaterialPageRoute(builder: (BuildContext buildContext) {
-      return DetailCart(
-        userModel: myUserModel,
-      );
-    });
-    Navigator.of(context).push(materialPageRoute);
-  }
-
-  BottomNavigationBarItem homeBotton() {
-    return BottomNavigationBarItem(
-      icon: Icon(Icons.home),
-      label: 'Home',
-    );
-  }
-
-  BottomNavigationBarItem cartBotton() {
-    return BottomNavigationBarItem(
-      icon: Icon(Icons.shopping_cart),
-      label: 'Cart',
-    );
-  }
-
-  BottomNavigationBarItem readQrBotton() {
-    return BottomNavigationBarItem(
-      icon: Icon(Icons.code),
-      label: 'QR code',
-    );
-  }
-
-  Widget showBottomBarNav() {
-    return BottomNavigationBar(
-      currentIndex: 1,
-      items: <BottomNavigationBarItem>[
-        homeBotton(),
-        cartBotton(),
-        readQrBotton(),
-      ],
-      onTap: (int index) {
-        print('index =$index');
-        if (index == 0) {
-          // routeToDetailCart();
-          MaterialPageRoute route = MaterialPageRoute(
-            builder: (value) => MyService(
-              userModel: myUserModel,
-            ),
-          );
-          Navigator.of(context).pushAndRemoveUntil(route, (route) => false);
-        } else if (index == 2) {
-          // readQRcode();
-          readQRcodePreview();
-        }
+    MaterialPageRoute materialPageRoute = MaterialPageRoute(
+      builder: (BuildContext buildContext) {
+        return DetailCart(userModel: myUserModel);
       },
     );
-  }
-
-  // Future<void> readQRcode() async {
-  //   try {
-  //     var qrString = await BarcodeScanner.scan();
-  //     print('QR code = $qrString');
-  //     if (qrString != null) {
-  //       decodeQRcode(qrString);
-  //     }
-  //   } catch (e) {
-  //     print('e = $e');
-  //   }
-  // }
-
-  Future<void> readQRcodePreview() async {
-    try {
-      final qrScanString = await Navigator.push(this.context,
-          MaterialPageRoute(builder: (context) => ScanPreviewPage()));
-
-      print('Before scan');
-      // final qrScanString = await BarcodeScanner.scan();
-      print('After scan');
-      print('scanl result: $qrScanString');
-      qrString = qrScanString;
-      if (qrString != null) {
-        decodeQRcode(qrString);
-      }
-      // setState(() => scanResult = qrScanString);
-    } on PlatformException catch (e) {
-      print('e = $e');
-    }
-  }
-
-  Future<void> decodeQRcode(var code) async {
-    try {
-      String url =
-          'https://ptnpharma.com/apishop/json_productlist.php?bqcode=$code';
-      http.Response response = await http.get(Uri.parse(url));
-      var result = json.decode(response.body);
-      print('result ===*******>>>> $result');
-
-      int status = result['status'];
-      print('status ===>>> $status');
-      if (status == 0) {
-        normalDialog(context, 'No Code', 'No $code in my Database');
-      } else {
-        var itemProducts = result['itemsProduct'];
-        for (var map in itemProducts) {
-          print('map ===*******>>>> $map');
-
-          ProductAllModel productAllModel = ProductAllModel.fromJson(map);
-          MaterialPageRoute route = MaterialPageRoute(
-            builder: (BuildContext context) => Detail(
-              userModel: myUserModel,
-              productAllModel: productAllModel,
-            ),
-          );
-          Navigator.of(context).push(route).then((value) => readCart());
-
-          // Navigator.of(context).push(route).then((value) {
-          //   setState(() {
-          //     readCart();
-          //   });
-          // });
-        }
-      }
-    } catch (e) {}
-  }
-
-  void routeToListProduct(int index) {
-    MaterialPageRoute materialPageRoute =
-        MaterialPageRoute(builder: (BuildContext buildContext) {
-      return ListProduct(
-        index: index,
-        userModel: myUserModel,
-      );
-    });
     Navigator.of(context).push(materialPageRoute);
   }
 
-  void changePage(int index) {
-    // selected  >>  BubbleBottomBar
-    setState(() {
-      currentIndex = index;
-    });
 
-    //You can have a switch case to Navigate to different pages
-    switch (currentIndex) {
-      case 0:
-        MaterialPageRoute route = MaterialPageRoute(
-          builder: (value) => MyService(
-            userModel: myUserModel,
-          ),
-        );
-        Navigator.of(context).pushAndRemoveUntil(route, (route) => false);
-
-        break; // home
-      case 1:
-        routeToListProduct(0);
-        break; // all product
-      case 2:
-        routeToListProduct(2);
-        MaterialPageRoute materialPageRoute =
-            MaterialPageRoute(builder: (BuildContext buildContext) {
-          return DetailCart(
-            userModel: myUserModel,
-          );
-        });
-        Navigator.of(context).push(materialPageRoute).then((value) {
-          setState(() {
-            readCart();
-          });
-        });
-        break; // promotion
-    }
+  void routeToListProduct(int index) {
+    MaterialPageRoute materialPageRoute = MaterialPageRoute(
+      builder: (BuildContext buildContext) {
+        return ListProduct(index: index, userModel: myUserModel!);
+      },
+    );
+    Navigator.of(context).push(materialPageRoute);
   }
 
-  Widget showBubbleBottomBarNav() {
-    return BubbleBottomBar(
-      hasNotch: true,
-      // fabLocation: BubbleBottomBarFabLocation.end,
-      opacity: .2,
-      borderRadius: BorderRadius.vertical(
-          top: Radius.circular(
-              16)), //border radius doesn't work when the notch is enabled.
-      elevation: 8,
-      currentIndex: currentIndex,
-      onTap: changePage,
-      items: <BubbleBottomBarItem>[
-        BubbleBottomBarItem(
-            backgroundColor: Colors.red,
-            icon: Icon(
-              Icons.home,
-              color: Colors.black,
-            ),
-            activeIcon: Icon(
-              Icons.home,
-              color: Colors.red,
-            ),
-            title: Text("หน้าหลัก")),
-        BubbleBottomBarItem(
-            backgroundColor: Colors.green,
-            icon: Icon(
-              Icons.medical_services,
-              color: Colors.black,
-            ),
-            activeIcon: Icon(
-              Icons.medical_services,
-              color: Colors.green,
-            ),
-            title: Text("สินค้า")),
-        BubbleBottomBarItem(
-            backgroundColor: Colors.blue,
-            icon: Icon(
-              Icons.newspaper,
-              color: Colors.black,
-            ),
-            activeIcon: Icon(
-              Icons.newspaper,
-              color: Colors.blue,
-            ),
-            title: Text("ข่าวสาร")),
+  Widget stylishBottomBar() {
+    int? unread =
+        myUserModel!.lastNewsId!.toInt() - myUserModel!.lastNewsOpen!.toInt();
+    return StylishBottomBar(
+      option: AnimatedBarOptions(iconStyle: IconStyle.animated, opacity: 0.3),
+      items: [
+        BottomBarItem(
+          icon: const Icon(Icons.home),
+          title: const Text('Home'),
+          backgroundColor: Colors.blue,
+          // selectedIcon: const Icon(Icons.home),
+        ),
+        BottomBarItem(
+          icon: const Icon(Icons.medical_services),
+          title: const Text('Medicine'),
+          backgroundColor: Colors.green,
+        ),
+        BottomBarItem(
+          icon: const Icon(Icons.favorite),
+          title: const Text('Favorite'),
+          backgroundColor: Colors.red,
+        ),
+        BottomBarItem(
+          icon: const Icon(Icons.shopping_cart),
+          title: const Text('Cart'),
+          backgroundColor: Colors.brown,
+        ),
       ],
+      // fabLocation: StylishBarFabLocation.end,
+      hasNotch: true,
+      currentIndex: selectIndex,
+      onTap: (index) {
+        setState(() {
+          selectIndex = index;
+          // controller.jumpToPage(index);
+          if (index == 0) {
+            MaterialPageRoute route = MaterialPageRoute(
+              builder: (value) => MyService(userModel: myUserModel),
+            );
+            Navigator.of(context).pushAndRemoveUntil(route, (route) => false);
+          } else if (index == 1) {
+            routeToListProduct(0);
+          } else if (index == 2) {
+            routeToListProductfav(0);
+          } else if (index == 3) {
+            routeToDetailCart();
+          }
+        });
+      },
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    print('productAllModel (build)>> $productAllModel');
     return Scaffold(
       appBar: AppBar(
-        actions: <Widget>[
-          showCart(),
-        ],
+        iconTheme: IconThemeData(color: Colors.white),
+        actions: <Widget>[showCart()],
         backgroundColor: MyStyle().bgColor,
-        title: Text('ข้อมูลสินค้า'),
+        title: Text('ข้อมูลสินค้า', style: TextStyle(color: Colors.white)),
       ),
       body: productAllModel == null ? showProgress() : showDetailList(),
-      bottomNavigationBar: showBubbleBottomBarNav(), //showBottomBarNav
+      bottomNavigationBar: stylishBottomBar(), //showBottomBarNav
     );
   }
 
   Widget showProgress() {
-    return Center(
-      child: CircularProgressIndicator(),
-    );
+    return Center(child: CircularProgressIndicator());
   }
 
   Widget addButtonfix() {
@@ -1329,13 +1225,14 @@ class _DetailState extends State<Detail> {
                 child: Text(
                   'Add to Cart',
                   style: TextStyle(
-                      fontSize: 18.0,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold),
+                    fontSize: 18.0,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 onPressed: () {
-                  String productID = id;
-                  String memberID = myUserModel.id.toString();
+                  String? productID = id;
+                  String? memberID = myUserModel!.id.toString();
 
                   if ((qtyS == 0 || qtyS == null) &&
                       (qtyM == 0 || qtyM == null) &&
@@ -1346,20 +1243,23 @@ class _DetailState extends State<Detail> {
                   if (qtyS != 0) {
                     String unitSize = 's';
                     print(
-                        'productID = $productID, memberID=$memberID, unitSize=s, QTY=$qtyS');
-                    addCart(productID, unitSize, qtyS, memberID);
+                      'productID = $productID, memberID=$memberID, unitSize=s, QTY=$qtyS',
+                    );
+                    addCart(productID!, unitSize, qtyS!, memberID);
                   }
                   if (qtyM != 0) {
                     String unitSize = 'm';
                     print(
-                        'productID = $productID, memberID=$memberID, unitSize=m, QTY=$qtyM');
-                    addCart(productID, unitSize, qtyM, memberID);
+                      'productID = $productID, memberID=$memberID, unitSize=m, QTY=$qtyM',
+                    );
+                    addCart(productID!, unitSize, qtyM!, memberID);
                   }
                   if (qtyL != 0) {
                     String unitSize = 'l';
                     print(
-                        'productID = $productID, memberID=$memberID, unitSize=l, QTY=$qtyL');
-                    addCart(productID, unitSize, qtyL, memberID);
+                      'productID = $productID, memberID=$memberID, unitSize=l, QTY=$qtyL',
+                    );
+                    addCart(productID!, unitSize, qtyL!, memberID);
                   }
                 },
               ),
@@ -1379,16 +1279,25 @@ class _DetailState extends State<Detail> {
             Expanded(
               child: ElevatedButton(
                 // color: MyStyle().mainColor,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  textStyle: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontStyle: FontStyle.normal,
+                  ),
+                ),
                 child: Text(
                   'Add to Cart',
                   style: TextStyle(
-                      fontSize: 18.0,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold),
+                    fontSize: 18.0,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 onPressed: () {
-                  String productID = id;
-                  String memberID = myUserModel.id.toString();
+                  String? productID = id;
+                  String? memberID = myUserModel!.id.toString();
 
                   if ((qtyS == 0 || qtyS == null) &&
                       (qtyM == 0 || qtyM == null) &&
@@ -1399,28 +1308,28 @@ class _DetailState extends State<Detail> {
                   if (qtyS != 0) {
                     String unitSize = 's';
                     print(
-                        'productID = $productID, memberID=$memberID, unitSize=s, QTY=$qtyS');
-                    addCart(productID, unitSize, qtyS, memberID);
+                      'productID = $productID, memberID=$memberID, unitSize=s, QTY=$qtyS',
+                    );
+                    addCart(productID!, unitSize, qtyS!, memberID);
                   }
                   if (qtyM != 0) {
                     String unitSize = 'm';
                     print(
-                        'productID = $productID, memberID=$memberID, unitSize=m, QTY=$qtyM');
-                    addCart(productID, unitSize, qtyM, memberID);
+                      'productID = $productID, memberID=$memberID, unitSize=m, QTY=$qtyM',
+                    );
+                    addCart(productID!, unitSize, qtyM!, memberID);
                   }
                   if (qtyL != 0) {
                     String unitSize = 'l';
                     print(
-                        'productID = $productID, memberID=$memberID, unitSize=l, QTY=$qtyL');
-                    addCart(productID, unitSize, qtyL, memberID);
+                      'productID = $productID, memberID=$memberID, unitSize=l, QTY=$qtyL',
+                    );
+                    addCart(productID!, unitSize, qtyL!, memberID);
                   }
                 },
               ),
             ),
-            SizedBox(
-              width: 10.0,
-              height: (myUserModel.msg == '') ? 0 : 105.0,
-            )
+            SizedBox(width: 10.0, height: (myUserModel!.msg == '') ? 0 : 105.0),
           ],
         ),
       ],
@@ -1428,7 +1337,11 @@ class _DetailState extends State<Detail> {
   }
 
   Future<void> addCart(
-      String productID, String unitSize, int qTY, String memberID) async {
+    String productID,
+    String unitSize,
+    int qTY,
+    String memberID,
+  ) async {
     String url =
         'https://www.ptnpharma.com/apishop/json_savemycart.php?productID=$productID&unitSize=$unitSize&QTY=$qTY&memberId=$memberID';
     print('urlAddcart = $url');
@@ -1441,8 +1354,9 @@ class _DetailState extends State<Detail> {
   Widget showDetailList() {
     return Card(
       shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(10)),
-          side: BorderSide(width: 5, color: Colors.grey.shade200)),
+        borderRadius: BorderRadius.all(Radius.circular(10)),
+        side: BorderSide(width: 5, color: Colors.grey.shade200),
+      ),
       child: Stack(
         children: <Widget>[
           showController(),
@@ -1455,60 +1369,27 @@ class _DetailState extends State<Detail> {
   }
 
   ListView showController() {
-    String intVL = '10';
+    // String intVL = '10';
     return ListView(
       padding: EdgeInsets.all(10.0),
       children: <Widget>[
         favButton(),
         showTitle(),
-        (productAllModel.hilight == '-') ? Container() : showHilight(),
+        (productAllModel?.hilight == '') ? Container() : showHilight(),
+        (productAllModel?.extrapoint == '') ? Container() : showExtrapoint(),
         showTag(),
         showStockExpire(),
         Divider(),
         showPrice(),
         Divider(), //MyStyle().mySizebox(),
-        (slideshowLists.length > 0) ? showCarouseSlideshow() : Container(),
-        (productAllModel.youtube == '-') ? Container() : showVideo(),
+        (slideshowLists!.length > 0) ? showCarouseSlideshow() : Container(),
+        (productAllModel?.youtube == '-') ? Container() : showVideo(),
         salepriceinfo(),
         moreinfo(),
         headTitle('สินค้าที่เกี่ยวข้อง', Icons.thumb_up),
         relate(),
         MyStyle().mySizebox(),
       ],
-    );
-  }
-}
-
-class ScanPreviewPage extends StatefulWidget {
-  @override
-  _ScanPreviewPageState createState() => _ScanPreviewPageState();
-}
-
-class _ScanPreviewPageState extends State<ScanPreviewPage> {
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('PTN Pharma'),
-          backgroundColor: MyStyle().bgColor,
-        ),
-        body: SizedBox(
-          width: double.infinity,
-          height: double.infinity,
-          child: ScanPreviewWidget(
-            onScanResult: (result) {
-              debugPrint('scan result: $result');
-              Navigator.pop(context, result);
-            },
-          ),
-        ),
-      ),
     );
   }
 }

@@ -18,32 +18,40 @@ import 'package:ptncenter/utility/normal_dialog.dart';
 import 'package:ptncenter/widget/contact.dart';
 import 'package:ptncenter/widget/home.dart';
 import 'package:ptncenter/widget/homescreen.dart';
-import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
+// import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 import 'package:ptncenter/scaffold/list_product.dart';
 import 'package:ptncenter/scaffold/list_product_favorite.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
+// import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
 import 'detail_cart.dart';
 import 'package:toast/toast.dart';
 
 import 'package:flutter/services.dart';
 
 import 'package:permission_handler/permission_handler.dart';
-import 'package:scan_preview/scan_preview_widget.dart';
+// import 'package:scan_preview/scan_preview_widget.dart';
 import 'package:flutter/foundation.dart';
 
-import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+// import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+
+import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
+
+import 'package:webview_flutter/webview_flutter.dart';
+// Import for Android features.
+import 'package:webview_flutter_android/webview_flutter_android.dart';
+// Import for iOS/macOS features.
+import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
 class MyService extends StatefulWidget {
-  final UserModel userModel;
-  bool firstLoadAds;
-  bool orderSuccess;
-  MyService(
-      {Key key,
-      this.userModel,
-      this.firstLoadAds = false,
-      this.orderSuccess = false})
-      : super(key: key);
+  final UserModel? userModel;
+  bool? firstLoadAds;
+  bool? orderSuccess;
+  MyService({
+    Key? key,
+    this.userModel,
+    this.firstLoadAds = false,
+    this.orderSuccess = false,
+  }) : super(key: key);
 
   @override
   _MyServiceState createState() => _MyServiceState();
@@ -51,17 +59,18 @@ class MyService extends StatefulWidget {
 
 class _MyServiceState extends State<MyService> {
   //Explicit
-  List<CategoryModel> categoryModels = List(); // set array
-  UserModel myUserModel;
+  List<CategoryModel>? categoryModels = []; // set array
+  UserModel? myUserModel;
+  String? mywebPage;
+  Widget? currentWidget;
+  String? qrString;
+  int? amontCart = 0;
+  int? currentIndex;
+  ScrollController? scrollController = ScrollController();
 
-  String mywebPage;
-
-  Widget currentWidget;
-  String qrString;
-  int amontCart = 0;
-  int currentIndex;
-  ScrollController scrollController = ScrollController();
-  String _result = '';
+  int selectIndex = 0;
+  bool heart = false;
+  final controller = PageController();
 
   // Method
   @override
@@ -71,9 +80,9 @@ class _MyServiceState extends State<MyService> {
     setState(() {
       myUserModel = widget.userModel;
       currentWidget = Home(
-        userModel: myUserModel,
-        firstLoadAds: widget.firstLoadAds,
-        orderSuccess: widget.orderSuccess,
+        userModel: myUserModel!,
+        firstLoadAds: widget.firstLoadAds!,
+        orderSuccess: widget.orderSuccess!,
       );
       print('Here is initState');
       readCategory(); // read  ข้อมูลมาแสดง
@@ -84,19 +93,19 @@ class _MyServiceState extends State<MyService> {
   Future<void> readCart() async {
     amontCart = 0;
     // List map;
-    String memberId = myUserModel.id.toString();
+    String memberId = myUserModel!.id.toString();
     String url =
-        'https://ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId';
-    print('url readCart >> $url');
+        'https://www.ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId&screen=service';
+    // print('url readCart >> $url');
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var cartList = result['cart'];
-    print('cartList >> $cartList');
+    // print('cartList >> $cartList');
 
     if (cartList != null) {
       for (var map in cartList) {
         setState(() {
-          amontCart++;
+          amontCart = amontCart! + 1;
         });
       }
     }
@@ -104,168 +113,77 @@ class _MyServiceState extends State<MyService> {
   }
 
   Future<void> readCategory() async {
-    String url = 'https://ptnpharma.com/apishop/json_category.php';
+    String url = 'https://www.ptnpharma.com/apishop/json_category.php';
     // print('url readCategory >> $url');
 
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var cateList = result['data'];
+    // print('cateList >> $cateList');
     for (var map in cateList) {
-      CategoryModel categoryModel = CategoryModel.fromJson(map);
+      CategoryModel? categoryModel = CategoryModel.fromJson(map);
       setState(() {
-        categoryModels.add(categoryModel);
+        categoryModels!.add(categoryModel);
       });
     }
-    // print(' cateList ()>> $categoryModels');
+    print(' cateList ()>> $categoryModels');
   }
-
-/*************************** */
-  String _scanBarcode = 'Unknown';
-
-  Future<void> startBarcodeScanStream() async {
-    FlutterBarcodeScanner.getBarcodeStreamReceiver(
-            '#ff6666', 'Cancel', true, ScanMode.BARCODE)
-        .listen((barcode) => print(barcode));
-  }
-
-  Future<void> scanQR() async {
-    String barcodeScanRes;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    try {
-      barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-          '#ff6666', 'Cancel', true, ScanMode.QR);
-      print(barcodeScanRes);
-    } on PlatformException {
-      barcodeScanRes = 'Failed to get platform version.';
-    }
-
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
-
-    setState(() {
-      _scanBarcode = barcodeScanRes;
-    });
-  }
-
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> scanBarcodeNormal() async {
-    String barcodeScanRes;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    try {
-      barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-          '#ff6666', 'Cancel', true, ScanMode.BARCODE);
-      print(barcodeScanRes);
-
-      String url =
-          'https://ptnpharma.com/apishop/json_productlist.php?bqcode=$barcodeScanRes';
-      http.Response response = await http.get(Uri.parse(url));
-      var result = json.decode(response.body);
-      // print('result ===*******>>>> $result');
-
-      int status = result['status'];
-      // print('status ===>>> $status');
-      if (status == 0) {
-        normalDialog(
-            context, 'Not found', 'ไม่พบ code :: $barcodeScanRes ในระบบ');
-      } else {
-        var itemProducts = result['itemsProduct'];
-        for (var map in itemProducts) {
-          // print('map ===*******>>>> $map');
-
-          ProductAllModel productAllModel = ProductAllModel.fromJson(map);
-          MaterialPageRoute route = MaterialPageRoute(
-            builder: (BuildContext context) => Detail(
-              userModel: myUserModel,
-              productAllModel: productAllModel,
-            ),
-          );
-          Navigator.of(context).push(route).then((value) => readCart());
-
-          // Navigator.of(context).push(route).then((value) {
-          //   setState(() {
-          //     // readCart();
-          //   });
-          // });
-        }
-      }
-    } on PlatformException {
-      barcodeScanRes = 'Failed to get platform version.';
-    }
-
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
-
-    setState(() {
-      _scanBarcode = barcodeScanRes;
-    });
-  }
-
-/*************************** */
 
   void routeToListProduct(int index) {
-    MaterialPageRoute materialPageRoute =
-        MaterialPageRoute(builder: (BuildContext buildContext) {
-      return ListProduct(
-        index: index,
-        userModel: myUserModel,
-      );
-    });
+    MaterialPageRoute materialPageRoute = MaterialPageRoute(
+      builder: (BuildContext buildContext) {
+        return ListProduct(index: index, userModel: myUserModel!);
+      },
+    );
     Navigator.of(context).push(materialPageRoute);
   }
 
   void routeToListProductfav(int index) {
-    MaterialPageRoute materialPageRoute =
-        MaterialPageRoute(builder: (BuildContext buildContext) {
-      return ListProductfav(
-        index: index,
-        userModel: myUserModel,
-      );
-    });
+    MaterialPageRoute materialPageRoute = MaterialPageRoute(
+      builder: (BuildContext buildContext) {
+        return ListProductfav(index: index, userModel: myUserModel!);
+      },
+    );
     Navigator.of(context).push(materialPageRoute);
   }
 
   void routeToListProductByCate(int index, int cate, String cateName) {
-    MaterialPageRoute materialPageRoute =
-        MaterialPageRoute(builder: (BuildContext buildContext) {
-      return ListProduct(
-        index: index,
-        userModel: myUserModel,
-        cate: cate,
-        cateName: cateName,
-      );
-    });
+    MaterialPageRoute materialPageRoute = MaterialPageRoute(
+      builder: (BuildContext buildContext) {
+        return ListProduct(
+          index: index,
+          userModel: myUserModel!,
+          cate: cate,
+          cateName: cateName,
+        );
+      },
+    );
     Navigator.of(context).push(materialPageRoute);
   }
 
   void routeToNews() {
-    MaterialPageRoute materialPageRoute =
-        MaterialPageRoute(builder: (BuildContext buildContext) {
-      return News(
-        userModel: myUserModel,
-      );
-    });
+    MaterialPageRoute materialPageRoute = MaterialPageRoute(
+      builder: (BuildContext buildContext) {
+        return News(userModel: myUserModel!);
+      },
+    );
     Navigator.of(context).push(materialPageRoute);
     // int unread;
     // Navigator.of(context).push(materialPageRoute).then((value) => unread = 0);
   }
 
   void routeToNotify() {
-    MaterialPageRoute materialPageRoute =
-        MaterialPageRoute(builder: (BuildContext buildContext) {
-      return Notify(
-        userModel: myUserModel,
-      );
-    });
+    MaterialPageRoute materialPageRoute = MaterialPageRoute(
+      builder: (BuildContext buildContext) {
+        return Notify(userModel: myUserModel!);
+      },
+    );
     int unread;
     // Navigator.of(context).push(materialPageRoute);
     Navigator.of(context).push(materialPageRoute).then((value) => unread = 0);
   }
 
-  void changePage(int index) {
+  void changePage(int? index) {
     setState(() {
       currentIndex = index;
     });
@@ -292,17 +210,8 @@ class _MyServiceState extends State<MyService> {
 
   Widget menuHome() {
     return ListTile(
-      leading: Icon(
-        Icons.home,
-        size: 36.0,
-        color: MyStyle().mainColor,
-      ),
-      title: Text(
-        'หน้าหลัก',
-        style: TextStyle(
-          color: MyStyle().textColor,
-        ),
-      ),
+      leading: Icon(Icons.home, size: 36.0, color: MyStyle().mainColor),
+      title: Text('หน้าหลัก', style: TextStyle(color: MyStyle().textColor)),
       // subtitle: Text(
       //   'หน้าหลัก',
       //   style: TextStyle(
@@ -313,9 +222,7 @@ class _MyServiceState extends State<MyService> {
         setState(() {
           print('Here is menu home');
           readCart();
-          currentWidget = Home(
-            userModel: myUserModel,
-          );
+          currentWidget = Home(userModel: myUserModel!);
         });
         Navigator.of(context).pop();
       },
@@ -323,12 +230,9 @@ class _MyServiceState extends State<MyService> {
   }
 
   Widget menuCategory() {
-    print('menuCategory >> ' + categoryModels.length.toString());
+    print('menuCategory >> ' + categoryModels!.length.toString());
     return ExpansionTile(
-      leading: Icon(
-        Icons.category,
-        size: 36.0,
-      ),
+      leading: Icon(Icons.category, size: 36.0),
       title: Text('หมวดสินค้า'),
       children: <Widget>[
         Padding(
@@ -344,33 +248,38 @@ class _MyServiceState extends State<MyService> {
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: new InkWell(
-                          child: Text(
-                            ' - สินค้าทั้งหมด',
-                            style: TextStyle(fontSize: 16, color: Colors.black),
-                          ),
-                          onTap: () => routeToListProduct(
-                              0)), //  routeToListProductByCate(6, 0, 'สินค้าทั้งหมด')),
+                        child: Text(
+                          ' - สินค้าทั้งหมด',
+                          style: TextStyle(fontSize: 16, color: Colors.black),
+                        ),
+                        onTap: () => routeToListProduct(0),
+                      ), //  routeToListProductByCate(6, 0, 'สินค้าทั้งหมด')),
                     ),
                     ListView.builder(
-                        scrollDirection: Axis.vertical,
-                        shrinkWrap: true,
-                        controller: scrollController,
-                        itemCount: categoryModels.length,
-                        itemBuilder: (BuildContext buildContext, int index) {
-                          return Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: new InkWell(
-                                child: Text(
-                                  ' - ' + categoryModels[index].cateName,
-                                  style: TextStyle(
-                                      fontSize: 16, color: Colors.black),
-                                ),
-                                onTap: () => routeToListProductByCate(
-                                    5,
-                                    categoryModels[index].cateId,
-                                    categoryModels[index].cateName)),
-                          );
-                        }),
+                      scrollDirection: Axis.vertical,
+                      shrinkWrap: true,
+                      controller: scrollController,
+                      itemCount: categoryModels!.length,
+                      itemBuilder: (BuildContext buildContext, int index) {
+                        return Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: new InkWell(
+                            child: Text(
+                              ' - ' + categoryModels![index].cateName!,
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.black,
+                              ),
+                            ),
+                            onTap: () => routeToListProductByCate(
+                              5,
+                              categoryModels![index].cateId!,
+                              categoryModels![index].cateName!,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                   ],
                 ),
               ],
@@ -381,14 +290,11 @@ class _MyServiceState extends State<MyService> {
     );
   }
 
-  Widget menuexpandCate() {}
+  // Widget menuexpandCate() {}
 
   Widget menuLogOut() {
     return ListTile(
-      leading: Icon(
-        Icons.exit_to_app,
-        size: 36.0,
-      ),
+      leading: Icon(Icons.exit_to_app, size: 36.0),
       title: Text('ออกจากระบบ'),
       // subtitle: Text('Logout and exit'),
       onTap: () {
@@ -401,19 +307,17 @@ class _MyServiceState extends State<MyService> {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     await sharedPreferences.clear();
     // exit(0);
-    MaterialPageRoute materialPageRoute =
-        MaterialPageRoute(builder: (BuildContext buildContext) {
-      return MyApp();
-    });
+    MaterialPageRoute materialPageRoute = MaterialPageRoute(
+      builder: (BuildContext buildContext) {
+        return MyApp();
+      },
+    );
     Navigator.of(context).push(materialPageRoute);
   }
 
   Widget menuContact() {
     return ListTile(
-      leading: Icon(
-        Icons.home,
-        size: 36.0,
-      ),
+      leading: Icon(Icons.home, size: 36.0),
       title: Text('ติดต่อเรา'),
       // subtitle: Text('ข้อมูลติดต่อพัฒนาเภสัช'),
       onTap: () {
@@ -429,21 +333,25 @@ class _MyServiceState extends State<MyService> {
     String webPage = 'pay';
 
     return ListTile(
-      leading: Icon(
-        Icons.payments,
-        size: 36.0,
-      ),
-      title: Text('แจ้งชำระเงิน'),
+      leading: Icon(Icons.payments, size: 36.0),
+      title: Text('การชำระเงิน'),
       // subtitle: Text('Read QR code or barcode'),
       onTap: () {
         print('You click $webPage');
         Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => WebView(
-                      userModel: myUserModel,
-                      webPage: webPage,
-                    )));
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                WebViewExample(userModel: myUserModel!, webPage: webPage),
+          ),
+        );
+        // Navigator.push(
+        //     context,
+        //     MaterialPageRoute(
+        //         builder: (context) => WebView(
+        //               userModel: myUserModel!,
+        //               webPage: webPage,
+        //             )));
       },
     );
   }
@@ -452,21 +360,25 @@ class _MyServiceState extends State<MyService> {
     String webPage = 'orn';
 
     return ListTile(
-      leading: Icon(
-        Icons.checklist,
-        size: 36.0,
-      ),
+      leading: Icon(Icons.checklist, size: 36.0),
       title: Text('ตรวจสอบใบส่งของ'),
       // subtitle: Text('Read QR code or barcode'),
       onTap: () {
         print('You click $webPage');
         Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => WebView(
-                      userModel: myUserModel,
-                      webPage: webPage,
-                    )));
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                WebViewExample(userModel: myUserModel!, webPage: webPage),
+          ),
+        );
+        // Navigator.push(
+        //     context,
+        //     MaterialPageRoute(
+        //         builder: (context) => WebView(
+        //               userModel: myUserModel!,
+        //               webPage: webPage,
+        //             )));
       },
     );
   }
@@ -475,21 +387,25 @@ class _MyServiceState extends State<MyService> {
     String webPage = 'reward';
 
     return ListTile(
-      leading: Icon(
-        Icons.workspace_premium,
-        size: 36.0,
-      ),
+      leading: Icon(Icons.workspace_premium, size: 36.0),
       title: Text('ของสมนาคุณ'),
       // subtitle: Text('Read QR code or barcode'),
       onTap: () {
         print('You click $webPage');
         Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => WebView(
-                      userModel: myUserModel,
-                      webPage: webPage,
-                    )));
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                WebViewExample(userModel: myUserModel!, webPage: webPage),
+          ),
+        );
+        // Navigator.push(
+        //     context,
+        //     MaterialPageRoute(
+        //         builder: (context) => WebView(
+        //               userModel: myUserModel!,
+        //               webPage: webPage,
+        //             )));
       },
     );
   }
@@ -497,128 +413,57 @@ class _MyServiceState extends State<MyService> {
   Widget menuComplain() {
     String webPage = 'complain';
     return ListTile(
-      leading: Icon(
-        Icons.comment,
-        size: 36.0,
-      ),
-      title: Text('แจ้งร้องเรียน'),
+      leading: Icon(Icons.comment, size: 36.0),
+      title: Text('ข้อเสนอแนะ'),
       // subtitle: Text('Read QR code or barcode'),
       onTap: () {
         print('You click $webPage');
         Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => WebView(
-                      userModel: myUserModel,
-                      webPage: webPage,
-                    )));
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                WebViewExample(userModel: myUserModel!, webPage: webPage),
+          ),
+        );
+        // Navigator.push(
+        //     context,
+        //     MaterialPageRoute(
+        //         builder: (context) => WebView(
+        //               userModel: myUserModel!,
+        //               webPage: webPage,
+        //             )));
       },
     );
   }
 
   Widget menuReadQRcode() {
     return ListTile(
-      leading: Icon(
-        Icons.photo_camera,
-        size: 36.0,
-      ),
+      leading: Icon(Icons.photo_camera, size: 36.0),
       title: Text('Scan barcode'),
       // subtitle: Text('Read QR code or barcode'),
       onTap: () {
         // readQRcode();
         // readQRcodePreview();
-        scanBarcodeNormal();
+        // scanBarcodeNormal();
       },
     );
-  }
-
-  // Future<void> readQRcode() async {
-  //   try {
-  //     var qrString = await BarcodeScanner.scan();
-  //     print('QR code = $qrString');
-  //     if (qrString != null) {
-  //       decodeQRcode(qrString);
-  //     }
-  //   } catch (e) {
-  //     print('e = $e');
-  //   }
-  // }
-
-  Future<void> readQRcodePreview() async {
-    try {
-      final qrScanString = await Navigator.push(this.context,
-          MaterialPageRoute(builder: (context) => ScanPreviewPage()));
-
-      print('Before scan');
-      // final qrScanString = await BarcodeScanner.scan();
-      print('After scan');
-      print('scanl result: $qrScanString');
-      qrString = qrScanString;
-      if (qrString != null) {
-        decodeQRcode(qrString);
-      }
-      // setState(() => scanResult = qrScanString);
-    } on PlatformException catch (e) {
-      print('e = $e');
-    }
-  }
-
-  Future<void> decodeQRcode(var code) async {
-    try {
-      String url =
-          'https://ptnpharma.com/apishop/json_productlist.php?bqcode=$code';
-      http.Response response = await http.get(Uri.parse(url));
-      var result = json.decode(response.body);
-      print('result ===*******>>>> $result');
-
-      int status = result['status'];
-      print('status ===>>> $status');
-      if (status == 0) {
-        normalDialog(context, 'Not found', 'ไม่พบ code :: $code ในระบบ');
-      } else {
-        var itemProducts = result['itemsProduct'];
-        for (var map in itemProducts) {
-          print('map ===*******>>>> $map');
-
-          ProductAllModel productAllModel = ProductAllModel.fromJson(map);
-          MaterialPageRoute route = MaterialPageRoute(
-            builder: (BuildContext context) => Detail(
-              userModel: myUserModel,
-              productAllModel: productAllModel,
-            ),
-          );
-          // Navigator.of(context).push(route).then((value) {
-          //   setState(() {
-          //     // readCart();
-          //   });
-          // });
-          Navigator.of(context).push(route).then((value) => readCart());
-        }
-      }
-    } catch (e) {}
   }
 
   Widget showAppName() {
     return Text(
       'PTN CENTER',
-      style: TextStyle(
-        fontSize: 24.0,
-        color: MyStyle().textColor,
-      ),
+      style: TextStyle(fontSize: 24.0, color: MyStyle().textColor),
     );
   }
 
   Widget showLogin() {
-    String login = myUserModel.name;
-    if (login == null) {
+    String login = myUserModel!.name!;
+    if (login == '') {
       login = '...';
     }
     return Text(
-      'ร้าน $login',
-      style: TextStyle(
-        fontSize: 20.0,
-        color: MyStyle().mainColor,
-      ),
+      '$login',
+      style: TextStyle(fontSize: 20.0, color: MyStyle().mainColor),
     );
   }
 
@@ -641,7 +486,7 @@ class _MyServiceState extends State<MyService> {
       child: Column(
         children: <Widget>[
           showLogo(),
-          showAppName(),
+          // showAppName(),
           showLogin(),
         ],
       ),
@@ -657,7 +502,7 @@ class _MyServiceState extends State<MyService> {
           headDrawer(),
           menuHome(),
           menuCategory(),
-          menuORN(),
+          // menuORN(),
           menuPay(),
           menuReward(),
           // menuReadQRcode(),
@@ -695,39 +540,12 @@ class _MyServiceState extends State<MyService> {
     );
   }
 
-  void showToast(String msg, {int duration, int gravity}) {
-    Toast.show(msg, context, duration: duration, gravity: gravity);
-  }
-
-  Widget showMsg() {
-    var iconMsg = 'images/bubble-white.png';
-    if (myUserModel.msg == '') {
-      iconMsg = 'images/bubble-white.png';
-    } else {
-      iconMsg = 'images/bubble-red.png';
-    }
-    return GestureDetector(
-      onTap: () => showToast(myUserModel.msg, gravity: Toast.TOP, duration: 5),
-      child: Container(
-        margin: EdgeInsets.only(top: 5.0, right: 5.0),
-        width: 28.0,
-        height: 28.0,
-        child: Stack(
-          children: <Widget>[
-            Image.asset(iconMsg),
-          ],
-        ),
-      ),
-    );
-  }
-
   void routeToDetailCart() {
-    MaterialPageRoute materialPageRoute =
-        MaterialPageRoute(builder: (BuildContext buildContext) {
-      return DetailCart(
-        userModel: myUserModel,
-      );
-    });
+    MaterialPageRoute materialPageRoute = MaterialPageRoute(
+      builder: (BuildContext buildContext) {
+        return DetailCart(userModel: myUserModel);
+      },
+    );
     Navigator.of(context).push(materialPageRoute).then((value) {
       setState(() {
         print('Here is routeToDetailCart');
@@ -737,266 +555,167 @@ class _MyServiceState extends State<MyService> {
     });
   }
 
-  BottomNavigationBarItem homeBotton() {
-    return BottomNavigationBarItem(
-      icon: Icon(Icons.home),
-      label: 'Home',
+  Widget stylishBottomBar() {
+    print(
+      myUserModel!.lastNotifyId!.toString() +
+          ' >> ' +
+          myUserModel!.lastNotifyOpen!.toString(),
     );
-  }
+    int? unread = myUserModel!.lastNotifyId!.toInt() -
+        myUserModel!.lastNotifyOpen!.toInt();
 
-  BottomNavigationBarItem favoriteBotton() {
-    return BottomNavigationBarItem(
-      icon: Icon(Icons.favorite),
-      label: 'Favorite',
-    );
-  }
-
-  BottomNavigationBarItem cartBotton() {
-    return BottomNavigationBarItem(
-      icon: Icon(Icons.shopping_cart),
-      label: 'Cart',
-    );
-  }
-
-  BottomNavigationBarItem readQrBotton() {
-    return BottomNavigationBarItem(
-      icon: Icon(Icons.code),
-      label: 'QR code',
-    );
-  }
-
-  Widget showBottomBarNav() {
-    return BottomNavigationBar(
-      items: <BottomNavigationBarItem>[
-        homeBotton(),
-        favoriteBotton(),
-        cartBotton(),
-        readQrBotton(),
+    return StylishBottomBar(
+      option: AnimatedBarOptions(iconStyle: IconStyle.animated, opacity: 0.3),
+      items: [
+        BottomBarItem(
+          icon: const Icon(Icons.home),
+          title: const Text('Home'),
+          backgroundColor: Colors.blue,
+          // selectedIcon: const Icon(Icons.home),
+        ),
+        BottomBarItem(
+          icon: const Icon(Icons.medical_services),
+          title: const Text('Medicine'),
+          backgroundColor: Colors.green,
+        ),
+        BottomBarItem(
+          icon: const Icon(Icons.favorite),
+          title: const Text('Favorite'),
+          backgroundColor: Colors.red,
+        ),
+        BottomBarItem(
+          icon: Stack(
+            children: <Widget>[
+              Icon(Icons.notifications, color: Colors.orange),
+              (unread != 0)
+                  ? Text(
+                      ' $unread ',
+                      style: TextStyle(
+                        fontSize: 13,
+                        backgroundColor: Colors.red.shade600,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        wordSpacing: 100.0,
+                      ),
+                    )
+                  : Text(''),
+            ],
+          ),
+          title: const Text('Notify'),
+          backgroundColor: Colors.black,
+        ),
       ],
-      onTap: (int index) {
-        print('index =$index');
-        if (index == 1) {
-          routeToListProductfav(0);
-        } else if (index == 2) {
-          routeToListProduct(0);
-        } else if (index == 3) {
-          routeToNotify();
-        }
+      // fabLocation: StylishBarFabLocation.end,
+      hasNotch: true,
+      currentIndex: selectIndex,
+      onTap: (index) {
+        setState(() {
+          selectIndex = index;
+          // controller.jumpToPage(index);
+          if (index == 0) {
+            MaterialPageRoute route = MaterialPageRoute(
+              builder: (value) => MyService(userModel: myUserModel),
+            );
+            Navigator.of(context).pushAndRemoveUntil(route, (route) => false);
+          } else if (index == 1) {
+            routeToListProduct(0);
+          } else if (index == 2) {
+            routeToListProductfav(0);
+          } else if (index == 3) {
+            routeToNotify();
+          }
+        });
       },
     );
-  }
-
-  Widget showBubbleBottomBarNav() {
-    int unread = myUserModel.lastNewsId - myUserModel.lastNewsOpen;
-
-    return BubbleBottomBar(
-      hasNotch: true,
-      // fabLocation: BubbleBottomBarFabLocation.end,
-      opacity: .2,
-      borderRadius: BorderRadius.vertical(
-          top: Radius.circular(
-              16)), //border radius doesn't work when the notch is enabled.
-      elevation: 8,
-      currentIndex: currentIndex,
-      onTap: changePage,
-      items: <BubbleBottomBarItem>[
-        BubbleBottomBarItem(
-            backgroundColor: Colors.blue,
-            icon: Icon(
-              Icons.home,
-              color: Colors.black,
-            ),
-            activeIcon: Icon(
-              Icons.home,
-              color: Colors.blue,
-            ),
-            title: Text("หน้าหลัก")),
-        BubbleBottomBarItem(
-            backgroundColor: Colors.red,
-            icon: Icon(
-              Icons.favorite,
-              color: Colors.black,
-            ),
-            activeIcon: Icon(
-              Icons.favorite,
-              color: Colors.red,
-            ),
-            title: Text("รายการโปรด")),
-        BubbleBottomBarItem(
-            backgroundColor: Colors.green,
-            icon: Icon(
-              Icons.medical_services,
-              color: Colors.black,
-            ),
-            activeIcon: Icon(
-              Icons.medical_services,
-              color: Colors.green,
-            ),
-            title: Text("สินค้า")),
-        BubbleBottomBarItem(
-            backgroundColor: Colors.brown,
-            icon: Stack(
-              children: <Widget>[
-                Icon(
-                  Icons.newspaper,
-                  color: Colors.black,
-                ),
-                (unread != 0)
-                    ? Text(
-                        ' $unread ',
-                        style: TextStyle(
-                          fontSize: 13,
-                          backgroundColor: Colors.red.shade600,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          wordSpacing: 100.0,
-                        ),
-                      )
-                    : Text(''),
-                // CircleAvatar(
-                //   radius: 8,
-                //   backgroundColor: Colors.red,
-                //   child: Text(
-                //     ' 5 ',
-                //     style: TextStyle(
-                //       color: Colors.white,
-                //       fontWeight: FontWeight.bold,
-                //     ),
-                //   ),
-                // ),
-              ],
-            ),
-            activeIcon: Icon(
-              Icons.newspaper,
-              color: Colors.brown,
-            ),
-            title: Text("การแจ้งเตือน")),
-        /*
-        BubbleBottomBarItem(
-            backgroundColor: Colors.green,
-            icon: Icon(
-              Icons.bookmark,
-              color: Colors.black,
-            ),
-            activeIcon: Icon(
-              Icons.bookmark,
-              color: Colors.green,
-            ),
-            title: Text("โปรโมชัน")),
-        BubbleBottomBarItem(
-            backgroundColor: Colors.green,
-            icon: Icon(
-              Icons.arrow_upward,
-              color: Colors.black,
-            ),
-            activeIcon: Icon(
-              Icons.arrow_upward,
-              color: Colors.green,
-            ),
-            title: Text("ปรับราคา")),
-        BubbleBottomBarItem(
-            backgroundColor: Colors.green,
-            icon: Icon(
-              Icons.fiber_new,
-              color: Colors.black,
-            ),
-            activeIcon: Icon(
-              Icons.fiber_new,
-              color: Colors.green,
-            ),
-            title: Text("สินค้าใหม่")),
-            */
-      ],
-    );
-    // readCategory();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        iconTheme: IconThemeData(color: Colors.white),
         actions: <Widget>[
           // showMsg(),
           showCart(),
         ],
         backgroundColor: MyStyle().bgColor,
-        title: Text('หน้าหลัก'),
+        title: Text('หน้าหลัก', style: TextStyle(color: Colors.white)),
         // centerTitle: true,
       ),
-
       body: currentWidget,
       drawer: showDrawer(),
-      bottomNavigationBar: showBubbleBottomBarNav(), //showBottomBarNav
+      // bottomNavigationBar: showBubbleBottomBarNav(), //showBottomBarNav
+      bottomNavigationBar: stylishBottomBar(), //showBottomBarNav
     );
   }
 }
 
-class WebView extends StatefulWidget {
-  final UserModel userModel;
-  final String webPage;
+// class WebView extends StatefulWidget {
+//   final UserModel? userModel;
+//   final String? webPage;
 
-  WebView({Key key, this.userModel, this.webPage}) : super(key: key);
+//   WebView({Key? key, this.userModel, this.webPage}) : super(key: key);
 
-  @override
-  _WebViewState createState() => _WebViewState();
-}
+//   @override
+//   _WebViewState createState() => _WebViewState();
+// }
 
-class _WebViewState extends State<WebView> {
-  UserModel myUserModel;
-  String mywebPage;
+// class _WebViewState extends State<WebView> {
+//   UserModel? myUserModel;
+//   String? mywebPage;
 
-  @override
-  void initState() {
-    super.initState();
-    myUserModel = widget.userModel;
-    mywebPage = widget.webPage;
-  }
+//   @override
+//   void initState() {
+//     super.initState();
+//     myUserModel = widget.userModel;
+//     mywebPage = widget.webPage;
+//   }
 
-  @override
-  Widget build(BuildContext context) {
-    String memberId = myUserModel.id;
-    String memberCode = myUserModel.customerCode;
-    String webPage = mywebPage.toString();
+//   @override
+//   Widget build(BuildContext context) {
+//     String? memberId = myUserModel!.id;
+//     String? memberCode = myUserModel!.customerCode;
+//     String webPage = mywebPage.toString();
 
-    String url =
-        'https://ptnpharma.com/shop/pages/tables/orderhistory_mobile.php?memberId=$memberId&memberCode=$memberCode'; //
-    String txtTitle = 'หน้า.....';
+//     String url =
+//         'https://www.ptnpharma.com/shop/pages/tables/orderhistory_mb.php?memberId=$memberId&memberCode=$memberCode'; //
+//     String txtTitle = 'หน้า.....';
 
-    if (webPage == 'pay') {
-      url =
-          'https://ptnpharma.com/shop/pages/forms/pay_mobile.php?memberId=$memberId&memberCode=$memberCode'; //
-      txtTitle = 'แจ้งชำระเงิน';
-    } else if (webPage == 'orn') {
-      url =
-          'https://ptnpharma.com/shop/pages/tables/orn_list_mobile.php?memberId=$memberId&memberCode=$memberCode'; //
-      txtTitle = 'ตรวจสอบใบส่งของ';
-    } else if (webPage == 'reward') {
-      url =
-          'https://ptnpharma.com/shop/pages/tables/reward_list_mobile.php?memberId=$memberId&memberCode=$memberCode'; //
-      txtTitle = 'รายการของสมนาคุณ ';
-    } else {
-      url =
-          'https://ptnpharma.com/shop/pages/forms/complain_mobile.php?memberId=$memberId&memberCode=$memberCode'; //
-      txtTitle = 'แจ้งร้องเรียน';
-    }
+//     if (webPage == 'pay') {
+//       url =
+//           'https://www.ptnpharma.com/shop/pages/forms/pay_mobile.php?memberId=$memberId&memberCode=$memberCode'; //
+//       txtTitle = 'แจ้งชำระเงิน';
+//     } else if (webPage == 'orn') {
+//       url =
+//           'https://www.ptnpharma.com/shop/pages/tables/orn_list_mobile.php?memberId=$memberId&memberCode=$memberCode'; //
+//       txtTitle = 'ตรวจสอบใบส่งของ';
+//     } else if (webPage == 'reward') {
+//       url =
+//           'https://www.ptnpharma.com/shop/pages/tables/reward_list_mb.php?memberId=$memberId&memberCode=$memberCode'; //
+//       txtTitle = 'รายการของสมนาคุณ ';
+//     } else {
+//       url =
+//           'https://www.ptnpharma.com/shop/pages/forms/complain_mobile.php?memberId=$memberId&memberCode=$memberCode'; //
+//       txtTitle = 'แจ้งร้องเรียน';
+//     }
 
-    print('Click open ==>> $webPage');
+//     print('Click open ==>> $webPage');
 
-    print('URL ==>> $url');
-    return WebviewScaffold(
-      url: url, //"https://www.androidmonks.com",
-      appBar: AppBar(
-        backgroundColor: MyStyle().bgColor,
-        title: Text(txtTitle),
-      ),
-      withZoom: true,
-      withJavascript: true,
-      withLocalStorage: true,
-      appCacheEnabled: false,
-      ignoreSSLErrors: true,
-    );
-  }
-}
+//     print('URL ==>> $url');
+//     return WebviewScaffold(
+//       url: url, //"https://www.androidmonks.com",
+//       appBar: AppBar(
+//         backgroundColor: MyStyle().bgColor,
+//         title: Text(txtTitle),
+//       ),
+//       withZoom: true,
+//       withJavascript: true,
+//       withLocalStorage: true,
+//       appCacheEnabled: false,
+//       ignoreSSLErrors: true,
+//     );
+//   }
+// }
 
 class ScanPreviewPage extends StatefulWidget {
   @override
@@ -1020,14 +739,98 @@ class _ScanPreviewPageState extends State<ScanPreviewPage> {
         body: SizedBox(
           width: double.infinity,
           height: double.infinity,
-          child: ScanPreviewWidget(
-            onScanResult: (result) {
-              debugPrint('scan result: $result');
-              Navigator.pop(context, result);
-            },
-          ),
+          // child: ScanPreviewWidget(
+          //   onScanResult: (result) {
+          //     debugPrint('scan result: $result');
+          //     Navigator.pop(context, result);
+          //   },
+          // ),
         ),
       ),
     );
   }
+}
+
+class WebViewExample extends StatefulWidget {
+  final UserModel? userModel;
+  final String? webPage;
+  const WebViewExample({super.key, this.userModel, this.webPage});
+  @override
+  State<WebViewExample> createState() => _WebViewExampleState();
+}
+
+class _WebViewExampleState extends State<WebViewExample> {
+  UserModel? myUserModel;
+  String? mywebPage;
+  late final WebViewController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    myUserModel = widget.userModel;
+    mywebPage = widget.webPage;
+    String? memberId = myUserModel!.id;
+    String? memberCode = myUserModel!.customerCode;
+    String webPage = mywebPage.toString();
+
+    String? urlView =
+        'https://www.ptnpharma.com/shop/pages/tables/orderhistory_mb.php?memberId=$memberId&memberCode=$memberCode'; //
+    String? txtTitle = 'หน้า.....';
+
+    if (webPage == 'pay') {
+      urlView =
+          'https://www.ptnpharma.com/shop/pages/forms/pay_mobile.php?memberId=$memberId&memberCode=$memberCode'; //
+      txtTitle = 'การชำระเงิน';
+    } else if (webPage == 'orn') {
+      urlView =
+          'https://www.ptnpharma.com/shop/pages/tables/orn_list_mobile.php?memberId=$memberId&memberCode=$memberCode'; //
+      txtTitle = 'ตรวจสอบใบส่งของ';
+    } else if (webPage == 'reward') {
+      urlView =
+          'https://www.ptnpharma.com/shop/pages/tables/reward_list_mb.php?memberId=$memberId&memberCode=$memberCode'; //
+      txtTitle = 'รายการของสมนาคุณ ';
+    } else {
+      urlView =
+          'https://www.ptnpharma.com/shop/pages/forms/complain_mobile.php?memberId=$memberId&memberCode=$memberCode'; //
+      txtTitle = 'แจ้งร้องเรียน';
+    }
+
+    // #docregion webview_controller
+    controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onProgress: (int progress) {
+            // Update loading bar.
+          },
+          onPageStarted: (String url) {},
+          onPageFinished: (String url) {},
+          onHttpError: (HttpResponseError error) {},
+          onWebResourceError: (WebResourceError error) {},
+          onNavigationRequest: (NavigationRequest request) {
+            if (request.url.startsWith('https://www.youtube.com/')) {
+              return NavigationDecision.prevent;
+            }
+            return NavigationDecision.navigate;
+          },
+        ),
+      )
+      ..loadRequest(Uri.parse(urlView));
+    // #enddocregion webview_controller
+  }
+
+  // #docregion webview_widget
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+          backgroundColor: Colors.green,
+          iconTheme: IconThemeData(color: Colors.white),
+          title:
+              const Text('PTN Pharma', style: TextStyle(color: Colors.white))),
+      body: WebViewWidget(controller: controller),
+    );
+  }
+
+  // #enddocregion webview_widget
 }

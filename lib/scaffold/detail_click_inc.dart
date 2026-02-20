@@ -13,10 +13,10 @@ import 'package:ptncenter/utility/normal_dialog.dart';
 import 'package:ptncenter/scaffold/list_product.dart';
 
 class Detail extends StatefulWidget {
-  final ProductAllModel productAllModel;
-  final UserModel userModel;
+  final ProductAllModel? productAllModel;
+  final UserModel? userModel;
 
-  Detail({Key key, this.productAllModel, this.userModel}) : super(key: key);
+  Detail({Key? key, this.productAllModel, this.userModel}) : super(key: key);
 
   @override
   _DetailState createState() => _DetailState();
@@ -24,17 +24,17 @@ class Detail extends StatefulWidget {
 
 class _DetailState extends State<Detail> {
   // Explicit
-  ProductAllModel currentProductAllModel;
-  ProductAllModel2 productAllModel;
-  List<UnitSizeModel> unitSizeModels = List();
-  List<int> amounts = [
+  ProductAllModel? currentProductAllModel;
+  ProductAllModel2? productAllModel;
+  List<UnitSizeModel>? unitSizeModels;
+  List<int>? amounts = [
     0,
     0,
     0
   ]; // amount[0] -> s,amount[1] -> m,amount[2] -> l;
-  int amontCart = 0;
-  UserModel myUserModel;
-  String id; // productID
+  int? amontCart = 0;
+  UserModel? myUserModel;
+  String? id; // productID
 
   // Method
   @override
@@ -50,9 +50,9 @@ class _DetailState extends State<Detail> {
 
   Future<void> getProductWhereID() async {
     if (currentProductAllModel != null) {
-      String memberId = myUserModel.id.toString();
-      id = currentProductAllModel.id.toString();
-      String url = '${MyStyle().getProductWhereId}$id&memberId=$memberId';
+      String? memberId = myUserModel!.id.toString();
+      id = currentProductAllModel!.id.toString();
+      String? url = '${MyStyle().getProductWhereId}$id&memberId=$memberId';
       print('url Detaillll ====>>> $url');
       http.Response response = await http.get(Uri.parse(url));
       var result = json.decode(response.body);
@@ -72,17 +72,17 @@ class _DetailState extends State<Detail> {
           Map<String, dynamic> sizeSmap = priceListMap['s'];
           if (sizeSmap != null) {
             UnitSizeModel unitSizeModel = UnitSizeModel.fromJson(sizeSmap);
-            unitSizeModels.add(unitSizeModel);
+            unitSizeModels!.add(unitSizeModel);
           }
           Map<String, dynamic> sizeMmap = priceListMap['m'];
           if (sizeMmap != null) {
             UnitSizeModel unitSizeModel = UnitSizeModel.fromJson(sizeMmap);
-            unitSizeModels.add(unitSizeModel);
+            unitSizeModels!.add(unitSizeModel);
           }
           Map<String, dynamic> sizeLmap = priceListMap['l'];
           if (sizeLmap != null) {
             UnitSizeModel unitSizeModel = UnitSizeModel.fromJson(sizeLmap);
-            unitSizeModels.add(unitSizeModel);
+            unitSizeModels!.add(unitSizeModel);
           }
           print('sizeSmap = $sizeSmap');
           print('sizeMmap = $sizeMmap');
@@ -97,7 +97,7 @@ class _DetailState extends State<Detail> {
     return Container(
       height: MediaQuery.of(context).size.height * 0.5 - 50,
       child: Image.network(
-        productAllModel.photo,
+        productAllModel!.photo!,
         fit: BoxFit.contain,
       ),
     );
@@ -105,25 +105,25 @@ class _DetailState extends State<Detail> {
 
   Widget showTitle() {
     return Text(
-      productAllModel.title,
+      productAllModel!.title!,
       style: MyStyle().h2Style,
     );
   }
 
   Widget showDetail() {
-    return Text(productAllModel.detail);
+    return Text(productAllModel!.detail!);
   }
 
   Widget showPackage(int index) {
     return Text(
-      unitSizeModels[index].lable,
+      unitSizeModels![index].lable!,
       style: MyStyle().h3Style,
     );
   }
 
   Widget showPricePackage(int index) {
     return Text(
-      '${unitSizeModels[index].price.toString()} บาท/ ',
+      '${unitSizeModels![index].price.toString()} บาท/ ',
       style: MyStyle().h3Style,
     );
   }
@@ -149,7 +149,7 @@ class _DetailState extends State<Detail> {
   }
 
   Widget decButton(int index) {
-    int value = amounts[index];
+    int value = amounts![index];
     return IconButton(
       icon: Icon(Icons.remove_circle_outline),
       onPressed: () {
@@ -159,7 +159,7 @@ class _DetailState extends State<Detail> {
         } else {
           setState(() {
             value--;
-            amounts[index] = value;
+            amounts![index] = value;
           });
         }
       },
@@ -167,7 +167,7 @@ class _DetailState extends State<Detail> {
   }
 
   Widget incButton(int index) {
-    int value = amounts[index];
+    int value = amounts![index];
 
     return IconButton(
       icon: Icon(Icons.add_circle_outline),
@@ -175,7 +175,7 @@ class _DetailState extends State<Detail> {
         setState(() {
           // print('inc index $index');
           value++;
-          amounts[index] = value;
+          amounts![index] = value;
           print('inc value = $value');
         });
       },
@@ -187,7 +187,7 @@ class _DetailState extends State<Detail> {
   }
 
   Widget incDecValue(int index) {
-    int value = amounts[index];
+    int value = amounts![index];
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -204,7 +204,7 @@ class _DetailState extends State<Detail> {
       height: 150.0,
       // color: Colors.grey,
       child: ListView.builder(
-        itemCount: unitSizeModels.length,
+        itemCount: unitSizeModels!.length,
         itemBuilder: (BuildContext buildContext, int index) {
           return showChoosePricePackage(index); // showDetailPrice(index);
         },
@@ -214,9 +214,9 @@ class _DetailState extends State<Detail> {
 
   Future<void> readCart() async {
     amontCart = 0;
-    String memberId = myUserModel.id.toString();
+    String memberId = myUserModel!.id.toString();
     String url =
-        'https://ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId';
+        'https://www.ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId&screen=click';
 
     // print('url Detail =====>>>>>>>> $url');
     http.Response response = await http.get(Uri.parse(url));
@@ -224,7 +224,7 @@ class _DetailState extends State<Detail> {
     var cartList = result['cart'];
     for (var map in cartList) {
       setState(() {
-        amontCart++;
+        amontCart = amontCart! + 1;
       });
     }
   }
@@ -302,24 +302,24 @@ class _DetailState extends State<Detail> {
                       fontWeight: FontWeight.bold),
                 ),
                 onPressed: () {
-                  String productID = id;
-                  String memberID = myUserModel.id.toString();
+                  String? productID = id;
+                  String? memberID = myUserModel!.id.toString();
 
                   int index = 0;
-                  List<bool> status = List();
+                  List<bool>? status;
 
-                  for (var object in unitSizeModels) {
-                    if (amounts[index] == 0) {
-                      status.add(true);
+                  for (var object in unitSizeModels!) {
+                    if (amounts![index] == 0) {
+                      status!.add(true);
                     } else {
-                      status.add(false);
+                      status!.add(false);
                     }
 
                     index++;
                   }
 
-                  bool sumStatus = true;
-                  if (status.length == 1) {
+                  bool? sumStatus = true;
+                  if (status!.length == 1) {
                     sumStatus = status[0];
                   } else {
                     sumStatus = status[0] && status[1] && status[2];
@@ -330,14 +330,14 @@ class _DetailState extends State<Detail> {
                         context, 'Do not choose item', 'Please choose item');
                   } else {
                     int index = 0;
-                    for (var object in unitSizeModels) {
-                      String unitSize = unitSizeModels[index].unit;
-                      int qTY = amounts[index];
+                    for (var object in unitSizeModels!) {
+                      String? unitSize = unitSizeModels![index].unit!;
+                      int? qTY = amounts![index];
 
                       print(
                           'productID = $productID, memberID=$memberID, unitSize=$unitSize, QTY=$qTY');
                       if (qTY != 0) {
-                        addCart(productID, unitSize, qTY, memberID);
+                        addCart(productID!, unitSize, qTY, memberID);
                       }
                       index++;
                     }

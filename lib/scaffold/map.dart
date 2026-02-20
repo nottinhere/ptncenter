@@ -23,12 +23,13 @@ class HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        iconTheme: IconThemeData(color: Colors.white),
         // leading: IconButton(
         //     icon: Icon(FontAwesomeIcons.arrowLeft),
         //     onPressed: () {
         //       //
         //     }),
-        title: Text("PTN CENTER"),
+        title: Text("PTN CENTER", style: TextStyle(color: Colors.white)),
         backgroundColor: MyStyle().bgColor,
 
         actions: <Widget>[

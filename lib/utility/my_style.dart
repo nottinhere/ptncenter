@@ -58,9 +58,20 @@ class MyStyle {
     color: Color.fromARGB(0xff, 0xff, 0x99, 0x99),
   );
 
+  TextStyle h3bStyleOrange = TextStyle(
+    fontSize: 16.0,
+    fontWeight: FontWeight.bold,
+    color: Colors.orange,
+  );
+
   TextStyle h3StyleRed = TextStyle(
     fontSize: 16.0,
     color: Colors.red,
+  );
+
+  TextStyle h3StyleOrange = TextStyle(
+    fontSize: 16.0,
+    color: Colors.orange.shade700,
   );
 
   TextStyle h3StyleBlue = TextStyle(
@@ -129,16 +140,16 @@ class MyStyle {
   String fontName = 'Sarabun';
 
   String readAllProduct =
-      'http://www.ptnpharma.com/apishop/json_productlist.php?top=100';
+      'https://www.ptnpharma.com/apishop/json_productlist.php?top=100';
   String readProductWhereMode =
-      'http://www.ptnpharma.com/apishop/json_productlist.php?searchKey=';
+      'https://www.ptnpharma.com/apishop/json_productlist.php?searchKey=';
   String getUserWhereUserAndPass =
-      'http://www.ptnpharma.com/apishop/json_login.php';
+      'https://www.ptnpharma.com/apishop/json_login.php';
   String getProductWhereId =
-      'http://www.ptnpharma.com/apishop/json_productdetail.php?id=';
+      'https://www.ptnpharma.com/apishop/json_productdetail.php?id=';
 
   String loadMyCart =
-      'http://www.ptnpharma.com/apishop/json_loadmycart.php?memberId=';
+      'https://www.ptnpharma.com/apishop/json_loadmycart.php?memberId='; //  json_loadmycart_gift.php
 
   MyStyle();
 }

@@ -1,34 +1,36 @@
 class ProductAllModel2 {
-  String title;
-  String hilight;
-  String productCode;
-  String photo;
-  PriceList priceList;
-  String expire;
-  String expireColor;
-  String detail;
-  String usefor;
-  String method;
-  int itemincartSunit;
-  int itemincartMunit;
-  int itemincartLunit;
-  int recommend;
-  int promotion;
-  int updateprice;
-  int newproduct;
-  int notreceive;
-  bool favorite;
-  int stock;
-  String cateID;
-  String cateName;
-  String youtube;
-  String pricelabel;
-  String pricesale;
-  int id;
+  String? title;
+  String? hilight;
+  String? extrapoint;
+  String? productCode;
+  String? photo;
+  PriceList? priceList;
+  String? expire;
+  String? expireColor;
+  String? detail;
+  String? usefor;
+  String? method;
+  int? itemincartSunit;
+  int? itemincartMunit;
+  int? itemincartLunit;
+  int? recommend;
+  int? promotion;
+  int? updateprice;
+  int? newproduct;
+  int? notreceive;
+  bool? favorite;
+  int? stock;
+  String? cateID;
+  String? cateName;
+  String? youtube;
+  String? pricelabel;
+  String? pricesale;
+  int? id;
 
   ProductAllModel2(
       {this.title,
       this.hilight,
+      this.extrapoint,
       this.productCode,
       this.photo,
       this.priceList,
@@ -57,6 +59,7 @@ class ProductAllModel2 {
   ProductAllModel2.fromJson(Map<String, dynamic> json) {
     title = json['title'];
     hilight = json['hilight'];
+    extrapoint = json['extrapoint'];
     productCode = json['product_code'];
     photo = json['photo'];
     priceList = json['price_list'] != null
@@ -89,10 +92,11 @@ class ProductAllModel2 {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['title'] = this.title;
     data['hilight'] = this.hilight;
+    data['extrapoint'] = this.extrapoint;
     data['product_code'] = this.productCode;
     data['photo'] = this.photo;
     if (this.priceList != null) {
-      data['price_list'] = this.priceList.toJson();
+      data['price_list'] = this.priceList!.toJson();
     }
     data['expire'] = this.expire;
     data['expire_color'] = this.expireColor;
@@ -120,7 +124,7 @@ class ProductAllModel2 {
 }
 
 class PriceList {
-  S s;
+  S? s;
 
   PriceList({this.s});
 
@@ -131,16 +135,16 @@ class PriceList {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     if (this.s != null) {
-      data['s'] = this.s.toJson();
+      data['s'] = this.s!.toJson();
     }
     return data;
   }
 }
 
 class S {
-  String lable;
-  String price;
-  String unit;
+  String? lable;
+  String? price;
+  String? unit;
 
   S({this.lable, this.price, this.unit});
 

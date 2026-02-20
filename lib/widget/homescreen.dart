@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:async';
 import 'dart:ui' as ui;
 import 'package:carousel_slider/carousel_slider.dart';
-// import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:ptncenter/models/product_all_model.dart';
@@ -15,20 +14,16 @@ import 'package:ptncenter/scaffold/detail_cart.dart';
 import 'package:ptncenter/scaffold/list_product.dart';
 import 'package:ptncenter/utility/my_style.dart';
 import 'package:ptncenter/utility/normal_dialog.dart';
-import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 
 import 'package:flutter/services.dart';
 
 import 'package:permission_handler/permission_handler.dart';
-import 'package:scan_preview/scan_preview_widget.dart';
 import 'package:flutter/foundation.dart';
 
-// import 'package:flutter_ui_challenges/core/presentation/res/assets.dart';
-
 class HomeScreen extends StatefulWidget {
-  final UserModel userModel;
+  final UserModel? userModel;
 
-  HomeScreen({Key key, this.userModel}) : super(key: key);
+  HomeScreen({Key? key, this.userModel}) : super(key: key);
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -36,20 +31,22 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   // Explicit
-  // List<PromoteModel> promoteModels = List();
-  List<Widget> promoteLists = List();
-  List<Widget> suggestLists = List();
-  List<String> urlImages = List();
-  List<String> urlImagesSuggest = List();
-  List<String> productsName = List();
+  // List<PromoteModel> promoteModels;
+  List<Widget>? promoteLists;
+  List<Widget>? suggestLists;
+  List<String>? urlImages;
+  List<String>? urlImagesSuggest;
+  List<String>? productsName;
 
-  int amontCart = 0, banerIndex = 0, suggestIndex = 0;
-  UserModel myUserModel;
-  List<ProductAllModel> promoteModels = List();
-  List<ProductAllModel> suggestModels = List();
-  String qrString;
-  int currentIndex = 0;
-  String _result = '';
+  int? amontCart = 0;
+  int banerIndex = 0;
+  int suggestIndex = 0;
+  UserModel? myUserModel;
+  List<ProductAllModel>? promoteModels;
+  List<ProductAllModel>? suggestModels;
+  String? qrString;
+  int? currentIndex = 0;
+  String? _result = '';
 
   // Method
   @override
@@ -62,31 +59,31 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> readPromotion() async {
-    String url = 'http://www.ptnpharma.com/apishop/json_promotion.php';
+    String? url = 'http://www.ptnpharma.com/apishop/json_promotion.php';
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var mapItemProduct =
         result['itemsProduct']; // dynamic    จะส่ง value อะไรก็ได้ รวมถึง null
     for (var map in mapItemProduct) {
-      PromoteModel promoteModel = PromoteModel.fromJson(map);
-      ProductAllModel productAllModel = ProductAllModel.fromJson(map);
-      String urlImage = promoteModel.photo;
+      PromoteModel? promoteModel = PromoteModel.fromJson(map);
+      ProductAllModel? productAllModel = ProductAllModel.fromJson(map);
+      String? urlImage = promoteModel.photo;
       setState(() {
         //promoteModels.add(promoteModel); // push ค่าลง array
-        promoteModels.add(productAllModel);
-        promoteLists.add(showImageNetWork(urlImage));
-        urlImages.add(urlImage);
+        promoteModels!.add(productAllModel);
+        promoteLists!.add(showImageNetWork(urlImage!));
+        urlImages!.add(urlImage);
       });
     }
   }
 
-  Image showImageNetWork(String urlImage) {
-    return Image.network(urlImage);
+  Image showImageNetWork(String? urlImage) {
+    return Image.network(urlImage!);
   }
 
   Future<void> readSuggest() async {
-    String memId = myUserModel.id;
-    String url =
+    String? memId = myUserModel!.id;
+    String? url =
         'http://www.ptnpharma.com/apishop/json_suggest.php?memberId=$memId'; // ?memberId=$memberId
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
@@ -95,14 +92,14 @@ class _HomeScreenState extends State<HomeScreen> {
     for (var map in mapItemProduct) {
       PromoteModel promoteModel = PromoteModel.fromJson(map);
       ProductAllModel productAllModel = ProductAllModel.fromJson(map);
-      String urlImage = promoteModel.photo;
-      String productName = promoteModel.title;
+      String? urlImage = promoteModel.photo;
+      String? productName = promoteModel.title;
       setState(() {
         //promoteModels.add(promoteModel); // push ค่าลง array
-        suggestModels.add(productAllModel);
-        suggestLists.add(Image.network(urlImage));
-        urlImagesSuggest.add(urlImage);
-        productsName.add(productName);
+        suggestModels!.add(productAllModel);
+        suggestLists!.add(Image.network(urlImage!));
+        urlImagesSuggest!.add(urlImage);
+        productsName!.add(productName!);
       });
     }
   }
@@ -120,7 +117,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
         MaterialPageRoute route = MaterialPageRoute(
           builder: (BuildContext context) => Detail(
-            productAllModel: promoteModels[banerIndex],
+            productAllModel: promoteModels![banerIndex],
             userModel: myUserModel,
           ),
         );
@@ -154,7 +151,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
         MaterialPageRoute route = MaterialPageRoute(
           builder: (BuildContext context) => Detail(
-            productAllModel: suggestModels[suggestIndex],
+            productAllModel: suggestModels![suggestIndex],
             userModel: myUserModel,
           ),
         );
@@ -174,7 +171,7 @@ class _HomeScreenState extends State<HomeScreen> {
           },
         ),
         // items: suggestLists,
-        items: suggestLists
+        items: suggestLists!
             .map((item) => Container(
                   child: Center(
                     child: Column(
@@ -186,7 +183,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           padding: EdgeInsets.all(8.0),
                         ),
                         Text(
-                          productsName[indexSlide++].toString(),
+                          productsName![indexSlide++].toString(),
                           style: TextStyle(
                               fontSize: 12,
                               // fontWeight: FontWeight.bold,
@@ -208,7 +205,7 @@ class _HomeScreenState extends State<HomeScreen> {
         width: MediaQuery.of(context).size.width * 0.9,
         padding: EdgeInsets.only(top: 5.0, bottom: 5.0),
         height: MediaQuery.of(context).size.width * 0.70, // size.height * 0.20,
-        child: promoteLists.length == 0
+        child: promoteLists!.length == 0
             ? myCircularProgress()
             : showCarouseSlider(),
       ),
@@ -217,10 +214,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget suggest() {
     return Card(
-      child: Container(
+      child: SizedBox(
         width: MediaQuery.of(context).size.width * 0.9,
         height: MediaQuery.of(context).size.height * 0.25,
-        child: suggestLists.length == 0
+        child: suggestLists!.length == 0
             ? myCircularProgress()
             : showCarouseSliderSuggest(),
       ),
@@ -239,8 +236,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget orderhistoryBox() {
-    String login = myUserModel.name;
-    return Container(
+    String? login = myUserModel!.name;
+    return SizedBox(
       width: MediaQuery.of(context).size.width * 0.8,
       // height: 80.0,
       child: GestureDetector(
@@ -276,7 +273,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget productBox() {
-    return Container(
+    return SizedBox(
       width: MediaQuery.of(context).size.width * 0.45,
       // height: 80.0,
       child: GestureDetector(
@@ -287,7 +284,7 @@ class _HomeScreenState extends State<HomeScreen> {
             alignment: AlignmentDirectional(0.0, 0.0),
             child: Column(
               children: <Widget>[
-                Container(
+                SizedBox(
                   width: 45.0,
                   child: Image.asset('images/icon_drugs.png'),
                 ),
@@ -311,7 +308,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget promotionBox() {
-    return Container(
+    return SizedBox(
       width: MediaQuery.of(context).size.width * 0.45,
       // height: 80.0,
       child: GestureDetector(
@@ -322,7 +319,7 @@ class _HomeScreenState extends State<HomeScreen> {
             alignment: AlignmentDirectional(0.0, 0.0),
             child: Column(
               children: <Widget>[
-                Container(
+                SizedBox(
                   width: 45.0,
                   child: Image.asset('images/icon_promotion.png'),
                 ),
@@ -346,7 +343,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget updatepriceBox() {
-    return Container(
+    return SizedBox(
       width: MediaQuery.of(context).size.width * 0.45,
       // height: 80.0,
       child: GestureDetector(
@@ -357,7 +354,7 @@ class _HomeScreenState extends State<HomeScreen> {
             alignment: AlignmentDirectional(0.0, 0.0),
             child: Column(
               children: <Widget>[
-                Container(
+                SizedBox(
                   width: 45.0,
                   child: Image.asset('images/icon_updateprice.png'),
                 ),
@@ -381,7 +378,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget newproductBox() {
-    return Container(
+    return SizedBox(
       width: MediaQuery.of(context).size.width * 0.45,
       // height: 80.0,
       child: GestureDetector(
@@ -392,7 +389,7 @@ class _HomeScreenState extends State<HomeScreen> {
             alignment: AlignmentDirectional(0.0, 0.0),
             child: Column(
               children: <Widget>[
-                Container(
+                SizedBox(
                   width: 45.0,
                   child: Image.asset('images/icon_new.png'),
                 ),
@@ -416,7 +413,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget cartBox() {
-    return Container(
+    return SizedBox(
       width: MediaQuery.of(context).size.width * 0.45,
       // height: 80.0,
       child: GestureDetector(
@@ -427,7 +424,7 @@ class _HomeScreenState extends State<HomeScreen> {
             alignment: AlignmentDirectional(0.0, 0.0),
             child: Column(
               children: <Widget>[
-                Container(
+                SizedBox(
                   width: 45.0,
                   child: Image.asset('images/icon_cart.png'),
                 ),
@@ -457,7 +454,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget historyBox() {
-    return Container(
+    return SizedBox(
       width: MediaQuery.of(context).size.width * 0.45,
       // height: 80.0,
       child: GestureDetector(
@@ -468,7 +465,7 @@ class _HomeScreenState extends State<HomeScreen> {
             alignment: AlignmentDirectional(0.0, 0.0),
             child: Column(
               children: <Widget>[
-                Container(
+                SizedBox(
                   width: 45.0,
                   child: Image.asset('images/icon_history.png'),
                 ),
@@ -485,19 +482,19 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         onTap: () {
           print('You click order history');
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => WebView(
-                        userModel: myUserModel,
-                      )));
+          // Navigator.push(
+          //     context,
+          //     MaterialPageRoute(
+          //         builder: (context) => WebView(
+          //               userModel: myUserModel!,
+          //             )));
         },
       ),
     );
   }
 
   Widget barcodeBox() {
-    return Container(
+    return SizedBox(
       width: MediaQuery.of(context).size.width * 0.45,
       // height: 80.0,
       child: GestureDetector(
@@ -508,7 +505,7 @@ class _HomeScreenState extends State<HomeScreen> {
             alignment: AlignmentDirectional(0.0, 0.0),
             child: Column(
               children: <Widget>[
-                Container(
+                SizedBox(
                   width: 45.0,
                   child: Image.asset('images/icon_barcode.png'),
                 ),
@@ -526,7 +523,7 @@ class _HomeScreenState extends State<HomeScreen> {
         onTap: () {
           print('You click barcode scan');
           // readQRcode();
-          readQRcodePreview();
+          // readQRcodePreview();
           // Navigator.of(context).pop();
         },
       ),
@@ -534,7 +531,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget bottomRight() {
-    return Container(
+    return SizedBox(
       width: MediaQuery.of(context).size.width * 0.4,
       // height: 80.0,
       child: GestureDetector(
@@ -545,7 +542,7 @@ class _HomeScreenState extends State<HomeScreen> {
             alignment: AlignmentDirectional(0.0, 0.0),
             child: Column(
               children: <Widget>[
-                Container(
+                SizedBox(
                   width: 45.0,
                   child: Image.asset('images/icon_recommend.png'),
                 ),
@@ -633,48 +630,18 @@ class _HomeScreenState extends State<HomeScreen> {
       subtitle: Text('Read QR code or barcode'),
       onTap: () {
         // readQRcode();
-        readQRcodePreview();
+        // readQRcodePreview();
         Navigator.of(context).pop();
       },
     );
   }
 
-  // Future<void> readQRcode() async {
-  //   try {
-  //     var qrString = await BarcodeScanner.scan();
-  //     print('QR code = $qrString');
-  //     if (qrString != null) {
-  //       decodeQRcode(qrString);
-  //     }
-  //   } catch (e) {
-  //     print('e = $e');
-  //   }
-  // }
-
-  Future<void> readQRcodePreview() async {
-    try {
-      final qrScanString = await Navigator.push(this.context,
-          MaterialPageRoute(builder: (context) => ScanPreviewPage()));
-
-      print('Before scan');
-      // final qrScanString = await BarcodeScanner.scan();
-      print('After scan');
-      print('scanl result: $qrScanString');
-      qrString = qrScanString;
-      if (qrString != null) {
-        decodeQRcode(qrString);
-      }
-      // setState(() => scanResult = qrScanString);
-    } on PlatformException catch (e) {
-      print('e = $e');
-    }
-  }
 
   Future<void> readCart() async {
     amontCart = 0;
-    String memberId = myUserModel.id.toString();
-    String url =
-        'https://ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId';
+    String? memberId = myUserModel!.id.toString();
+    String? url =
+        'https://www.ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId&screen=homescreen';
 
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
@@ -682,16 +649,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
     for (var map in cartList) {
       setState(() {
-        amontCart++;
+        amontCart = amontCart! + 1;
       });
-      print('amontCart (service page))>>>> $amontCart');
+      print('amontCart (home page))>>>> $amontCart');
     }
   }
 
   Future<void> decodeQRcode(var code) async {
     try {
-      String url =
-          'https://ptnpharma.com/apishop/json_productlist.php?bqcode=$code';
+      String? url =
+          'https://www.ptnpharma.com/apishop/json_productlist.php?bqcode=$code';
       http.Response response = await http.get(Uri.parse(url));
       var result = json.decode(response.body);
       print('result ===*******>>>> $result');
@@ -764,7 +731,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget headTitle(String string, IconData iconData) {
+  Widget headTitle(String? string, IconData iconData) {
     // Widget  แทน object ประเภทไดก็ได้
     return Container(
       padding: EdgeInsets.all(5.0),
@@ -777,7 +744,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           mySizebox(),
           Text(
-            string,
+            string!,
             style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
@@ -790,114 +757,3 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class WebViewWidget extends StatefulWidget {
-  WebViewWidget({Key key}) : super(key: key);
-
-  @override
-  _WebViewWidgetState createState() => _WebViewWidgetState();
-}
-
-class _WebViewWidgetState extends State {
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: Text("Sample WebView Widget"),
-          backgroundColor: MyStyle().bgColor,
-        ),
-        body: Center(
-          child: Column(
-            children: [
-              Container(
-                child: TextButton(
-                    child: Text("Open my Blog"),
-                    onPressed: () {
-                      print("in");
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (context) => WebView()));
-                    }),
-              )
-            ],
-          ),
-        ));
-  }
-}
-
-class WebView extends StatefulWidget {
-  final UserModel userModel;
-
-  WebView({Key key, this.userModel}) : super(key: key);
-
-  @override
-  _WebViewState createState() => _WebViewState();
-}
-
-class _WebViewState extends State<WebView> {
-  UserModel myUserModel;
-
-  @override
-  void initState() {
-    super.initState();
-    myUserModel = widget.userModel;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    String memberId = myUserModel.id;
-    String memberCode = myUserModel.customerCode;
-    String url =
-        'https://ptnpharma.com/shop/pages/tables/orderhistory_mobile.php?memberId=$memberId&memberCode=$memberCode'; //
-    print('URL ==>> $url');
-    return WebviewScaffold(
-      url: url, //"https://www.androidmonks.com",
-      appBar: AppBar(
-        backgroundColor: MyStyle().bgColor,
-        title: Text("ประวัติการสั่งซื้อ"),
-      ),
-      withZoom: true,
-      withJavascript: true,
-      withLocalStorage: true,
-      appCacheEnabled: false,
-      ignoreSSLErrors: true,
-    );
-  }
-}
-
-class ScanPreviewPage extends StatefulWidget {
-  @override
-  _ScanPreviewPageState createState() => _ScanPreviewPageState();
-}
-
-class _ScanPreviewPageState extends State<ScanPreviewPage> {
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('PTN Pharma'),
-          backgroundColor: MyStyle().bgColor,
-        ),
-        body: SizedBox(
-          width: double.infinity,
-          height: double.infinity,
-          child: ScanPreviewWidget(
-            onScanResult: (result) {
-              debugPrint('scan result: $result');
-              Navigator.pop(context, result);
-            },
-          ),
-        ),
-      ),
-    );
-  }
-}

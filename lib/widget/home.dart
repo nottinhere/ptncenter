@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:async';
 import 'package:carousel_slider/carousel_slider.dart';
-// import 'package:barcode_scan2/barcode_scan2.dart';
+import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:ptncenter/models/product_all_model.dart';
@@ -18,6 +18,7 @@ import 'package:ptncenter/scaffold/detail_cart.dart';
 
 import 'package:ptncenter/scaffold/list_news.dart';
 import 'package:ptncenter/scaffold/list_notify.dart';
+import 'package:ptncenter/scaffold/list_promotionbanner.dart';
 
 import 'package:ptncenter/scaffold/list_product.dart';
 import 'package:ptncenter/scaffold/list_product_favorite.dart';
@@ -27,34 +28,37 @@ import 'package:ptncenter/scaffold/map.dart';
 
 import 'package:ptncenter/utility/my_style.dart';
 import 'package:ptncenter/utility/normal_dialog.dart';
-import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:toast/toast.dart';
 
 import 'package:popup_banner/popup_banner.dart';
 
 import 'package:flutter/services.dart';
 
 import 'package:permission_handler/permission_handler.dart';
-import 'package:scan_preview/scan_preview_widget.dart';
 import 'package:flutter/foundation.dart';
 
-import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
-
-import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:firebase_core/firebase_core.dart';
-import '../firebase_options.dart';
+import 'package:ptncenter/main.dart';
+import 'package:ptncenter/scaffold/my_service.dart';
+import 'package:ptncenter/utility/my_style.dart';
+import 'package:ptncenter/scaffold/detail_popup.dart';
 
 import 'package:rflutter_alert/rflutter_alert.dart';
-import 'package:status_alert/status_alert.dart';
+import 'package:awesome_dialog/awesome_dialog.dart';
+
+import 'package:webview_flutter/webview_flutter.dart';
+import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
+
+import 'package:image/image.dart' as image;
+import 'package:image_picker/image_picker.dart' as image_picker;
+import 'package:webview_flutter_android/webview_flutter_android.dart' as webview_flutter_android;
 
 class Home extends StatefulWidget {
-  final UserModel userModel;
-  bool firstLoadAds;
-  bool orderSuccess;
+  final UserModel? userModel;
+  bool? firstLoadAds;
+  bool? orderSuccess;
 
   Home(
-      {Key key,
+      {Key? key,
       this.userModel,
       this.firstLoadAds = false,
       this.orderSuccess = false})
@@ -66,245 +70,126 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   // Explicit
-  // List<PromoteModel> promoteModels = List();
-  List<Widget> promoteLists = List();
-  List<Widget> suggestLists = List();
-  List<Widget> slideshowLists = List();
-  List<Widget> newsLists = List();
-  List<String> urlImages = List();
-  List<String> urlImagesSuggest = List();
-  List<String> productsName = List();
-  // List<String> subjectList = List();
-  // List<String> postdateList = List();
+  // List<PromoteModel> promoteModels;
+  List<Widget>? promoteLists;
+  List<Widget>? suggestLists;
+  List<Widget>? slideshowLists = [];
+  List<Widget>? newsLists;
+  List<String>? urlImages = [];
+  List<String>? urlImagesSuggest;
+  List<String>? productsName;
+  // List<String> subjectList;
+  // List<String> postdateList;
 
   ScrollController scrollController = ScrollController();
 
-  int amontCart = 0, banerIndex = 0, suggestIndex = 0;
-  UserModel myUserModel;
-  PopupModel popupModel;
-  PopupModel newsModel;
+  int? amontCart = 0;
+  int? banerIndex = 0;
+  int? suggestIndex = 0;
+  UserModel? myUserModel;
+  PopupModel? popupModel;
+  PopupModel? newsModel;
+  PromoteModel? promoteModel;
+  bool? orderSuccess;
 
-  bool orderSuccess;
+  bool? firstLoad = false;
+  List<ProductAllModel>? promoteModels;
+  List<ProductAllModel>? suggestModels;
+  List<ProductAllModel>? slideshowModels = [];
+  List<PopupModel>? popupAllModel;
+  List<PopupModel>? newsModels = [];
 
-  bool firstLoad = false;
-  List<ProductAllModel> promoteModels = List();
-  List<ProductAllModel> suggestModels = List();
-  List<ProductAllModel> slideshowModels = List();
-  List<PopupModel> popupAllModel = List();
-  List<PopupModel> newsModels = List();
-
-  String qrString;
-  int currentIndex = 0;
-  String _result = '';
-
-  /*******       FirebaseAnalytics      *********/
-
-  /*******       FirebaseAnalytics      *********/
+  String? qrString;
+  int? currentIndex = 0;
 
   // Method
   @override
   void initState() {
     super.initState();
 
-    // AnalyticsService.observer.analytics.setCurrentScreen(screenName: "home");
-    // AnalyticsService.observer.analytics.logEvent(name: "homePage");
-
-    /*   Ads banner  next upload 
-    print('widget.firstLoadAds >> ${widget.firstLoadAds}');
-    firstLoad = widget.firstLoadAds;
-    print('firstLoad >> $firstLoad');
-    if (firstLoad == true) {
-      setState(() {
-        WidgetsBinding.instance.addPostFrameCallback((_) => showAdsPopup());
-        firstLoad = false;
-      });
-    }
-    print('BF firstLoad >> $firstLoad');
-    */
-    readPromotion();
     myUserModel = widget.userModel;
     orderSuccess = widget.orderSuccess;
-
-    readSuggest();
+    // readPromotion();
+    // readSuggest();
     readSlide();
     setState(() {
       readCart();
     });
-    directMessage();
     _requestPermission();
     readNews();
-    showOrderSuccessPopup();
+    // showOrderSuccessPopup();
+    Future.delayed(Duration.zero, () => showOrderSuccessDialog(context));
+    // _setFirebase();
   }
+
+
 
   _requestPermission() async {
     await Permission.camera.request();
   }
 
-  /*************************** */
-  String _scanBarcode = 'Unknown';
-
-  Future<void> startBarcodeScanStream() async {
-    FlutterBarcodeScanner.getBarcodeStreamReceiver(
-            '#ff6666', 'Cancel', true, ScanMode.BARCODE)
-        .listen((barcode) => print(barcode));
-  }
-
-  Future<void> scanQR() async {
-    String barcodeScanRes;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    try {
-      barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-          '#ff6666', 'Cancel', true, ScanMode.QR);
-      print(barcodeScanRes);
-    } on PlatformException {
-      barcodeScanRes = 'Failed to get platform version.';
-    }
-
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
-
-    setState(() {
-      _scanBarcode = barcodeScanRes;
-    });
-  }
-
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> scanBarcodeNormal() async {
-    String barcodeScanRes;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    try {
-      barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-          '#ff6666', 'Cancel', true, ScanMode.BARCODE);
-      print(barcodeScanRes);
-
-      String url =
-          'https://ptnpharma.com/apishop/json_productlist.php?bqcode=$barcodeScanRes';
-      http.Response response = await http.get(Uri.parse(url));
-      var result = json.decode(response.body);
-      // print('result ===*******>>>> $result');
-
-      int status = result['status'];
-      // print('status ===>>> $status');
-      if (status == 0) {
-        normalDialog(
-            context, 'Not found', 'ไม่พบ code :: $barcodeScanRes ในระบบ');
-      } else {
-        var itemProducts = result['itemsProduct'];
-        for (var map in itemProducts) {
-          // print('map ===*******>>>> $map');
-
-          ProductAllModel productAllModel = ProductAllModel.fromJson(map);
-          MaterialPageRoute route = MaterialPageRoute(
-            builder: (BuildContext context) => Detail(
-              userModel: myUserModel,
-              productAllModel: productAllModel,
-            ),
-          );
-          Navigator.of(context).push(route).then((value) => readCart());
-
-          // Navigator.of(context).push(route).then((value) {
-          //   setState(() {
-          //     // readCart();
-          //   });
-          // });
-        }
-      }
-    } on PlatformException {
-      barcodeScanRes = 'Failed to get platform version.';
-    }
-
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
-
-    setState(() {
-      _scanBarcode = barcodeScanRes;
-    });
-  }
-
-  /*************************** */
-
-  Future<void> readPromotion() async {
-    String url = 'https://www.ptnpharma.com/apishop/json_promotion.php';
-    http.Response response = await http.get(Uri.parse(url));
-    var result = json.decode(response.body);
-    var mapItemProduct =
-        result['itemsProduct']; // dynamic    จะส่ง value อะไรก็ได้ รวมถึง null
-
-    // Map<String, dynamic> map = result['data'];
-
-    for (var map in mapItemProduct) {
-      PromoteModel promoteModel = PromoteModel.fromJson(map);
-      ProductAllModel productAllModel = ProductAllModel.fromJson(map);
-      String urlImage = promoteModel.photo;
-      setState(() {
-        //promoteModels.add(promoteModel); // push ค่าลง array
-        promoteModels.add(productAllModel);
-        promoteLists.add(showImageNetWork(urlImage));
-        urlImages.add(urlImage);
-      });
-    }
-  }
+  
 
   Image showImageNetWork(String urlImage) {
     return Image.network(urlImage);
   }
 
-  /*************************** */
+  /***************************  */
 
   Future<void> readSlide() async {
-    String url = 'https://www.ptnpharma.com/apishop/json_slideshow.php';
+    String? url = 'https://www.ptnpharma.com/apishop/json_slideshow.php';
+
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var mapItemProduct =
         result['itemsProduct']; // dynamic    จะส่ง value อะไรก็ได้ รวมถึง null
     for (var map in mapItemProduct) {
-      PromoteModel slideshowModel = PromoteModel.fromJson(map);
-      ProductAllModel productAllModel = ProductAllModel.fromJson(map);
-      String urlImage = slideshowModel.photo;
+      PromoteModel? slideshowModel = PromoteModel.fromJson(map);
+      ProductAllModel? productAllModel = ProductAllModel.fromJson(map);
+      String? urlImage = slideshowModel.photo;
       setState(() {
         //promoteModels.add(promoteModel); // push ค่าลง array
-        slideshowModels.add(productAllModel);
-        slideshowLists.add(showImageNetWork(urlImage));
-        urlImages.add(urlImage);
+        slideshowModels!.add(productAllModel);
+        slideshowLists!.add(showImageNetWork(urlImage!));
+        urlImages!.add(urlImage);
       });
+      print('slideshowLists (readSlide) >> $slideshowLists ');
     }
   }
 
-  /*************************** */
+  /*************************** 
 
   Future<void> readSuggest() async {
-    String memId = myUserModel.id;
-    String url =
+    String? memId = myUserModel!.id;
+    String? url =
         'https://www.ptnpharma.com/apishop/json_suggest.php?memberId=$memId'; // ?memberId=$memberId
+    print('urlSuggest >> $url');
+
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var mapItemProduct =
         result['itemsProduct']; // dynamic    จะส่ง value อะไรก็ได้ รวมถึง null
     for (var map in mapItemProduct) {
-      PromoteModel promoteModel = PromoteModel.fromJson(map);
-      ProductAllModel productAllModel = ProductAllModel.fromJson(map);
-      String urlImage = promoteModel.photo;
-      String productName = promoteModel.title;
+      PromoteModel? promoteModel = PromoteModel.fromJson(map);
+      ProductAllModel? productAllModel = ProductAllModel.fromJson(map);
+      String? urlImage = promoteModel.photo;
+      String? productName = promoteModel.title;
       setState(() {
         //promoteModels.add(promoteModel); // push ค่าลง array
-        suggestModels.add(productAllModel);
-        suggestLists.add(Image.network(urlImage));
-        urlImagesSuggest.add(urlImage);
-        productsName.add(productName);
+        suggestModels!.add(productAllModel);
+        suggestLists!.add(Image.network(urlImage!));
+        urlImagesSuggest!.add(urlImage);
+        productsName!.add(productName!);
       });
     }
   }
-
+*/
   /*************************** */
 
   Future<void> readNews() async {
-    String memId = myUserModel.id;
-    String url =
-        'https://www.ptnpharma.com/apishop/json_news.php?limit=5'; // ?memberId=$memberId
+    String? memId = myUserModel!.id;
+    String? url =
+        'https://www.ptnpharma.com/apishop/json_news.php?limit=7'; // ?memberId=$memberId
     print('urlNews >> $url');
 
     http.Response response = await http.get(Uri.parse(url));
@@ -312,41 +197,91 @@ class _HomeState extends State<Home> {
     var mapItemNews =
         result['itemsData']; // dynamic    จะส่ง value อะไรก็ได้ รวมถึง null
 
+    print('mapItemNews >> $mapItemNews');
+
     for (var map in mapItemNews) {
-      PopupModel popupModel = PopupModel.fromJson(map);
-      String postdate = popupModel.postdate;
-      String subject = popupModel.subject;
+      PopupModel? popupModel = PopupModel.fromJson(map);
+      // String? postdate = popupModel!.postdate!;
+      // String? subject = popupModel!.subject!;
       setState(() {
         //promoteModels.add(promoteModel); // push ค่าลง array
-        newsModels.add(popupModel);
+        newsModels!.add(popupModel);
         // subjectList.add(subject);
         // postdateList.add(postdate);
       });
     }
-    // print('newsModels.length (readNews) >> ' + newsModels.length.toString());
+    // print('newsModels.length (readNews) >> $newsModels ');
   }
 
-  Future<void> showAdsPopup() async {
-    PopupBanner(
+  // Future<void> showAdsPopup() async {
+  //   PopupBanner(
+  //     context: context,
+  //     images: images,
+  //     onClick: (index) {
+  //       debugPrint("CLICKED $index");
+  //     },
+  //   ).show();
+  // }
+
+  void showOrderSuccessDialog(BuildContext context) {
+    // orderSuccess = true;
+    if (orderSuccess == true) {
+      AwesomeDialog(
+        context: context,
+        headerAnimationLoop: false,
+        dialogType: DialogType.noHeader,
+        autoHide: const Duration(seconds: 5),
+        title: 'บันทึกคำสั่งซื้อ',
+        desc: 'คำสั่งซื้อของคุณได้ถูกดำเนินการเสร็จสิ้น ',
+        btnOkOnPress: () {
+          debugPrint('OnClcik');
+        },
+        btnOkIcon: Icons.check_circle,
+      ).show();
+    }
+  }
+
+    Future<void> normalDialogLogin(
+    BuildContext buildContext,
+    String title,
+    String message,
+  ) async {
+    AwesomeDialog(
       context: context,
-      images: images,
-      onClick: (index) {
-        debugPrint("CLICKED $index");
+      headerAnimationLoop: false,
+      dialogType: DialogType.error,
+      autoHide: const Duration(seconds: 4),
+      title: title,
+      desc: message,
+      btnOkColor: Colors.red,
+      btnOkOnPress: () {
+        debugPrint('OnClcik');
       },
+      btnOkIcon: Icons.check_circle,
     ).show();
+    // showDialog(
+    //   context: buildContext,
+    //   builder: (BuildContext buildContext) {
+    //     return AlertDialog(
+    //       title: showTitle(title),
+    //       content: Text(message),
+    //       actions: <Widget>[okButtonLogin(buildContext)],
+    //     );
+    //   },
+    // );
   }
 
   Future<void> showOrderSuccessPopup() async {
     if (orderSuccess == true) {
-      print('--------------- *showOrderSuccessPopup* ------------');
-      StatusAlert.show(
-        context,
-        duration: Duration(seconds: 3),
-        title: 'Success',
-        subtitle: 'สั่งซื้อเรียบร้อย',
-        configuration: IconConfiguration(icon: Icons.done),
-        maxWidth: 260,
-      );
+      // print('--------------- *showOrderSuccessPopup* ------------');
+      // StatusAlert.show(
+      //   context,
+      //   duration: Duration(seconds: 3),
+      //   title: 'Success',
+      //   subtitle: 'สั่งซื้อเรียบร้อย',
+      //   configuration: IconConfiguration(icon: Icons.done),
+      //   maxWidth: 260,
+      // );
 
       // successAlertBox()
       //     .animate()
@@ -356,124 +291,42 @@ class _HomeState extends State<Home> {
     }
   }
 
-  Widget successAlertBox() {
-    WidgetsBinding.instance.addPostFrameCallback(
-      (_) => Alert(
-        context: context,
-        type: AlertType.success,
-        title: "สั่งซื้อเรียบร้อย",
-        desc: "ทางเราจะจัดส่งสินค้าโดยเร็ว",
-        alertAnimation: fadeAlertAnimation,
-        buttons: [
-          // DialogButton(
-          //   child: Text(
-          //     "OK",
-          //     style: TextStyle(color: Colors.white, fontSize: 18),
-          //   ),
-          //   onPressed: () => Navigator.pop(context),
-          //   color: Color.fromRGBO(0, 179, 134, 1.0),
-          // ),
-        ],
-      ).show(),
-    );
-  }
+  // Widget? successAlertBox() {
+  //   WidgetsBinding.instance.addPostFrameCallback(
+  //     (_) => Alert(
+  //       context: context,
+  //       type: AlertType.success,
+  //       title: "สั่งซื้อเรียบร้อย",
+  //       desc: "ทางเราจะจัดส่งสินค้าโดยเร็ว",
+  //       alertAnimation: fadeAlertAnimation,
+  //       buttons: [
+  //         // DialogButton(
+  //         //   child: Text(
+  //         //     "OK",
+  //         //     style: TextStyle(color: Colors.white, fontSize: 18),
+  //         //   ),
+  //         //   onPressed: () => Navigator.pop(context),
+  //         //   color: Color.fromRGBO(0, 179, 134, 1.0),
+  //         // ),
+  //       ],
+  //     ).show(),
+  //   );
+  // }
 
-  Widget fadeAlertAnimation(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
-  ) {
-    return Align(
-      child: FadeTransition(
-        opacity: animation,
-        child: child,
-      ),
-    );
-  }
+  // Widget fadeAlertAnimation(
+  //   BuildContext context,
+  //   Animation<double> animation,
+  //   Animation<double> secondaryAnimation,
+  //   Widget child,
+  // ) {
+  //   return Align(
+  //     child: FadeTransition(
+  //       opacity: animation,
+  //       child: child,
+  //     ),
+  //   );
+  // }
 
-  /***************popup_banner ************ */
-  List<String> images = [
-    "https://tinyurl.com/popup-banner-image",
-    "https://tinyurl.com/popup-banner-image2",
-    "https://tinyurl.com/popup-banner-image3",
-    "https://tinyurl.com/popup-banner-image4"
-  ];
-
-  List<String> imagesLocal = [
-    "assets/images/popup-banner-local-image.jpg",
-    "assets/images/popup-banner-local-image2.jpg",
-    "assets/images/popup-banner-local-image3.jpeg",
-    "assets/images/popup-banner-local-image4.jpg"
-  ];
-
-  void showDefaultPopup() {
-    PopupBanner(
-      context: context,
-      images: images,
-      onClick: (index) {
-        debugPrint("CLICKED $index");
-      },
-    ).show();
-  }
-
-  void showHideDotsPopup() {
-    PopupBanner(
-      context: context,
-      images: images,
-      useDots: false,
-      onClick: (index) {
-        debugPrint("CLICKED $index");
-      },
-    ).show();
-  }
-
-  void showCustomizeDots() {
-    PopupBanner(
-      context: context,
-      images: images,
-      dotsAlignment: Alignment.bottomCenter,
-      dotsColorActive: Colors.blue,
-      dotsColorInactive: Colors.grey.withOpacity(0.5),
-      onClick: (index) {
-        debugPrint("CLICKED $index");
-      },
-    ).show();
-  }
-
-  void showNonactiveSlideCustomClose() {
-    PopupBanner(
-      context: context,
-      images: images,
-      autoSlide: false,
-      customCloseButton: ElevatedButton(
-        onPressed: () => Navigator.pop(context),
-        style: ElevatedButton.styleFrom(
-          primary: Colors.blue,
-        ),
-        child: const Text(
-          "Close",
-          style: TextStyle(
-            color: Colors.white,
-          ),
-        ),
-      ),
-      onClick: (index) {
-        debugPrint("CLICKED $index");
-      },
-    ).show();
-  }
-
-  void showFromLocal() {
-    PopupBanner(
-      context: context,
-      images: imagesLocal,
-      fromNetwork: false,
-      onClick: (index) {},
-    ).show();
-  }
-
-  /*************popup_banner ************** */
 
   Widget myCircularProgress() {
     return Center(
@@ -481,120 +334,24 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Widget showCarouseSlider() {
-    return GestureDetector(
-      onTap: () {
-        print('You Click index is $banerIndex');
-
-        MaterialPageRoute route = MaterialPageRoute(
-          builder: (BuildContext context) => Detail(
-            productAllModel: promoteModels[banerIndex],
-            userModel: myUserModel,
-          ),
-        );
-        // Navigator.of(context).push(route).then((value) {});  //  link to detail page
-      },
-      child: CarouselSlider(
-        options: CarouselOptions(
-          height: 1500,
-          viewportFraction: 0.8,
-          enlargeCenterPage: true,
-          aspectRatio: 16 / 9,
-          // pauseAutoPlayOnTouch: Duration(seconds: 5),
-          autoPlay: true,
-          autoPlayAnimationDuration: Duration(seconds: 5),
-          onPageChanged: (int index, reason) {
-            banerIndex = index;
-            // print('index = $index');
-          },
-        ),
-        items: promoteLists,
-      ),
-    );
-  }
-
-  Widget showCarouseSliderSuggest() {
-    return GestureDetector(
-      child: CarouselSlider.builder(
-        options: CarouselOptions(
-          // pauseAutoPlayOnTouch: Duration(seconds: 5),
-          autoPlay: true,
-          autoPlayAnimationDuration: Duration(seconds: 5),
-        ),
-        itemCount: (suggestLists.length / 2).round(),
-        itemBuilder: (context, index, realIdx) {
-          final int first = index * 2;
-          final int second = first + 1;
-
-          return Row(
-            children: [first, second].map((idx) {
-              return Expanded(
-                child: GestureDetector(
-                  child: Card(
-                    // flex: 1,
-                    child: Column(
-                      children: <Widget>[
-                        Container(
-                          // width: MediaQuery.of(context).size.width * 0.50,
-                          height: 100.00,
-                          child: suggestLists[idx],
-                          padding: EdgeInsets.all(8.0),
-                        ),
-                        Text(
-                          productsName[idx].toString(),
-                          style: TextStyle(
-                              fontSize: 12,
-                              // fontWeight: FontWeight.bold,
-                              color: Colors.black),
-                        ),
-                      ],
-                    ),
-                  ),
-                  onTap: () {
-                    // print('You Click index >> $idx');
-                    /*
-                    MaterialPageRoute route = MaterialPageRoute(
-                      builder: (BuildContext context) => Detail(
-                        productAllModel: suggestModels[idx],
-                        userModel: myUserModel,
-                      ),
-                    );
-                    Navigator.of(context).push(route).then((value) {});
-                    */
-                    MaterialPageRoute materialPageRoute =
-                        MaterialPageRoute(builder: (BuildContext buildContext) {
-                      return Detail(
-                        productAllModel: suggestModels[idx],
-                        userModel: myUserModel,
-                      );
-                    });
-                    Navigator.of(context)
-                        .push(materialPageRoute)
-                        .then((value) => readCart());
-                  },
-                ),
-              );
-            }).toList(),
-          );
-        },
-      ),
-    );
-  }
 
   void routeToListProductByCate(int index, int cate, String cateName) {
     MaterialPageRoute materialPageRoute =
         MaterialPageRoute(builder: (BuildContext buildContext) {
       return ListProduct(
-        index: index,
-        userModel: myUserModel,
-        cate: cate,
-        cateName: cateName,
+        index: index!,
+        userModel: myUserModel!,
+        cate: cate!,
+        cateName: cateName!,
       );
     });
     Navigator.of(context).push(materialPageRoute);
   }
 
   Widget showCarouseSlideshow() {
+    print('slideshowLists.length (showCarouseSlideshow) >> ' +
+        slideshowLists!.length.toString());
+
     return GestureDetector(
       child: CarouselSlider.builder(
         options: CarouselOptions(
@@ -602,7 +359,7 @@ class _HomeState extends State<Home> {
           autoPlay: true,
           autoPlayAnimationDuration: Duration(seconds: 5),
         ),
-        itemCount: (slideshowLists.length).round(),
+        itemCount: (slideshowLists!.length).round(),
         itemBuilder: (context, index, realIdx) {
           final int first = index;
           // final int second = first + 1;
@@ -612,7 +369,7 @@ class _HomeState extends State<Home> {
                 child: Container(
                   padding: EdgeInsets.all(1.0),
                   child: Center(
-                    child: Image.network(urlImages[idx],
+                    child: Image.network(urlImages![idx],
                         fit: BoxFit.cover, width: 280),
                   ),
                 ),
@@ -622,8 +379,9 @@ class _HomeState extends State<Home> {
                       MaterialPageRoute(builder: (BuildContext buildContext) {
                     return ListProduct(
                       index: 6,
-                      userModel: myUserModel,
-                      searchStr: slideshowModels[idx].productCode.toString(),
+                      userModel: myUserModel!,
+                      cateName: slideshowModels![idx].title.toString(),
+                      searchStr: slideshowModels![idx].productCode.toString(),
                     );
                   });
                   Navigator.of(context)
@@ -638,37 +396,15 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Widget promotion() {
-    return Card(
-      child: Container(
-        width: MediaQuery.of(context).size.width * 0.9,
-        padding: EdgeInsets.only(top: 5.0, bottom: 5.0),
-        height: MediaQuery.of(context).size.width * 0.70, // size.height * 0.20,
-        child: promoteLists.length == 0
-            ? myCircularProgress()
-            : showCarouseSlider(),
-      ),
-    );
-  }
-
-  Widget suggest() {
-    return Card(
-      child: Container(
-        width: MediaQuery.of(context).size.width * 0.9,
-        height: MediaQuery.of(context).size.height * 0.25,
-        child: suggestLists.length == 0
-            ? myCircularProgress()
-            : showCarouseSliderSuggest(),
-      ),
-    );
-  }
-
   Widget slideshow() {
+    print('slideshowLists.length (Widget slideshow) >> ' +
+        slideshowLists!.length.toString());
+
     return Card(
       child: Container(
         width: MediaQuery.of(context).size.width * 0.9,
         height: MediaQuery.of(context).size.height * 0.25,
-        child: suggestLists.length == 0
+        child: slideshowLists!.isEmpty
             ? myCircularProgress()
             : showCarouseSlideshow(),
       ),
@@ -676,13 +412,13 @@ class _HomeState extends State<Home> {
   }
 
   Widget showNews() {
-    print('newsModels.length (showNews) >> ' + newsModels.length.toString());
+    // print('newsModels.length (showNews) >> ' + newsModels!.length.toString());
 
     return Card(
       child: Container(
         width: MediaQuery.of(context).size.width * 0.9,
         height: MediaQuery.of(context).size.height * 0.4,
-        child: newsModels.length > 0 ? listNews() : Container(),
+        child: newsModels!.isNotEmpty ? listNews() : Container(),
       ),
     );
   }
@@ -692,52 +428,52 @@ class _HomeState extends State<Home> {
         MaterialPageRoute(builder: (BuildContext buildContext) {
       return ListProduct(
         index: index,
-        userModel: myUserModel,
+        userModel: myUserModel!,
       );
     });
     Navigator.of(context).push(materialPageRoute);
   }
 
-  Widget orderhistoryBox() {
-    String login = myUserModel.name;
-    return Container(
-      width: MediaQuery.of(context).size.width * 0.8,
-      // height: 80.0,
-      child: GestureDetector(
-        child: Card(
-          color: Colors.greenAccent.shade100,
-          child: Container(
-            padding: EdgeInsets.all(16.0),
-            alignment: AlignmentDirectional(0.0, 0.0),
-            child: Row(
-              children: <Widget>[
-                Container(
-                  width: 45.0,
-                  child: Image.asset('images/icon_drugs.png'),
-                  padding: EdgeInsets.all(8.0),
-                ),
-                Text(
-                  'ประวัติการสั่งซื้อ',
-                  style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black),
-                ),
-              ],
-            ),
-          ),
-        ),
-        onTap: () {
-          print('You click product');
-          routeToListProduct(0);
-        },
-      ),
-    );
-  }
+  // Widget orderhistoryBox() {
+  //   String? login = myUserModel!.name;
+  //   return Container(
+  //     width: MediaQuery.of(context).size.width * 0.8,
+  //     // height: 80.0,
+  //     child: GestureDetector(
+  //       child: Card(
+  //         color: Colors.greenAccent.shade100,
+  //         child: Container(
+  //           padding: EdgeInsets.all(16.0),
+  //           alignment: AlignmentDirectional(0.0, 0.0),
+  //           child: Row(
+  //             children: <Widget>[
+  //               Container(
+  //                 width: 45.0,
+  //                 child: Image.asset('images/icon_drugs.png'),
+  //                 padding: EdgeInsets.all(8.0),
+  //               ),
+  //               Text(
+  //                 'ประวัติการสั่งซื้อ',
+  //                 style: TextStyle(
+  //                     fontSize: 24,
+  //                     fontWeight: FontWeight.bold,
+  //                     color: Colors.black),
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //       ),
+  //       onTap: () {
+  //         print('You click product');
+  //         routeToListProduct(0);
+  //       },
+  //     ),
+  //   );
+  // }
 
   Widget profileBox() {
-    String login = myUserModel.name;
-    String address = myUserModel.address;
+    String? login = myUserModel!.name;
+    String? address = myUserModel!.address;
     // int loginStatus = myUserModel.status;
 
     return Container(
@@ -794,6 +530,13 @@ class _HomeState extends State<Home> {
       child: GestureDetector(
         child: Card(
           // color: Colors.green.shade100,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10), // if you need this
+            side: BorderSide(
+              color: Colors.blue.shade300,
+              width: 2,
+            ),
+          ),
           child: Container(
             padding: EdgeInsets.all(16.0),
             alignment: AlignmentDirectional(0.0, 0.0),
@@ -804,7 +547,7 @@ class _HomeState extends State<Home> {
                   child: Image.asset('images/icon_drugs.png'),
                 ),
                 Text(
-                  'รายการสินค้า',
+                  'สั่งสินค้า',
                   style: TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.bold,
@@ -815,8 +558,61 @@ class _HomeState extends State<Home> {
           ),
         ),
         onTap: () async {
+          // await FirebaseAnalytics.instance.logEvent(
+          //   name: 'PTN_tracking',
+          //   parameters: <String, dynamic>{
+          //     'page_name': 'ProductScreen',
+          //     'page_index': 1,
+          //   },
+          // );
           print('You click product');
           routeToListProduct(0);
+        },
+      ),
+    );
+  }
+
+  Widget promotionbannerBTN() {
+    String? login = myUserModel!.name;
+    String? address = myUserModel!.address;
+    // int loginStatus = myUserModel.status;
+
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.6,
+      // height: 80.0,
+      child: GestureDetector(
+        child: Card(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(40), // if you need this
+            side: BorderSide(
+              color: Colors.blue.shade200,
+              width: 2,
+            ),
+          ),
+          color: Color.fromARGB(255, 255, 255, 255),
+          child: Container(
+            padding: EdgeInsets.all(3.0),
+            alignment: AlignmentDirectional(0.0, 0.0),
+            child: Text(
+              'โปรโมชันทั้งหมด', // 'ผู้แทน : $login',
+              textAlign: TextAlign.left,
+              style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black),
+            ),
+          ),
+        ),
+        onTap: () {
+          print('You click promotion banner');
+          // routeToListProduct(0);
+          MaterialPageRoute materialPageRoute =
+              MaterialPageRoute(builder: (BuildContext buildContext) {
+            return Promotionbanner(
+              userModel: myUserModel!,
+            );
+          });
+          Navigator.of(context).push(materialPageRoute);
         },
       ),
     );
@@ -829,6 +625,13 @@ class _HomeState extends State<Home> {
       child: GestureDetector(
         child: Card(
           // color: Colors.green.shade100,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10), // if you need this
+            side: BorderSide(
+              color: Colors.green.shade300,
+              width: 2,
+            ),
+          ),
           child: Container(
             padding: EdgeInsets.all(16.0),
             alignment: AlignmentDirectional(0.0, 0.0),
@@ -857,6 +660,90 @@ class _HomeState extends State<Home> {
     );
   }
 
+  Widget bestsellerBox() {
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.45,
+      // height: 80.0,
+      child: GestureDetector(
+        child: Card(
+          // color: Colors.green.shade100,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10), // if you need this
+            side: BorderSide(
+              color: Colors.green.shade300,
+              width: 2,
+            ),
+          ),
+          child: Container(
+            padding: EdgeInsets.all(16.0),
+            alignment: AlignmentDirectional(0.0, 0.0),
+            child: Column(
+              children: <Widget>[
+                Container(
+                  width: 45.0,
+                  child: Image.asset('images/icon_bestseller.png'),
+                ),
+                Text(
+                  'สินค้าขายดี',
+                  style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black),
+                ),
+              ],
+            ),
+          ),
+        ),
+        onTap: () {
+          print('You click product bestseller');
+          routeToListProduct(7);
+        },
+      ),
+    );
+  }
+
+  Widget topintrendBox() {
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.45,
+      // height: 80.0,
+      child: GestureDetector(
+        child: Card(
+          // color: Colors.green.shade100,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10), // if you need this
+            side: BorderSide(
+              color: Colors.green.shade300,
+              width: 2,
+            ),
+          ),
+          child: Container(
+            padding: EdgeInsets.all(16.0),
+            alignment: AlignmentDirectional(0.0, 0.0),
+            child: Column(
+              children: <Widget>[
+                Container(
+                  width: 45.0,
+                  child: Image.asset('images/icon_intrend.png'),
+                ),
+                Text(
+                  'สินค้า Intrend',
+                  style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black),
+                ),
+              ],
+            ),
+          ),
+        ),
+        onTap: () {
+          print('You click product Intrend');
+          routeToListProduct(8);
+        },
+      ),
+    );
+  }
+
   Widget frequentBox() {
     return Container(
       width: MediaQuery.of(context).size.width * 0.45,
@@ -864,6 +751,13 @@ class _HomeState extends State<Home> {
       child: GestureDetector(
         child: Card(
           // color: Colors.green.shade100,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10), // if you need this
+            side: BorderSide(
+              color: Colors.green.shade300,
+              width: 2,
+            ),
+          ),
           child: Container(
             padding: EdgeInsets.all(16.0),
             alignment: AlignmentDirectional(0.0, 0.0),
@@ -889,7 +783,7 @@ class _HomeState extends State<Home> {
           MaterialPageRoute materialPageRoute =
               MaterialPageRoute(builder: (BuildContext buildContext) {
             return ListProductFrequent(
-              userModel: myUserModel,
+              userModel: myUserModel!,
             );
           });
           Navigator.of(context).push(materialPageRoute);
@@ -905,6 +799,13 @@ class _HomeState extends State<Home> {
       child: GestureDetector(
         child: Card(
           // color: Colors.green.shade100,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10), // if you need this
+            side: BorderSide(
+              color: Colors.green.shade300,
+              width: 2,
+            ),
+          ),
           child: Container(
             padding: EdgeInsets.all(16.0),
             alignment: AlignmentDirectional(0.0, 0.0),
@@ -940,6 +841,13 @@ class _HomeState extends State<Home> {
       child: GestureDetector(
         child: Card(
           // color: Colors.green.shade100,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10), // if you need this
+            side: BorderSide(
+              color: Colors.green.shade300,
+              width: 2,
+            ),
+          ),
           child: Container(
             padding: EdgeInsets.all(16.0),
             alignment: AlignmentDirectional(0.0, 0.0),
@@ -975,6 +883,13 @@ class _HomeState extends State<Home> {
       child: GestureDetector(
         child: Card(
           // color: Colors.green.shade100,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10), // if you need this
+            side: BorderSide(
+              color: Colors.green.shade300,
+              width: 2,
+            ),
+          ),
           child: Container(
             padding: EdgeInsets.all(16.0),
             alignment: AlignmentDirectional(0.0, 0.0),
@@ -1010,6 +925,13 @@ class _HomeState extends State<Home> {
       child: GestureDetector(
         child: Card(
           // color: Colors.green.shade100,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10), // if you need this
+            side: BorderSide(
+              color: Colors.blue.shade300,
+              width: 2,
+            ),
+          ),
           child: Container(
             padding: EdgeInsets.all(16.0),
             alignment: AlignmentDirectional(0.0, 0.0),
@@ -1035,7 +957,7 @@ class _HomeState extends State<Home> {
           MaterialPageRoute materialPageRoute =
               MaterialPageRoute(builder: (BuildContext buildContext) {
             return DetailCart(
-              userModel: myUserModel,
+              userModel: myUserModel!,
             );
           });
           Navigator.of(context).push(materialPageRoute);
@@ -1044,13 +966,78 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Widget historyBox() {
+  Widget suggestionBox() {
+    String webPage = 'suggestion';
+
     return Container(
       width: MediaQuery.of(context).size.width * 0.45,
       // height: 80.0,
       child: GestureDetector(
         child: Card(
           // color: Colors.green.shade100,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10), // if you need this
+            side: BorderSide(
+              color: Colors.yellow.shade600,
+              width: 2,
+            ),
+          ),
+          child: Container(
+            padding: EdgeInsets.all(16.0),
+            alignment: AlignmentDirectional(0.0, 0.0),
+            child: Column(
+              children: <Widget>[
+                Container(
+                  width: 45.0,
+                  child: Image.asset('images/icon_suggestion.png'),
+                ),
+                Text(
+                  'ข้อเสนอแนะ',
+                  style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black),
+                ),
+              ],
+            ),
+          ),
+        ),
+        onTap: () {
+          print('You click suggestion');
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => WebViewExample(
+                        userModel: myUserModel!,
+                        webPage: webPage,
+                      )));
+          // Navigator.push(
+          //     context,
+          //     MaterialPageRoute(
+          //         builder: (context) => WebView(
+          //               userModel: myUserModel!,
+          //             )));
+        },
+      ),
+    );
+  }
+
+  Widget historyBox() {
+    String webPage = 'history';
+
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.45,
+      // height: 80.0,
+      child: GestureDetector(
+        child: Card(
+          // color: Colors.green.shade100,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10), // if you need this
+            side: BorderSide(
+              color: Colors.blue.shade300,
+              width: 2,
+            ),
+          ),
           child: Container(
             padding: EdgeInsets.all(16.0),
             alignment: AlignmentDirectional(0.0, 0.0),
@@ -1076,21 +1063,37 @@ class _HomeState extends State<Home> {
           Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => WebView(
-                        userModel: myUserModel,
+                  builder: (context) => WebViewExample(
+                        userModel: myUserModel!,
+                        webPage: webPage,
                       )));
+          // Navigator.push(
+          //     context,
+          //     MaterialPageRoute(
+          //         builder: (context) => WebView(
+          //               userModel: myUserModel!,
+          //             )));
         },
       ),
     );
   }
 
-  Widget barcodeBox() {
+  Widget rewardBox() {
+    String webPage = 'reward';
+
     return Container(
       width: MediaQuery.of(context).size.width * 0.45,
       // height: 80.0,
       child: GestureDetector(
         child: Card(
           // color: Colors.green.shade100,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10), // if you need this
+            side: BorderSide(
+              color: Colors.blue.shade300,
+              width: 2,
+            ),
+          ),
           child: Container(
             padding: EdgeInsets.all(16.0),
             alignment: AlignmentDirectional(0.0, 0.0),
@@ -1098,10 +1101,10 @@ class _HomeState extends State<Home> {
               children: <Widget>[
                 Container(
                   width: 45.0,
-                  child: Image.asset('images/icon_barcode.png'),
+                  child: Image.asset('images/icon_pointredeem.png'),
                 ),
                 Text(
-                  'Scan',
+                  'ของสมนาคุณ',
                   style: TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.bold,
@@ -1112,13 +1115,60 @@ class _HomeState extends State<Home> {
           ),
         ),
         onTap: () {
-          print('You click barcode scan');
-          // readQRcodePreview();
-          scanBarcodeNormal();
+          print('You click order history');
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => WebViewExample(
+                        userModel: myUserModel!,
+                        webPage: webPage,
+                      )));
+          // Navigator.push(
+          //     context,
+          //     MaterialPageRoute(
+          //         builder: (context) => WebView(
+          //               userModel: myUserModel!,
+          //             )));
         },
       ),
     );
   }
+
+  // Widget barcodeBox() {
+  //   return Container(
+  //     width: MediaQuery.of(context).size.width * 0.45,
+  //     // height: 80.0,
+  //     child: GestureDetector(
+  //       child: Card(
+  //         // color: Colors.green.shade100,
+  //         child: Container(
+  //           padding: EdgeInsets.all(16.0),
+  //           alignment: AlignmentDirectional(0.0, 0.0),
+  //           child: Column(
+  //             children: <Widget>[
+  //               Container(
+  //                 width: 45.0,
+  //                 child: Image.asset('images/icon_barcode.png'),
+  //               ),
+  //               Text(
+  //                 'Scan',
+  //                 style: TextStyle(
+  //                     fontSize: 17,
+  //                     fontWeight: FontWeight.bold,
+  //                     color: Colors.black),
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //       ),
+  //       onTap: () {
+  //         print('You click barcode scan');
+  //         // readQRcodePreview();
+  //         // scanBarcodeNormal();
+  //       },
+  //     ),
+  //   );
+  // }
 
   Widget favariteBox() {
     return Container(
@@ -1127,6 +1177,13 @@ class _HomeState extends State<Home> {
       child: GestureDetector(
         child: Card(
           // color: Colors.green.shade100,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10), // if you need this
+            side: BorderSide(
+              color: Colors.green.shade300,
+              width: 2,
+            ),
+          ),
           child: Container(
             padding: EdgeInsets.all(16.0),
             alignment: AlignmentDirectional(0.0, 0.0),
@@ -1153,7 +1210,7 @@ class _HomeState extends State<Home> {
               MaterialPageRoute(builder: (BuildContext buildContext) {
             return ListProductfav(
               // index: index,
-              userModel: myUserModel,
+              userModel: myUserModel!,
             );
           });
           Navigator.of(context).push(materialPageRoute);
@@ -1169,6 +1226,13 @@ class _HomeState extends State<Home> {
       child: GestureDetector(
         child: Card(
           // color: Colors.green.shade100,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10), // if you need this
+            side: BorderSide(
+              color: Colors.yellow.shade600,
+              width: 2,
+            ),
+          ),
           child: Container(
             padding: EdgeInsets.all(16.0),
             alignment: AlignmentDirectional(0.0, 0.0),
@@ -1194,10 +1258,58 @@ class _HomeState extends State<Home> {
           MaterialPageRoute materialPageRoute =
               MaterialPageRoute(builder: (BuildContext buildContext) {
             return ListProductvote(
-              userModel: myUserModel,
+              userModel: myUserModel!,
             );
           });
           Navigator.of(context).push(materialPageRoute);
+        },
+      ),
+    );
+  }
+
+  Widget paymentBox() {
+    String webPage = 'pay';
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.45,
+      // height: 80.0,
+      child: GestureDetector(
+        child: Card(
+          // color: Colors.green.shade100,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10), // if you need this
+            side: BorderSide(
+              color: Colors.blue.shade300,
+              width: 2,
+            ),
+          ),
+          child: Container(
+            padding: EdgeInsets.all(16.0),
+            alignment: AlignmentDirectional(0.0, 0.0),
+            child: Column(
+              children: <Widget>[
+                Container(
+                  width: 45.0,
+                  child: Image.asset('images/icon_payment.png'),
+                ),
+                Text(
+                  'การชำระเงิน',
+                  style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black),
+                ),
+              ],
+            ),
+          ),
+        ),
+        onTap: () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => WebViewExample(
+                        userModel: myUserModel!,
+                        webPage: webPage,
+                      )));
         },
       ),
     );
@@ -1254,13 +1366,14 @@ class _HomeState extends State<Home> {
   }
 
   Widget listNews() {
+    // print('newsModels.length (listNews) >> ' + newsModels!.length.toString());
     return ListView.builder(
       controller: scrollController,
-      itemCount: newsModels.length,
+      itemCount: newsModels!.length,
       itemBuilder: (BuildContext buildContext, int index) {
         return Column(
           children: [
-            // Text(newsLists.length.toString()),
+            // Text(newsModels!.length.toString()),
             GestureDetector(
               child: Container(
                 height: 70,
@@ -1272,7 +1385,7 @@ class _HomeState extends State<Home> {
                       children: <Widget>[
                         Flexible(
                           child: Text(
-                            newsModels[index].subject,
+                            newsModels![index].subject!,
                             style: MyStyle().h3Style,
                           ),
                         ),
@@ -1285,8 +1398,8 @@ class _HomeState extends State<Home> {
                 MaterialPageRoute materialPageRoute =
                     MaterialPageRoute(builder: (BuildContext buildContext) {
                   return DetailNews(
-                    popupModel: newsModels[index],
-                    userModel: myUserModel,
+                    popupModel: newsModels![index],
+                    userModel: myUserModel!,
                   );
                 });
                 Navigator.of(context).push(materialPageRoute);
@@ -1305,7 +1418,7 @@ class _HomeState extends State<Home> {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         productBox(),
-        notreceiveBox(),
+        paymentBox(),
       ],
     );
   }
@@ -1316,8 +1429,8 @@ class _HomeState extends State<Home> {
       // mainAxisSize: MainAxisSize.max,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        promotionBox(),
-        newproductBox(),
+        historyBox(),
+        rewardBox(),
       ],
     );
   }
@@ -1328,8 +1441,8 @@ class _HomeState extends State<Home> {
       // mainAxisSize: MainAxisSize.max,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        updatepriceBox(),
-        frequentBox(),
+        bestsellerBox(),
+        topintrendBox(),
       ],
     );
   }
@@ -1340,8 +1453,8 @@ class _HomeState extends State<Home> {
       // mainAxisSize: MainAxisSize.max,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        favariteBox(),
-        voteBox(),
+        frequentBox(),
+        notreceiveBox(),
       ],
     );
   }
@@ -1352,9 +1465,8 @@ class _HomeState extends State<Home> {
       // mainAxisSize: MainAxisSize.max,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        barcodeBox(),
-        // cartBox(),
-        historyBox(),
+        promotionBox(),
+        updatepriceBox(),
       ],
     );
   }
@@ -1365,7 +1477,22 @@ class _HomeState extends State<Home> {
       // mainAxisSize: MainAxisSize.max,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        // frequentBox(),
+        newproductBox(),
+        favariteBox(),
+      ],
+    );
+  }
+
+  Widget row7Menu() {
+    return Row(
+      // mainAxisAlignment: MainAxisAlignment.spaceAround,
+      // mainAxisSize: MainAxisSize.max,
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        voteBox(),
+        suggestionBox(),
+        // barcodeBox(),
+        // cartBox(),
       ],
     );
   }
@@ -1377,58 +1504,11 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Widget menuReadQRcode() {
-    return ListTile(
-      leading: Icon(
-        Icons.photo_camera,
-        size: 36.0,
-      ),
-      title: Text('Read QR code'),
-      subtitle: Text('Read QR code or barcode'),
-      onTap: () {
-        // readQRcode();
-        readQRcodePreview();
-        // Navigator.of(context).pop();
-      },
-    );
-  }
-
-  // Future<void> readQRcode() async {
-  //   try {
-  //     var qrString = await BarcodeScanner.scan();
-  //     print('QR code = $qrString');
-  //     if (qrString != null) {
-  //       decodeQRcode(qrString);
-  //     }
-  //   } catch (e) {
-  //     print('e = $e');
-  //   }
-  // }
-
-  Future<void> readQRcodePreview() async {
-    try {
-      final qrScanString = await Navigator.push(this.context,
-          MaterialPageRoute(builder: (context) => ScanPreviewPage()));
-
-      print('Before scan');
-      // final qrScanString = await BarcodeScanner.scan();
-      print('After scan');
-      print('scanl result: $qrScanString');
-      qrString = qrScanString;
-      if (qrString != null) {
-        decodeQRcode(qrString);
-      }
-      // setState(() => scanResult = qrScanString);
-    } on PlatformException catch (e) {
-      print('e = $e');
-    }
-  }
-
   Future<void> readCart() async {
     amontCart = 0;
-    String memberId = myUserModel.id.toString();
+    String memberId = myUserModel!.id.toString();
     String url =
-        'https://ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId';
+        'https://www.ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId&screen=home';
 
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
@@ -1436,47 +1516,11 @@ class _HomeState extends State<Home> {
     if (cartList != null) {
       for (var map in cartList) {
         setState(() {
-          amontCart++;
+          amontCart = amontCart! + 1;
         });
         // print('amontCart (service page))>>>> $amontCart');
       }
     }
-  }
-
-  Future<void> decodeQRcode(var code) async {
-    try {
-      String url =
-          'https://ptnpharma.com/apishop/json_productlist.php?bqcode=$code';
-      http.Response response = await http.get(Uri.parse(url));
-      var result = json.decode(response.body);
-      print('result ===*******>>>> $result');
-
-      int status = result['status'];
-      print('status ===>>> $status');
-      if (status == 0) {
-        normalDialog(context, 'Not found', 'ไม่พบ code :: $code ในระบบ');
-      } else {
-        var itemProducts = result['itemsProduct'];
-        for (var map in itemProducts) {
-          print('map ===*******>>>> $map');
-
-          ProductAllModel productAllModel = ProductAllModel.fromJson(map);
-          MaterialPageRoute route = MaterialPageRoute(
-            builder: (BuildContext context) => Detail(
-              userModel: myUserModel,
-              productAllModel: productAllModel,
-            ),
-          );
-          Navigator.of(context).push(route).then((value) => readCart());
-
-          // Navigator.of(context).push(route).then((value) {
-          //   setState(() {
-          //     // readCart();
-          //   });
-          // });
-        }
-      }
-    } catch (e) {}
   }
 
   Widget FadeAlertAnimation(BuildContext context, Animation<double> animation,
@@ -1488,21 +1532,6 @@ class _HomeState extends State<Home> {
       ),
     );
   }
-
-  // Widget successBox() {
-  //   return Text(
-  //     'สั่งซื้อเรียบร้อย',
-  //     style: TextStyle(
-  //       fontSize: 32,
-  //       fontWeight: FontWeight.bold,
-  //       color: MyStyle().textColor,
-  //     ),
-  //   )
-  //       .animate()
-  //       .fadeOut(duration: 3.seconds)
-  //       .then(delay: 5.seconds) // baseline=800ms
-  //       .slide();
-  // }
 
   Widget homeMenu() {
     return Container(
@@ -1535,41 +1564,32 @@ class _HomeState extends State<Home> {
           // mySizebox(),
           row5Menu(),
           // mySizebox(),
-          // row6Menu(),
+          row6Menu(),
+          // mySizebox(),
+          row7Menu(),
         ],
       ),
     );
   }
 
-  Future<void> directMessage() {
-    String msg = myUserModel.msg;
-    if (msg != '') {
-      // ToastView.createView(msg, context, Toast.LENGTH_LONG, Toast.BOTTOM,
-      //     Colors.red, Colors.white, 200, null);
-      Toast.show(msg, context,
-          duration: Toast.LENGTH_LONG,
-          gravity: Toast.BOTTOM,
-          backgroundColor: Colors.red);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    String login = myUserModel.name;
-    String loginStatus = myUserModel.status;
-    String msg = myUserModel.msg;
-    int unread = myUserModel.lastNewsId - myUserModel.lastNewsOpen;
+    String? login = myUserModel!.name;
+    String? loginStatus = myUserModel!.status;
+    String? msg = myUserModel!.msg;
+    int? unread = myUserModel!.lastNewsId! - myUserModel!.lastNewsOpen!;
 
     if (loginStatus == '1') {
       return SingleChildScrollView(
         child: Column(
           children: <Widget>[
             profileBox(),
-            headTitle('สินค้าแนะนำ', Icons.thumb_up), //($loginStatus)
+            // headTitle('สินค้าแนะนำ', Icons.thumb_up), //($loginStatus)
             slideshow(),
-            headTitle('เมนู', Icons.home),
+            promotionbannerBTN(),
+            headTitle('เมนู', Icons.medical_services),
             homeMenu(),
-            headTitle('ข่าวสาร', Icons.home),
+            headTitle('ข่าวสาร', Icons.newspaper),
             showNews(),
           ],
         ),
@@ -1577,10 +1597,6 @@ class _HomeState extends State<Home> {
     } else {
       return Text('กรุณาติดต่อ PTN Pharma');
     }
-  }
-
-  void showToast(String msg, {int duration, int gravity}) {
-    Toast.show(msg, context, duration: duration, gravity: gravity);
   }
 
   Widget headTitle(String string, IconData iconData) {
@@ -1609,16 +1625,17 @@ class _HomeState extends State<Home> {
   }
 
   Widget _buttonWidget({
-    String title,
-    VoidCallback onClick,
+    String? title,
+    VoidCallback? onClick,
   }) {
     return ElevatedButton(
-      onPressed: () => onClick(),
+      // onPressed: () => onClick(),
+      onPressed: () => () {},
       style: ElevatedButton.styleFrom(
-        primary: Colors.blue,
+        backgroundColor: Colors.blue,
       ),
       child: Text(
-        title,
+        title!,
         style: const TextStyle(
           color: Colors.white,
         ),
@@ -1627,114 +1644,91 @@ class _HomeState extends State<Home> {
   }
 }
 
-class WebViewWidget extends StatefulWidget {
-  WebViewWidget({Key key}) : super(key: key);
-
+class WebViewExample extends StatefulWidget {
+  final UserModel? userModel;
+  final String? webPage;
+  const WebViewExample({super.key, this.userModel, this.webPage});
   @override
-  _WebViewWidgetState createState() => _WebViewWidgetState();
+  State<WebViewExample> createState() => _WebViewExampleState();
 }
 
-class _WebViewWidgetState extends State {
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: Text("Sample WebView Widget"),
-          backgroundColor: MyStyle().bgColor,
-        ),
-        body: Center(
-          child: Column(
-            children: [
-              Container(
-                child: TextButton(
-                    child: Text("Open my Blog"),
-                    onPressed: () {
-                      print("in");
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (context) => WebView()));
-                    }),
-              )
-            ],
-          ),
-        ));
-  }
-}
-
-class WebView extends StatefulWidget {
-  final UserModel userModel;
-
-  WebView({Key key, this.userModel}) : super(key: key);
-
-  @override
-  _WebViewState createState() => _WebViewState();
-}
-
-class _WebViewState extends State<WebView> {
-  UserModel myUserModel;
+class _WebViewExampleState extends State<WebViewExample> {
+  UserModel? myUserModel;
+  String? mywebPage;
+  late final WebViewController controller;
 
   @override
   void initState() {
     super.initState();
     myUserModel = widget.userModel;
+    mywebPage = widget.webPage;
+    String? memberId = myUserModel!.id;
+    String? memberCode = myUserModel!.customerCode;
+    String webPage = mywebPage.toString();
+
+
+    String? urlView =
+        'https://www.ptnpharma.com/shop/pages/tables/orderhistory_mb.php?memberId=$memberId&memberCode=$memberCode'; //
+    String? txtTitle = 'หน้า.....';
+
+    if (webPage == 'pay') {
+      urlView =
+          'https://www.ptnpharma.com/shop/pages/forms/pay_mobile.php?memberId=$memberId&memberCode=$memberCode'; //
+      txtTitle = 'การชำระเงิน';
+    } else if (webPage == 'history') {
+      urlView =
+          'https://www.ptnpharma.com/shop/pages/tables/orderhistory_mb.php?memberId=$memberId&memberCode=$memberCode'; //
+      txtTitle = 'ประวัติการสั่งซื้อ';
+    } else if (webPage == 'reward') {
+      urlView =
+          'https://www.ptnpharma.com/shop/pages/tables/reward_list_mb.php?memberId=$memberId&memberCode=$memberCode'; //
+      txtTitle = 'รายการของสมนาคุณ ';
+    } else if (webPage == 'suggestion') {
+      urlView =
+          'https://www.ptnpharma.com/shop/pages/forms/complain_mobile.php?memberId=$memberId&memberCode=$memberCode'; //
+      txtTitle = 'ข้อเสนอแนะ ';
+    } else {
+      urlView =
+          'https://www.ptnpharma.com/shop/pages/forms/complain_mobile.php?memberId=$memberId&memberCode=$memberCode'; //
+      txtTitle = 'แจ้งร้องเรียน';
+    }
+
+    // #docregion webview_controller
+    controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onProgress: (int progress) {
+            // Update loading bar.
+          },
+          onPageStarted: (String url) {},
+          onPageFinished: (String url) {},
+          onHttpError: (HttpResponseError error) {},
+          onWebResourceError: (WebResourceError error) {},
+          onNavigationRequest: (NavigationRequest request) {
+            if (request.url.startsWith('https://www.youtube.com/')) {
+              return NavigationDecision.prevent;
+            }
+            return NavigationDecision.navigate;
+          },
+        ),
+      )
+      ..loadRequest(Uri.parse(urlView));
+    // #enddocregion webview_controller
   }
 
+
+  // #docregion webview_widget
   @override
   Widget build(BuildContext context) {
-    String memberId = myUserModel.id;
-    String memberCode = myUserModel.customerCode;
-    String url =
-        'https://ptnpharma.com/shop/pages/tables/orderhistory_mobile.php?memberId=$memberId&memberCode=$memberCode'; //
-    print('URL ==>> $url');
-    return WebviewScaffold(
-      url: url, //"https://www.androidmonks.com",
+    return Scaffold(
       appBar: AppBar(
-        backgroundColor: MyStyle().bgColor,
-        title: Text("ประวัติการสั่งซื้อ"),
-      ),
-      withZoom: true,
-      withJavascript: true,
-      withLocalStorage: true,
-      appCacheEnabled: false,
-      ignoreSSLErrors: true,
+          backgroundColor: Colors.green,
+          iconTheme: IconThemeData(color: Colors.white),
+          title:
+              const Text('PTN Pharma', style: TextStyle(color: Colors.white))),
+      body: WebViewWidget(controller: controller),
     );
   }
-}
-
-class ScanPreviewPage extends StatefulWidget {
-  @override
-  _ScanPreviewPageState createState() => _ScanPreviewPageState();
-}
-
-class _ScanPreviewPageState extends State<ScanPreviewPage> {
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('PTN Pharma'),
-          backgroundColor: MyStyle().bgColor,
-        ),
-        body: SizedBox(
-          width: double.infinity,
-          height: double.infinity,
-          child: ScanPreviewWidget(
-            onScanResult: (result) {
-              debugPrint('scan result: $result');
-              Navigator.pop(context, result);
-            },
-          ),
-        ),
-      ),
-    );
-  }
+  // #enddocregion webview_widget
 }

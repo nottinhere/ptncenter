@@ -14,7 +14,8 @@ description: A new Flutter project.
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.1.0 <3.0.0"
+    sdk: '>=3.2.5 <4.0.0'
+
 
 dependencies:
   flutter:
@@ -22,40 +23,45 @@ dependencies:
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.3
-  http: ^0.12.0+2
-  carousel_slider: ^4.0.0
-  # carousel_slider: ^2.2.1
-  shared_preferences: ^2.0.15
-  bubble_bottom_bar: ^1.2.0
-  flutter_webview_plugin: ^0.4.0
-  # barcode_scan: ^1.0.0
-  rflutter_alert: ^1.1.0
-  toast: ^0.1.5
-  loading: ^1.0.2
-  loadmore: ^1.0.4
-  location: ^2.3.5
-  url_launcher: ^5.0.2
-  google_maps_flutter: ^2.2.1
-  font_awesome_flutter: ^8.2.0
-  flutter_spinbox: ^0.6.0
-  favorite_button: ^0.0.4
-  barcode_scan2: ^4.2.1
-  permission_handler: ^9.2.0
-  flutter_barcode_scanner: ^2.0.0
-  popup_banner: ^1.0.0
-  flutter_overlay_loader: ^2.0.0
-  youtube_player_flutter: ^8.1.2
-  chat_bubbles: ^1.5.0
-  firebase_analytics: ^10.7.4
-  firebase_core: ^2.22.0
-  status_alert: ^1.0.1
+  flutter_lints: ^5.0.0
+  firebase_analytics: ^11.4.1
+  carousel_slider: ^5.0.0
+  barcode_scan2: ^4.4.0
+  shared_preferences: ^2.5.1
+  toast: ^0.3.0
+  permission_handler: ^11.3.1
+  youtube_player_flutter: ^9.1.1
+  youtube_player_iframe: ^5.2.2
+
+  chat_bubbles: ^1.7.0
+  font_awesome_flutter: ^10.8.0
+  google_maps_flutter: ^2.10.0
+  awesome_dialog: ^3.2.1
+  stylish_bottom_bar: ^1.1.1
+  loader_overlay: ^5.0.0
+  loading_animation_widget: ^1.3.0
+  mobile_scanner: ^7.0.1
+  image: ^4.5.4
+  image_picker: ^1.1.2
+  webview_flutter: ^4.13.0
+  platform: ^3.1.6
+
+  flutter_overlay_loader: ^2.0.0  #request to change
+  popup_banner: ^1.0.0  #request to change
+  rflutter_alert: ^2.0.7   #request to change
+  flutter_spinbox: ^0.13.1  #request to change
+  favorite_button: ^0.0.4 #request to change
+  status_alert: ^1.0.1 #request to change
+  loading_indicator: ^3.1.1    #request to change   19m
+  # flutter_webview_plugin: ^0.4.0  #request to change
+  # flutter_barcode_scanner: ^2.0.0  #request to change
+
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
     
-  scan_preview:
+  # scan_preview:
 
 
 # For information on the generic Dart part of this file, see the
