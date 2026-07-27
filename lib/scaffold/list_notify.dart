@@ -5,7 +5,6 @@ import 'package:http/http.dart' as http;
 
 import 'package:ptncenter/models/user_model.dart';
 import 'package:ptncenter/models/popup_model.dart';
-import 'package:ptncenter/scaffold/authen.dart';
 import 'package:ptncenter/scaffold/detail_notify.dart';
 import 'package:ptncenter/scaffold/detail_cart.dart';
 import 'package:ptncenter/scaffold/list_product.dart';
@@ -14,11 +13,8 @@ import 'package:ptncenter/scaffold/list_product_favorite.dart';
 import 'my_service.dart';
 
 import 'package:ptncenter/utility/my_style.dart';
-import 'package:ptncenter/utility/normal_dialog.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:flutter/services.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:chat_bubbles/chat_bubbles.dart';
 import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
 
@@ -59,7 +55,6 @@ class _NotifyState extends State<Notify> {
 
   String? qrString;
   int? currentIndex = 0;
-  String? _result = '';
   int selectIndex = 3;
 
   // Method
@@ -79,7 +74,7 @@ class _NotifyState extends State<Notify> {
   Future<void> readNotify() async {
     String? memberId = myUserModel!.id;
     String? url =
-        'https://www.ptnpharma.com/apishop/json_notify.php?limit=10&memberId=$memberId'; // ?memberId=$memberId
+        '${MyStyle().serverName}/apishop/json_notify.php?limit=10&memberId=$memberId'; // ?memberId=$memberId
     print('urlNotify >> $url');
 
     http.Response response = await http.get(Uri.parse(url));
@@ -89,8 +84,6 @@ class _NotifyState extends State<Notify> {
 
     for (var map in mapItemNotify) {
       PopupModel? popupModel = PopupModel.fromJson(map);
-      String? postdate = popupModel.postdate;
-      String? subject = popupModel.subject;
       setState(() {
         //promoteModels.add(promoteModel); // push ค่าลง array
         notifyModels!.add(popupModel);
@@ -167,7 +160,6 @@ class _NotifyState extends State<Notify> {
   }
 
   Widget listNotify() {
-    Duration duration = new Duration();
     final now = new DateTime.now();
     return ListView.builder(
       controller: scrollController,
@@ -218,13 +210,13 @@ class _NotifyState extends State<Notify> {
     amontCart = 0;
     String memberId = myUserModel!.id.toString();
     String url =
-        'https://www.ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId&screen=listnotify';
+        '${MyStyle().serverName}/apishop/json_loadmycart.php?memberId=$memberId&screen=listnotify';
 
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var cartList = result['cart'];
     if (cartList != null) {
-      for (var map in cartList) {
+      for (var _ in cartList) {
         setState(() {
           amontCart = amontCart! + 1;
         });
@@ -252,9 +244,7 @@ class _NotifyState extends State<Notify> {
         return Notify(userModel: myUserModel!);
       },
     );
-    int unread;
-    // Navigator.of(context).push(materialPageRoute);
-    Navigator.of(context).push(materialPageRoute).then((value) => unread = 0);
+    Navigator.of(context).push(materialPageRoute);
   }
 
   Widget headTitle(String string, IconData iconData) {
@@ -275,15 +265,6 @@ class _NotifyState extends State<Notify> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buttonWidget({String? title, VoidCallback? onClick}) {
-    return ElevatedButton(
-      // onPressed: () => onClick(),
-      onPressed: () => () {},
-      style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
-      child: Text(title!, style: const TextStyle(color: Colors.white)),
     );
   }
 
@@ -312,9 +293,6 @@ class _NotifyState extends State<Notify> {
   }
 
   Widget stylishBottomBar() {
-    int? unread =
-        myUserModel!.lastNewsId!.toInt() - myUserModel!.lastNewsOpen!.toInt();
-
     return StylishBottomBar(
       //  option: AnimatedBarOptions(
       //    iconSize: 32,

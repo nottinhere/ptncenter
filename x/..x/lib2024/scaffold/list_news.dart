@@ -72,7 +72,7 @@ class _NewsState extends State<News> {
   Future<void> readNews() async {
     String? memberId = myUserModel!.id;
     String? url =
-        'https://www.ptnpharma.com/apishop/json_news.php?limit=5&memberId=$memberId'; // ?memberId=$memberId
+        '${MyStyle().serverName}/apishop/json_news.php?limit=5&memberId=$memberId'; // ?memberId=$memberId
     print('urlNews >> $url');
 
     http.Response response = await http.get(Uri.parse(url));

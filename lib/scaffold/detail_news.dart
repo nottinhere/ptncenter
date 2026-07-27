@@ -15,10 +15,6 @@ import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
 import 'my_service.dart';
 
 import 'package:webview_flutter/webview_flutter.dart';
-// Import for Android features.
-import 'package:webview_flutter_android/webview_flutter_android.dart';
-// Import for iOS/macOS features.
-import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
 class DetailNews extends StatefulWidget {
   final PopupModel? popupModel;
@@ -60,7 +56,7 @@ class _DetailState extends State<DetailNews> {
   Future<void> getPopupWhereID() async {
     String id = currentPopupModel!.id.toString();
 
-    String url = 'https://www.ptnpharma.com/apishop/json_newsdetail.php?id=$id';
+    String url = '${MyStyle().serverName}/apishop/json_newsdetail.php?id=$id';
     print('urlPopup >> $url');
 
     http.Response response = await http.get(Uri.parse(url));
@@ -306,8 +302,6 @@ class _DetailState extends State<DetailNews> {
   }
 
   Widget stylishBottomBar() {
-    int? unread =
-        myUserModel!.lastNewsId!.toInt() - myUserModel!.lastNewsOpen!.toInt();
     return StylishBottomBar(
       //  option: AnimatedBarOptions(
       //    iconSize: 32,
@@ -518,11 +512,7 @@ class _WebViewExampleState extends State<WebViewExample> {
     super.initState();
     myUserModel = widget.userModel;
     mywebPage = widget.webPage;
-    String? memberId = myUserModel!.id;
-    String? memberCode = myUserModel!.customerCode;
-    String webPage = mywebPage.toString();
 
-    
     String? url = mywebPage!; //
     print('URL ==>> $url');
 

@@ -420,7 +420,7 @@ class _ListProductState extends State<ListProduct> {
     return Row(
       children: <Widget>[
         Container(
-          width: MediaQuery.of(context).size.width * 0.7 - 10,
+          width: MediaQuery.of(context).size.width * 0.75,
           child: Text(
             filterProductAllModels![index].title!,
             style: MyStyle().h3Style,
@@ -434,7 +434,7 @@ class _ListProductState extends State<ListProduct> {
     return Row(
       children: <Widget>[
         Container(
-          width: MediaQuery.of(context).size.width * 0.7 - 10,
+          width: MediaQuery.of(context).size.width * 0.75,
           child: Text(
             filterProductAllModels![index].hilight!,
             style: MyStyle().h3StyleRed,

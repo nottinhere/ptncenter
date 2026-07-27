@@ -11,7 +11,6 @@ import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:ptncenter/utility/normal_dialog.dart';
 import 'detail.dart';
 import 'detail_cart.dart';
-import 'package:ptncenter/widget/home.dart';
 
 import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
 
@@ -20,9 +19,8 @@ import 'my_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:loading_indicator/loading_indicator.dart';
-import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 // import 'package:scan_preview/scan_preview_widget.dart';
 // import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
@@ -35,7 +33,6 @@ class ListProductfav extends StatefulWidget {
   final UserModel? userModel;
   final int? cate;
   final String? cateName;
-  String _result = '';
 
   ListProductfav(
       {Key? key, this.index, this.userModel, this.cate, this.cateName})
@@ -140,7 +137,7 @@ class _ListProductfavState extends State<ListProductfav> {
     lastItemName = '';
     String memberId = myUserModel!.id.toString();
     String url =
-        'https://www.ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId&screen=listproductfav';
+        '${MyStyle().serverName}/apishop/json_loadmycart.php?memberId=$memberId&screen=listproductfav';
 
     print('url Detail =====>>>>>>>> $url');
 
@@ -199,7 +196,7 @@ class _ListProductfavState extends State<ListProductfav> {
       print(barcodeScanRes);
 
       String url =
-          'https://www.ptnpharma.com/apishop/json_productlist.php?bqcode=$barcodeScanRes';
+          '${MyStyle().serverName}/apishop/json_productlist.php?bqcode=$barcodeScanRes';
       http.Response response = await http.get(Uri.parse(url));
       var result = json.decode(response.body);
       // print('result ===*******>>>> $result');
@@ -292,7 +289,7 @@ class _ListProductfavState extends State<ListProductfav> {
 
     String memberId = myUserModel!.id.toString();
     String url =
-        'https://www.ptnpharma.com/apishop/json_productfavoritelist.php?memberId=$memberId&searchKey=$searchString&page=$page';
+        '${MyStyle().serverName}/apishop/json_productfavoritelist.php?memberId=$memberId&searchKey=$searchString&page=$page';
 
     // url = '${MyStyle().readProductWhereMode}$myIndex';
     print("URL = $url");
@@ -336,7 +333,7 @@ class _ListProductfavState extends State<ListProductfav> {
     String? memberId = myUserModel!.id.toString();
     int? productID = filterProductAllModels![index].id!;
     String? url =
-        'https://www.ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId';
+        '${MyStyle().serverName}/apishop/json_loadmycart.php?memberId=$memberId';
 
     print("URL update item = $url");
     http.Response response = await http.get(Uri.parse(url));
@@ -366,7 +363,7 @@ class _ListProductfavState extends State<ListProductfav> {
     return Row(
       children: <Widget>[
         Container(
-          width: MediaQuery.of(context).size.width * 0.7 - 10,
+          width: MediaQuery.of(context).size.width * 0.75,
           child: Text(
             filterProductAllModels![index].title!,
             style: MyStyle().h3Style,
@@ -380,7 +377,7 @@ class _ListProductfavState extends State<ListProductfav> {
     return Row(
       children: <Widget>[
         Container(
-          width: MediaQuery.of(context).size.width * 0.7 - 10,
+          width: MediaQuery.of(context).size.width * 0.75,
           child: Text(
             filterProductAllModels![index].hilight!,
             style: MyStyle().h3StyleRed,
@@ -484,11 +481,25 @@ class _ListProductfavState extends State<ListProductfav> {
     // return Text('na');
   }
 
+  Widget showExtrapoint(int index) {
+    return Row(
+      children: <Widget>[
+        Container(
+          width: MediaQuery.of(context).size.width * 0.75,
+          child: Text(
+            filterProductAllModels![index].extrapoint!,
+            style: MyStyle().h3StyleOrange,
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget showText(int index) {
     return Container(
-      padding: EdgeInsets.only(left: 5.0, right: 2.0),
+      padding: EdgeInsets.only(left: 5.0, right: 0.0),
       // height: MediaQuery.of(context).size.width * 0.5,
-      width: MediaQuery.of(context).size.width * 0.73,
+      width: MediaQuery.of(context).size.width * 0.78,
       child: Container(
         padding: EdgeInsets.only(bottom: 5.0, top: 5.0),
         child: Column(
@@ -497,6 +508,9 @@ class _ListProductfavState extends State<ListProductfav> {
             showName(index),
             (filterProductAllModels![index].hilight != '')
                 ? showHilight(index)
+                : Container(),
+            (filterProductAllModels![index].extrapoint != '')
+                ? showExtrapoint(index)
                 : Container(),
             showPrice(index),
             showStock(index),
@@ -524,15 +538,9 @@ class _ListProductfavState extends State<ListProductfav> {
 
   BoxDecoration myBoxDecoration() {
     return BoxDecoration(
-      border: Border(
-        top: BorderSide(
-          color: Colors.blueGrey.shade100,
-          width: 1.0,
-        ),
-        // bottom: BorderSide(
-        //   color: Colors.blueGrey.shade100,
-        //   width: 1.0,
-        // ),
+      border: Border.all(color: Colors.green.shade300),
+      borderRadius: BorderRadius.all(
+        Radius.circular(5.0), //                 <--- border radius here
       ),
     );
   }
@@ -566,11 +574,15 @@ class _ListProductfavState extends State<ListProductfav> {
 
   Widget myCircularProgress() {
     return Visibility(
-      maintainSize: true,
-      maintainAnimation: true,
-      maintainState: true,
+      maintainSize: false,
+      maintainAnimation: false,
+      maintainState: false,
       visible: visible,
-      child: Center(child: CupertinoActivityIndicator()),
+      child: Center(
+          child: LoadingAnimationWidget.staggeredDotsWave(
+        color: Colors.green,
+        size: 20,
+      )),
     );
   }
 
@@ -702,7 +714,11 @@ class _ListProductfavState extends State<ListProductfav> {
         return Center(child: Text(''));
       }
     } else {
-      return Center(child: CircularProgressIndicator());
+      return Center(
+          child: LoadingAnimationWidget.staggeredDotsWave(
+        color: Colors.green,
+        size: 30,
+      ));
     }
     /*
     return Center(
@@ -782,7 +798,7 @@ class _ListProductfavState extends State<ListProductfav> {
     try {
       if(code != '' && code != null){
         String url =
-            'https://www.ptnpharma.com/apishop/json_productlist.php?bqcode=$code';
+            '${MyStyle().serverName}/apishop/json_productlist.php?bqcode=$code';
         http.Response response = await http.get(Uri.parse(url));
         var result = json.decode(response.body);
         // print('result ===*******>>>> $result');
@@ -984,8 +1000,6 @@ class _ListProductfavState extends State<ListProductfav> {
   // }
 
   Widget stylishBottomBar() {
-    int? unread =
-        myUserModel!.lastNewsId!.toInt() - myUserModel!.lastNewsOpen!.toInt();
     return StylishBottomBar(
       //  option: AnimatedBarOptions(
       //    iconSize: 32,

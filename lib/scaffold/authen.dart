@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -11,7 +10,6 @@ import 'package:ptncenter/utility/my_style.dart';
 import 'package:ptncenter/scaffold/detail_popup.dart';
 import 'package:ptncenter/utility/normal_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 
 class Authen extends StatefulWidget {
@@ -190,7 +188,7 @@ class _AuthenState extends State<Authen> {
       ).show();
       
     } else {
-      String urlPop = 'https://www.ptnpharma.com/apishop/json_popup.php';
+      String urlPop = '${MyStyle().serverName}/apishop/json_popup.php';
       http.Response responsePop = await http.get(Uri.parse(urlPop));
       var resultPop = json.decode(responsePop.body);
       var mapItemPopup = resultPop[
@@ -284,41 +282,6 @@ class _AuthenState extends State<Authen> {
     //     builder: (value) => DetailPopup(userModel: userModel),
     //   );
     //   Navigator.of(context).pushAndRemoveUntil(route, (route) => false);
-  }
-
-  void _onBasicAlertPressed(context) {
-    var alertStyle = AlertStyle(
-      isCloseButton: false,
-      isOverlayTapDismiss: false,
-      titleStyle: TextStyle(
-        color: Colors.red,
-      ),
-    );
-
-    Alert(
-      context: context,
-      style: alertStyle,
-      title: "ประกาศ !!!",
-      desc: subjectPopup,
-      buttons: [
-        DialogButton(
-          child: Text(
-            "Close",
-            style: TextStyle(color: Colors.white, fontSize: 18),
-          ),
-          onPressed: () => gotoService(),
-          color: Color.fromRGBO(255, 77, 77, 1.0),
-        ),
-        DialogButton(
-          child: Text(
-            "Detail",
-            style: TextStyle(color: Colors.white, fontSize: 18),
-          ),
-          onPressed: () => gotoPopupdetail(),
-          color: Color.fromRGBO(51, 153, 255, 1.0),
-        ),
-      ],
-    ).show();
   }
 
   void routeToMyService(statusPopup) async {

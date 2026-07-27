@@ -35,7 +35,7 @@ class UserModel {
   int? lastNotifyId;
   int? unpaidorn;
   int? unpaidorder;
-  int? totalIncart;
+  double? totalIncart;
   String? firsunpaiddate;
   String? credittermAlert;
   String? financialamountAlert;
@@ -43,6 +43,10 @@ class UserModel {
   int? countpricechange;
   String? promotionalert;
   String? promotionsuccess;
+  String? lastupdateLicense;
+  int? lastupdateLicenseYear;
+  String? lastupdateLicenseStatus;
+  String? lastupdateLicenseReason;
   String? msg;
 
   UserModel(
@@ -90,6 +94,10 @@ class UserModel {
       this.countpricechange,
       this.promotionalert,
       this.promotionsuccess,
+      this.lastupdateLicense,
+      this.lastupdateLicenseYear,
+      this.lastupdateLicenseStatus,
+      this.lastupdateLicenseReason,
       this.msg});
 
   UserModel.fromJson(Map<String, dynamic> json) {
@@ -137,6 +145,10 @@ class UserModel {
     countpricechange = json['countpricechange'];
     promotionalert = json['promotionalert'];
     promotionsuccess = json['promotionsuccess'];
+    lastupdateLicense = json['lastupdateLicense'];
+    lastupdateLicenseYear = json['lastupdateLicenseYear'];
+    lastupdateLicenseStatus = json['lastupdateLicenseStatus'];
+    lastupdateLicenseReason = json['lastupdateLicenseReason'];
     msg = json['msg'];
   }
 
@@ -186,6 +198,10 @@ class UserModel {
     data['countpricechange'] = this.countpricechange;
     data['promotionalert'] = this.promotionalert;
     data['promotionsuccess'] = this.promotionsuccess;
+    data['lastupdateLicense'] = this.lastupdateLicense;
+    data['lastupdateLicenseYear'] = this.lastupdateLicenseYear;
+    data['lastupdateLicenseStatus'] = this.lastupdateLicenseStatus;
+    data['lastupdateLicenseReason'] = this.lastupdateLicenseReason;
     data['msg'] = this.msg;
     return data;
   }

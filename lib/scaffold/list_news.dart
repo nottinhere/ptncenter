@@ -5,16 +5,12 @@ import 'package:http/http.dart' as http;
 
 import 'package:ptncenter/models/user_model.dart';
 import 'package:ptncenter/models/popup_model.dart';
-import 'package:ptncenter/scaffold/authen.dart';
 import 'package:ptncenter/scaffold/detail_news.dart';
 import 'package:ptncenter/scaffold/detail_cart.dart';
 
 import 'package:ptncenter/utility/my_style.dart';
-import 'package:ptncenter/utility/normal_dialog.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:flutter/services.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:chat_bubbles/chat_bubbles.dart';
 
 class News extends StatefulWidget {
@@ -53,7 +49,6 @@ class _NewsState extends State<News> {
 
   String? qrString;
   int? currentIndex = 0;
-  String? _result = '';
 
   // Method
   @override
@@ -72,7 +67,7 @@ class _NewsState extends State<News> {
   Future<void> readNews() async {
     String? memberId = myUserModel!.id;
     String? url =
-        'https://www.ptnpharma.com/apishop/json_news.php?limit=5&memberId=$memberId'; // ?memberId=$memberId
+        '${MyStyle().serverName}/apishop/json_news.php?limit=5&memberId=$memberId'; // ?memberId=$memberId
     print('urlNews >> $url');
 
     http.Response response = await http.get(Uri.parse(url));
@@ -82,8 +77,6 @@ class _NewsState extends State<News> {
 
     for (var map in mapItemNews) {
       PopupModel? popupModel = PopupModel.fromJson(map);
-      String? postdate = popupModel.postdate;
-      String? subject = popupModel.subject;
       setState(() {
         //promoteModels.add(promoteModel); // push ค่าลง array
         newsModels!.add(popupModel);
@@ -161,7 +154,6 @@ class _NewsState extends State<News> {
   }
 
   Widget listNews() {
-    Duration duration = new Duration();
     final now = new DateTime.now();
     return ListView.builder(
       controller: scrollController,
@@ -230,13 +222,13 @@ class _NewsState extends State<News> {
     amontCart = 0;
     String memberId = myUserModel!.id.toString();
     String url =
-        'https://www.ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId&screen=listnews';
+        '${MyStyle().serverName}/apishop/json_loadmycart.php?memberId=$memberId&screen=listnews';
 
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var cartList = result['cart'];
     if (cartList != null) {
-      for (var map in cartList) {
+      for (var _ in cartList) {
         setState(() {
           amontCart = amontCart! + 1;
         });
@@ -273,25 +265,6 @@ class _NewsState extends State<News> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buttonWidget({
-    String? title,
-    VoidCallback? onClick,
-  }) {
-    return ElevatedButton(
-      // onPressed: () => onClick(),
-      onPressed: () => () {},
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.blue,
-      ),
-      child: Text(
-        title!,
-        style: const TextStyle(
-          color: Colors.white,
-        ),
       ),
     );
   }

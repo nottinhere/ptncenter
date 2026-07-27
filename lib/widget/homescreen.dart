@@ -1,13 +1,11 @@
 import 'dart:convert';
 import 'dart:async';
-import 'dart:ui' as ui;
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:ptncenter/models/product_all_model.dart';
 import 'package:ptncenter/models/promote_model.dart';
 import 'package:ptncenter/models/user_model.dart';
-import 'package:ptncenter/scaffold/authen.dart';
 import 'package:ptncenter/scaffold/detail.dart';
 import 'package:ptncenter/scaffold/detail_cart.dart';
 
@@ -17,7 +15,6 @@ import 'package:ptncenter/utility/normal_dialog.dart';
 
 import 'package:flutter/services.dart';
 
-import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/foundation.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -46,7 +43,6 @@ class _HomeScreenState extends State<HomeScreen> {
   List<ProductAllModel>? suggestModels;
   String? qrString;
   int? currentIndex = 0;
-  String? _result = '';
 
   // Method
   @override
@@ -114,13 +110,6 @@ class _HomeScreenState extends State<HomeScreen> {
     return GestureDetector(
       onTap: () {
         print('You Click index is $banerIndex');
-
-        MaterialPageRoute route = MaterialPageRoute(
-          builder: (BuildContext context) => Detail(
-            productAllModel: promoteModels![banerIndex],
-            userModel: myUserModel,
-          ),
-        );
         // Navigator.of(context).push(route).then((value) {});  //  link to detail page
       },
       child: CarouselSlider(
@@ -236,7 +225,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget orderhistoryBox() {
-    String? login = myUserModel!.name;
     return SizedBox(
       width: MediaQuery.of(context).size.width * 0.8,
       // height: 80.0,
@@ -641,13 +629,13 @@ class _HomeScreenState extends State<HomeScreen> {
     amontCart = 0;
     String? memberId = myUserModel!.id.toString();
     String? url =
-        'https://www.ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId&screen=homescreen';
+        '${MyStyle().serverName}/apishop/json_loadmycart.php?memberId=$memberId&screen=homescreen';
 
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var cartList = result['cart'];
 
-    for (var map in cartList) {
+    for (var _ in cartList) {
       setState(() {
         amontCart = amontCart! + 1;
       });
@@ -658,7 +646,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> decodeQRcode(var code) async {
     try {
       String? url =
-          'https://www.ptnpharma.com/apishop/json_productlist.php?bqcode=$code';
+          '${MyStyle().serverName}/apishop/json_productlist.php?bqcode=$code';
       http.Response response = await http.get(Uri.parse(url));
       var result = json.decode(response.body);
       print('result ===*******>>>> $result');

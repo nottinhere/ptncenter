@@ -14,14 +14,12 @@ import 'package:ptncenter/scaffold/list_product.dart';
 import 'package:ptncenter/scaffold/list_product_favorite.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:ptncenter/models/promote_model.dart';
-import 'package:ptncenter/widget/home.dart';
 import 'my_service.dart';
 import 'package:flutter_spinbox/flutter_spinbox.dart';
 import 'package:favorite_button/favorite_button.dart';
 
 import 'package:flutter/services.dart';
 
-import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/foundation.dart';
 
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
@@ -57,6 +55,7 @@ class _DetailState extends State<Detail> {
   int? sizeSincart = 0, sizeMincart = 0, sizeLincart = 0;
   int? qtyS = 0, qtyM = 0, qtyL = 0;
   int? showSincart = 0, showMincart = 0, showLincart = 0;
+  int? limitS = 0, limitM = 0, limitL = 0;
   // var showSincart = '', showMincart = '', showLincart = '';
 
   List<Widget>? promoteLists = [];
@@ -137,6 +136,11 @@ class _DetailState extends State<Detail> {
         showMincart = productAllModel!.itemincartMunit;
         showLincart = productAllModel!.itemincartLunit;
 
+        limitS = productAllModel!.limitS;
+        limitM = productAllModel!.limitM;
+        limitL = productAllModel!.limitL;
+
+
         videoCode = productAllModel?.youtube?.toString();
       });
       print('videoCode >> $videoCode');
@@ -155,9 +159,10 @@ class _DetailState extends State<Detail> {
     String? memId = myUserModel!.id;
     id = currentProductAllModel!.id.toString();
 
+
     String url =
-        'https://www.ptnpharma.com/apishop/json_productimage.php?memberId=$memId&id=$id';
-    // String url = 'https://www.ptnpharma.com/apishop/json_slideshow.php';
+        '${MyStyle().serverName}/apishop/json_productimage.php?memberId=$memId&id=$id';
+    // String url = '${MyStyle().serverName}/apishop/json_slideshow.php';
 
     print('URL image detail >> $url');
 
@@ -188,7 +193,7 @@ class _DetailState extends State<Detail> {
     id = currentProductAllModel!.id.toString();
 
     String url =
-        'https://www.ptnpharma.com/apishop/json_relate.php?memberId=$memId&productId=$id'; // ?memberId=$memberId
+        '${MyStyle().serverName}/apishop/json_relate.php?memberId=$memId&productId=$id'; // ?memberId=$memberId
 
     print('URL relate >> $url');
     http.Response response = await http.get(Uri.parse(url));
@@ -201,7 +206,6 @@ class _DetailState extends State<Detail> {
       PromoteModel? relateslideshowModel = PromoteModel.fromJson(map);
       ProductAllModel? productAllModel = ProductAllModel.fromJson(map);
       String? urlImage = relateslideshowModel.photo;
-      String? productName = relateslideshowModel.title;
 
       setState(() {
         //promoteModels.add(promoteModel); // push ค่าลง array
@@ -218,20 +222,6 @@ class _DetailState extends State<Detail> {
     return Center(child: CircularProgressIndicator());
   }
 
-  void routeToListProductByCate(int index, int cate, String cateName) {
-    MaterialPageRoute materialPageRoute = MaterialPageRoute(
-      builder: (BuildContext buildContext) {
-        return ListProduct(
-          index: index,
-          userModel: myUserModel!,
-          cate: cate,
-          cateName: cateName,
-        );
-      },
-    );
-    Navigator.of(context).push(materialPageRoute);
-  }
-
   void routeToListProductfav(int index) {
     MaterialPageRoute materialPageRoute = MaterialPageRoute(
       builder: (BuildContext buildContext) {
@@ -241,223 +231,85 @@ class _DetailState extends State<Detail> {
     Navigator.of(context).push(materialPageRoute);
   }
 
-  Widget categoryTag() {
-    return Container(
-      // width: MediaQuery.of(context).size.width * 0.20,
-      // height: 80.0,
-      child: GestureDetector(
-        child: Card(
-          color: Colors.blueGrey.shade400,
-          child: Container(
-            padding: EdgeInsets.all(4.0),
-            alignment: AlignmentDirectional(0.0, 0.0),
-            child: Column(
-              children: <Widget>[
-                Text(
-                  productAllModel!.cateName!,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        onTap: () {
-          print('You click promotion');
-          routeToListProductByCate(
-            6,
-            int.parse(productAllModel!.cateID!),
-            productAllModel!.cateName!,
-          );
-        },
-      ),
-    );
-  }
+  bool get hasAnyTag =>
+      productAllModel!.promotion == 1 ||
+      productAllModel!.newproduct == 1 ||
+      productAllModel!.updateprice == 1 ||
+      productAllModel!.notreceive == 1;
 
-  Widget promotionTag() {
-    return Container(
-      width: MediaQuery.of(context).size.width * 0.20,
-      // height: 80.0,
-      child: GestureDetector(
-        child: Card(
-          color: Colors.green.shade300,
-          child: Container(
-            padding: EdgeInsets.all(4.0),
-            alignment: AlignmentDirectional(0.0, 0.0),
-            child: Column(
-              children: <Widget>[
-                Text(
-                  'โปรโมชัน',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-            ),
+  Widget tagChip(String label, Color color, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(20.0),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 12.0,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
           ),
         ),
-        onTap: () {
-          print('You click promotion');
-          routeToListProduct(2);
-        },
-      ),
-    );
-  }
-
-  Widget updatepriceTag() {
-    return Container(
-      width: MediaQuery.of(context).size.width * 0.22,
-      // height: 80.0,
-      child: GestureDetector(
-        child: Card(
-          color: Colors.green.shade300,
-          child: Container(
-            padding: EdgeInsets.all(4.0),
-            alignment: AlignmentDirectional(0.0, 0.0),
-            child: Column(
-              children: <Widget>[
-                Text(
-                  'จะปรับราคา',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        onTap: () {
-          print('You click update price');
-          routeToListProduct(3);
-        },
-      ),
-    );
-  }
-
-  Widget newproductTag() {
-    return Container(
-      width: MediaQuery.of(context).size.width * 0.20,
-      // height: 80.0,
-      child: GestureDetector(
-        child: Card(
-          color: Colors.green.shade300,
-          child: Container(
-            padding: EdgeInsets.all(4.0),
-            alignment: AlignmentDirectional(0.0, 0.0),
-            child: Column(
-              children: <Widget>[
-                Text(
-                  'สินค้าใหม่',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        onTap: () {
-          print('You click new item');
-          routeToListProduct(1);
-        },
-      ),
-    );
-  }
-
-  Widget notreceiveTag() {
-    return Container(
-      width: MediaQuery.of(context).size.width * 0.25,
-      // height: 80.0,
-      child: GestureDetector(
-        child: Card(
-          color: Colors.green.shade300,
-          child: Container(
-            padding: EdgeInsets.all(4.0),
-            alignment: AlignmentDirectional(0.0, 0.0),
-            child: Column(
-              children: <Widget>[
-                Text(
-                  'สั่งแล้วไม่ได้รับ',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        onTap: () {
-          print('You click not receive');
-          routeToListProduct(4);
-        },
       ),
     );
   }
 
   Widget showTag() {
-    return Row(
-      // mainAxisAlignment: MainAxisAlignment.spaceAround,
-      // mainAxisSize: MainAxisSize.max,
-      // mainAxisSize: MainAxisSize.min,
+    return Wrap(
+      spacing: 8.0,
+      runSpacing: 8.0,
       children: <Widget>[
-        SizedBox(width: 5.0, height: 5.0),
-        // categoryTag(),
-        productAllModel!.promotion == 1 ? promotionTag() : Container(),
-        productAllModel!.newproduct == 1 ? newproductTag() : Container(),
-        productAllModel!.updateprice == 1 ? updatepriceTag() : Container(),
-        productAllModel!.notreceive == 1 ? notreceiveTag() : Container(),
-        SizedBox(width: 5.0, height: 8.0),
+        if (productAllModel!.promotion == 1)
+          tagChip('โปรโมชัน', MyStyle().mainColor, () => routeToListProduct(2)),
+        if (productAllModel!.newproduct == 1)
+          tagChip('สินค้าใหม่', Colors.blue.shade600, () => routeToListProduct(1)),
+        if (productAllModel!.updateprice == 1)
+          tagChip('จะปรับราคา', MyStyle().warningColor, () => routeToListProduct(3)),
+        if (productAllModel!.notreceive == 1)
+          tagChip('สั่งแล้วไม่ได้รับ', MyStyle().alertColor, () => routeToListProduct(4)),
       ],
     );
   }
 
   Widget showCarouseSlideshow() {
     print('slideshowLists.length >> ' + slideshowLists!.length.toString());
-    return Column(
-      children: [
-        GestureDetector(
-          child: CarouselSlider.builder(
-            options: CarouselOptions(
-              // pauseAutoPlayOnTouch: Duration(seconds: 5),
-              autoPlay: slideshowLists!.isNotEmpty ? true : false,
-              autoPlayAnimationDuration: Duration(seconds: 5),
-            ),
-            itemCount: (slideshowLists!.length).round(),
-            itemBuilder: (context, index, realIdx) {
-              final int first = index;
-              // final int second = first + 1;
-              return Row(
-                children: [first].map((idx) {
-                  return Expanded(
-                    child: Container(
-                      padding: EdgeInsets.all(1.0),
-                      child: Center(
-                        child: Image.network(
-                          urlImages![idx],
-                          fit: BoxFit.cover,
-                          width: 1000,
-                        ),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(MyStyle().radiusM),
+      child: GestureDetector(
+        child: CarouselSlider.builder(
+          options: CarouselOptions(
+            // pauseAutoPlayOnTouch: Duration(seconds: 5),
+            autoPlay: slideshowLists!.isNotEmpty ? true : false,
+            autoPlayAnimationDuration: Duration(seconds: 5),
+          ),
+          itemCount: (slideshowLists!.length).round(),
+          itemBuilder: (context, index, realIdx) {
+            final int first = index;
+            // final int second = first + 1;
+            return Row(
+              children: [first].map((idx) {
+                return Expanded(
+                  child: Container(
+                    color: Colors.white,
+                    padding: EdgeInsets.all(1.0),
+                    child: Center(
+                      child: Image.network(
+                        urlImages![idx],
+                        fit: BoxFit.cover,
+                        width: 1000,
                       ),
                     ),
-                  );
-                }).toList(),
-              );
-            },
-          ),
+                  ),
+                );
+              }).toList(),
+            );
+          },
         ),
-        Divider(),
-      ],
+      ),
     );
   }
 
@@ -481,7 +333,14 @@ class _DetailState extends State<Detail> {
             children: [first, second].map((idx) {
               return Expanded(
                 child: GestureDetector(
-                  child: Card(
+                  child: Container(
+                    margin: EdgeInsets.symmetric(horizontal: 4.0),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(MyStyle().radiusS),
+                      border: Border.all(color: MyStyle().borderColor),
+                    ),
+                    clipBehavior: Clip.antiAlias,
                     child: Column(
                       children: [
                         Container(
@@ -493,12 +352,16 @@ class _DetailState extends State<Detail> {
                           height: 100.00,
                           padding: EdgeInsets.all(8.0),
                         ),
-                        Text(
-                          relateslideshowModels![idx].title!,
-                          style: TextStyle(
-                            fontSize: 12,
-                            // fontWeight: FontWeight.bold,
-                            color: Colors.black,
+                        Padding(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 6.0, vertical: 4.0),
+                          child: Text(
+                            relateslideshowModels![idx].title!,
+                            style: TextStyle(
+                              fontSize: 12,
+                              // fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
                           ),
                         ),
                       ],
@@ -518,59 +381,8 @@ class _DetailState extends State<Detail> {
               );
             }).toList(),
           );
-
-          // return Row(
-          //   children: [first, second].map((idx) {
-          //         return Expanded(
-          //           child: GestureDetector(
-          //             child: Card(
-          //               // flex: 1,
-          //               child: Column(
-          //                 children: <Widget>[
-          //                   Container(
-          //                     child: Image.network(urlImages![idx],
-          //                         fit: BoxFit.cover, width: 1000),
-
-          //                     // width: MediaQuery.of(context).size.width * 0.50,
-          //                     height: 100.00,
-          //                     // child: relateslideshowLists![idx],
-          //                     padding: EdgeInsets.all(8.0),
-          //                   ),
-          //                   Text(
-          //                     productsName![idx].toString(),
-          //                     style: TextStyle(
-          //                         fontSize: 12,
-          //                         // fontWeight: FontWeight.bold,
-          //                         color: Colors.black),
-          //                   ),
-          //                 ],
-          //               ),
-          //             ),
-          //             onTap: () {
-          //               print('You Click index >> $idx');
-          //               MaterialPageRoute route = MaterialPageRoute(
-          //                 builder: (BuildContext context) => Detail(
-          //                   productAllModel: relateslideshowModels![idx],
-          //                   userModel: myUserModel,
-          //                 ),
-          //               );
-          //               Navigator.of(context).push(route).then((value) {});
-          //             },
-          //           ),
-          //         );
-          //       }).toList() ??
-          //       [],
-          // );
         },
       ),
-    );
-  }
-
-  Widget showImage() {
-    return Container(
-      // height: MediaQuery.of(context).size.height * 0.5 - 50,
-      height: MediaQuery.of(context).size.height * 0.5 - 150,
-      child: Image.network(productAllModel!.photo!, fit: BoxFit.contain),
     );
   }
 
@@ -581,7 +393,7 @@ class _DetailState extends State<Detail> {
     bool _isFavorite,
   ) async {
     String url =
-        'https://www.ptnpharma.com/apishop/json_favorite.php?productID=$productID&memberId=$memberID&status=$_isFavorite';
+        '${MyStyle().serverName}/apishop/json_favorite.php?productID=$productID&memberId=$memberID&status=$_isFavorite';
 
     print('url Favorites url ====>>>>> $url');
     await http.get(Uri.parse(url)).then((response) {
@@ -596,57 +408,97 @@ class _DetailState extends State<Detail> {
 
     String? productID = id;
     String? memberID = myUserModel!.id.toString();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        // Text(
-        //   'รายการโปรด',
-        //   style: MyStyle().h3StyleBlue,
-        // ),
-        FavoriteButton(
-          isFavorite: favStatus,
-          iconSize: 50.0,
-          // iconDisabledColor: Colors.white,
-          valueChanged: (_isFavorite) {
-            // print('Is Favorite : $_isFavorite');
-            editFavorite(productID!, memberID, _isFavorite);
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(color: Color(0x1F000000), blurRadius: 6.0),
+        ],
+      ),
+      child: FavoriteButton(
+        isFavorite: favStatus,
+        iconSize: 34.0,
+        valueChanged: (_isFavorite) {
+          // print('Is Favorite : $_isFavorite');
+          editFavorite(productID!, memberID, _isFavorite);
 
-            // http.Response response =  http.get(Uri.parse(url));
-          },
-        ),
-      ],
+          // http.Response response =  http.get(Uri.parse(url));
+        },
+      ),
     );
   }
 
-  Widget showTitle() {
-    return Text(productAllModel!.title!, style: MyStyle().h3bStyle);
-  }
-
-  Widget showHilight() {
-    return Row(
+  Widget imageSection() {
+    return Stack(
       children: <Widget>[
         Container(
-          width: MediaQuery.of(context).size.width * 0.7 - 10,
-          child: Text(productAllModel!.hilight!, style: MyStyle().h3StyleRed),
+          width: double.infinity,
+          height: MediaQuery.of(context).size.height * 0.30,
+          padding: EdgeInsets.all(12.0),
+          child: Image.network(productAllModel!.photo!, fit: BoxFit.contain),
+        ),
+        Positioned(
+          top: 8.0,
+          right: 8.0,
+          child: favButton(),
         ),
       ],
     );
   }
 
-  Widget showExtrapoint() {
-    return Row(
-      children: <Widget>[
-        Container(
-          width: MediaQuery.of(context).size.width * 0.7 - 10,
-          child: Text(productAllModel!.extrapoint!,
-              style: MyStyle().h3StyleOrange),
-        ),
-      ],
+  Widget titleCard() {
+    return Padding(
+      padding: EdgeInsets.all(14.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(productAllModel!.title!, style: MyStyle().h2Style),
+          if ((productAllModel?.hilight ?? '') != '')
+            Padding(
+              padding: EdgeInsets.only(top: 6.0),
+              child: Text(productAllModel!.hilight!, style: MyStyle().h3StyleRed),
+            ),
+          if ((productAllModel?.extrapoint ?? '') != '')
+            Padding(
+              padding: EdgeInsets.only(top: 4.0),
+              child:
+                  Text(productAllModel!.extrapoint!, style: MyStyle().h3StyleOrange),
+            ),
+          if (hasAnyTag)
+            Padding(padding: EdgeInsets.only(top: 10.0), child: showTag()),
+        ],
+      ),
     );
   }
-  // Widget showDetail() {
-  //   return Text(productAllModel.detail);
-  // }
+
+  Widget sectionDivider() {
+    return Divider(height: 1.0, thickness: 1.0, color: MyStyle().borderColor);
+  }
+
+  Widget productSummaryCard() {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(MyStyle().radiusM),
+        border: Border.all(color: MyStyle().borderColor),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          imageSection(),
+          sectionDivider(),
+          titleCard(),
+          sectionDivider(),
+          showStockExpire(),
+          sectionDivider(),
+          showPrice(),
+        ],
+      ),
+    );
+  }
 
   Widget showPackage(int index) {
     if (unitSizeModels![index].price.toString() == '0') {
@@ -689,16 +541,20 @@ class _DetailState extends State<Detail> {
     //  int value = amounts[index];
     //  return Text('$value');
     int? iniValue = 0;
+    int? limitValue = 0;
     bool? readOnlyMode;
     var iconName;
     var iconColor;
     print('incart all size -> $sizeSincart / $sizeMincart / $sizeLincart ');
     if (index == 0) {
       iniValue = showSincart;
+      limitValue = limitS;
     } else if (index == 1) {
       iniValue = showMincart;
+      limitValue = limitM;
     } else if (index == 2) {
       iniValue = showLincart;
+      limitValue = limitL;
     }
 
     iniValue = (iniValue); // (iniValue).toInt();
@@ -746,7 +602,7 @@ class _DetailState extends State<Detail> {
             Padding(
               child: SpinBox(
                 min: 1,
-                max: 10000,
+                max: (limitValue==0)?10000:limitValue!.toDouble(),  //10000,//
                 value: (iniValue)!
                     .toDouble(), //(iniValue == 0) ? 0 : (iniValue).toInt(),
                 onChanged: (changevalue) {
@@ -780,41 +636,58 @@ class _DetailState extends State<Detail> {
     // print('iniValue ($index)>> $iniValue');
   }
 
+  Widget infoTile(IconData icon, String label, String value,
+      {Color? valueColor}) {
+    return Expanded(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Icon(icon, size: 16.0, color: MyStyle().mutedTextColor),
+          SizedBox(width: 6.0),
+          Flexible(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(label, style: MyStyle().captionStyle),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 14.0,
+                    fontWeight: FontWeight.w600,
+                    color: valueColor ?? Colors.grey.shade900,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget showStockExpire() {
-    return Container(
-      width: MediaQuery.of(context).size.width * 0.98,
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 14.0, vertical: 12.0),
       child: Row(
         children: <Widget>[
-          Container(
-            width: MediaQuery.of(context).size.width * 0.16,
-            child: Text('สต๊อก :', style: MyStyle().h3StyleGray),
+          infoTile(
+            Icons.inventory_2_outlined,
+            'สต๊อก',
+            '${productAllModel!.stock}',
+            valueColor: productAllModel!.stock.toString() != '0'
+                ? Colors.grey.shade900
+                : Colors.red,
           ),
-          Container(
-            width: MediaQuery.of(context).size.width * 0.19,
-            child: Text(
-              ' ${productAllModel!.stock}',
-              style: (productAllModel!.stock.toString() != '0')
-                  ? MyStyle().h3StyleGray
-                  : MyStyle().h3StyleRed,
-            ),
-          ),
-          Container(
-            width: MediaQuery.of(context).size.width * 0.28,
-            child: Text('วันหมดอายุ :', style: MyStyle().h3StyleGray),
-          ),
-          Container(
-            width: MediaQuery.of(context).size.width * 0.28,
-            child: Text(
-              ' ${productAllModel!.expire}',
-              style: TextStyle(
-                fontSize: 16.0,
-                color: (productAllModel!.expireColor == 'red')
-                    ? Colors.red
-                    : (productAllModel!.expireColor == 'blue')
-                        ? Colors.blue.shade700
-                        : Colors.black,
-              ),
-            ),
+          infoTile(
+            Icons.event_outlined,
+            'วันหมดอายุ',
+            '${productAllModel!.expire}',
+            valueColor: (productAllModel!.expireColor == 'red')
+                ? Colors.red
+                : (productAllModel!.expireColor == 'blue')
+                    ? Colors.blue.shade700
+                    : Colors.grey.shade900,
           ),
         ],
       ),
@@ -838,197 +711,158 @@ class _DetailState extends State<Detail> {
       ),
     );
 
-    return Column(
-      children: [
-        // Align(
-        //   alignment: Alignment.centerLeft,
-        //   // width: MediaQuery.of(context).size.width * 0.20,
-        //   child: Text(
-        //     'Video ',
-        //     style: MyStyle().h4bStyleGray,
-        //   ),
-        // ),
-        YoutubePlayer(
-          key: ObjectKey(_controllers),
-          controller: _controllers,
-          actionsPadding: const EdgeInsets.only(left: 16.0),
-          bottomActions: [
-            CurrentPosition(),
-            const SizedBox(width: 10.0),
-            ProgressBar(isExpanded: true),
-            const SizedBox(width: 10.0),
-            RemainingDuration(),
-            FullScreenButton(),
-          ],
-        ),
-        Divider(),
-      ],
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(MyStyle().radiusM),
+      child: YoutubePlayer(
+        key: ObjectKey(_controllers),
+        controller: _controllers,
+        actionsPadding: const EdgeInsets.only(left: 16.0),
+        bottomActions: [
+          CurrentPosition(),
+          const SizedBox(width: 10.0),
+          ProgressBar(isExpanded: true),
+          const SizedBox(width: 10.0),
+          RemainingDuration(),
+          FullScreenButton(),
+        ],
+      ),
     );
   }
 
-  // Widget showVideo() {
-  //   String videoSelectCode = productAllModel!.youtube!;
-  //   print('videoSelectCode ====>>>>> $videoSelectCode');
-  //   final _controller = YoutubePlayerController(
-  //     params: YoutubePlayerParams(
-  //       mute: false,
-  //       showControls: true,
-  //       showFullscreenButton: true,
-  //     ),
-  //   );
-  //   // _controller.loadVideoById(...); // Auto Play
-  //   // _controller.cueVideoById(...); // Manual Play
-  //   // _controller.loadPlaylist(...); // Auto Play with playlist
-  //   // _controller.cuePlaylist(...); // Manual Play with playlist
-  //   _controller.loadVideoById(videoId: videoSelectCode);
-  //   // If the requirement is just to play a single video.
-  //   return YoutubePlayer(
-  //     controller: _controller,
-  //     aspectRatio: 16 / 9,
-  //   );
-  // }
-
-  Widget showUsefor() {
-    return Column(
-      children: [
-        Align(
-          alignment: Alignment.centerLeft,
-          // width: MediaQuery.of(context).size.width * 0.20,
-          child: Text('ใช้รักษา', style: MyStyle().h4bStyleGray),
-        ),
-        Container(
-          // width: MediaQuery.of(context).size.width * 0.75,
-          child: Text(productAllModel!.usefor!, style: MyStyle().h4StyleGray),
-        ),
-        SizedBox(height: 20.0),
-      ],
-    );
-  }
-
-  Widget showMethod() {
-    return Column(
-      children: [
-        Align(
-          alignment: Alignment.centerLeft,
-          // width: MediaQuery.of(context).size.width * 0.20,
-          child: Text('วิธีการใช้', style: MyStyle().h4bStyleGray),
-        ),
-        Container(
-          // width: MediaQuery.of(context).size.width * 0.75,
-          child: Text(productAllModel!.method!, style: MyStyle().h4StyleGray),
-        ),
-        SizedBox(height: 20.0),
-      ],
-    );
-  }
-
-  Widget showDetail() {
-    return Column(
-      children: [
-        Align(
-          alignment: Alignment.centerLeft,
-          // width: MediaQuery.of(context).size.width * 0.20,
-          child: Text('รายละเอียด :', style: MyStyle().h4bStyleGray),
-        ),
-        Container(
-          // width: MediaQuery.of(context).size.width * 0.75,
-          child: Text(productAllModel!.detail!, style: MyStyle().h4StyleGray),
-        ),
-        SizedBox(height: 20.0),
-      ],
+  Widget infoSection(IconData icon, String title, String content) {
+    return Padding(
+      padding: EdgeInsets.all(14.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              Icon(icon, size: 16.0, color: MyStyle().mainColor),
+              SizedBox(width: 6.0),
+              Text(title, style: MyStyle().h4bStyleGray),
+            ],
+          ),
+          SizedBox(height: 6.0),
+          Text(content, style: MyStyle().h4StyleGray),
+        ],
+      ),
     );
   }
 
   Widget salepriceinfo() {
-    return Column(
-      children: [
-        // Align(
-        //   // width: MediaQuery.of(context).size.width * 0.16,
-        //   alignment: Alignment.centerLeft,
-        //   child: Text(
-        //     'ข้อมูลเพิ่มเติม',
-        //     style: MyStyle().h3bStyleGreen,
-        //   ),
-        // ),
-        // SizedBox(
-        //   height: 10.0,
-        // ),
-        Container(
-          width: MediaQuery.of(context).size.width * 0.99,
-          child: Row(
-            children: <Widget>[
-              Container(
-                width: MediaQuery.of(context).size.width * 0.10,
-                child: Text('ราคา', style: MyStyle().h4bStyleRed),
-              ),
-              Container(
-                width: MediaQuery.of(context).size.width * 0.18,
-                child: Text('ป้าย :', style: MyStyle().h4bStyleGray),
-              ),
-              Container(
-                width: MediaQuery.of(context).size.width * 0.15,
-                child: Text(
-                  productAllModel!.pricelabel!,
-                  style: MyStyle().h3bStyleGray,
-                ),
-              ),
-              Container(
-                width: MediaQuery.of(context).size.width * 0.34,
-                child: Text('แนะนำขายปลีก :', style: MyStyle().h4bStyleGray),
-              ),
-              Container(
-                width: MediaQuery.of(context).size.width * 0.15,
-                child: Text(
-                  productAllModel!.pricesale!,
-                  style: MyStyle().h3bStyleGray,
-                ),
-              ),
-            ],
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(14.0),
+      decoration: BoxDecoration(
+        color: MyStyle().primaryLight,
+        borderRadius: BorderRadius.circular(MyStyle().radiusM),
+      ),
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text('ราคาป้าย', style: MyStyle().captionStyle),
+                SizedBox(height: 4.0),
+                Text(productAllModel!.pricelabel!, style: MyStyle().h3bStyleGray),
+              ],
+            ),
           ),
-        ),
-        SizedBox(height: 20.0),
-      ],
+          Container(
+            width: 1.0,
+            height: 32.0,
+            color: MyStyle().borderColor,
+            margin: EdgeInsets.symmetric(horizontal: 12.0),
+          ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text('แนะนำขายปลีก', style: MyStyle().captionStyle),
+                SizedBox(height: 4.0),
+                Text(productAllModel!.pricesale!, style: MyStyle().h3bStyleGray),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
+  bool get hasMoreInfo =>
+      (productAllModel?.usefor ?? '') != '' ||
+      (productAllModel?.method ?? '') != '' ||
+      (productAllModel?.detail ?? '') != '';
+
   Widget moreinfo() {
-    return Column(
-      children: [
-        // Align(
-        //   // width: MediaQuery.of(context).size.width * 0.16,
-        //   alignment: Alignment.centerLeft,
-        //   child: Text(
-        //     'ข้อมูลเพิ่มเติม',
-        //     style: MyStyle().h3bStyleGreen,
-        //   ),
-        // ),
-        Container(
-          child: productAllModel!.usefor == '' ? Container() : showUsefor(),
-        ),
-        Container(
-          child: productAllModel!.method == '' ? Container() : showMethod(),
-        ),
-        Container(
-          child: productAllModel!.detail == '' ? Container() : showDetail(),
-        ),
-      ],
+    List<Widget> items = <Widget>[
+      if ((productAllModel?.usefor ?? '') != '')
+        infoSection(Icons.medical_information_outlined, 'ใช้รักษา',
+            productAllModel!.usefor!),
+      if ((productAllModel?.method ?? '') != '')
+        infoSection(Icons.info_outline, 'วิธีการใช้', productAllModel!.method!),
+      if ((productAllModel?.detail ?? '') != '')
+        infoSection(
+            Icons.description_outlined, 'รายละเอียด', productAllModel!.detail!),
+    ];
+
+    List<Widget> children = [];
+    for (int i = 0; i < items.length; i++) {
+      if (i > 0) children.add(sectionDivider());
+      children.add(items[i]);
+    }
+
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: children);
+  }
+
+  Widget moreInfoCard() {
+    List<Widget> sections = <Widget>[
+      if (slideshowLists!.isNotEmpty)
+        Padding(padding: EdgeInsets.all(14.0), child: showCarouseSlideshow()),
+      if ((productAllModel?.youtube ?? '-') != '-')
+        Padding(padding: EdgeInsets.all(14.0), child: showVideo()),
+      Padding(padding: EdgeInsets.all(14.0), child: salepriceinfo()),
+      if (hasMoreInfo) moreinfo(),
+    ];
+
+    List<Widget> children = [];
+    for (int i = 0; i < sections.length; i++) {
+      if (i > 0) children.add(sectionDivider());
+      children.add(sections[i]);
+    }
+
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(MyStyle().radiusM),
+        border: Border.all(color: MyStyle().borderColor),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: children,
+      ),
     );
   }
 
   Widget showPrice() {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: Color.fromARGB(255, 255, 255, 255)),
-      ),
-      height: (53 * unitSizeModels!.length.toDouble()),
-      // color: Colors.grey,
-      child: ListView.builder(
-        itemCount: unitSizeModels!.length,
-        itemBuilder: (BuildContext buildContext, int index) {
-          print('price >> ' + unitSizeModels![index].price.toString());
-          return showChoosePricePackage(index);
-          // return showChoosePricePackage(index);
-        },
+    return Padding(
+      padding: EdgeInsets.all(14.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text('เลือกขนาดบรรจุ', style: MyStyle().h4bStyleGray),
+          SizedBox(height: 8.0),
+          ...List<Widget>.generate(unitSizeModels!.length, (index) {
+            return Padding(
+              padding: EdgeInsets.only(
+                  bottom: index == unitSizeModels!.length - 1 ? 0 : 10.0),
+              child: showChoosePricePackage(index),
+            );
+          }),
+        ],
       ),
     );
   }
@@ -1038,37 +872,29 @@ class _DetailState extends State<Detail> {
       'relateslideshowLists!.length (Widget relate)>> ' +
           relateslideshowLists!.length.toString(),
     );
-    return Card(
-      child: Container(
-        width: MediaQuery.of(context).size.width * 0.9,
-        height: MediaQuery.of(context).size.height * 0.25,
-        child: relateslideshowLists!.isEmpty
-            ? myCircularProgress()
-            : showCarouseSliderRelate(),
+    return Container(
+      width: double.infinity,
+      height: MediaQuery.of(context).size.height * 0.25,
+      padding: EdgeInsets.all(10.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(MyStyle().radiusM),
+        border: Border.all(color: MyStyle().borderColor),
       ),
+      child: relateslideshowLists!.isEmpty
+          ? myCircularProgress()
+          : showCarouseSliderRelate(),
     );
   }
 
-  Widget mySizebox() {
-    return SizedBox(width: 10.0, height: 30.0);
-  }
-
   Widget headTitle(String string, IconData iconData) {
-    // Widget  แทน object ประเภทไดก็ได้
-    return Container(
-      padding: EdgeInsets.all(5.0),
+    return Padding(
+      padding: EdgeInsets.only(bottom: 10.0),
       child: Row(
         children: <Widget>[
-          Icon(iconData, size: 18.0, color: MyStyle().textColor),
-          mySizebox(),
-          Text(
-            string,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: MyStyle().textColor,
-            ),
-          ),
+          Icon(iconData, size: 20.0, color: MyStyle().textColor),
+          SizedBox(width: 8.0),
+          Text(string, style: MyStyle().sectionTitleStyle),
         ],
       ),
     );
@@ -1080,14 +906,14 @@ class _DetailState extends State<Detail> {
     amontCart = 0;
     String memberId = myUserModel!.id.toString();
     String url =
-        'https://www.ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId&screen=detaiil';
+        '${MyStyle().serverName}/apishop/json_loadmycart.php?memberId=$memberId&screen=detaiil';
 
     print('url Detail =====>>>>>>>> $url');
 
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var cartList = result['cart'];
-    for (var map in cartList) {
+    for (var _ in cartList) {
       // setState(() {
       amontCart = amontCart! + 1;
       // });
@@ -1143,8 +969,6 @@ class _DetailState extends State<Detail> {
   }
 
   Widget stylishBottomBar() {
-    int? unread =
-        myUserModel!.lastNewsId!.toInt() - myUserModel!.lastNewsOpen!.toInt();
     return StylishBottomBar(
       option: AnimatedBarOptions(iconStyle: IconStyle.animated, opacity: 0.3),
       items: [
@@ -1198,6 +1022,7 @@ class _DetailState extends State<Detail> {
   Widget build(BuildContext context) {
     print('productAllModel (build)>> $productAllModel');
     return Scaffold(
+      backgroundColor: MyStyle().scaffoldBackground,
       appBar: AppBar(
         iconTheme: IconThemeData(color: Colors.white),
         actions: <Widget>[showCart()],
@@ -1213,126 +1038,71 @@ class _DetailState extends State<Detail> {
     return Center(child: CircularProgressIndicator());
   }
 
-  Widget addButtonfix() {
-    return Column(
-      // mainAxisAlignment: MainAxisAlignment.end,
-      children: <Widget>[
-        Row(
-          children: <Widget>[
-            Expanded(
-              child: ElevatedButton(
-                // color: MyStyle().mainColor,
-                child: Text(
-                  'Add to Cart',
-                  style: TextStyle(
-                    fontSize: 18.0,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                onPressed: () {
-                  String? productID = id;
-                  String? memberID = myUserModel!.id.toString();
-
-                  if ((qtyS == 0 || qtyS == null) &&
-                      (qtyM == 0 || qtyM == null) &&
-                      (qtyL == 0 || qtyL == null)) {
-                    normalDialog(context, 'แจ้งเตือน', 'กรุณาระบุจำนวน');
-                  }
-
-                  if (qtyS != 0) {
-                    String unitSize = 's';
-                    print(
-                      'productID = $productID, memberID=$memberID, unitSize=s, QTY=$qtyS',
-                    );
-                    addCart(productID!, unitSize, qtyS!, memberID);
-                  }
-                  if (qtyM != 0) {
-                    String unitSize = 'm';
-                    print(
-                      'productID = $productID, memberID=$memberID, unitSize=m, QTY=$qtyM',
-                    );
-                    addCart(productID!, unitSize, qtyM!, memberID);
-                  }
-                  if (qtyL != 0) {
-                    String unitSize = 'l';
-                    print(
-                      'productID = $productID, memberID=$memberID, unitSize=l, QTY=$qtyL',
-                    );
-                    addCart(productID!, unitSize, qtyL!, memberID);
-                  }
-                },
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
   Widget addButton() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: <Widget>[
-        Row(
-          children: <Widget>[
-            Expanded(
-              child: ElevatedButton(
-                // color: MyStyle().mainColor,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  textStyle: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontStyle: FontStyle.normal,
-                  ),
-                ),
-                child: Text(
-                  'Add to Cart',
-                  style: TextStyle(
-                    fontSize: 18.0,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                onPressed: () {
-                  String? productID = id;
-                  String? memberID = myUserModel!.id.toString();
-
-                  if ((qtyS == 0 || qtyS == null) &&
-                      (qtyM == 0 || qtyM == null) &&
-                      (qtyL == 0 || qtyL == null)) {
-                    normalDialog(context, 'แจ้งเตือน', 'กรุณาระบุจำนวน');
-                  }
-
-                  if (qtyS != 0) {
-                    String unitSize = 's';
-                    print(
-                      'productID = $productID, memberID=$memberID, unitSize=s, QTY=$qtyS',
-                    );
-                    addCart(productID!, unitSize, qtyS!, memberID);
-                  }
-                  if (qtyM != 0) {
-                    String unitSize = 'm';
-                    print(
-                      'productID = $productID, memberID=$memberID, unitSize=m, QTY=$qtyM',
-                    );
-                    addCart(productID!, unitSize, qtyM!, memberID);
-                  }
-                  if (qtyL != 0) {
-                    String unitSize = 'l';
-                    print(
-                      'productID = $productID, memberID=$memberID, unitSize=l, QTY=$qtyL',
-                    );
-                    addCart(productID!, unitSize, qtyL!, memberID);
-                  }
-                },
-              ),
+    return Container(
+      padding: EdgeInsets.fromLTRB(
+        14.0,
+        10.0,
+        14.0,
+        10.0 + ((myUserModel!.msg == '') ? 0 : 90.0),
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(top: BorderSide(color: MyStyle().borderColor)),
+      ),
+      child: SizedBox(
+        width: double.infinity,
+        height: 48.0,
+        child: ElevatedButton.icon(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: MyStyle().mainColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(MyStyle().radiusS),
             ),
-            SizedBox(width: 10.0, height: (myUserModel!.msg == '') ? 0 : 105.0),
-          ],
+          ),
+          icon: Icon(Icons.add_shopping_cart, color: Colors.white),
+          label: Text(
+            'เพิ่มลงตะกร้า',
+            style: TextStyle(
+              fontSize: 16.0,
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          onPressed: () {
+            String? productID = id;
+            String? memberID = myUserModel!.id.toString();
+
+            if ((qtyS == 0 || qtyS == null) &&
+                (qtyM == 0 || qtyM == null) &&
+                (qtyL == 0 || qtyL == null)) {
+              normalDialog(context, 'แจ้งเตือน', 'กรุณาระบุจำนวน');
+            }
+
+            if (qtyS != 0) {
+              String unitSize = 's';
+              print(
+                'productID = $productID, memberID=$memberID, unitSize=s, QTY=$qtyS',
+              );
+              addCart(productID!, unitSize, qtyS!, memberID);
+            }
+            if (qtyM != 0) {
+              String unitSize = 'm';
+              print(
+                'productID = $productID, memberID=$memberID, unitSize=m, QTY=$qtyM',
+              );
+              addCart(productID!, unitSize, qtyM!, memberID);
+            }
+            if (qtyL != 0) {
+              String unitSize = 'l';
+              print(
+                'productID = $productID, memberID=$memberID, unitSize=l, QTY=$qtyL',
+              );
+              addCart(productID!, unitSize, qtyL!, memberID);
+            }
+          },
         ),
-      ],
+      ),
     );
   }
 
@@ -1343,7 +1113,7 @@ class _DetailState extends State<Detail> {
     String memberID,
   ) async {
     String url =
-        'https://www.ptnpharma.com/apishop/json_savemycart.php?productID=$productID&unitSize=$unitSize&QTY=$qTY&memberId=$memberID';
+        '${MyStyle().serverName}/apishop/json_savemycart.php?productID=$productID&unitSize=$unitSize&QTY=$qTY&memberId=$memberID';
     print('urlAddcart = $url');
     await http.get(Uri.parse(url)).then((response) {});
     print('upload ok');
@@ -1352,43 +1122,26 @@ class _DetailState extends State<Detail> {
   }
 
   Widget showDetailList() {
-    return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(10)),
-        side: BorderSide(width: 5, color: Colors.grey.shade200),
-      ),
-      child: Stack(
+    return SafeArea(
+      child: Column(
         children: <Widget>[
-          showController(),
-          MyStyle().mySizebox(),
+          Expanded(child: showController()),
           addButton(),
-          MyStyle().mySizebox(),
         ],
       ),
     );
   }
 
   ListView showController() {
-    // String intVL = '10';
     return ListView(
-      padding: EdgeInsets.all(10.0),
+      padding: EdgeInsets.all(14.0),
       children: <Widget>[
-        favButton(),
-        showTitle(),
-        (productAllModel?.hilight == '') ? Container() : showHilight(),
-        (productAllModel?.extrapoint == '') ? Container() : showExtrapoint(),
-        showTag(),
-        showStockExpire(),
-        Divider(),
-        showPrice(),
-        Divider(), //MyStyle().mySizebox(),
-        (slideshowLists!.length > 0) ? showCarouseSlideshow() : Container(),
-        (productAllModel?.youtube == '-') ? Container() : showVideo(),
-        salepriceinfo(),
-        moreinfo(),
+        productSummaryCard(),
+        SizedBox(height: 14.0),
+        moreInfoCard(),
+        SizedBox(height: 14.0),
         headTitle('สินค้าที่เกี่ยวข้อง', Icons.thumb_up),
         relate(),
-        MyStyle().mySizebox(),
       ],
     );
   }

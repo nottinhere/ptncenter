@@ -6,9 +6,13 @@ class CategoryModel {
   CategoryModel({this.cateId, this.cateName, this.retail});
 
   CategoryModel.fromJson(Map<String, dynamic> json) {
-    cateId = json['cate_id'];
+    cateId = json['cate_id'] is String
+        ? int.tryParse(json['cate_id'])
+        : json['cate_id'];
     cateName = json['cate_name'];
-    retail = json['retail'];
+    retail = json['retail'] is String
+        ? int.tryParse(json['retail'])
+        : json['retail'];
   }
 
   Map<String, dynamic> toJson() {

@@ -7,12 +7,7 @@ import 'package:ptncenter/models/product_vote_model.dart';
 import 'package:ptncenter/models/user_model.dart';
 import 'package:ptncenter/scaffold/list_product.dart';
 import 'package:ptncenter/utility/my_style.dart';
-import 'package:ptncenter/utility/normal_dialog.dart';
-import 'detail.dart';
 import 'detail_cart.dart';
-import 'package:ptncenter/widget/home.dart';
-
-import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
 
 import 'my_service.dart';
 
@@ -22,7 +17,6 @@ import 'package:favorite_button/favorite_button.dart';
 
 import 'package:flutter/services.dart';
 
-import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/foundation.dart';
 
 class ListProductvote extends StatefulWidget {
@@ -30,7 +24,6 @@ class ListProductvote extends StatefulWidget {
   final UserModel? userModel;
   final int? cate;
   final String? cateName;
-  String? _result = '';
 
   ListProductvote(
       {Key? key, this.index, this.userModel, this.cate, this.cateName})
@@ -134,7 +127,7 @@ class _ListProductvoteState extends State<ListProductvote> {
     lastItemName = '';
     String memberId = myUserModel!.id.toString();
     String url =
-        'https://www.ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId&screen=listproductvote';
+        '${MyStyle().serverName}/apishop/json_loadmycart.php?memberId=$memberId&screen=listproductvote';
 
     print('url Detail =====>>>>>>>> $url');
 
@@ -199,7 +192,7 @@ class _ListProductvoteState extends State<ListProductvote> {
 
     String memberId = myUserModel!.id.toString();
     String url =
-        'https://www.ptnpharma.com/apishop/json_productvotelist.php?memberId=$memberId&searchKey=$searchString&page=$page';
+        '${MyStyle().serverName}/apishop/json_productvotelist.php?memberId=$memberId&searchKey=$searchString&page=$page';
 
     // url = '${MyStyle().readProductWhereMode}$myIndex';
     print("URL = $url");
@@ -241,21 +234,19 @@ class _ListProductvoteState extends State<ListProductvote> {
     print('Here is updateDatalist function');
 
     String memberId = myUserModel!.id.toString();
-    int productID = filterProductVoteModels![index].id!;
     String url =
-        'https://www.ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId';
+        '${MyStyle().serverName}/apishop/json_loadmycart.php?memberId=$memberId';
 
     print("URL update item = $url");
     http.Response response = await http.get(Uri.parse(url));
-    var result = json.decode(response.body);
-    var cartList = result['cart'];
+    json.decode(response.body);
   }
 
   Widget showName(int index) {
     return Row(
       children: <Widget>[
         Container(
-          width: MediaQuery.of(context).size.width * 0.7 - 10,
+          width: MediaQuery.of(context).size.width * 0.75,
           child: Text(
             filterProductVoteModels![index].title!,
             style: MyStyle().h3Style,
@@ -371,7 +362,7 @@ class _ListProductvoteState extends State<ListProductvote> {
   Future<void> thumbLike(
       String productID, String memberID, bool _isFavorite) async {
     String url =
-        'https://www.ptnpharma.com/apishop/json_productvote.php?productID=$productID&memberId=$memberID&status=$_isFavorite';
+        '${MyStyle().serverName}/apishop/json_productvote.php?productID=$productID&memberId=$memberID&status=$_isFavorite';
 
     print('url Favorites url ====>>>>> $url');
     await http.get(Uri.parse(url)).then((response) {
@@ -409,15 +400,9 @@ class _ListProductvoteState extends State<ListProductvote> {
 
   BoxDecoration myBoxDecoration() {
     return BoxDecoration(
-      border: Border(
-        top: BorderSide(
-          color: Colors.blueGrey.shade100,
-          width: 1.0,
-        ),
-        // bottom: BorderSide(
-        //   color: Colors.blueGrey.shade100,
-        //   width: 1.0,
-        // ),
+      border: Border.all(color: Colors.green.shade300),
+      borderRadius: BorderRadius.all(
+        Radius.circular(5.0), //                 <--- border radius here
       ),
     );
   }

@@ -365,7 +365,7 @@ class _ListProductfavState extends State<ListProductfav> {
     return Row(
       children: <Widget>[
         Container(
-          width: MediaQuery.of(context).size.width * 0.7 - 10,
+          width: MediaQuery.of(context).size.width * 0.75,
           child: Text(
             filterProductAllModels![index].title!,
             style: MyStyle().h3Style,
@@ -379,7 +379,7 @@ class _ListProductfavState extends State<ListProductfav> {
     return Row(
       children: <Widget>[
         Container(
-          width: MediaQuery.of(context).size.width * 0.7 - 10,
+          width: MediaQuery.of(context).size.width * 0.75,
           child: Text(
             filterProductAllModels![index].hilight!,
             style: MyStyle().h3StyleRed,
@@ -485,9 +485,9 @@ class _ListProductfavState extends State<ListProductfav> {
 
   Widget showText(int index) {
     return Container(
-      padding: EdgeInsets.only(left: 5.0, right: 2.0),
+      padding: EdgeInsets.only(left: 5.0, right: 0.0),
       // height: MediaQuery.of(context).size.width * 0.5,
-      width: MediaQuery.of(context).size.width * 0.73,
+      width: MediaQuery.of(context).size.width * 0.78,
       child: Container(
         padding: EdgeInsets.only(bottom: 5.0, top: 5.0),
         child: Column(

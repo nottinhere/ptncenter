@@ -148,8 +148,8 @@ class _DetailState extends State<Detail> {
     id = currentProductAllModel!.id.toString();
 
     String url =
-        'https://www.ptnpharma.com/apishop/json_productimage.php?memberId=$memId&id=$id';
-    // String url = 'https://www.ptnpharma.com/apishop/json_slideshow.php';
+        '${MyStyle().serverName}/apishop/json_productimage.php?memberId=$memId&id=$id';
+    // String url = '${MyStyle().serverName}/apishop/json_slideshow.php';
 
     print('URL image detail >> $url');
 
@@ -180,7 +180,7 @@ class _DetailState extends State<Detail> {
     id = currentProductAllModel!.id.toString();
 
     String url =
-        'https://www.ptnpharma.com/apishop/json_relate.php?memberId=$memId&productId=$id'; // ?memberId=$memberId
+        '${MyStyle().serverName}/apishop/json_relate.php?memberId=$memId&productId=$id'; // ?memberId=$memberId
 
     print('URL relate >> $url');
     http.Response response = await http.get(Uri.parse(url));
@@ -560,7 +560,7 @@ class _DetailState extends State<Detail> {
     return Row(
       children: <Widget>[
         Container(
-          width: MediaQuery.of(context).size.width * 0.7 - 10,
+          width: MediaQuery.of(context).size.width * 0.75,
           child: Text(
             productAllModel!.hilight!,
             style: MyStyle().h3StyleRed,
@@ -1430,7 +1430,7 @@ class _DetailState extends State<Detail> {
   Future<void> addCart(
       String productID, String unitSize, int qTY, String memberID) async {
     String url =
-        'https://www.ptnpharma.com/apishop/json_savemycart.php?productID=$productID&unitSize=$unitSize&QTY=$qTY&memberId=$memberID';
+        '${MyStyle().serverName}/apishop/json_savemycart.php?productID=$productID&unitSize=$unitSize&QTY=$qTY&memberId=$memberID';
     print('urlAddcart = $url');
     await http.get(Uri.parse(url)).then((response) {});
     print('upload ok');

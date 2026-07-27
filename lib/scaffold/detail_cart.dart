@@ -4,20 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:ptncenter/models/rewardredeem_model.dart';
 import 'package:ptncenter/models/price_list_model.dart';
-import 'package:ptncenter/models/product_all_model.dart';
 import 'package:ptncenter/models/product_all_model2.dart';
 import 'package:ptncenter/models/user_model.dart';
-import 'package:ptncenter/scaffold/detail.dart';
 import 'package:ptncenter/utility/my_style.dart';
-import 'package:ptncenter/utility/normal_dialog.dart';
-import 'package:ptncenter/widget/home.dart';
 import 'package:ptncenter/scaffold/list_product.dart';
 import 'package:ptncenter/scaffold/list_product_favorite.dart';
 // import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
 import 'my_service.dart';
 import 'package:flutter_spinbox/flutter_spinbox.dart';
 import 'package:flutter/services.dart';
-import 'package:permission_handler/permission_handler.dart';
 // import 'package:scan_preview/scan_preview_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
@@ -116,7 +111,6 @@ class _DetailCartState extends State<DetailCart> {
   Future<void> readCart() async {
     clearArray();
     String? memberId = myUserModel!.id.toString();
-
     String? url = '${MyStyle().loadMyCart}$memberId&screen=cart';
     print('url Detail Cart ====>>>>> $url');
 
@@ -129,13 +123,21 @@ class _DetailCartState extends State<DetailCart> {
     List<dynamic>? arrIncartS = [];
     List<dynamic>? arrIncartM = [];
     List<dynamic>? arrIncartL = [];
+    productAllModels = [];
+        total = 0;
+
 
     for (var map in cartList) {
-      ProductAllModel2 productAllModel = ProductAllModel2.fromJson(map);
+     ProductAllModel2 productAllModel = ProductAllModel2.fromJson(map);
       // print('productAllModel = ${productAllModel.toJson().toString()}');
+
       setState(() {
+        print('Start setState size S-1');
         Map<String, dynamic> priceListMap = map['price_list'];
+        print('Start setState size S-2');
         int? productID = productAllModel.id;
+        print('Start setState size S-3');
+
 
         if (priceListMap['s'] != null) {
           arrIncartS.add(productID);
@@ -229,6 +231,9 @@ class _DetailCartState extends State<DetailCart> {
         promotionsuccess    = myData['promotionsuccess'];
         promotionsuccessgift    = myData['promotionsuccessgift'];
         print('MY CREDIT > $creditterm + $financialamount + $contactAdmin');
+        var countIC = productAllModels?.length;
+            print('read productAllModels?.length >> {$countIC}');
+
       });
     }
 
@@ -243,20 +248,18 @@ class _DetailCartState extends State<DetailCart> {
     String? memberId = myUserModel!.id;
     String? memberCode = myUserModel!.customerCode;
     String? url =
-        'https://www.ptnpharma.com/apishop/json_loadmyreward.php?memberId=$memberId&memberCode=$memberCode'; // ?memberId=$memberId
-    print('urlNews >> $url');
+        '${MyStyle().serverName}/apishop/json_loadmyreward.php?memberId=$memberId&memberCode=$memberCode'; // ?memberId=$memberId
+    print('urlReward >> $url');
 
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var mapItemNews =
         result['itemsData']; // dynamic    จะส่ง value อะไรก็ได้ รวมถึง null
 
+    print('Start setState readReward');
+
     for (var map in mapItemNews) {
       RewardredeemModel? rewardModel = RewardredeemModel.fromJson(map);
-      int? rwId = rewardModel.rwId;
-      String? rwSubject = rewardModel.rwSubject;
-      String? rwUnit = rewardModel.unit;
-      String? rwQTY = rewardModel.qty;
 
       setState(() {
         rewardredeemModels!.add(rewardModel);
@@ -325,7 +328,7 @@ class _DetailCartState extends State<DetailCart> {
       children: <Widget>[
         Container(
           padding: EdgeInsets.only(left: 16.00),
-          width: MediaQuery.of(context).size.width * 0.7 - 10,
+          width: MediaQuery.of(context).size.width * 0.75,
           child: Text(productAllModels![index].hilight!,
               style: MyStyle().h3StyleRed),
         ),
@@ -395,6 +398,15 @@ class _DetailCartState extends State<DetailCart> {
   }
 
   Widget editQTY(double quantity) {
+    int? limitValue = 0;
+    if (index == 0) {
+      limitValue = productAllModel!.limitS;
+    } else if (index == 1) {
+      limitValue = productAllModel!.limitM;
+    } else if (index == 2) {
+      limitValue = productAllModel!.limitL;
+    }
+
     // return TextFormField(
     //   keyboardType: TextInputType.number,
     //   onChanged: (String string) {
@@ -405,7 +417,7 @@ class _DetailCartState extends State<DetailCart> {
     return SpinBox(
       value: (quantity).toDouble(),
       min: 1,
-      max: 10000,
+      max: (limitValue==0)?10000:limitValue!.toDouble(),  //10000,// 
       onChanged: (changevalue) {
         newQTY = (changevalue == 0) ? 0 : (changevalue).toDouble();
 
@@ -430,7 +442,18 @@ class _DetailCartState extends State<DetailCart> {
     );
   }
 
-  Widget changeQTY(String productID, String size, double quantity) {
+  Widget changeQTY(String productID, String size, double quantity, double limitorder) {
+
+    double? limitValue = limitorder;
+    // if (size =='s') {
+    //   limitValue = productAllModel!.limitS!.toDouble();
+    // } else if (size =='m') {
+    //   limitValue = productAllModel!.limitM!.toDouble();
+    // } else if (size =='l') {
+    //   limitValue = productAllModel!.limitL!.toDouble();
+    // }
+
+    print('size -> $size -> $limitValue');
     String? memberID = myUserModel!.id.toString();
     return SizedBox(
       width: 140.0,
@@ -440,7 +463,7 @@ class _DetailCartState extends State<DetailCart> {
         ),
         value: (quantity).toDouble(),
         min: 1,
-        max: 10000,
+        max: (limitValue==0)?10000:limitValue.toDouble(),  //10000,// 
         onChanged: (changevalue) {
           newQTY = (changevalue == 0) ? 0 : (changevalue).toDouble();
           print(
@@ -489,7 +512,7 @@ class _DetailCartState extends State<DetailCart> {
     String memberID,
   ) async {
     String url =
-        'https://www.ptnpharma.com/apishop/json_updatemycart.php?productID=$productID&unitSize=$unitSize&newQTY=$newQTY&memberId=$memberID';
+        '${MyStyle().serverName}/apishop/json_updatemycart.php?productID=$productID&unitSize=$unitSize&newQTY=$newQTY&memberId=$memberID';
 
     print('url editDetailCart ====>>>>> $url');
 
@@ -506,7 +529,7 @@ class _DetailCartState extends State<DetailCart> {
     String memberID,
   ) async {
     String url =
-        'https://www.ptnpharma.com/apishop/json_updatemycart.php?productID=$productID&unitSize=$unitSize&newQTY=$newQTY&memberId=$memberID';
+        '${MyStyle().serverName}/apishop/json_updatemycart.php?productID=$productID&unitSize=$unitSize&newQTY=$newQTY&memberId=$memberID';
     print('url editDetailCart ====>>>>> $url');
     await http.get(Uri.parse(url)).then((response) {});
 
@@ -580,7 +603,7 @@ class _DetailCartState extends State<DetailCart> {
     print('productID = $productID ,unitSize = $unitSize ,memberID = $memberID');
 
     String url =
-        'https://www.ptnpharma.com/apishop/json_removeitemincart.php?productID=$productID&unitSize=$unitSize&memberId=$memberID';
+        '${MyStyle().serverName}/apishop/json_removeitemincart.php?productID=$productID&unitSize=$unitSize&memberId=$memberID';
     print('url DeleteCart======>>>> $url');
 
     await http.get(Uri.parse(url)).then((response) {
@@ -627,6 +650,9 @@ class _DetailCartState extends State<DetailCart> {
     double? showQTYS =
         (quantityS == null) ? 0.0 : double.parse(quantityS.replaceAll(',', ''));
 
+    double? limitS = double.parse(sMap?[index]['limitorder']);
+    double? showlimitS = (limitS == null) ? 0.0 : limitS;
+
     print('Here is showSText 3');
 
     print('$productID > $priceS > $lableS > $quantityS > $pricechange');
@@ -653,7 +679,7 @@ class _DetailCartState extends State<DetailCart> {
                       ],
                     )
                   : Text('$priceS บาท/ $lableS', style: MyStyle().h3Style),
-              changeQTY(productID, 's', showQTYS),
+              changeQTY(productID, 's', showQTYS, showlimitS),
               deleteButton(proIndex, 's'),
             ],
           );
@@ -675,6 +701,10 @@ class _DetailCartState extends State<DetailCart> {
 
     double? showQTYM =
         (quantityM == null) ? 0.0 : double.parse(quantityM.replaceAll(',', ''));
+
+    double? limitM = double.parse(mMap?[index]['limitorder']);
+    double? showlimitM = (limitM == null) ? 0.0 : limitM;
+
 
     print('Here is showMText 3');
 
@@ -702,7 +732,7 @@ class _DetailCartState extends State<DetailCart> {
                       ],
                     )
                   : Text('$priceM บาท/ $lableM', style: MyStyle().h3Style),
-              changeQTY(productID, 'm', showQTYM),
+              changeQTY(productID, 'm', showQTYM,showlimitM),
               deleteButton(proIndex, 'm'),
             ],
           );
@@ -719,6 +749,12 @@ class _DetailCartState extends State<DetailCart> {
 
     double? showQTYL =
         (quantityL == null) ? 0.0 : double.parse(quantityL.replaceAll(',', ''));
+            print('showQTYL->$showQTYL ');
+
+    double? limitL = double.parse(lMap?[index]['limitorder']);
+    double? showlimitL = (limitL == null) ? 0.0 : limitL;
+
+    print('showQTYL->$showQTYL | limitL->$limitL  | showlimitL->$showlimitL ');
 
     return lableL!.isEmpty
         ? SizedBox()
@@ -742,7 +778,7 @@ class _DetailCartState extends State<DetailCart> {
                       ],
                     )
                   : Text('$priceL บาท/ $lableL', style: MyStyle().h3Style),
-              changeQTY(productID, 'l', showQTYL),
+              changeQTY(productID, 'l', showQTYL,showlimitL),
               deleteButton(proIndex, 'l'),
             ],
           );
@@ -752,6 +788,8 @@ class _DetailCartState extends State<DetailCart> {
     print('allArrIncartS >> $allArrIncartS');
     print('allArrIncartM >> $allArrIncartM');
     print('allArrIncartL >> $allArrIncartL');
+
+
     var iS = 0;
     var iM = 0;
     var iL = 0;
@@ -762,7 +800,7 @@ class _DetailCartState extends State<DetailCart> {
       itemCount: productAllModels?.length,
       itemBuilder: (BuildContext buildContext, int index) {
         int? proID = productAllModels![index].id;
-        print('proID >> $proID');
+        // print('proID >> $proID');
 
         return Card(
           shape: RoundedRectangleBorder(
@@ -979,7 +1017,7 @@ class _DetailCartState extends State<DetailCart> {
   Widget promotionAlert(String msg) {
     return Container(
           // padding: EdgeInsets.only(top: 50.0),
-          // width: MediaQuery.of(context).size.width * 0.7 - 10,
+          // width: MediaQuery.of(context).size.width * 0.75,
           child: BubbleSpecialOne(
             text: msg,  // myUserModel!.promotionalert!
             isSender: true,
@@ -1041,7 +1079,7 @@ class _DetailCartState extends State<DetailCart> {
       mainAxisAlignment: MainAxisAlignment.end,
       children: <Widget>[
         Container(
-          width: MediaQuery.of(context).size.width * 0.7 - 10,
+          width: MediaQuery.of(context).size.width * 0.75,
           child: Column(
             children: [
               (promotionalert != '-') ? promotionAlert(promotionalert!):Container(),
@@ -1169,7 +1207,7 @@ class _DetailCartState extends State<DetailCart> {
   Future<void> submitThread() async {
     try {
       String url =
-          'https://www.ptnpharma.com/apishop/json_submit_myorder.php?memberId=$memberID&transport=$transport&comment=$comment';
+          '${MyStyle().serverName}/apishop/json_submit_myorder20022026.php?memberId=$memberID&transport=$transport&comment=$comment';
       print('url ==> $url');
 
       // await http.get(Uri.parse(url)).then((value) {
@@ -1257,8 +1295,6 @@ class _DetailCartState extends State<DetailCart> {
   }
 
   Widget stylishBottomBar() {
-    int? unread =
-        myUserModel!.lastNewsId!.toInt() - myUserModel!.lastNewsOpen!.toInt();
     return StylishBottomBar(
       option: AnimatedBarOptions(iconStyle: IconStyle.animated, opacity: 0.3),
       items: [

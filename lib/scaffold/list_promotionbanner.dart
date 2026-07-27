@@ -7,19 +7,14 @@ import 'package:ptncenter/models/product_all_model.dart';
 import 'package:ptncenter/models/user_model.dart';
 import 'package:ptncenter/models/promote_model.dart';
 import 'package:ptncenter/models/popup_model.dart';
-import 'package:ptncenter/scaffold/authen.dart';
-import 'package:ptncenter/scaffold/detail_notify.dart';
 import 'package:ptncenter/scaffold/detail_cart.dart';
 import 'package:ptncenter/scaffold/list_notify.dart';
 import 'package:ptncenter/scaffold/list_product.dart';
 import 'package:ptncenter/scaffold/list_product_favorite.dart';
 
 import 'package:ptncenter/utility/my_style.dart';
-import 'package:ptncenter/utility/normal_dialog.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'my_service.dart';
 import 'package:flutter/services.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
 
 class Promotionbanner extends StatefulWidget {
@@ -57,7 +52,6 @@ class _PromotionbannerState extends State<Promotionbanner> {
 
   String? qrString;
   int? currentIndex = 0;
-  String? _result = '';
 
   // Method
   @override
@@ -78,7 +72,7 @@ class _PromotionbannerState extends State<Promotionbanner> {
   /*************************** */
 
   Future<void> readSlide() async {
-    String? url = 'https://www.ptnpharma.com/apishop/json_slideshow.php';
+    String? url = '${MyStyle().serverName}/apishop/json_slideshow.php';
 
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
@@ -166,8 +160,6 @@ class _PromotionbannerState extends State<Promotionbanner> {
   }
 
   Widget listSlide() {
-    Duration duration = new Duration();
-    final now = new DateTime.now();
     return ListView.builder(
       controller: scrollController,
       itemCount: slideshowModels!.length,
@@ -211,13 +203,13 @@ class _PromotionbannerState extends State<Promotionbanner> {
     amontCart = 0;
     String memberId = myUserModel!.id.toString();
     String url =
-        'https://www.ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId&screen=promotionbanner';
+        '${MyStyle().serverName}/apishop/json_loadmycart.php?memberId=$memberId&screen=promotionbanner';
 
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var cartList = result['cart'];
     if (cartList != null) {
-      for (var map in cartList) {
+      for (var _ in cartList) {
         setState(() {
           amontCart = amontCart! + 1;
         });
@@ -269,25 +261,6 @@ class _PromotionbannerState extends State<Promotionbanner> {
     );
   }
 
-  Widget _buttonWidget({
-    String? title,
-    VoidCallback? onClick,
-  }) {
-    return ElevatedButton(
-      // onPressed: () => onClick(),
-      onPressed: () => () {},
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.blue,
-      ),
-      child: Text(
-        title!,
-        style: const TextStyle(
-          color: Colors.white,
-        ),
-      ),
-    );
-  }
-
   void routeToListProductfav(int index) {
     MaterialPageRoute materialPageRoute =
         MaterialPageRoute(builder: (BuildContext buildContext) {
@@ -315,14 +288,10 @@ class _PromotionbannerState extends State<Promotionbanner> {
         userModel: myUserModel!,
       );
     });
-    int unread;
-    // Navigator.of(context).push(materialPageRoute);
-    Navigator.of(context).push(materialPageRoute).then((value) => unread = 0);
+    Navigator.of(context).push(materialPageRoute);
   }
 
   Widget stylishBottomBar() {
-    int? unread =
-        myUserModel!.lastNewsId!.toInt() - myUserModel!.lastNewsOpen!.toInt();
     return StylishBottomBar(
       //  option: AnimatedBarOptions(
       //    iconSize: 32,

@@ -7,14 +7,10 @@ import 'package:ptncenter/models/product_all_model.dart';
 import 'package:ptncenter/models/user_model.dart';
 import 'package:ptncenter/scaffold/list_product.dart';
 import 'package:ptncenter/scaffold/list_product_favorite.dart';
-import 'package:ptncenter/scaffold/list_product_frequent.dart';
 
 import 'package:ptncenter/utility/my_style.dart';
 // import 'package:barcode_scan2/barcode_scan2.dart';
-import 'package:ptncenter/utility/normal_dialog.dart';
-import 'detail.dart';
 import 'detail_cart.dart';
-import 'package:ptncenter/widget/home.dart';
 
 import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
 
@@ -23,9 +19,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 
 import 'package:flutter/services.dart';
-
-import 'package:permission_handler/permission_handler.dart';
-import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 // import 'package:loading/loading.dart';
 // import 'package:loading_indicator/loading_indicator.dart';
@@ -37,7 +31,6 @@ class ListProductFrequent extends StatefulWidget {
   final UserModel? userModel;
   final int? cate;
   final String? cateName;
-  String _result = '';
 
   ListProductFrequent(
       {Key? key, this.index, this.userModel, this.cate, this.cateName})
@@ -87,15 +80,12 @@ class _ListProductFrequent extends State<ListProductFrequent> {
   final Debouncer? debouncer =
       Debouncer(milliseconds: 300); // ตั้งค่า เวลาที่จะ delay
   bool statusStart = true;
-  bool _showbyaddcart = false;
 
   int currentIndex = 1;
   int selectIndex = 2;
 
   var _isShowincart = {};
   // List<ProductAllModel> productAllModels_buffer = List(); // []; //
-
-  var _controller = TextEditingController();
 
   int substart = 0;
   bool visible = true;
@@ -144,7 +134,7 @@ class _ListProductFrequent extends State<ListProductFrequent> {
     lastItemName = '';
     String memberId = myUserModel!.id.toString();
     String url =
-        'https://www.ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId&screen=listproductfeq';
+        '${MyStyle().serverName}/apishop/json_loadmycart.php?memberId=$memberId&screen=listproductfeq';
 
     // print('url Detail =====>>>>>>>> $url');
 
@@ -209,7 +199,7 @@ class _ListProductFrequent extends State<ListProductFrequent> {
 
     String memberId = myUserModel!.id.toString();
     String url =
-        'https://www.ptnpharma.com/apishop/json_productfrequentlist.php?memberId=$memberId&searchKey=$searchString&page=$page';
+        '${MyStyle().serverName}/apishop/json_productfrequentlist.php?memberId=$memberId&searchKey=$searchString&page=$page';
 
     // url = '${MyStyle().readProductWhereMode}$myIndex';
     print("URL = $url");
@@ -246,24 +236,12 @@ class _ListProductFrequent extends State<ListProductFrequent> {
   }
 
   Widget showName(int index) {
-    bool favStatus = ((filterProductAllModels![index].itemFeqSunit != '0' &&
-                filterProductAllModels![index].itemFeqSunit ==
-                    filterProductAllModels![index].itemincartSunit) ||
-            (filterProductAllModels![index].itemFeqMunit != '0' &&
-                filterProductAllModels![index].itemFeqMunit ==
-                    filterProductAllModels![index].itemincartMunit) ||
-            (filterProductAllModels![index].itemFeqLunit != '0' &&
-                filterProductAllModels![index].itemFeqLunit ==
-                    filterProductAllModels![index].itemincartLunit))
-        ? false
-        : true;
-
     return Visibility(
       visible: true,
       child: Row(
         children: <Widget>[
           Container(
-            width: MediaQuery.of(context).size.width * 0.7 - 10,
+            width: MediaQuery.of(context).size.width * 0.75,
             child: Text(
               filterProductAllModels![index].title!,
               style: MyStyle().h3Style,
@@ -278,7 +256,7 @@ class _ListProductFrequent extends State<ListProductFrequent> {
     return Row(
       children: <Widget>[
         Container(
-          width: MediaQuery.of(context).size.width * 0.7 - 10,
+          width: MediaQuery.of(context).size.width * 0.75,
           child: Text(
             filterProductAllModels![index].hilight!,
             style: MyStyle().h3StyleRed,
@@ -366,33 +344,31 @@ class _ListProductFrequent extends State<ListProductFrequent> {
 
   BoxDecoration myBoxDecoration() {
     return BoxDecoration(
-      border: Border(
-        top: BorderSide(
-          color: Colors.blueGrey.shade100,
-          width: 1.0,
-        ),
-        // bottom: BorderSide(
-        //   color: Colors.blueGrey.shade100,
-        //   width: 1.0,
-        // ),
+      border: Border.all(color: Colors.green.shade300),
+      borderRadius: BorderRadius.all(
+        Radius.circular(5.0), //                 <--- border radius here
       ),
     );
   }
 
   Widget myCircularProgress() {
     return Visibility(
-      maintainSize: true,
-      maintainAnimation: true,
-      maintainState: true,
+      maintainSize: false,
+      maintainAnimation: false,
+      maintainState: false,
       visible: visible,
-      child: Center(child: CupertinoActivityIndicator()),
+      child: Center(
+          child: LoadingAnimationWidget.staggeredDotsWave(
+        color: Colors.green,
+        size: 20,
+      )),
     );
   }
 
   Future<void> iconAddCart(String memberID, String productID, String selectUnit,
       String qty, bool _isFavorite) async {
     String url =
-        'https://www.ptnpharma.com/apishop/json_addfeqitemtocart.php?memberId=$memberID&productID=$productID&selectUnit=$selectUnit&qty=$qty&status=$_isFavorite';
+        '${MyStyle().serverName}/apishop/json_addfeqitemtocart.php?memberId=$memberID&productID=$productID&selectUnit=$selectUnit&qty=$qty&status=$_isFavorite';
 
     print('url Favorites url ====>>>>> $url');
     await http.get(Uri.parse(url)).then((response) {
@@ -480,22 +456,6 @@ class _ListProductFrequent extends State<ListProductFrequent> {
 
     print(
         '($index)_isShowincart[$index] >> ' + _isShowincart[index].toString());
-
-    String? qty;
-    String? productID = filterProductAllModels![index].id.toString();
-    String? memberID = myUserModel!.id.toString();
-    String? selectUnit = filterProductAllModels![index].selectUnit;
-    switch (selectUnit) {
-      case 's':
-        qty = filterProductAllModels![index].itemFeqSunit;
-        break;
-      case 'm':
-        qty = filterProductAllModels![index].itemFeqMunit;
-        break;
-      case 'l':
-        qty = filterProductAllModels![index].itemFeqLunit;
-        break;
-    }
 
     return Row(
       children: <Widget>[
@@ -661,14 +621,18 @@ class _ListProductFrequent extends State<ListProductFrequent> {
         return Center(child: Text(''));
       }
     } else {
-      return Center(child: CircularProgressIndicator());
+      return Center(
+          child: LoadingAnimationWidget.staggeredDotsWave(
+        color: Colors.green,
+        size: 30,
+      ));
     }
   }
 
   Future<void> addAlltoCart() async {
     String memberID = myUserModel!.id.toString();
     String url =
-        'https://www.ptnpharma.com/apishop/json_addallfeqitemtocart.php?memberId=$memberID';
+        '${MyStyle().serverName}/apishop/json_addallfeqitemtocart.php?memberId=$memberID';
 
     print('url Favorites url ====>>>>> $url');
     await http.get(Uri.parse(url)).then((response) {
@@ -858,8 +822,6 @@ class _ListProductFrequent extends State<ListProductFrequent> {
   // }
 
   Widget stylishBottomBar() {
-    int? unread =
-        myUserModel!.lastNewsId!.toInt() - myUserModel!.lastNewsOpen!.toInt();
     return StylishBottomBar(
       //  option: AnimatedBarOptions(
       //    iconSize: 32,

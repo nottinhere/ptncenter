@@ -261,7 +261,7 @@ class _ListProductvoteState extends State<ListProductvote> {
     return Row(
       children: <Widget>[
         Container(
-          width: MediaQuery.of(context).size.width * 0.7 - 10,
+          width: MediaQuery.of(context).size.width * 0.75,
           child: Text(
             filterProductVoteModels![index].title!,
             style: MyStyle().h3Style,

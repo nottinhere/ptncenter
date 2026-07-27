@@ -1,34 +1,30 @@
 import 'dart:convert';
-import 'dart:io';
 
 // import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:ptncenter/main.dart';
-import 'package:ptncenter/models/product_all_model.dart';
 import 'package:ptncenter/models/user_model.dart';
 import 'package:ptncenter/models/category_model.dart';
-import 'package:ptncenter/scaffold/detail.dart';
 
 import 'package:ptncenter/scaffold/list_news.dart';
 import 'package:ptncenter/scaffold/list_notify.dart';
 
 import 'package:ptncenter/utility/my_style.dart';
-import 'package:ptncenter/utility/normal_dialog.dart';
 import 'package:ptncenter/widget/contact.dart';
 import 'package:ptncenter/widget/home.dart';
-import 'package:ptncenter/widget/homescreen.dart';
 // import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 import 'package:ptncenter/scaffold/list_product.dart';
 import 'package:ptncenter/scaffold/list_product_favorite.dart';
+import 'package:ptncenter/scaffold/payment_ornlist.dart';
+import 'package:ptncenter/scaffold/reward_list.dart';
+import 'package:ptncenter/scaffold/suggestion_form.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 // import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
 import 'detail_cart.dart';
-import 'package:toast/toast.dart';
 
 import 'package:flutter/services.dart';
 
-import 'package:permission_handler/permission_handler.dart';
 // import 'package:scan_preview/scan_preview_widget.dart';
 import 'package:flutter/foundation.dart';
 
@@ -37,10 +33,6 @@ import 'package:flutter/foundation.dart';
 import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
 
 import 'package:webview_flutter/webview_flutter.dart';
-// Import for Android features.
-import 'package:webview_flutter_android/webview_flutter_android.dart';
-// Import for iOS/macOS features.
-import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
 class MyService extends StatefulWidget {
   final UserModel? userModel;
@@ -95,7 +87,7 @@ class _MyServiceState extends State<MyService> {
     // List map;
     String memberId = myUserModel!.id.toString();
     String url =
-        'https://www.ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId&screen=service';
+        '${MyStyle().serverName}/apishop/json_loadmycart.php?memberId=$memberId&screen=service';
     // print('url readCart >> $url');
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
@@ -103,7 +95,7 @@ class _MyServiceState extends State<MyService> {
     // print('cartList >> $cartList');
 
     if (cartList != null) {
-      for (var map in cartList) {
+      for (var _ in cartList) {
         setState(() {
           amontCart = amontCart! + 1;
         });
@@ -113,15 +105,17 @@ class _MyServiceState extends State<MyService> {
   }
 
   Future<void> readCategory() async {
-    String url = 'https://www.ptnpharma.com/apishop/json_category.php';
+    String url = 'https://ptnpharma.com/jsonData/category.json';
     // print('url readCategory >> $url');
 
     http.Response response = await http.get(Uri.parse(url));
-    var result = json.decode(response.body);
-    var cateList = result['data'];
+    var cateList = json.decode(response.body);
     // print('cateList >> $cateList');
     for (var map in cateList) {
       CategoryModel? categoryModel = CategoryModel.fromJson(map);
+      if (categoryModel.cateId == 2) {
+        continue;
+      }
       setState(() {
         categoryModels!.add(categoryModel);
       });
@@ -178,9 +172,7 @@ class _MyServiceState extends State<MyService> {
         return Notify(userModel: myUserModel!);
       },
     );
-    int unread;
-    // Navigator.of(context).push(materialPageRoute);
-    Navigator.of(context).push(materialPageRoute).then((value) => unread = 0);
+    Navigator.of(context).push(materialPageRoute);
   }
 
   void changePage(int? index) {
@@ -208,16 +200,37 @@ class _MyServiceState extends State<MyService> {
     }
   }
 
-  Widget menuHome() {
+  Widget drawerIcon(IconData iconData, Color tint, Color iconColor) {
+    return Container(
+      width: 42.0,
+      height: 42.0,
+      decoration: BoxDecoration(color: tint, shape: BoxShape.circle),
+      child: Icon(iconData, color: iconColor, size: 22.0),
+    );
+  }
+
+  Widget drawerTile({
+    required IconData icon,
+    required String label,
+    required Color tint,
+    required Color iconColor,
+    required VoidCallback onTap,
+  }) {
     return ListTile(
-      leading: Icon(Icons.home, size: 36.0, color: MyStyle().mainColor),
-      title: Text('หน้าหลัก', style: TextStyle(color: MyStyle().textColor)),
-      // subtitle: Text(
-      //   'หน้าหลัก',
-      //   style: TextStyle(
-      //     color: MyStyle().mainColor,
-      //   ),
-      // ),
+      contentPadding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 2.0),
+      leading: drawerIcon(icon, tint, iconColor),
+      title: Text(label, style: MyStyle().tileLabelStyle),
+      trailing: Icon(Icons.chevron_right, size: 20.0, color: MyStyle().mutedTextColor),
+      onTap: onTap,
+    );
+  }
+
+  Widget menuHome() {
+    return drawerTile(
+      icon: Icons.home_rounded,
+      label: 'หน้าหลัก',
+      tint: MyStyle().tileTints[0],
+      iconColor: MyStyle().tileIconColors[0],
       onTap: () {
         setState(() {
           print('Here is menu home');
@@ -231,72 +244,60 @@ class _MyServiceState extends State<MyService> {
 
   Widget menuCategory() {
     print('menuCategory >> ' + categoryModels!.length.toString());
-    return ExpansionTile(
-      leading: Icon(Icons.category, size: 36.0),
-      title: Text('หมวดสินค้า'),
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Align(
-            alignment: Alignment.topLeft,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: new InkWell(
-                        child: Text(
-                          ' - สินค้าทั้งหมด',
-                          style: TextStyle(fontSize: 16, color: Colors.black),
-                        ),
-                        onTap: () => routeToListProduct(0),
-                      ), //  routeToListProductByCate(6, 0, 'สินค้าทั้งหมด')),
-                    ),
-                    ListView.builder(
-                      scrollDirection: Axis.vertical,
-                      shrinkWrap: true,
-                      controller: scrollController,
-                      itemCount: categoryModels!.length,
-                      itemBuilder: (BuildContext buildContext, int index) {
-                        return Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: new InkWell(
-                            child: Text(
-                              ' - ' + categoryModels![index].cateName!,
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.black,
-                              ),
-                            ),
-                            onTap: () => routeToListProductByCate(
-                              5,
-                              categoryModels![index].cateId!,
-                              categoryModels![index].cateName!,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
+    return Theme(
+      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+      child: ExpansionTile(
+        tilePadding: EdgeInsets.symmetric(horizontal: 16.0),
+        leading: drawerIcon(
+          Icons.category_rounded,
+          MyStyle().tileTints[1],
+          MyStyle().tileIconColors[1],
         ),
-      ],
+        title: Text('หมวดสินค้า', style: MyStyle().tileLabelStyle),
+        children: <Widget>[
+          ListTile(
+            contentPadding: EdgeInsets.only(left: 72.0, right: 16.0),
+            dense: true,
+            visualDensity: VisualDensity(vertical: -4),
+            minVerticalPadding: 0,
+            title: Text('สินค้าทั้งหมด', style: MyStyle().h4StyleGray),
+            onTap: () => routeToListProduct(0),
+          ),
+          ListView.builder(
+            scrollDirection: Axis.vertical,
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            controller: scrollController,
+            itemCount: categoryModels!.length,
+            itemBuilder: (BuildContext buildContext, int index) {
+              return ListTile(
+                contentPadding: EdgeInsets.only(left: 72.0, right: 16.0),
+                dense: true,
+                title: Text(
+                  categoryModels![index].cateName!,
+                  style: MyStyle().h4StyleGray,
+                ),
+                onTap: () => routeToListProductByCate(
+                  5,
+                  categoryModels![index].cateId!,
+                  categoryModels![index].cateName!,
+                ),
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 
   // Widget menuexpandCate() {}
 
   Widget menuLogOut() {
-    return ListTile(
-      leading: Icon(Icons.exit_to_app, size: 36.0),
-      title: Text('ออกจากระบบ'),
-      // subtitle: Text('Logout and exit'),
+    return drawerTile(
+      icon: Icons.exit_to_app_rounded,
+      label: 'ออกจากระบบ',
+      tint: Color(0xFFFDE8EF),
+      iconColor: MyStyle().alertColor,
       onTap: () {
         logOut();
       },
@@ -316,10 +317,11 @@ class _MyServiceState extends State<MyService> {
   }
 
   Widget menuContact() {
-    return ListTile(
-      leading: Icon(Icons.home, size: 36.0),
-      title: Text('ติดต่อเรา'),
-      // subtitle: Text('ข้อมูลติดต่อพัฒนาเภสัช'),
+    return drawerTile(
+      icon: Icons.storefront_rounded,
+      label: 'ติดต่อเรา',
+      tint: MyStyle().tileTints[4],
+      iconColor: MyStyle().tileIconColors[4],
       onTap: () {
         setState(() {
           currentWidget = Contact();
@@ -330,28 +332,18 @@ class _MyServiceState extends State<MyService> {
   }
 
   Widget menuPay() {
-    String webPage = 'pay';
-
-    return ListTile(
-      leading: Icon(Icons.payments, size: 36.0),
-      title: Text('การชำระเงิน'),
-      // subtitle: Text('Read QR code or barcode'),
+    return drawerTile(
+      icon: Icons.payments_rounded,
+      label: 'การชำระเงิน',
+      tint: MyStyle().tileTints[2],
+      iconColor: MyStyle().tileIconColors[2],
       onTap: () {
-        print('You click $webPage');
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) =>
-                WebViewExample(userModel: myUserModel!, webPage: webPage),
+            builder: (context) => PaymentOrnList(userModel: myUserModel!),
           ),
         );
-        // Navigator.push(
-        //     context,
-        //     MaterialPageRoute(
-        //         builder: (context) => WebView(
-        //               userModel: myUserModel!,
-        //               webPage: webPage,
-        //             )));
       },
     );
   }
@@ -384,54 +376,35 @@ class _MyServiceState extends State<MyService> {
   }
 
   Widget menuReward() {
-    String webPage = 'reward';
-
-    return ListTile(
-      leading: Icon(Icons.workspace_premium, size: 36.0),
-      title: Text('ของสมนาคุณ'),
-      // subtitle: Text('Read QR code or barcode'),
+    return drawerTile(
+      icon: Icons.workspace_premium_rounded,
+      label: 'ของสมนาคุณ',
+      tint: MyStyle().tileTints[3],
+      iconColor: MyStyle().tileIconColors[3],
       onTap: () {
-        print('You click $webPage');
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) =>
-                WebViewExample(userModel: myUserModel!, webPage: webPage),
+            builder: (context) => RewardList(userModel: myUserModel!),
           ),
         );
-        // Navigator.push(
-        //     context,
-        //     MaterialPageRoute(
-        //         builder: (context) => WebView(
-        //               userModel: myUserModel!,
-        //               webPage: webPage,
-        //             )));
       },
     );
   }
 
   Widget menuComplain() {
-    String webPage = 'complain';
-    return ListTile(
-      leading: Icon(Icons.comment, size: 36.0),
-      title: Text('ข้อเสนอแนะ'),
-      // subtitle: Text('Read QR code or barcode'),
+    return drawerTile(
+      icon: Icons.comment_rounded,
+      label: 'ข้อเสนอแนะ',
+      tint: MyStyle().tileTints[5],
+      iconColor: MyStyle().tileIconColors[5],
       onTap: () {
-        print('You click $webPage');
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) =>
-                WebViewExample(userModel: myUserModel!, webPage: webPage),
+            builder: (context) => SuggestionForm(userModel: myUserModel!),
           ),
         );
-        // Navigator.push(
-        //     context,
-        //     MaterialPageRoute(
-        //         builder: (context) => WebView(
-        //               userModel: myUserModel!,
-        //               webPage: webPage,
-        //             )));
       },
     );
   }
@@ -462,53 +435,85 @@ class _MyServiceState extends State<MyService> {
       login = '...';
     }
     return Text(
-      '$login',
-      style: TextStyle(fontSize: 20.0, color: MyStyle().mainColor),
+      login,
+      style: TextStyle(
+        fontSize: 18.0,
+        fontWeight: FontWeight.bold,
+        color: Colors.white,
+        shadows: [Shadow(color: Colors.black45, blurRadius: 4.0)],
+      ),
     );
   }
 
   Widget showLogo() {
     return Container(
-      width: 80.0,
-      height: 80.0,
-      child: Image.asset('images/logo_master.png'),
+      width: 68.0,
+      height: 68.0,
+      child: Image.asset('images/logo_master.png', fit: BoxFit.contain),
     );
   }
 
   Widget headDrawer() {
     return DrawerHeader(
+      margin: EdgeInsets.zero,
+      padding: EdgeInsets.zero,
       decoration: BoxDecoration(
         image: DecorationImage(
           image: AssetImage('images/pharma.jpg'),
           fit: BoxFit.cover,
         ),
       ),
-      child: Column(
-        children: <Widget>[
-          showLogo(),
-          // showAppName(),
-          showLogin(),
-        ],
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.black.withOpacity(0.05),
+              Colors.black.withOpacity(0.55),
+            ],
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            showLogo(),
+            SizedBox(height: 10.0),
+            showLogin(),
+            SizedBox(height: 2.0),
+            Text(
+              'ยินดีต้อนรับ',
+              style: TextStyle(fontSize: 12.0, color: Colors.white70),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget showDrawer() {
-    // print(' cateList (showDrawer)>> $categoryModels');
-
     return Drawer(
+      backgroundColor: MyStyle().scaffoldBackground,
       child: ListView(
+        padding: EdgeInsets.zero,
         children: <Widget>[
           headDrawer(),
+          SizedBox(height: 6.0),
           menuHome(),
           menuCategory(),
-          // menuORN(),
           menuPay(),
           menuReward(),
-          // menuReadQRcode(),
           menuContact(),
           menuComplain(),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: Divider(color: MyStyle().borderColor, height: 1.0),
+          ),
           menuLogOut(),
+          SizedBox(height: 12.0),
         ],
       ),
     );
@@ -775,24 +780,16 @@ class _WebViewExampleState extends State<WebViewExample> {
 
     String? urlView =
         'https://www.ptnpharma.com/shop/pages/tables/orderhistory_mb.php?memberId=$memberId&memberCode=$memberCode'; //
-    String? txtTitle = 'หน้า.....';
 
     if (webPage == 'pay') {
       urlView =
           'https://www.ptnpharma.com/shop/pages/forms/pay_mobile.php?memberId=$memberId&memberCode=$memberCode'; //
-      txtTitle = 'การชำระเงิน';
     } else if (webPage == 'orn') {
       urlView =
           'https://www.ptnpharma.com/shop/pages/tables/orn_list_mobile.php?memberId=$memberId&memberCode=$memberCode'; //
-      txtTitle = 'ตรวจสอบใบส่งของ';
-    } else if (webPage == 'reward') {
-      urlView =
-          'https://www.ptnpharma.com/shop/pages/tables/reward_list_mb.php?memberId=$memberId&memberCode=$memberCode'; //
-      txtTitle = 'รายการของสมนาคุณ ';
     } else {
       urlView =
           'https://www.ptnpharma.com/shop/pages/forms/complain_mobile.php?memberId=$memberId&memberCode=$memberCode'; //
-      txtTitle = 'แจ้งร้องเรียน';
     }
 
     // #docregion webview_controller

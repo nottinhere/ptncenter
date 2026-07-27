@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ptncenter/scaffold/map.dart';
+import 'package:ptncenter/utility/my_style.dart';
 
 class Contact extends StatefulWidget {
   @override
@@ -7,200 +8,212 @@ class Contact extends StatefulWidget {
 }
 
 class _ContactState extends State<Contact> {
-  @override
-  Widget spaceBox() {
-    return SizedBox(
-      width: 10.0,
-      height: 16.0,
+  Widget sectionHeader(IconData iconData, String title) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 10.0),
+      child: Row(
+        children: <Widget>[
+          Icon(iconData, size: 20.0, color: MyStyle().textColor),
+          SizedBox(width: 8.0),
+          Text(title, style: MyStyle().sectionTitleStyle),
+        ],
+      ),
     );
   }
 
-  Widget build(BuildContext context) {
-    return GestureDetector(
+  Widget sectionCard({required Widget child}) {
+    return Container(
+      width: double.infinity,
+      margin: EdgeInsets.only(bottom: 14.0),
+      padding: EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(MyStyle().radiusM),
+        border: Border.all(color: MyStyle().borderColor),
+      ),
+      child: child,
+    );
+  }
+
+  Widget infoRow(IconData iconData, String text, {double topPadding = 8.0}) {
+    return Padding(
+      padding: EdgeInsets.only(top: topPadding),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Icon(iconData, size: 16.0, color: MyStyle().mutedTextColor),
+          SizedBox(width: 8.0),
+          Expanded(child: Text(text, style: MyStyle().h4StyleGray)),
+        ],
+      ),
+    );
+  }
+
+  Widget branchCard({
+    required String name,
+    required List<String> addressLines,
+    required String phone,
+    required String hours,
+  }) {
+    return sectionCard(
       child: Column(
-        children: [
-          Container(
-            width: MediaQuery.of(context).size.width,
-            child: Card(
-              // color: Color.fromRGBO(235, 254, 255, 1.0),
-              child: Column(
-                children: [
-                  Container(
-                    padding: EdgeInsets.only(bottom: 15.0, top: 15.0),
-                    child: Column(
-                      children: <Widget>[
-                        Text(
-                          'Contact',
-                          style: TextStyle(
-                            fontSize: 24.0,
-                            fontWeight: FontWeight.bold,
-                            color: Color.fromARGB(0xff, 0, 0, 0),
-                          ),
-                        ),
-                        spaceBox(),
-                        Text(
-                          'บริษัท พี ที เอ็น ฟาร์มาเซ็นเตอร์ จำกัด',
-                          style: TextStyle(
-                            fontSize: 20.0,
-                            fontWeight: FontWeight.bold,
-                            decoration: TextDecoration.underline,
-                            color: Color.fromARGB(0xff, 0, 0, 0),
-                          ),
-                        ),
-                        spaceBox(),
-                        Text(
-                          '919/30 ม.10 ถ.พหลโยธิน ต.นครสวรรค์ตก',
-                          style: TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.bold,
-                            color: Color.fromARGB(0xff, 0, 0, 0),
-                          ),
-                        ),
-                        Text(
-                          'อ.เมือง จ.นครสวรรค์ 60000',
-                          style: TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.bold,
-                            color: Color.fromARGB(0xff, 0, 0, 0),
-                          ),
-                        ),
-                        spaceBox(),
-                        Text(
-                          ' โทร 056-371370  มือถือ  092-0319999 ',
-                          style: TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.bold,
-                            color: Color.fromARGB(0xff, 0, 0, 0),
-                          ),
-                        ),
-                        // spaceBox(),
-                        Text(
-                          ' เวลาทำการ  9.30น -18.00 น. ',
-                          style: TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.bold,
-                            color: Color.fromARGB(0xff, 0, 0, 0),
-                          ),
-                        ),
-                        spaceBox(),
-                        Text(
-                          'คลังสินค้า พัฒนาเภสัช',
-                          style: TextStyle(
-                            fontSize: 20.0,
-                            fontWeight: FontWeight.bold,
-                            decoration: TextDecoration.underline,
-                            color: Color.fromARGB(0xff, 0, 0, 0),
-                          ),
-                        ),
-                        spaceBox(),
-                        Text(
-                          ' 159/1 ม .4 นครสวรรค์ตก',
-                          style: TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.bold,
-                            color: Color.fromARGB(0xff, 0, 0, 0),
-                          ),
-                        ),
-                        Text(
-                          ' อำเภอเมืองนครสวรรค์ จ.นครสวรรค์ 60000',
-                          style: TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.bold,
-                            color: Color.fromARGB(0xff, 0, 0, 0),
-                          ),
-                        ),
-                        spaceBox(),
-                        Text(
-                          ' โทร 056-345625 มือถือ 081-9164131',
-                          style: TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.bold,
-                            color: Color.fromARGB(0xff, 0, 0, 0),
-                          ),
-                        ),
-                        // spaceBox(),
-                        Text(
-                          ' เวลาทำการ  9.30น -17.00 น. ',
-                          style: TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.bold,
-                            color: Color.fromARGB(0xff, 0, 0, 0),
-                          ),
-                        ),
-                        spaceBox(),
-                        Container(
-                          width: MediaQuery.of(context).size.width * 0.45,
-                          // height: 80.0,
-                          child: GestureDetector(
-                            child: Card(
-                              // color: Colors.green.shade100,
-                              child: Container(
-                                // padding: EdgeInsets.all(16.0),
-                                alignment: AlignmentDirectional(0.0, 0.0),
-                                child: Column(
-                                  children: <Widget>[
-                                    Container(
-                                      width: 150.0,
-                                      child: Image.asset(
-                                          'images/icon_googlemap.jpg'),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            onTap: () {
-                              print('You click cart');
-                              MaterialPageRoute materialPageRoute =
-                                  MaterialPageRoute(
-                                      builder: (BuildContext buildContext) {
-                                return HomePage();
-                              });
-                              Navigator.of(context).push(materialPageRoute);
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Row(
-                    children: <Widget>[
-                      Container(
-                        padding: EdgeInsets.only(left: 10.0),
-                        width: 40.0,
-                        child: Image.asset('images/icon_line.png'),
-                      ),
-                      Text(
-                        ' https://line.me/ti/p/_P0vaper0j',
-                        style: TextStyle(
-                            fontSize: 18,
-                            // fontWeight: FontWeight.bold,
-                            color: Colors.black),
-                      ),
-                    ],
-                  ),
-                  spaceBox(),
-                  Row(
-                    children: <Widget>[
-                      Container(
-                        padding: EdgeInsets.only(left: 10.0),
-                        width: 40.0,
-                        child: Image.asset('images/icon_facebook.png'),
-                      ),
-                      Text(
-                        ' https://www.facebook.com/pattana.rx',
-                        style: TextStyle(
-                            fontSize: 18,
-                            // fontWeight: FontWeight.bold,
-                            color: Colors.black),
-                      ),
-                    ],
-                  ),
-                  spaceBox(),
-                ],
-              ),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(name, style: MyStyle().h3bStyle),
+          for (final line in addressLines) infoRow(Icons.location_on_outlined, line),
+          infoRow(Icons.call_outlined, phone),
+          infoRow(Icons.access_time, hours),
+        ],
+      ),
+    );
+  }
+
+  Widget headerCard() {
+    return sectionCard(
+      child: Row(
+        children: <Widget>[
+          CircleAvatar(
+            radius: 26.0,
+            backgroundColor: MyStyle().primaryLight,
+            child: Icon(Icons.storefront_rounded,
+                color: MyStyle().mainColor, size: 26.0),
+          ),
+          SizedBox(width: 12.0),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  'บริษัท พี ที เอ็น ฟาร์มาเซ็นเตอร์ จำกัด',
+                  style: MyStyle().h3bStyle,
+                ),
+                SizedBox(height: 2.0),
+                Text('ติดต่อเรา', style: MyStyle().captionStyle),
+              ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget mapCard() {
+    return GestureDetector(
+      onTap: () {
+        MaterialPageRoute materialPageRoute =
+            MaterialPageRoute(builder: (BuildContext buildContext) {
+          return HomePage();
+        });
+        Navigator.of(context).push(materialPageRoute);
+      },
+      child: Container(
+        width: double.infinity,
+        margin: EdgeInsets.only(bottom: 14.0),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(MyStyle().radiusM),
+          border: Border.all(color: MyStyle().borderColor),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Row(
+          children: <Widget>[
+            Image.asset(
+              'images/icon_googlemap.jpg',
+              width: 72.0,
+              height: 72.0,
+              fit: BoxFit.cover,
+            ),
+            SizedBox(width: 12.0),
+            Expanded(
+              child: Text('ดูตำแหน่งบน Google Maps', style: MyStyle().h4bStyleGray),
+            ),
+            Icon(Icons.chevron_right, color: MyStyle().mutedTextColor),
+            SizedBox(width: 8.0),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget socialTile({
+    required String iconAsset,
+    required String label,
+  }) {
+    return Container(
+      width: double.infinity,
+      margin: EdgeInsets.only(bottom: 10.0),
+      padding: EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(MyStyle().radiusS),
+        border: Border.all(color: MyStyle().borderColor),
+      ),
+      child: Row(
+        children: <Widget>[
+          Container(
+            width: 36.0,
+            height: 36.0,
+            decoration: BoxDecoration(
+              color: MyStyle().primaryLight,
+              shape: BoxShape.circle,
+            ),
+            padding: EdgeInsets.all(7.0),
+            child: Image.asset(iconAsset, fit: BoxFit.contain),
+          ),
+          SizedBox(width: 12.0),
+          Expanded(
+            child: Text(
+              label,
+              style: MyStyle().h4StyleGray,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: MyStyle().scaffoldBackground,
+      child: SingleChildScrollView(
+        padding: EdgeInsets.all(14.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            headerCard(),
+            sectionHeader(Icons.storefront_outlined, 'สาขา'),
+            branchCard(
+              name: 'บริษัท พี ที เอ็น ฟาร์มาเซ็นเตอร์ จำกัด',
+              addressLines: <String>[
+                '919/30 ม.10 ถ.พหลโยธิน ต.นครสวรรค์ตก',
+                'อ.เมือง จ.นครสวรรค์ 60000',
+              ],
+              phone: '056-371370, มือถือ 092-0319999',
+              hours: 'เวลาทำการ 9.30 - 18.00 น.',
+            ),
+            branchCard(
+              name: 'คลังสินค้า พัฒนาเภสัช',
+              addressLines: <String>[
+                '159/1 ม.4 นครสวรรค์ตก',
+                'อำเภอเมืองนครสวรรค์ จ.นครสวรรค์ 60000',
+              ],
+              phone: '056-345625, มือถือ 081-9164131',
+              hours: 'เวลาทำการ 9.30 - 17.00 น.',
+            ),
+            mapCard(),
+            sectionHeader(Icons.forum_outlined, 'ช่องทางออนไลน์'),
+            socialTile(
+              iconAsset: 'images/icon_line.png',
+              label: 'https://line.me/ti/p/_P0vaper0j',
+            ),
+            socialTile(
+              iconAsset: 'images/icon_facebook.png',
+              label: 'https://www.facebook.com/pattana.rx',
+            ),
+          ],
+        ),
       ),
     );
   }

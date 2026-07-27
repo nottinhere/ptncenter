@@ -73,7 +73,7 @@ class _NotifyState extends State<Notify> {
   Future<void> readNotify() async {
     String? memberId = myUserModel!.id;
     String? url =
-        'https://www.ptnpharma.com/apishop/json_notify.php?limit=10&memberId=$memberId'; // ?memberId=$memberId
+        '${MyStyle().serverName}/apishop/json_notify.php?limit=10&memberId=$memberId'; // ?memberId=$memberId
     print('urlNotify >> $url');
 
     http.Response response = await http.get(Uri.parse(url));

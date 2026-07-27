@@ -12,17 +12,12 @@ import 'package:ptncenter/scaffold/list_product_favorite.dart';
 import 'my_service.dart';
 import 'detail.dart';
 import 'detail_cart.dart';
-import 'package:ptncenter/widget/home.dart';
 import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_overlay_loader/flutter_overlay_loader.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
-import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:toast/toast.dart';
 
 class ListProduct extends StatefulWidget {
@@ -31,7 +26,6 @@ class ListProduct extends StatefulWidget {
   final int? cate;
   final String? cateName;
   final String? searchStr;
-  String? _result = '';
 
   ListProduct(
       {Key? key,
@@ -96,8 +90,6 @@ class _ListProductState extends State<ListProduct> {
 
 
   // List<ProductAllModel> productAllModels_buffer = List(); // []; //
-
-  var _controller = TextEditingController();
 
   int substart = 0;
   bool visible = true;
@@ -202,7 +194,7 @@ class _ListProductState extends State<ListProduct> {
     lastItemName = '';
     String memberId = myUserModel!.id.toString();
     String url =
-        'https://www.ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId&screen=listproduct';
+        '${MyStyle().serverName}/apishop/json_loadmycart.php?memberId=$memberId&screen=listproduct';
 
     print('url Detail =====>>>>>>>> $url');
 
@@ -277,23 +269,23 @@ class _ListProductState extends State<ListProduct> {
 
     String memberId = myUserModel!.id.toString();
     String url =
-        'https://www.ptnpharma.com/apishop/json_productlist.php?memberId=$memberId&searchKey=$searchString&page=$page';
+        '${MyStyle().serverName}/apishop/json_productlist.php?memberId=$memberId&searchKey=$searchString&page=$page';
     if (myIndex != 0) {
       if (myIndex == 1 || myIndex == 2 || myIndex == 3) {
         url =
-            'https://www.ptnpharma.com/apishop/json_productlist.php?memberId=$memberId&searchKey=$searchString&product_mode=$myIndex&page=$page';
+            '${MyStyle().serverName}/apishop/json_productlist.php?memberId=$memberId&searchKey=$searchString&product_mode=$myIndex&page=$page';
       } else if (myIndex == 4) {
         url =
-            'https://www.ptnpharma.com/apishop/json_productnotreceive.php?memberId=$memberId&page=$page';
+            '${MyStyle().serverName}/apishop/json_productnotreceive.php?memberId=$memberId&page=$page';
       } else if (myIndex == 5) {
         url =
-            'https://www.ptnpharma.com/apishop/json_productlist.php?memberId=$memberId&cate_id=$myCate&page=$page';
+            '${MyStyle().serverName}/apishop/json_productlist.php?memberId=$memberId&cate_id=$myCate&page=$page';
       } else if (myIndex == 7) {
         url =
-            'https://www.ptnpharma.com/apishop/json_productbestseller.php?memberId=$memberId&page=$page';
+            '${MyStyle().serverName}/apishop/json_productbestseller.php?memberId=$memberId&page=$page';
       } else if (myIndex == 8) {
         url =
-            'https://www.ptnpharma.com/apishop/json_productbestintrend.php?memberId=$memberId&page=$page';
+            '${MyStyle().serverName}/apishop/json_productbestintrend.php?memberId=$memberId&page=$page';
       }
     }
 
@@ -394,7 +386,7 @@ class _ListProductState extends State<ListProduct> {
     String? memberId = myUserModel!.id.toString();
     int? productID = filterProductAllModels![index].id!;
     String? url =
-        'https://www.ptnpharma.com/apishop/json_loadmycart.php?memberId=$memberId';
+        '${MyStyle().serverName}/apishop/json_loadmycart.php?memberId=$memberId';
 
     print("URL update item = $url");
     http.Response response = await http.get(Uri.parse(url));
@@ -424,7 +416,7 @@ class _ListProductState extends State<ListProduct> {
     return Row(
       children: <Widget>[
         Container(
-          width: MediaQuery.of(context).size.width * 0.7 - 10,
+          width: MediaQuery.of(context).size.width * 0.75,
           child: Text(
             filterProductAllModels![index].title!,
             style: MyStyle().h3Style,
@@ -438,7 +430,7 @@ class _ListProductState extends State<ListProduct> {
     return Row(
       children: <Widget>[
         Container(
-          width: MediaQuery.of(context).size.width * 0.7 - 10,
+          width: MediaQuery.of(context).size.width * 0.75,
           child: Text(
             filterProductAllModels![index].hilight!,
             style: MyStyle().h3StyleRed,
@@ -452,7 +444,7 @@ class _ListProductState extends State<ListProduct> {
     return Row(
       children: <Widget>[
         Container(
-          width: MediaQuery.of(context).size.width * 0.7 - 10,
+          width: MediaQuery.of(context).size.width * 0.75,
           child: Text(
             filterProductAllModels![index].extrapoint!,
             style: MyStyle().h3StyleOrange,
@@ -558,9 +550,9 @@ class _ListProductState extends State<ListProduct> {
 
   Widget showText(int index) {
     return Container(
-      padding: EdgeInsets.only(left: 5.0, right: 2.0),
+      padding: EdgeInsets.only(left: 5.0, right: 0.0),
       // height: MediaQuery.of(context).size.width * 0.5,
-      width: MediaQuery.of(context).size.width * 0.73,
+      width: MediaQuery.of(context).size.width * 0.78,
       child: Container(
         padding: EdgeInsets.only(bottom: 5.0, top: 5.0),
         child: Column(
@@ -645,9 +637,9 @@ class _ListProductState extends State<ListProduct> {
 
   Widget myCircularProgress() {
     return Visibility(
-      maintainSize: true,
-      maintainAnimation: true,
-      maintainState: true,
+      maintainSize: false,
+      maintainAnimation: false,
+      maintainState: false,
       visible: visible,
       // child: Center(child: CupertinoActivityIndicator()),
       child: Center(
@@ -786,7 +778,11 @@ class _ListProductState extends State<ListProduct> {
         return Center(child: Text(''));
       }
     } else {
-      return Center(child: CircularProgressIndicator());
+      return Center(
+          child: LoadingAnimationWidget.staggeredDotsWave(
+        color: Colors.green,
+        size: 30,
+      ));
     }
     /*
     return Center(
@@ -865,7 +861,7 @@ Future<void> decodeQRcode(var code) async {
     try {
       if(code != '' && code != null){
         String url =
-            'https://www.ptnpharma.com/apishop/json_productlist.php?bqcode=$code';
+            '${MyStyle().serverName}/apishop/json_productlist.php?bqcode=$code';
             print('url === (decodeQRcode) >>>> $url');
         http.Response response = await http.get(Uri.parse(url));
         var result = json.decode(response.body);
@@ -960,7 +956,6 @@ Future<void> decodeQRcode(var code) async {
                 },
                 onSelected: (String selection) {    // onSelected: (String selection) {
                     var parts = selection.split('|');
-                    var prefix = parts[0].trim();                 // prefix: "date"
                     searchString = 'x|'+parts.sublist(1).join('|').trim();
                     setState(() {
                       page = 1;
@@ -1057,8 +1052,6 @@ Future<void> decodeQRcode(var code) async {
   }
 
   Widget stylishBottomBar() {
-    int? unread =
-        myUserModel!.lastNewsId!.toInt() - myUserModel!.lastNewsOpen!.toInt();
     return StylishBottomBar(
       option: AnimatedBarOptions(
         iconStyle: IconStyle.animated,

@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:ptncenter/scaffold/authen.dart';
+import 'package:ptncenter/utility/my_style.dart';
 import 'firebase_options.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 
@@ -36,6 +37,25 @@ class MyApp extends StatelessWidget {
     );
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        useMaterial3: false,
+        fontFamily: MyStyle().fontName,
+        scaffoldBackgroundColor: MyStyle().scaffoldBackground,
+        primaryColor: MyStyle().mainColor,
+        colorScheme: ColorScheme.fromSeed(seedColor: MyStyle().mainColor),
+        cardTheme: CardThemeData(
+          elevation: 0,
+          color: MyStyle().surfaceColor,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(MyStyle().radiusM),
+          ),
+        ),
+        appBarTheme: AppBarTheme(
+          backgroundColor: MyStyle().bgColor,
+          foregroundColor: Colors.white,
+          elevation: 0,
+        ),
+      ),
       home: Authen(),
     );
   }

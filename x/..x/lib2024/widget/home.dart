@@ -244,7 +244,7 @@ class _HomeState extends State<Home> {
   /*************************** */
 
   Future<void> readPromotion() async {
-    String? url = 'https://www.ptnpharma.com/apishop/json_promotion.php';
+    String? url = '${MyStyle().serverName}/apishop/json_promotion.php';
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var mapItemProduct =
@@ -272,7 +272,7 @@ class _HomeState extends State<Home> {
   /*************************** */
 
   Future<void> readSlide() async {
-    String? url = 'https://www.ptnpharma.com/apishop/json_slideshow.php';
+    String? url = '${MyStyle().serverName}/apishop/json_slideshow.php';
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var mapItemProduct =
@@ -295,7 +295,7 @@ class _HomeState extends State<Home> {
   Future<void> readSuggest() async {
     String? memId = myUserModel!.id;
     String? url =
-        'https://www.ptnpharma.com/apishop/json_suggest.php?memberId=$memId'; // ?memberId=$memberId
+        '${MyStyle().serverName}/apishop/json_suggest.php?memberId=$memId'; // ?memberId=$memberId
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var mapItemProduct =
@@ -320,7 +320,7 @@ class _HomeState extends State<Home> {
   Future<void> readNews() async {
     String? memId = myUserModel!.id;
     String? url =
-        'https://www.ptnpharma.com/apishop/json_news.php?limit=5'; // ?memberId=$memberId
+        '${MyStyle().serverName}/apishop/json_news.php?limit=5'; // ?memberId=$memberId
     print('urlNews >> $url');
 
     http.Response response = await http.get(Uri.parse(url));

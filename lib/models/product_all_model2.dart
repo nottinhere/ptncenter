@@ -13,6 +13,9 @@ class ProductAllModel2 {
   int? itemincartSunit;
   int? itemincartMunit;
   int? itemincartLunit;
+  int? limitS;
+  int? limitM;
+  int? limitL;
   int? recommend;
   int? promotion;
   int? updateprice;
@@ -42,6 +45,9 @@ class ProductAllModel2 {
       this.itemincartSunit,
       this.itemincartMunit,
       this.itemincartLunit,
+      this.limitS,
+      this.limitM,
+      this.limitL,
       this.recommend,
       this.promotion,
       this.updateprice,
@@ -73,6 +79,9 @@ class ProductAllModel2 {
     itemincartSunit = json['itemincartSunit'];
     itemincartMunit = json['itemincartMunit'];
     itemincartLunit = json['itemincartLunit'];
+    limitS = json['limitS'];
+    limitM = json['limitM'];
+    limitL = json['limitL'];
     recommend = json['recommend'];
     promotion = json['promotion'];
     updateprice = json['updateprice'];
@@ -106,6 +115,9 @@ class ProductAllModel2 {
     data['itemincartSunit'] = this.itemincartSunit;
     data['itemincartMunit'] = this.itemincartMunit;
     data['itemincartLunit'] = this.itemincartLunit;
+    data['limitS'] = this.limitS;
+    data['limitM'] = this.limitM;
+    data['limitL'] = this.limitL;
     data['recommend'] = this.recommend;
     data['promotion'] = this.promotion;
     data['updateprice'] = this.updateprice;
@@ -145,6 +157,7 @@ class S {
   String? lable;
   String? price;
   String? unit;
+  String? limitorder;
 
   S({this.lable, this.price, this.unit});
 
@@ -152,6 +165,7 @@ class S {
     lable = json['lable'];
     price = json['price'];
     unit = json['unit'];
+    limitorder = json['limitorder'];
   }
 
   Map<String, dynamic> toJson() {
@@ -159,6 +173,7 @@ class S {
     data['lable'] = this.lable;
     data['price'] = this.price;
     data['unit'] = this.unit;
+    data['limitorder'] = this.limitorder;
     return data;
   }
 }

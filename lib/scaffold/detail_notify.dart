@@ -5,7 +5,6 @@ import 'package:http/http.dart' as http;
 import 'package:ptncenter/models/user_model.dart';
 import 'package:ptncenter/utility/my_style.dart';
 import 'package:ptncenter/models/popup_model.dart';
-import 'package:ptncenter/scaffold/detail_cart.dart';
 import 'package:ptncenter/scaffold/list_product.dart';
 import 'package:ptncenter/scaffold/list_notify.dart';
 import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
@@ -14,12 +13,6 @@ import 'package:ptncenter/scaffold/list_product_favorite.dart';
 import 'my_service.dart';
 
 import 'package:webview_flutter/webview_flutter.dart';
-// Import for Android features.
-import 'package:webview_flutter_android/webview_flutter_android.dart';
-// Import for iOS/macOS features.
-import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
-
-
 
 class DetailNotify extends StatefulWidget {
   final PopupModel? popupModel;
@@ -61,7 +54,7 @@ class _DetailState extends State<DetailNotify> {
   Future<void> getPopupWhereID() async {
     String id = currentPopupModel!.id.toString();
 
-    String url = 'https://www.ptnpharma.com/apishop/json_notifydetail.php?id=$id';
+    String url = '${MyStyle().serverName}/apishop/json_notifydetail.php?id=$id';
     print('urlPopup >> $url');
 
     http.Response response = await http.get(Uri.parse(url));
@@ -317,9 +310,6 @@ class _DetailState extends State<DetailNotify> {
   // }
 
   Widget stylishBottomBar() {
-    int? unread =
-        myUserModel!.lastNewsId!.toInt() - myUserModel!.lastNewsOpen!.toInt();
-
     return StylishBottomBar(
       //  option: AnimatedBarOptions(
       //    iconSize: 32,
@@ -408,9 +398,7 @@ class _DetailState extends State<DetailNotify> {
         userModel: myUserModel!,
       );
     });
-    int unread;
-    // Navigator.of(context).push(materialPageRoute);
-    Navigator.of(context).push(materialPageRoute).then((value) => unread = 0);
+    Navigator.of(context).push(materialPageRoute);
   }
 
   Widget gotoHome() {
@@ -554,11 +542,7 @@ class _WebViewExampleState extends State<WebViewExample> {
     super.initState();
     myUserModel = widget.userModel;
     mywebPage = widget.webPage;
-    String? memberId = myUserModel!.id;
-    String? memberCode = myUserModel!.customerCode;
-    String webPage = mywebPage.toString();
 
-    
     String? url = mywebPage!; //
     print('URL ==>> $url');
 
