@@ -98,8 +98,7 @@ class _OcrScanState extends State<OcrScan> {
 
     List<String> barcodes = [];
     List<String> internalCodes = [];
-    TextBlock? nameBlock;
-    double bestBlockHeight = 0;
+    List<String> nameCandidates = [];
 
     try {
       InputImage inputImage = InputImage.fromFile(image);
@@ -110,7 +109,10 @@ class _OcrScanState extends State<OcrScan> {
 
       for (TextBlock block in recognizedText.blocks) {
         for (TextLine line in block.lines) {
-          List<String> lineBarcodes = extractBarcodesFromLine(line.text);
+          String lineText = line.text.trim();
+          if (lineText.isEmpty) continue;
+
+          List<String> lineBarcodes = extractBarcodesFromLine(lineText);
           if (lineBarcodes.isNotEmpty) {
             for (String barcodeValue in lineBarcodes) {
               if (!barcodes.contains(barcodeValue)) barcodes.add(barcodeValue);
@@ -118,25 +120,25 @@ class _OcrScanState extends State<OcrScan> {
             continue;
           }
 
-          Match? codeMatch = internalCodeRegex.firstMatch(line.text);
+          Match? codeMatch = internalCodeRegex.firstMatch(lineText);
           if (codeMatch != null) {
             String value = codeMatch.group(0)!;
             if (!internalCodes.contains(value)) internalCodes.add(value);
+            continue;
           }
-        }
 
-        // เก็บ block ตัวอักษร (ไม่ใช่ตัวเลขล้วน) ที่บรรทัดใหญ่ที่สุด ไว้เป็นตัวสำรองชื่อสินค้า
-        bool looksNumeric = numericOnlyRegex.hasMatch(block.text.trim());
-        double blockHeight = block.boundingBox.height.toDouble();
-        if (!looksNumeric && block.text.trim().isNotEmpty && blockHeight > bestBlockHeight) {
-          bestBlockHeight = blockHeight;
-          nameBlock = block;
+          // แต่ละบรรทัดที่ไม่ใช่บาร์โค้ด/โค้ดภายใน และไม่ใช่ตัวเลขล้วน
+          // ถือเป็นชื่อสินค้าหนึ่งตัว - หนึ่งรูปมีโอกาสเจอชื่อสินค้าได้หลายคำ/หลายบรรทัด
+          bool looksNumeric = numericOnlyRegex.hasMatch(lineText);
+          if (!looksNumeric && !nameCandidates.contains(lineText)) {
+            nameCandidates.add(lineText);
+          }
         }
       }
 
       print('OCR barcodes found: $barcodes');
       print('OCR internal codes found: $internalCodes');
-      print('OCR name candidate: ${nameBlock?.text}');
+      print('OCR name candidates found: $nameCandidates');
     } catch (e) {
       print('OCR error: $e');
     }
@@ -155,9 +157,13 @@ class _OcrScanState extends State<OcrScan> {
         lookupResults.add(
             OcrLookupResult(code: code, matchType: 'โค้ดสินค้า', product: product));
       }
-    } else if (nameBlock != null) {
-      String? keyword = firstWordRegex.firstMatch(nameBlock.text)?.group(0);
-      if (keyword != null && keyword.isNotEmpty) {
+    } else if (nameCandidates.isNotEmpty) {
+      for (String candidate in nameCandidates) {
+        Match? firstMatch = firstWordRegex.firstMatch(candidate);
+        String? keyword = firstMatch?.group(0);
+        // keyword ที่นำไปค้นหาต้องยาวอย่างน้อย 5 ตัวอักษร ไม่งั้นถือว่าไม่น่าเชื่อถือพอ
+        if (keyword == null || keyword.length < 5) continue;
+
         List<ProductAllModel> products = await lookupProductByKeyword(keyword);
         if (products.isEmpty) {
           lookupResults.add(

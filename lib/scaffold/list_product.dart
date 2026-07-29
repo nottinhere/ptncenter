@@ -341,42 +341,6 @@ class _ListProductState extends State<ListProduct> {
     }
   }
 
-  // void showCreditAlertDialog(BuildContext context) {
-  //   String? creditterm = myUserModel!.credittermAlert;
-  //   String? financialamount = myUserModel!.financialamountAlert;
-  //   String? contactAdmin = myUserModel!.contactAdminAlert;
-
-  //   if (creditterm !='-' || financialamount !='-' || contactAdmin !='-') {
-  //       var txtCreditTitle =  '';
-  //       if(creditterm !='-' )
-  //         txtCreditTitle =  'ท่านมียอดค้างชำระเกินกำหนด';
-  //       else if(financialamount !='-' )
-  //         txtCreditTitle =  'ท่านมียอดค้างชำระเกินวงเงินที่กำหนด';
-  //       else if(contactAdmin !='-' )
-  //         txtCreditTitle =  'กรุณาติดต่อผู้ดูแลระบบ';
-
-
-  //       AwesomeDialog(
-  //         context: context,
-  //         headerAnimationLoop: false,
-  //         dialogType: DialogType.warning,
-  //         autoHide: const Duration(seconds: 5),
-  //         title:  txtCreditTitle,
-  //         desc: 'กรุณาชำระรายการหรือติดต่อเจ้าหน้าที่ ',
-  //         // btnCancelOnPress: () {
-  //         //   debugPrint('OnClcik');
-  //         // },
-
-  //         btnOkText: ('ok'),
-  //         btnOkColor: const Color.fromARGB(255, 252, 183, 36),
-  //         btnOkOnPress: () {
-  //           debugPrint('OnClcik');
-  //         },
-  //         btnOkIcon: Icons.check_circle,
-
-  //       ).show();
-  //   }
-  // }
 
   Future<void> updateDatalist(index) async {
     // List<ProductAllModel> productAllModels_buffer = List(); // []; //
@@ -892,6 +856,7 @@ Future<void> decodeQRcode(var code) async {
   }
 
   List<String> jsonSuggestMed =[];
+  String autocompleteQuery = '';
   Future<void> loadJsonAsset() async {
     String url = 'https://ptnpharma.com/jsonData/medicine_unit.json';
     http.Response response = await http.get(Uri.parse(url));
@@ -902,6 +867,70 @@ Future<void> decodeQRcode(var code) async {
     setState(() {
        jsonSuggestMed;
     });
+  }
+
+  List<String> searchWords(String query) {
+    return query
+        .toLowerCase()
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((String word) => word.isNotEmpty)
+        .toList();
+  }
+
+  Widget highlightedOptionText(BuildContext context, String text, String query) {
+    List<String> words = searchWords(query);
+    if (words.isEmpty) {
+      return Text(text);
+    }
+
+    String lowerText = text.toLowerCase();
+    List<TextSpan> spans = <TextSpan>[];
+    int cursor = 0;
+
+    while (cursor < text.length) {
+      int bestIndex = -1;
+      int bestLength = 0;
+      for (String word in words) {
+        int idx = lowerText.indexOf(word, cursor);
+        if (idx != -1 && (bestIndex == -1 || idx < bestIndex)) {
+          bestIndex = idx;
+          bestLength = word.length;
+        }
+      }
+
+      if (bestIndex == -1) {
+        spans.add(TextSpan(text: text.substring(cursor)));
+        break;
+      }
+
+      if (bestIndex > cursor) {
+        spans.add(TextSpan(text: text.substring(cursor, bestIndex)));
+      }
+      spans.add(TextSpan(
+        text: text.substring(bestIndex, bestIndex + bestLength),
+        style: TextStyle(fontWeight: FontWeight.bold),
+      ));
+      cursor = bestIndex + bestLength;
+    }
+
+    TextStyle baseStyle =
+        DefaultTextStyle.of(context).style.copyWith(fontSize: 15.0);
+    return RichText(text: TextSpan(style: baseStyle, children: spans));
+  }
+
+  String buildSearchKey(String query) {
+    String trimmed = query.trim();
+    if (trimmed.isEmpty) return trimmed;
+
+    List<String> words = trimmed.split(RegExp(r'\s+'));
+    if (words.length >= 2) {
+      // ค้นหาด้วย 2 คำแรกพร้อมกัน (ต้องเจอทั้งคู่ใน field เดียวกัน) เช่น "Acetin 200"
+      String keyword1 = Uri.encodeComponent(words[0]);
+      String keyword2 = Uri.encodeComponent(words[1]);
+      return 'kw2|$keyword1|$keyword2';
+    }
+    return trimmed;
   }
 
   Widget searchForm() {
@@ -930,6 +959,7 @@ Future<void> decodeQRcode(var code) async {
                     textInputAction: TextInputAction.search,
                     onSubmitted: (value) {
                       setState(() {
+                        searchString = buildSearchKey(value);
                         page = 1;
                         myIndex = 0;
                         productAllModels!.clear();
@@ -947,12 +977,44 @@ Future<void> decodeQRcode(var code) async {
                   );
                 },  
                 optionsBuilder: (TextEditingValue textEditingValue) {
-                  if (textEditingValue.text == '') {
+                  autocompleteQuery = textEditingValue.text.trim();
+                  List<String> words = searchWords(textEditingValue.text);
+                  if (words.isEmpty) {
                     return const Iterable<String>.empty();
                   }
                   return listjsonSuggestMed.where((String option) {
-                    return option.contains(textEditingValue.text.toLowerCase());
+                    return words.every((String word) => option.contains(word));
                   });
+                },
+                optionsViewBuilder: (context, onSelected, options) {
+                  List<String> optionsList = options.toList();
+                  return Align(
+                    alignment: Alignment.topLeft,
+                    child: Material(
+                      elevation: 4.0,
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(maxHeight: 700.0),
+                        child: ListView.builder(
+                          padding: EdgeInsets.zero,
+                          shrinkWrap: true,
+                          itemCount: optionsList.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            String option = optionsList[index];
+                            String displayName = option.split('|').first;
+                            return InkWell(
+                              onTap: () => onSelected(option),
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 16.0, vertical: 10.0),
+                                child: highlightedOptionText(
+                                    context, displayName, autocompleteQuery),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  );
                 },
                 onSelected: (String selection) {    // onSelected: (String selection) {
                     var parts = selection.split('|');

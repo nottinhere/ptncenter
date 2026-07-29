@@ -475,14 +475,14 @@ DateTime parseDate =
                         userModel: myUserModel,
                       );
                     });
-                    // Navigator.of(context).push(materialPageRoute);
-                    Navigator.of(context)
-                        .push(materialPageRoute)
-                        .then((value) => setState(() {
-                              ornAllModels!.clear();
-                              readData();
-                              updateDatalist(index);
-                            }));
+                    Navigator.of(context).push(materialPageRoute);
+                    // Navigator.of(context)
+                    //     .push(materialPageRoute)
+                    //     .then((value) => setState(() {
+                    //           ornAllModels!.clear();
+                    //           readData();
+                    //           updateDatalist(index);
+                    //         }));
                   },
                 ),
                 myCircularProgress(),
@@ -515,14 +515,14 @@ DateTime parseDate =
                   userModel: myUserModel,
                 );
               });
-              // Navigator.of(context).push(materialPageRoute);
-              Navigator.of(context)
-                  .push(materialPageRoute)
-                  .then((value) => setState(() {
-                        ornAllModels!.clear();
-                        readData();
-                        updateDatalist(index);
-                      }));
+              Navigator.of(context).push(materialPageRoute);
+              // Navigator.of(context)
+              //     .push(materialPageRoute)
+              //     .then((value) => setState(() {
+              //           ornAllModels!.clear();
+              //           readData();
+              //           updateDatalist(index);
+              //         }));
             },
           );
         },

@@ -214,12 +214,26 @@ class _HomeState extends State<Home> {
 
   void submitSearch(String value) {
     String query = value.trim();
+    String? searchStr;
+
+    if (query.isNotEmpty) {
+      List<String> words = query.split(RegExp(r'\s+'));
+      if (words.length >= 2) {
+        // ค้นหาด้วย 2 คำแรกพร้อมกัน (ต้องเจอทั้งคู่ใน field เดียวกัน) เช่น "Acetin 200"
+        String keyword1 = Uri.encodeComponent(words[0]);
+        String keyword2 = Uri.encodeComponent(words[1]);
+        searchStr = 'kw2|$keyword1|$keyword2';
+      } else {
+        searchStr = query;
+      }
+    }
+
     MaterialPageRoute materialPageRoute =
         MaterialPageRoute(builder: (BuildContext buildContext) {
       return ListProduct(
         index: 0,
         userModel: myUserModel!,
-        searchStr: query.isEmpty ? null : query,
+        searchStr: searchStr,
       );
     });
     Navigator.of(context).push(materialPageRoute);

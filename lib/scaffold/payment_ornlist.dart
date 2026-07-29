@@ -337,12 +337,15 @@ class _PaymentOrnListState extends State<PaymentOrnList> {
         userModel: myUserModel,
       );
     });
-    Navigator.of(context)
-        .push(materialPageRoute)
-        .then((value) => setState(() {
-              ornAllModels!.clear();
-              readData();
-            }));
+    // Navigator.of(context)
+    //     .push(materialPageRoute)
+    //     .then((value) => setState(() {
+    //           page = 1;
+    //           ornAllModels!.clear();
+    //           readData();
+    //         }));
+        Navigator.of(context).push(materialPageRoute);
+
   }
 
   Widget showProductItem() {
@@ -486,7 +489,13 @@ class _PaymentOrnListState extends State<PaymentOrnList> {
               userModel: myUserModel,
             );
           });
-          Navigator.of(context).push(materialPageRoute);
+          Navigator.of(context)
+              .push(materialPageRoute)
+              .then((value) => setState(() {
+                    page = 1;
+                    ornAllModels!.clear();
+                    readData();
+                  }));
         }
       }
     } catch (e) {}
