@@ -1,18 +1,22 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_spinbox/flutter_spinbox.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:ptncenter/models/product_all_model.dart';
 import 'package:ptncenter/models/user_model.dart';
+import 'package:ptncenter/scaffold/crop_image_page.dart';
 import 'package:ptncenter/scaffold/detail.dart';
 import 'package:ptncenter/scaffold/detail_cart.dart';
 import 'package:ptncenter/scaffold/list_product.dart';
 import 'package:ptncenter/scaffold/my_service.dart';
 import 'package:ptncenter/scaffold/reward_list.dart';
 import 'package:ptncenter/utility/my_style.dart';
+import 'package:ptncenter/utility/normal_dialog.dart';
 import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
 
 class OcrLookupResult {
@@ -38,12 +42,13 @@ class _OcrScanState extends State<OcrScan> {
   final TextRecognizer textRecognizer =
       TextRecognizer(script: TextRecognitionScript.latin);
 
-  // ลำดับความน่าเชื่อถือ: บาร์โค้ดสินค้า > โค้ดภายในระบบ 5 หลัก > ชื่อสินค้า
-  final RegExp barcodeRegex = RegExp(r'\b\d{13}\b|\b\d{12}\b|\b\d{8}\b');
-  final RegExp internalCodeRegex = RegExp(r'\b\d{5}\b');
-  final RegExp numericOnlyRegex = RegExp(r'^[\d\s.,%/-]+$');
+  // ลำดับความสำคัญการแสดงผลการค้นหา: barcodeRegex > twoWordRegex > firstWordRegex > numericOnlyRegex
+  // ตัดเอา 2 คำแรกของ block ชื่อสินค้ามาเป็น keyword (แม่นยำกว่าคำเดียว)
+  final RegExp twoWordRegex = RegExp(r'^([A-Za-z0-9]+)\s+([A-Za-z0-9]+)');
   // ตัดเอาคำแรกของ block ชื่อสินค้ามาเป็น keyword (ตัวอักษร+ตัวเลขผสมกันได้ เช่น "3M", "Acetin200")
   final RegExp firstWordRegex = RegExp(r'[A-Za-z0-9]+');
+  final RegExp barcodeRegex = RegExp(r'\b\d{13}\b|\b\d{12}\b|\b\d{8}\b');
+  final RegExp numericOnlyRegex = RegExp(r'^[\d\s.,%/-]+$');
 
   File? pickedImage;
   bool scanning = false;
@@ -66,8 +71,19 @@ class _OcrScanState extends State<OcrScan> {
     final pickedFile = await picker.pickImage(source: source);
     if (pickedFile == null) return;
 
+    Uint8List imageBytes = await pickedFile.readAsBytes();
+    if (!mounted) return;
+
+    final File? croppedFile = await Navigator.of(context).push<File?>(
+      MaterialPageRoute(
+        builder: (BuildContext context) =>
+            CropImagePage(imageBytes: imageBytes),
+      ),
+    );
+    if (croppedFile == null) return;
+
     setState(() {
-      pickedImage = File(pickedFile.path);
+      pickedImage = croppedFile;
       results = [];
     });
 
@@ -97,7 +113,6 @@ class _OcrScanState extends State<OcrScan> {
     });
 
     List<String> barcodes = [];
-    List<String> internalCodes = [];
     List<String> nameCandidates = [];
 
     try {
@@ -120,14 +135,7 @@ class _OcrScanState extends State<OcrScan> {
             continue;
           }
 
-          Match? codeMatch = internalCodeRegex.firstMatch(lineText);
-          if (codeMatch != null) {
-            String value = codeMatch.group(0)!;
-            if (!internalCodes.contains(value)) internalCodes.add(value);
-            continue;
-          }
-
-          // แต่ละบรรทัดที่ไม่ใช่บาร์โค้ด/โค้ดภายใน และไม่ใช่ตัวเลขล้วน
+          // แต่ละบรรทัดที่ไม่ใช่บาร์โค้ด และไม่ใช่ตัวเลขล้วน
           // ถือเป็นชื่อสินค้าหนึ่งตัว - หนึ่งรูปมีโอกาสเจอชื่อสินค้าได้หลายคำ/หลายบรรทัด
           bool looksNumeric = numericOnlyRegex.hasMatch(lineText);
           if (!looksNumeric && !nameCandidates.contains(lineText)) {
@@ -137,48 +145,63 @@ class _OcrScanState extends State<OcrScan> {
       }
 
       print('OCR barcodes found: $barcodes');
-      print('OCR internal codes found: $internalCodes');
       print('OCR name candidates found: $nameCandidates');
     } catch (e) {
       print('OCR error: $e');
     }
 
-    List<OcrLookupResult> lookupResults = [];
+    List<OcrLookupResult> twoWordResults = [];
+    List<OcrLookupResult> firstWordResults = [];
+    List<OcrLookupResult> barcodeResults = [];
 
-    if (barcodes.isNotEmpty) {
-      for (String barcode in barcodes) {
-        ProductAllModel? product = await lookupProductByBarcode(barcode);
-        lookupResults.add(OcrLookupResult(
-            code: barcode, matchType: 'บาร์โค้ด', product: product));
-      }
-    } else if (internalCodes.isNotEmpty) {
-      for (String code in internalCodes) {
-        ProductAllModel? product = await lookupProductByCode(code);
-        lookupResults.add(
-            OcrLookupResult(code: code, matchType: 'โค้ดสินค้า', product: product));
-      }
-    } else if (nameCandidates.isNotEmpty) {
-      for (String candidate in nameCandidates) {
-        Match? firstMatch = firstWordRegex.firstMatch(candidate);
-        String? keyword = firstMatch?.group(0);
-        // keyword ที่นำไปค้นหาต้องยาวอย่างน้อย 5 ตัวอักษร ไม่งั้นถือว่าไม่น่าเชื่อถือพอ
-        if (keyword == null || keyword.length < 5) continue;
-
-        List<ProductAllModel> products = await lookupProductByKeyword(keyword);
+    for (String candidate in nameCandidates) {
+      Match? twoWordMatch = twoWordRegex.firstMatch(candidate);
+      String? twoWordKeyword = twoWordMatch != null
+          ? '${twoWordMatch.group(1)} ${twoWordMatch.group(2)}'
+          : null;
+      // keyword ที่นำไปค้นหาต้องยาวอย่างน้อย 5 ตัวอักษร ไม่งั้นถือว่าไม่น่าเชื่อถือพอ
+      if (twoWordKeyword != null && twoWordKeyword.length >= 5) {
+        List<ProductAllModel> products =
+            await lookupProductByKeyword(twoWordKeyword);
         if (products.isEmpty) {
-          lookupResults.add(
-              OcrLookupResult(code: keyword, matchType: 'ชื่อสินค้า', product: null));
+          twoWordResults.add(OcrLookupResult(
+              code: twoWordKeyword,
+              matchType: 'ชื่อสินค้า (2 คำ)',
+              product: null));
         } else {
           for (ProductAllModel product in products) {
-            lookupResults.add(OcrLookupResult(
+            twoWordResults.add(OcrLookupResult(
+                code: twoWordKeyword,
+                matchType: 'ชื่อสินค้า (2 คำ)',
+                product: product));
+          }
+        }
+      }
+
+      Match? firstMatch = firstWordRegex.firstMatch(candidate);
+      String? keyword = firstMatch?.group(0);
+      if (keyword != null && keyword.length >= 5) {
+        List<ProductAllModel> products = await lookupProductByKeyword(keyword);
+        if (products.isEmpty) {
+          firstWordResults.add(OcrLookupResult(
+              code: keyword, matchType: 'ชื่อสินค้า', product: null));
+        } else {
+          for (ProductAllModel product in products) {
+            firstWordResults.add(OcrLookupResult(
                 code: keyword, matchType: 'ชื่อสินค้า', product: product));
           }
         }
       }
     }
 
+    for (String barcode in barcodes) {
+      ProductAllModel? product = await lookupProductByBarcode(barcode);
+      barcodeResults.add(OcrLookupResult(
+          code: barcode, matchType: 'บาร์โค้ด', product: product));
+    }
+
     setState(() {
-      results = lookupResults;
+      results = [...barcodeResults, ...twoWordResults, ...firstWordResults];
       scanning = false;
     });
   }
@@ -187,14 +210,6 @@ class _OcrScanState extends State<OcrScan> {
     String? memberId = myUserModel?.id;
     String url = '${MyStyle().serverName}/apishop/json_productlist.php'
         '?memberId=$memberId&bqcode=$barcode&page=1';
-    print('url > $url');
-    return _fetchFirstProduct(url);
-  }
-
-  Future<ProductAllModel?> lookupProductByCode(String code) async {
-    String? memberId = myUserModel?.id;
-    String url = '${MyStyle().serverName}/apishop/json_productlist.php'
-        '?memberId=$memberId&searchKey=x|$code&page=1';
     print('url > $url');
     return _fetchFirstProduct(url);
   }
@@ -311,26 +326,191 @@ class _OcrScanState extends State<OcrScan> {
     );
   }
 
+  Widget resultTileImage(ProductAllModel? product) {
+    if (product != null && product.photo != null && product.photo != '') {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(6.0),
+        child: Image.network(
+          product.photo!,
+          width: 48.0,
+          height: 48.0,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) => Icon(
+            Icons.image_not_supported_outlined,
+            color: Colors.grey.shade400,
+            size: 32.0,
+          ),
+        ),
+      );
+    }
+
+    return Icon(Icons.image_not_supported_outlined,
+        color: Colors.grey.shade400, size: 32.0);
+  }
+
+  bool isInCart(ProductAllModel product) {
+    return (product.itemincartSunit != null &&
+            product.itemincartSunit != '0') ||
+        (product.itemincartMunit != null && product.itemincartMunit != '0') ||
+        (product.itemincartLunit != null && product.itemincartLunit != '0');
+  }
+
+  Future<void> addToCart(
+      ProductAllModel product, String unitSize, int qty) async {
+    String? memberId = myUserModel?.id;
+    String url = '${MyStyle().serverName}/apishop/json_savemycart.php'
+        '?productID=${product.id}&unitSize=$unitSize&QTY=$qty&memberId=$memberId';
+    print('url addToCart > $url');
+    await http.get(Uri.parse(url));
+  }
+
+  Widget unitOptionRow(String label, int qty, ValueChanged<int> onChanged) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Expanded(child: Text(label, style: MyStyle().h4StyleGray)),
+          SizedBox(
+            width: 140.0,
+            child: SpinBox(
+              min: 0,
+              max: 10000,
+              value: qty.toDouble(),
+              onChanged: (value) => onChanged(value.toInt()),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void showAddToCartDialog(ProductAllModel product) {
+    int qtyS = 0;
+    int qtyM = 0;
+    int qtyL = 0;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return StatefulBuilder(
+          builder: (BuildContext dialogContext, StateSetter setDialogState) {
+            return AlertDialog(
+              title: Text('เพิ่มลงตะกร้า'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        resultTileImage(product),
+                        SizedBox(width: 10.0),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text(product.title ?? '', style: MyStyle().h3Style),
+                              if ((product.hilight ?? '').isNotEmpty)
+                                Text(product.hilight!,
+                                    style: MyStyle().h4StyleRed),
+                              Text('คงเหลือ: ${product.stock ?? '-'}',
+                                  style: MyStyle().h4StyleGray),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    Divider(),
+                    Text('เลือกขนาดบรรจุ', style: MyStyle().h4bStyleGray),
+                    if (product.itemSprice != null &&
+                        product.itemSprice != '0')
+                      unitOptionRow(
+                        '${product.itemSprice} บาท / ${product.itemSunit ?? ''}',
+                        qtyS,
+                        (value) => setDialogState(() => qtyS = value),
+                      ),
+                    if (product.itemMprice != null &&
+                        product.itemMprice != '0')
+                      unitOptionRow(
+                        '${product.itemMprice} บาท / ${product.itemMunit ?? ''}',
+                        qtyM,
+                        (value) => setDialogState(() => qtyM = value),
+                      ),
+                    if (product.itemLprice != null &&
+                        product.itemLprice != '0')
+                      unitOptionRow(
+                        '${product.itemLprice} บาท / ${product.itemLunit ?? ''}',
+                        qtyL,
+                        (value) => setDialogState(() => qtyL = value),
+                      ),
+                  ],
+                ),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: Text('ยกเลิก'),
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: MyStyle().mainColor),
+                  child: Text('เพิ่มลงตะกร้า',
+                      style: TextStyle(color: Colors.white)),
+                  onPressed: () async {
+                    if (qtyS == 0 && qtyM == 0 && qtyL == 0) {
+                      normalDialog(context, 'แจ้งเตือน', 'กรุณาระบุจำนวน');
+                      return;
+                    }
+
+                    if (qtyS > 0) await addToCart(product, 's', qtyS);
+                    if (qtyM > 0) await addToCart(product, 'm', qtyM);
+                    if (qtyL > 0) await addToCart(product, 'l', qtyL);
+
+                    setState(() {
+                      if (qtyS > 0) product.itemincartSunit = qtyS.toString();
+                      if (qtyM > 0) product.itemincartMunit = qtyM.toString();
+                      if (qtyL > 0) product.itemincartLunit = qtyL.toString();
+                    });
+
+                    Navigator.of(dialogContext).pop();
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   Widget resultTile(OcrLookupResult result) {
     ProductAllModel? product = result.product;
 
     return Card(
       child: ListTile(
         onTap: product != null ? () => routeToDetail(product) : null,
-        leading: Text(result.code, style: MyStyle().h4bStyleGray),
+        leading: resultTileImage(product),
         title: product != null
             ? Text(product.title ?? '', style: MyStyle().h3Style)
             : Text('ไม่พบสินค้าจาก "${result.code}" ในระบบ',
                 style: MyStyle().h4StyleRed),
         subtitle: Text(
           product != null
-              ? 'จับคู่ด้วย${result.matchType} • คงเหลือ: ${product.stock ?? '-'}'
-              : 'ค้นหาด้วย${result.matchType}',
+              ? 'จับคู่ด้วย${result.matchType} (${result.code}) • คงเหลือ: ${product.stock ?? '-'}'
+              : 'ค้นหาด้วย${result.matchType} (${result.code})',
           style: MyStyle().h4StyleGray,
         ),
-        trailing: product != null
-            ? Icon(Icons.check_circle, color: Colors.green)
-            : Icon(Icons.error_outline, color: Colors.red),
+        trailing: product == null
+            ? Icon(Icons.error_outline, color: Colors.red)
+            : isInCart(product)
+                ? Icon(Icons.add_shopping_cart, color: Colors.grey.shade400)
+                : IconButton(
+                    icon: Icon(Icons.add_shopping_cart,size: 30.0,
+                        color: MyStyle().mainColor),
+                    onPressed: () => showAddToCartDialog(product),
+                  ),
       ),
     );
   }

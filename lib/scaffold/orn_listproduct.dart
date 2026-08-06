@@ -42,6 +42,9 @@ class _ListProductOrnState extends State<ListProductOrn> {
   String? qrString;
 
   String productTab = 'all'; // 'notreceived' or 'all'
+  Set<String> addedToCartKeys = {};
+
+  String cartKey(OrnProductModel item) => '${item.medId}_${item.size}';
 
   @override
   void initState() {
@@ -50,9 +53,74 @@ class _ListProductOrnState extends State<ListProductOrn> {
     ornId = widget.ornId;
     ornNo = widget.ornNo;
 
-    createController(); // เมื่อ scroll to bottom
+    // createController(); // เมื่อ scroll to bottom
 
     readData();
+    readCart();
+  }
+
+  Future<void> readCart() async {
+    String? memberId = myUserModel?.id;
+    String url =
+        '${MyStyle().serverName}/apishop/json_loadmycart.php?memberId=$memberId';
+    print('url readCart (orn product) > $url');
+
+    try {
+      http.Response response = await http.get(Uri.parse(url));
+      var result = json.decode(response.body);
+      var cartList = result['cart'];
+      if (cartList is List) {
+        Set<String> keys = {};
+        for (var mapCart in cartList) {
+          String? id = mapCart['id']?.toString();
+          var priceList = mapCart['price_list'];
+          if (id != null && priceList is Map) {
+            for (var unitKey in priceList.keys) {
+              keys.add('${id}_$unitKey');
+            }
+          }
+        }
+
+        if (mounted) {
+          setState(() {
+            addedToCartKeys.addAll(keys);
+          });
+        }
+      }
+    } catch (e) {
+      print('readCart (orn product) error: $e');
+    }
+  }
+
+  Future<void> addToCart(OrnProductModel item) async {
+    if (item.medId == null || item.size == null) return;
+
+    int qty = item.qty ?? 1;
+    String? memberId = myUserModel?.id;
+    String url = '${MyStyle().serverName}/apishop/json_savemycart.php'
+        '?productID=${item.medId}&unitSize=${item.size}&QTY=$qty&memberId=$memberId';
+    print('url addToCart (orn product) > $url');
+
+    try {
+      await http.get(Uri.parse(url));
+      if (mounted) {
+        setState(() {
+          addedToCartKeys.add(cartKey(item));
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text(
+                  'เพิ่ม "${item.title}" จำนวน $qty ${item.unit} ลงตะกร้าแล้ว')),
+        );
+      }
+    } catch (e) {
+      print('addToCart (orn product) error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('เพิ่มลงตะกร้าไม่สำเร็จ')),
+        );
+      }
+    }
   }
 
   void createController() {
@@ -197,6 +265,11 @@ class _ListProductOrnState extends State<ListProductOrn> {
   }
 
   Widget productItem(OrnProductModel item) {
+    bool alreadyInCart = addedToCartKeys.contains(cartKey(item));
+    bool canAddToCart =
+        item.medId != null && item.size != null && !alreadyInCart;
+    bool showCartIcon = item.sale != 0;
+
     return Card(
       child: Container(
         decoration: myBoxDecoration(),
@@ -205,6 +278,15 @@ class _ListProductOrnState extends State<ListProductOrn> {
           children: <Widget>[
             showImage(item),
             showText(item),
+            if (showCartIcon)
+              IconButton(
+                icon: Icon(Icons.add_shopping_cart,
+                    size: 30.0,
+                    color: canAddToCart
+                        ? MyStyle().mainColor
+                        : Colors.grey.shade400),
+                onPressed: canAddToCart ? () => addToCart(item) : null,
+              ),
           ],
         ),
       ),

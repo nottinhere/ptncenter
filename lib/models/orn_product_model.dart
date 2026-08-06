@@ -14,6 +14,7 @@ class OrnProductModel {
   String? unit;
   String? size;
   String? photo;
+  int? sale;
 
   OrnProductModel(
       {this.odId,
@@ -30,7 +31,8 @@ class OrnProductModel {
       this.receive,
       this.unit,
       this.size,
-      this.photo});
+      this.photo,
+      this.sale});
 
   OrnProductModel.fromJson(Map<String, dynamic> json) {
     odId = json['od_id'];
@@ -48,6 +50,7 @@ class OrnProductModel {
     unit = json['unit'];
     size = json['size'];
     photo = json['photo'];
+    sale = json['sale'];
   }
 
   Map<String, dynamic> toJson() {
@@ -67,6 +70,7 @@ class OrnProductModel {
     data['unit'] = this.unit;
     data['size'] = this.size;
     data['photo'] = this.photo;
+    data['sale'] = this.sale;
     return data;
   }
 }

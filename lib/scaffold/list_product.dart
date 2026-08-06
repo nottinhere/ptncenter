@@ -26,6 +26,7 @@ class ListProduct extends StatefulWidget {
   final int? cate;
   final String? cateName;
   final String? searchStr;
+  final String? promotionGroupId;
 
   ListProduct(
       {Key? key,
@@ -33,7 +34,8 @@ class ListProduct extends StatefulWidget {
       this.userModel,
       this.cate,
       this.cateName,
-      this.searchStr})
+      this.searchStr,
+      this.promotionGroupId})
       : super(key: key);
 
   @override
@@ -77,6 +79,7 @@ class _ListProductState extends State<ListProduct> {
   int? myCate = 0;
   String? myCateName = '';
   String? mysearchString = '';
+  String? myPromotionGroupId;
   ScrollController scrollController = ScrollController();
   final Debouncer debouncer =
       Debouncer(milliseconds: 300); // ตั้งค่า เวลาที่จะ delay
@@ -107,6 +110,7 @@ class _ListProductState extends State<ListProduct> {
     myCate = widget.cate;
     myCateName = widget.cateName;
     mysearchString = widget.searchStr;
+    myPromotionGroupId = widget.promotionGroupId;
 
     if (mysearchString != null) {
       searchString = mysearchString;
@@ -280,6 +284,9 @@ class _ListProductState extends State<ListProduct> {
       } else if (myIndex == 5) {
         url =
             '${MyStyle().serverName}/apishop/json_productlist.php?memberId=$memberId&cate_id=$myCate&page=$page';
+      } else if (myIndex == 6) {
+        url =
+            '${MyStyle().serverName}/apishop/json_productlist.php?memberId=$memberId&promotiongroup_id=$myPromotionGroupId&page=$page';
       } else if (myIndex == 7) {
         url =
             '${MyStyle().serverName}/apishop/json_productbestseller.php?memberId=$memberId&page=$page';
@@ -1190,7 +1197,7 @@ Future<void> decodeQRcode(var code) async {
       } else if (myIndex == 7) {
         txtheader = 'สินค้าขายดี';
       } else if (myIndex == 8) {
-        txtheader = 'สินค้า Intrend';
+        txtheader = 'สินค้ามาแรง';
       }
     } else {
       txtheader = 'รายการสินค้า';

@@ -365,8 +365,14 @@ class _ListProductFrequent extends State<ListProductFrequent> {
     );
   }
 
-  Future<void> iconAddCart(String memberID, String productID, String selectUnit,
-      String qty, bool _isFavorite) async {
+  Future<void> iconAddCart(
+      String memberID,
+      String productID,
+      String selectUnit,
+      String qty,
+      bool _isFavorite,
+      String productName,
+      String unit) async {
     String url =
         '${MyStyle().serverName}/apishop/json_addfeqitemtocart.php?memberId=$memberID&productID=$productID&selectUnit=$selectUnit&qty=$qty&status=$_isFavorite';
 
@@ -375,6 +381,13 @@ class _ListProductFrequent extends State<ListProductFrequent> {
       setState(() {
         // readCart();
       });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content:
+                  Text('เพิ่ม "$productName" จำนวน $qty $unit ลงตะกร้าแล้ว')),
+        );
+      }
     });
   }
 
@@ -391,18 +404,22 @@ class _ListProductFrequent extends State<ListProductFrequent> {
         ? false
         : true;
     String? qty;
+    String? unitLabel;
     String? productID = filterProductAllModels![index].id.toString();
     String? memberID = myUserModel!.id.toString();
     String? selectUnit = filterProductAllModels![index].selectUnit!;
     switch (selectUnit) {
       case 's':
         qty = filterProductAllModels![index].itemFeqSunit!;
+        unitLabel = filterProductAllModels![index].itemSunit;
         break;
       case 'm':
         qty = filterProductAllModels![index].itemFeqMunit!;
+        unitLabel = filterProductAllModels![index].itemMunit;
         break;
       case 'l':
         qty = filterProductAllModels![index].itemFeqLunit!;
+        unitLabel = filterProductAllModels![index].itemLunit;
         break;
     }
 
@@ -420,7 +437,13 @@ class _ListProductFrequent extends State<ListProductFrequent> {
                   valueChanged: (_isFavorite) {
                     // print('Is Favorite : $_isFavorite');
                     iconAddCart(
-                        memberID, productID, selectUnit, qty!, _isFavorite);
+                        memberID,
+                        productID,
+                        selectUnit,
+                        qty!,
+                        _isFavorite,
+                        filterProductAllModels![index].title ?? '',
+                        unitLabel ?? '');
 
                     setState(() {
                       _isShowincart[index] = true;
@@ -937,7 +960,7 @@ class FavoriteButton extends StatefulWidget {
     Function? valueChanged,
     Key? key,
   })  : _iconSize = iconSize ?? 60.0,
-        _iconColor = iconColor ?? Colors.blueAccent,
+        _iconColor = iconColor ?? Colors.green,
         _iconDisabledColor = iconDisabledColor ?? Colors.grey[400]!,
         _isFavorite = isFavorite ?? false,
         _valueChanged = valueChanged!,

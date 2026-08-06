@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:ptncenter/models/product_all_model.dart';
 import 'package:ptncenter/models/popup_model.dart';
+import 'package:ptncenter/models/promotion_group_model.dart';
+import 'package:ptncenter/models/gift_model.dart';
 
 import 'package:ptncenter/models/promote_model.dart';
 import 'package:ptncenter/models/user_model.dart';
@@ -19,7 +21,9 @@ import 'package:ptncenter/scaffold/list_product.dart';
 import 'package:ptncenter/scaffold/list_product_favorite.dart';
 import 'package:ptncenter/scaffold/list_product_frequent.dart';
 import 'package:ptncenter/scaffold/list_product_vote.dart';
+import 'package:ptncenter/scaffold/list_promotionbanner.dart';
 
+import 'package:ptncenter/scaffold/history_list.dart';
 import 'package:ptncenter/scaffold/ocr_scan.dart';
 import 'package:ptncenter/scaffold/orn_list.dart';
 import 'package:ptncenter/scaffold/payment_ornlist.dart';
@@ -79,6 +83,11 @@ class _HomeState extends State<Home> {
   int _promoIndex = 0;
   final TextEditingController _searchController = TextEditingController();
 
+  List<PromotionGroupModel> promotionGroups = [];
+  Map<String, GiftModel> giftMap = {};
+  final CarouselSliderController _groupPromoController =
+      CarouselSliderController();
+
   // Method
   @override
   void initState() {
@@ -94,6 +103,8 @@ class _HomeState extends State<Home> {
     readNews();
     updateUserProfile();
     readLicenseAlert();
+    readPromotionGroups();
+    readGifts();
     Future.delayed(Duration.zero, () => showOrderSuccessDialog(context));
   }
 
@@ -124,6 +135,226 @@ class _HomeState extends State<Home> {
         urlImages!.add(urlImage);
       });
     }
+  }
+
+  Future<void> readPromotionGroups() async {
+    String url = 'https://ptnpharma.com/jsonData/medicinepromotiongroup.json';
+    try {
+      http.Response response = await http.get(Uri.parse(url));
+      var result = json.decode(response.body);
+      if (result is List) {
+        List<PromotionGroupModel> groups =
+            result.map((map) => PromotionGroupModel.fromJson(map)).toList();
+        if (mounted) {
+          setState(() {
+            promotionGroups = groups;
+          });
+        }
+      }
+    } catch (e) {
+      print('readPromotionGroups error: $e');
+    }
+  }
+
+  Future<void> readGifts() async {
+    String url = 'https://ptnpharma.com/jsonData/gift.json';
+    try {
+      http.Response response = await http.get(Uri.parse(url));
+      var result = json.decode(response.body);
+      if (result is List) {
+        Map<String, GiftModel> map = {};
+        for (var itemMap in result) {
+          GiftModel gift = GiftModel.fromJson(itemMap);
+          if (gift.id != null) map[gift.id!] = gift;
+        }
+        if (mounted) {
+          setState(() {
+            giftMap = map;
+          });
+        }
+      }
+    } catch (e) {
+      print('readGifts error: $e');
+    }
+  }
+
+  String formatPromotionTarget(String? target) {
+    double? value = double.tryParse(target ?? '');
+    if (value == null) return target ?? '';
+    String formatted = value == value.roundToDouble()
+        ? value.toInt().toString()
+        : value.toStringAsFixed(2);
+    // ใส่ comma คั่นหลักพัน
+    String intPart = formatted.split('.').first;
+    String result = '';
+    int count = 0;
+    for (int i = intPart.length - 1; i >= 0; i--) {
+      result = intPart[i] + result;
+      count++;
+      if (count % 3 == 0 && i != 0) result = ',$result';
+    }
+    return '$result.-';
+  }
+
+  void routeToGroupProducts(PromotionGroupModel group) {
+    MaterialPageRoute materialPageRoute =
+        MaterialPageRoute(builder: (BuildContext buildContext) {
+      return ListProduct(
+        index: 6,
+        userModel: myUserModel!,
+        cateName: group.name,
+        promotionGroupId: group.id,
+      );
+    });
+    Navigator.of(context).push(materialPageRoute);
+  }
+
+  Widget promotionGroupCard(PromotionGroupModel group) {
+    GiftModel? gift = giftMap[group.gift];
+    int itemCount = group.medIds.length;
+
+    return GestureDetector(
+      onTap: () => routeToGroupProducts(group),
+      child: Container(
+      margin: EdgeInsets.symmetric(horizontal: 4.0),
+      padding: EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(MyStyle().radiusM),
+        border: Border.all(color: MyStyle().borderColor),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              Icon(Icons.card_giftcard, color: Colors.red.shade400, size: 20.0),
+              SizedBox(width: 6.0),
+              Expanded(
+                child: Text(group.name ?? '',
+                    style: MyStyle().h3bStyle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis),
+              ),
+            ],
+          ),
+          SizedBox(height: 8.0),
+          Row(
+            children: <Widget>[
+              Text('ซื้อครบ ${formatPromotionTarget(group.target)}',
+                  style: TextStyle(
+                      color: MyStyle().mainColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14.0)),
+              SizedBox(width: 4.0),
+              Icon(Icons.arrow_forward, size: 14.0, color: MyStyle().mainColor),
+            ],
+          ),
+          if (gift != null) ...[
+            SizedBox(height: 6.0),
+            Row(
+              children: <Widget>[
+                Icon(Icons.card_giftcard,
+                    size: 16.0, color: Colors.red.shade400),
+                SizedBox(width: 6.0),
+                Expanded(
+                  child: Text('${gift.name ?? ''} x1',
+                      style: MyStyle().h4StyleGray,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis),
+                ),
+              ],
+            ),
+          ],
+          Divider(height: 18.0),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Expanded(
+                child: Row(
+                  children: <Widget>[
+                    Icon(Icons.layers_outlined,
+                        size: 14.0, color: Colors.grey.shade500),
+                    SizedBox(width: 4.0),
+                    Expanded(
+                      child: Text('สินค้าร่วมรายการ $itemCount รายการ',
+                          style: MyStyle().captionStyle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis),
+                    ),
+                  ],
+                ),
+              ),
+              Row(
+                children: <Widget>[
+                  Text('ดูสินค้าในกลุ่ม',
+                      style: TextStyle(
+                          color: MyStyle().mainColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13.0)),
+                  Icon(Icons.chevron_right,
+                      size: 16.0, color: MyStyle().mainColor),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+      ),
+    );
+  }
+
+  Widget groupPromotionSection() {
+    if (promotionGroups.isEmpty) return SizedBox();
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 4.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              Icon(Icons.card_giftcard, size: 24.0, color: Colors.red.shade400),
+              SizedBox(width: 8.0),
+              Text('โปรโมชันกลุ่มสินค้า',
+                  style: TextStyle(
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.bold,
+                      color: MyStyle().textColor,
+                      height: 1.1)),
+              SizedBox(width: 6.0),
+              Text('(${promotionGroups.length})',
+                  style: MyStyle().captionStyle),
+              Spacer(),
+              IconButton(
+                icon: Icon(Icons.chevron_left),
+                color: MyStyle().mutedTextColor,
+                onPressed: () => _groupPromoController.previousPage(),
+              ),
+              IconButton(
+                icon: Icon(Icons.chevron_right),
+                color: MyStyle().mutedTextColor,
+                onPressed: () => _groupPromoController.nextPage(),
+              ),
+            ],
+          ),
+          SizedBox(height: 10.0),
+          CarouselSlider.builder(
+            carouselController: _groupPromoController,
+            options: CarouselOptions(
+              height: 145.0,
+              viewportFraction: 0.85,
+              enableInfiniteScroll: false,
+            ),
+            itemCount: promotionGroups.length,
+            itemBuilder: (context, index, realIdx) {
+              return promotionGroupCard(promotionGroups[index]);
+            },
+          ),
+        ],
+      ),
+    );
   }
 
   String? licenseAlertStatus;
@@ -494,6 +725,25 @@ class _HomeState extends State<Home> {
               }),
             ),
           ],
+          SizedBox(height: 8.0),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                foregroundColor: MyStyle().mainColor,
+                side: BorderSide(color: MyStyle().mainColor),
+              ),
+              icon: Icon(Icons.local_offer_outlined),
+              label: Text('ดูโปรโมชันทั้งหมด'),
+              onPressed: () {
+                MaterialPageRoute materialPageRoute = MaterialPageRoute(
+                    builder: (BuildContext buildContext) {
+                  return Promotionbanner(userModel: myUserModel);
+                });
+                Navigator.of(context).push(materialPageRoute);
+              },
+            ),
+          ),
         ],
       ),
     );
@@ -533,7 +783,7 @@ class _HomeState extends State<Home> {
           () => routeToListProduct(4)),
       _QuickAction(Icons.local_fire_department_rounded, 'สินค้าขายดี',
           () => routeToListProduct(7)),
-      _QuickAction(Icons.trending_up_rounded, 'สินค้า Intrend',
+      _QuickAction(Icons.trending_up_rounded, 'สินค้ามาแรง',
           () => routeToListProduct(8)),
       _QuickAction(Icons.favorite_rounded, 'สินค้าโปรด', () {
         MaterialPageRoute materialPageRoute =
@@ -554,8 +804,13 @@ class _HomeState extends State<Home> {
         });
         Navigator.of(context).push(materialPageRoute);
       }),
-      _QuickAction(Icons.history_rounded, 'ประวัติการสั่ง',
-          () => _openWebPage('history')),
+      _QuickAction(Icons.history_rounded, 'ประวัติการสั่ง', () {
+        MaterialPageRoute materialPageRoute =
+            MaterialPageRoute(builder: (BuildContext buildContext) {
+          return HistoryList(userModel: myUserModel!);
+        });
+        Navigator.of(context).push(materialPageRoute);
+      }),
       _QuickAction(Icons.card_giftcard_rounded, 'ของสมนาคุณ', () {
         MaterialPageRoute materialPageRoute =
             MaterialPageRoute(builder: (BuildContext buildContext) {
@@ -592,6 +847,9 @@ class _HomeState extends State<Home> {
         });
         Navigator.of(context).push(materialPageRoute);
       }),
+            _QuickAction(Icons.history_rounded, 'ประวัติสั่ง(Web)',
+          () => _openWebPage('history')),
+
     ];
   }
 
@@ -774,6 +1032,7 @@ class _HomeState extends State<Home> {
             searchBar(),
             licenseBanner(),
             promoCarousel(),
+            groupPromotionSection(),
             sectionHeader('สินค้า', Icons.medical_services_rounded),
             quickAccessProductGrid(),
             sectionHeader('เพิ่มเติม', Icons.menu_book_rounded),
@@ -817,7 +1076,7 @@ class _WebViewExampleState extends State<WebViewExample> {
           'https://www.ptnpharma.com/shop/pages/forms/pay_mobile.php?memberId=$memberId&memberCode=$memberCode'; //
     } else if (webPage == 'history') {
       urlView =
-          'https://www.ptnpharma.com/shop/pages/tables/orderhistory_mb.php?memberId=$memberId&memberCode=$memberCode'; //
+          'https://www.ptnpharma.com/shop/pages/tables/orderhistory_mobile.php?memberId=$memberId&memberCode=$memberCode'; //
     } else if (webPage == 'suggestion') {
       urlView =
           'https://www.ptnpharma.com/shop/pages/forms/complain_mobile.php?memberId=$memberId&memberCode=$memberCode'; //

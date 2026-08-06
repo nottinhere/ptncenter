@@ -20,6 +20,16 @@ import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:chat_bubbles/chat_bubbles.dart';
        
 
+class PromotionGiftItem {
+  final String title;
+  final String qty;
+  final String unit;
+  final String? code;
+
+  PromotionGiftItem(
+      {required this.title, required this.qty, required this.unit, this.code});
+}
+
 class DetailCart extends StatefulWidget {
   final UserModel? userModel;
   DetailCart({Key? key, this.userModel}) : super(key: key);
@@ -562,7 +572,7 @@ class _DetailCartState extends State<DetailCart> {
 
   Widget deleteButton(int index, String size) {
     return IconButton(
-      icon: Icon(Icons.delete),
+      icon: Icon(Icons.delete, color: Colors.red),
       onPressed: () {
         confirmDelete(index, size);
       },
@@ -576,8 +586,8 @@ class _DetailCartState extends State<DetailCart> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Confirm delete'),
-          content: Text('Do you want delete : $titleProduct'),
+          title: Text('ลบสินค้าออกจากตะกร้า'),
+          content: Text('ต้องการลบรายการออกจากตะกร้า : $titleProduct'),
           actions: <Widget>[cancelButton(), comfirmButton(index, size)],
         );
       },
@@ -843,9 +853,94 @@ class _DetailCartState extends State<DetailCart> {
     );
   }
 
+  bool isFreeGift(RewardredeemModel reward) {
+    String? point = reward.point;
+    return point == null || point.isEmpty || point == '0';
+  }
+
+  Widget rewardTypeBadge(bool isFree) {
+    Color color = isFree ? Colors.green : Colors.blue;
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 2.0),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        border: Border.all(color: color),
+        borderRadius: BorderRadius.circular(20.0),
+      ),
+      child: Text(
+        isFree ? 'ของแถม' : 'แลกคะแนน',
+        style: TextStyle(
+            color: color, fontSize: 12.0, fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+
+  Widget rewardItemTile(RewardredeemModel reward) {
+    bool isFree = isFreeGift(reward);
+    Color color = isFree ? Colors.green : Colors.blue;
+
+    return Card(
+      margin: EdgeInsets.only(bottom: 8.0),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10.0),
+        side: BorderSide(color: Colors.grey.shade200),
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(10.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Icon(isFree ? Icons.card_giftcard : Icons.workspace_premium,
+                color: color, size: 32.0),
+            SizedBox(width: 10.0),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 6.0,
+                    runSpacing: 4.0,
+                    children: <Widget>[
+                      Text(reward.rwSubject ?? '', style: MyStyle().h4bStyleGray),
+                      rewardTypeBadge(isFree),
+                    ],
+                  ),
+                  // Text(reward.rwCode ?? '',
+                  //     style: TextStyle(fontSize: 12.0, color: Colors.grey)),
+                ],
+              ),
+            ),
+            SizedBox(
+              width: 40.0,
+              child: Text(
+                isFree ? 'ฟรี' : 'ได้รับ',
+                textAlign: TextAlign.right,
+                style: TextStyle(
+                  color: isFree ? Colors.green : Colors.grey,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            SizedBox(
+              width: 30.0,
+              child: Text(reward.qty ?? '',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+            ),
+            SizedBox(
+              width: 40.0,
+              child: Text(reward.unit ?? '',
+                  textAlign: TextAlign.center, style: MyStyle().h4StyleGray),
+            ),
+
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget showReward() {
-    // print(
-    //     'rewardredeemModels.length >>' + rewardredeemModels!.length.toString());
     return Card(
       child: Container(
         padding: EdgeInsets.only(
@@ -876,28 +971,7 @@ class _DetailCartState extends State<DetailCart> {
                 shrinkWrap: true,
                 itemCount: rewardredeemModels?.length,
                 itemBuilder: (BuildContext buildContext, int index) {
-                  return Column(
-                    children: [
-                      // Text(newsLists.length.toString()),
-                      GestureDetector(
-                        child: Align(
-                          alignment: Alignment.topLeft,
-                          child: Column(
-                            children: [
-                              Text(
-                                ' - ' +
-                                    rewardredeemModels![index].rwSubject! +
-                                    ' :: ' +
-                                    rewardredeemModels![index].qty! +
-                                    '  ' +
-                                    rewardredeemModels![index].unit!,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  );
+                  return rewardItemTile(rewardredeemModels![index]);
                 },
               ),
             ),
@@ -1028,7 +1102,92 @@ class _DetailCartState extends State<DetailCart> {
         );
   }
 
-    Widget promotionSuccess(String msg) {
+  List<PromotionGiftItem> parsePromotionSuccess(String msg, String? giftCodes) {
+    List<String> codeIds = [];
+    if (giftCodes != null && giftCodes.isNotEmpty && giftCodes != '-') {
+      List<String> parts =
+          giftCodes.split('|').where((s) => s.isNotEmpty).toList();
+      for (int i = 0; i < parts.length; i += 2) {
+        codeIds.add(parts[i]);
+      }
+    }
+
+    RegExp itemRegex = RegExp(r'-\s*(.+?)\s*::\s*([\d.,]+)\s*(\S+)');
+    List<PromotionGiftItem> items = [];
+    int i = 0;
+    for (Match match in itemRegex.allMatches(msg)) {
+      items.add(PromotionGiftItem(
+        title: match.group(1)!.trim(),
+        qty: match.group(2)!.trim(),
+        unit: match.group(3)!.trim(),
+        code: i < codeIds.length ? codeIds[i] : null,
+      ));
+      i++;
+    }
+    return items;
+  }
+
+  Widget promotionGiftTile(PromotionGiftItem item) {
+    return Card(
+      margin: EdgeInsets.only(bottom: 8.0),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10.0),
+        side: BorderSide(color: Colors.grey.shade200),
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(10.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Icon(Icons.card_giftcard, color: Colors.green, size: 32.0),
+            SizedBox(width: 10.0),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 6.0,
+                    runSpacing: 4.0,
+                    children: <Widget>[
+                      Text(item.title, style: MyStyle().h4bStyleGray),
+                      rewardTypeBadge(true),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(
+              width: 40.0,
+              child: Text(
+                'ฟรี',
+                textAlign: TextAlign.right,
+                style:
+                    TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+              ),
+            ),
+            SizedBox(
+              width: 30.0,
+              child: Text(item.qty,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+            ),
+            SizedBox(
+              width: 40.0,
+              child: Text(item.unit,
+                  textAlign: TextAlign.center, style: MyStyle().h4StyleGray),
+            ),
+
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget promotionSuccess(String msg) {
+    List<PromotionGiftItem> giftItems =
+        parsePromotionSuccess(msg, promotionsuccessgift);
+
     return Card(
       child: Container(
         padding: EdgeInsets.only(
@@ -1047,17 +1206,14 @@ class _DetailCartState extends State<DetailCart> {
                 textAlign: TextAlign.left,
               ),
             ),
-            Align(
-              alignment: Alignment.topLeft,
-              child: Text(msg),
-            ),
-            // Container(
-                // Text('รายการพิเศษที่ได้รับ',
-                //   style: MyStyle().h3bStyleGray,
-                //   textAlign: TextAlign.left,
-                // ),
-                // Text(msg),
-            // ),
+            SizedBox(height: 6.0),
+            if (giftItems.isEmpty)
+              Align(
+                alignment: Alignment.topLeft,
+                child: Text(msg),
+              )
+            else
+              ...giftItems.map(promotionGiftTile),
           ],
         ),
       ),

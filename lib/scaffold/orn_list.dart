@@ -363,14 +363,14 @@ DateTime parseDate =
           mainAxisAlignment: MainAxisAlignment.end,
           children: <Widget>[
             Container(
-              width: MediaQuery.of(context).size.width * 0.12,
+              width: MediaQuery.of(context).size.width * 0.15,
               child: Text(
                 'จำนวน ',
                 style: MyStyle().h3StyleGray,
               ),
             ),
             Container(
-              width: MediaQuery.of(context).size.width * 0.28,
+              width: MediaQuery.of(context).size.width * 0.25,
               child: Text(
                 ' ${filterOrnAllModels![index].box}  กล่อง',
                 style: MyStyle().h3StyleGray,

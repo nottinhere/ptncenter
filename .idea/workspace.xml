@@ -14,70 +14,13 @@
   <component name="ChangeListManager">
     <list default="true" id="eb79dd87-7282-4c63-b3ed-fb5885cd5498" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.flutter-plugins-dependencies" beforeDir="false" afterPath="$PROJECT_DIR$/.flutter-plugins-dependencies" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/android/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" afterPath="$PROJECT_DIR$/android/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/android/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/android/app/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java" beforeDir="false" afterPath="$PROJECT_DIR$/android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/images/pharma.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/images/pharma.jpg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ios/Runner/GeneratedPluginRegistrant.m" beforeDir="false" afterPath="$PROJECT_DIR$/ios/Runner/GeneratedPluginRegistrant.m" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/main.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/mainx.dart" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/models/category_model.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/models/category_model.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/models/product_all_model2.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/models/product_all_model2.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/models/product_in_cart_model.dart" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/models/user_model.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/models/user_model.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/scaffold/authen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/scaffold/authen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/scaffold/detail.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/scaffold/detail.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/scaffold/detail_cart.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/scaffold/detail_cart.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/scaffold/detail_click_inc.dart" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/scaffold/detail_news.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/scaffold/detail_news.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/scaffold/detail_notify.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/scaffold/detail_notify.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/scaffold/detail_popup.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/scaffold/detail_popup.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/scaffold/list_item.dart" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/scaffold/list_news.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/scaffold/list_news.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/scaffold/list_notify.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/scaffold/list_notify.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/scaffold/list_product.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/scaffold/list_product.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/scaffold/list_product_favorite.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/scaffold/list_product_favorite.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/scaffold/list_product_frequent.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/scaffold/list_product_frequent.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/scaffold/list_product_vote.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/scaffold/list_product_vote.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/scaffold/list_promotionbanner.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/scaffold/list_promotionbanner.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/scaffold/map.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/scaffold/map.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/scaffold/my_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/scaffold/my_service.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/scaffold/my_service2024.dart" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/scaffold/result_code.dart" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/scaffold/x_detail.dart" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/utility/my_style.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/utility/my_style.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/widget/contact.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/widget/contact.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/scaffold/ocr_scan.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/scaffold/ocr_scan.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/scaffold/orn_list.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/scaffold/orn_list.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/widget/home.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/widget/home.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/widget/home2024.dart" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/widget/homescreen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/widget/homescreen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/widget/homescreen2024.dart" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/macos/Flutter/GeneratedPluginRegistrant.swift" beforeDir="false" afterPath="$PROJECT_DIR$/macos/Flutter/GeneratedPluginRegistrant.swift" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/pubspec.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/pubspec.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/x/home.dart" beforeDir="false" afterPath="$PROJECT_DIR$/test/x/home.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/windows/flutter/generated_plugin_registrant.cc" beforeDir="false" afterPath="$PROJECT_DIR$/windows/flutter/generated_plugin_registrant.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/windows/flutter/generated_plugins.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/windows/flutter/generated_plugins.cmake" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/x/..x/android--/.gradle/7.3.1/checksums/checksums.lock" beforeDir="false" afterPath="$PROJECT_DIR$/x/..x/android--/.gradle/7.3.1/checksums/checksums.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/x/..x/android--/.gradle/7.3.1/checksums/md5-checksums.bin" beforeDir="false" afterPath="$PROJECT_DIR$/x/..x/android--/.gradle/7.3.1/checksums/md5-checksums.bin" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/x/..x/android--/.gradle/7.3.1/checksums/sha1-checksums.bin" beforeDir="false" afterPath="$PROJECT_DIR$/x/..x/android--/.gradle/7.3.1/checksums/sha1-checksums.bin" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/x/..x/lib2024/scaffold/detail.dart" beforeDir="false" afterPath="$PROJECT_DIR$/x/..x/lib2024/scaffold/detail.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/x/..x/lib2024/scaffold/list_news.dart" beforeDir="false" afterPath="$PROJECT_DIR$/x/..x/lib2024/scaffold/list_news.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/x/..x/lib2024/scaffold/list_notify.dart" beforeDir="false" afterPath="$PROJECT_DIR$/x/..x/lib2024/scaffold/list_notify.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/x/..x/lib2024/scaffold/list_product.dart" beforeDir="false" afterPath="$PROJECT_DIR$/x/..x/lib2024/scaffold/list_product.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/x/..x/lib2024/scaffold/list_product_favorite.dart" beforeDir="false" afterPath="$PROJECT_DIR$/x/..x/lib2024/scaffold/list_product_favorite.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/x/..x/lib2024/scaffold/list_product_frequent.dart" beforeDir="false" afterPath="$PROJECT_DIR$/x/..x/lib2024/scaffold/list_product_frequent.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/x/..x/lib2024/scaffold/list_product_vote.dart" beforeDir="false" afterPath="$PROJECT_DIR$/x/..x/lib2024/scaffold/list_product_vote.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/x/..x/lib2024/widget/home.dart" beforeDir="false" afterPath="$PROJECT_DIR$/x/..x/lib2024/widget/home.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/x/..x/test/x/home.dart" beforeDir="false" afterPath="$PROJECT_DIR$/x/..x/test/x/home.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/x/lib2024/scaffold/detail.dart" beforeDir="false" afterPath="$PROJECT_DIR$/x/lib2024/scaffold/detail.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/x/lib2024/scaffold/list_news.dart" beforeDir="false" afterPath="$PROJECT_DIR$/x/lib2024/scaffold/list_news.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/x/lib2024/scaffold/list_notify.dart" beforeDir="false" afterPath="$PROJECT_DIR$/x/lib2024/scaffold/list_notify.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/x/lib2024/scaffold/list_product.dart" beforeDir="false" afterPath="$PROJECT_DIR$/x/lib2024/scaffold/list_product.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/x/lib2024/scaffold/list_product_favorite.dart" beforeDir="false" afterPath="$PROJECT_DIR$/x/lib2024/scaffold/list_product_favorite.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/x/lib2024/scaffold/list_product_frequent.dart" beforeDir="false" afterPath="$PROJECT_DIR$/x/lib2024/scaffold/list_product_frequent.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/x/lib2024/scaffold/list_product_vote.dart" beforeDir="false" afterPath="$PROJECT_DIR$/x/lib2024/scaffold/list_product_vote.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/x/lib2024/widget/home.dart" beforeDir="false" afterPath="$PROJECT_DIR$/x/lib2024/widget/home.dart" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
