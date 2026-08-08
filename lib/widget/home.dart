@@ -19,6 +19,7 @@ import 'package:ptncenter/scaffold/license_status.dart';
 
 import 'package:ptncenter/scaffold/list_product.dart';
 import 'package:ptncenter/scaffold/list_product_favorite.dart';
+import 'package:ptncenter/scaffold/list_product_promotion.dart';
 import 'package:ptncenter/scaffold/list_product_frequent.dart';
 import 'package:ptncenter/scaffold/list_product_vote.dart';
 import 'package:ptncenter/scaffold/list_promotionbanner.dart';
@@ -199,7 +200,7 @@ class _HomeState extends State<Home> {
   void routeToGroupProducts(PromotionGroupModel group) {
     MaterialPageRoute materialPageRoute =
         MaterialPageRoute(builder: (BuildContext buildContext) {
-      return ListProduct(
+      return ListProductPromotion(
         index: 6,
         userModel: myUserModel!,
         cateName: group.name,

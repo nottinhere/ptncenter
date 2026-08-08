@@ -25,10 +25,7 @@ class _AuthenState extends State<Authen> {
   bool? remember = false; // false => unCheck      true = Check
   bool? status = true;
 
-  PopupModel? popupModel;
-  String? subjectPopup = '';
-  String? imagePopup = '';
-  String? statusPopup = '';
+  List<PopupModel> popupModels = [];
 
   bool? firstLoadAds;
 
@@ -188,25 +185,6 @@ class _AuthenState extends State<Authen> {
       ).show();
       
     } else {
-      String urlPop = '${MyStyle().serverName}/apishop/json_popup.php';
-      http.Response responsePop = await http.get(Uri.parse(urlPop));
-      var resultPop = json.decode(responsePop.body);
-      var mapItemPopup = resultPop[
-          'itemsData']; // dynamic    จะส่ง value อะไรก็ได้ รวมถึง null
-      for (var map in mapItemPopup) {
-        // PromoteModel promoteModel = PromoteModel.fromJson(map);
-        PopupModel popupModel = PopupModel.fromJson(map);
-        String? urlImage = popupModel.photo;
-        String? subject = popupModel.subject;
-        String? popstatus = popupModel.popstatus;
-        setState(() {
-          //promoteModels.add(promoteModel); // push ค่าลง arra
-          subjectPopup = subject;
-          statusPopup = popstatus;
-          imagePopup = urlImage;
-        });
-      }
-
       // No space
       String url =
           '${MyStyle().getUserWhereUserAndPass}?username=$user&password=$password';
@@ -215,8 +193,6 @@ class _AuthenState extends State<Authen> {
           url)); // await จะต้องทำงานใน await จะเสร็จจึงจะไปทำ process ต่อไป
       var result = json.decode(response.body);
       int statusInt = result['status'];
-
-      print('statusPopup CA >>> $statusPopup');
 
       if (statusInt == 0) {
         String message = result['message'];
@@ -231,10 +207,29 @@ class _AuthenState extends State<Authen> {
         print('map = $map');
         userModel = UserModel.fromJson(map);
 
+        String urlPop =
+            '${MyStyle().serverName}/apishop/json_popup.php?memberId=${userModel!.id}';
+        http.Response responsePop = await http.get(Uri.parse(urlPop));
+        var resultPop = json.decode(responsePop.body);
+        var mapItemPopup = resultPop[
+            'itemsData']; // dynamic    จะส่ง value อะไรก็ได้ รวมถึง null
+        List<PopupModel> popups = [];
+        if (mapItemPopup != null) {
+          for (var map in mapItemPopup) {
+            PopupModel popupModel = PopupModel.fromJson(map);
+            if (popupModel.popstatus == '1') {
+              popups.add(popupModel);
+            }
+          }
+        }
+        setState(() {
+          popupModels = popups;
+        });
+
         if (remember!) {
           saveSharePreference();
         } else {
-          routeToMyService(statusPopup);
+          routeToMyService(popupModels);
         }
       }
       if (statusInt == 2) {
@@ -249,7 +244,7 @@ class _AuthenState extends State<Authen> {
     sharedPreferences.setString('User', user!);
     sharedPreferences.setString('Password', password!);
 
-    routeToMyService(statusPopup);
+    routeToMyService(popupModels);
   }
 
   void gotoService() {
@@ -268,66 +263,23 @@ class _AuthenState extends State<Authen> {
     });
   }
 
-  void gotoPopupdetail() {
-    MaterialPageRoute materialPageRoute =
-        MaterialPageRoute(builder: (BuildContext buildContext) {
-      return DetailPopup(
-        // index: index,
-        userModel: userModel!,
-      );
-    });
-    Navigator.of(context).push(materialPageRoute);
-
-    //  MaterialPageRoute route = MaterialPageRoute(
-    //     builder: (value) => DetailPopup(userModel: userModel),
-    //   );
-    //   Navigator.of(context).pushAndRemoveUntil(route, (route) => false);
-  }
-
-  void routeToMyService(statusPopup) async {
-    // print('statusPopup >> $statusPopup');
-    if (statusPopup == '1') {
-      // when turn on popup alert
-      // WidgetsBinding.instance!
-      //     .addPostFrameCallback((_) => _onBasicAlertPressed(context));
-            WidgetsBinding.instance!
-          .addPostFrameCallback((_) =>normalDialogPopup(context, 'ประกาศ !! ', subjectPopup!));
-
-      // normalDialogPopup(context, 'ประกาศ !! ', subjectPopup!);
+  void routeToMyService(List<PopupModel> popups) {
+    if (popups.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext dialogContext) {
+            return PopupCarouselDialog(
+              popupModels: popups,
+              userModel: userModel,
+            );
+          },
+        ).then((value) => gotoService());
+      });
     } else {
       gotoService();
     }
-  }
-
-  Future<void> normalDialogPopup(
-    BuildContext buildContext,
-    String title,
-    String message,
-  ) async {
-    AwesomeDialog(
-      context: context,
-      headerAnimationLoop: false,
-      dialogType: DialogType.info,
-      // autoHide: const Duration(seconds: 4),
-      title: title,
-      desc: message,
-      btnOkColor: Colors.blue,
-      // btnOkIcon: Icons.check_circle,
-      btnOkText : 'รายละเอียด',
-      btnOkOnPress: () {
-        debugPrint('OnClcik');
-        gotoPopupdetail();
-      },
-
-      btnCancelColor: Colors.green,
-      // btnCancelIcon: Icons.check_circle,
-      btnCancelText : 'หน้าหลัก',
-      btnCancelOnPress: () {
-        gotoService();
-      },
-
-    dismissOnTouchOutside : false,
-    ).show();
   }
 
   Widget userForm() {

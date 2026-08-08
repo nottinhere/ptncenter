@@ -24,6 +24,7 @@ import 'package:flutter/foundation.dart';
 
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 // import 'package:youtube_player_iframe/youtube_player_iframe.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
 
@@ -74,6 +75,8 @@ class _DetailState extends State<Detail> {
   String? qrString;
   String? videoCode = "";
   int selectIndex = 1;
+  WebViewController? tiktokController;
+  String? tiktokUrl;
 
   // Method
   @override
@@ -142,6 +145,26 @@ class _DetailState extends State<Detail> {
 
 
         videoCode = productAllModel?.youtube?.toString();
+
+        String? tiktok = productAllModel?.tiktok;
+        if (tiktok != null && tiktok.isNotEmpty) {
+          tiktokUrl = tiktok;
+          tiktokController = WebViewController()
+            ..setJavaScriptMode(JavaScriptMode.unrestricted)
+            ..setNavigationDelegate(
+              NavigationDelegate(
+                onNavigationRequest: (NavigationRequest request) {
+                  if (request.url.startsWith('http://') ||
+                      request.url.startsWith('https://')) {
+                    return NavigationDecision.navigate;
+                  }
+                  // เช่น intent://, tiktok://  ที่ WebView เปิดตรงไม่ได้
+                  return NavigationDecision.prevent;
+                },
+              ),
+            )
+            ..loadRequest(Uri.parse(tiktok));
+        }
       });
       print('videoCode >> $videoCode');
     }
@@ -729,6 +752,16 @@ class _DetailState extends State<Detail> {
     );
   }
 
+  Widget showTikTokVideo() {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(MyStyle().radiusM),
+      child: SizedBox(
+        height: 550.0,
+        child: WebViewWidget(controller: tiktokController!),
+      ),
+    );
+  }
+
   Widget infoSection(IconData icon, String title, String content) {
     return Padding(
       padding: EdgeInsets.all(14.0),
@@ -822,6 +855,8 @@ class _DetailState extends State<Detail> {
         Padding(padding: EdgeInsets.all(14.0), child: showCarouseSlideshow()),
       if ((productAllModel?.youtube ?? '-') != '-')
         Padding(padding: EdgeInsets.all(14.0), child: showVideo()),
+      if (tiktokController != null)
+        Padding(padding: EdgeInsets.all(14.0), child: showTikTokVideo()),
       Padding(padding: EdgeInsets.all(14.0), child: salepriceinfo()),
       if (hasMoreInfo) moreinfo(),
     ];

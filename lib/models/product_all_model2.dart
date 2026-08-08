@@ -26,6 +26,7 @@ class ProductAllModel2 {
   String? cateID;
   String? cateName;
   String? youtube;
+  String? tiktok;
   String? pricelabel;
   String? pricesale;
   int? id;
@@ -58,6 +59,7 @@ class ProductAllModel2 {
       this.cateID,
       this.cateName,
       this.youtube,
+      this.tiktok,
       this.pricelabel,
       this.pricesale,
       this.id});
@@ -92,6 +94,7 @@ class ProductAllModel2 {
     cateID = json['cateID'];
     cateName = json['cateName'];
     youtube = json['youtube'];
+    tiktok = json['tiktok'];
     pricelabel = json['pricelabel'];
     pricesale = json['pricesale'];
     id = json['id'];
@@ -129,6 +132,7 @@ class ProductAllModel2 {
     data['cateID'] = this.cateID;
     data['cateName'] = this.cateName;
     data['youtube'] = this.youtube;
+    data['tiktok'] = this.tiktok;
     data['pricelabel'] = this.pricelabel;
     data['pricesale'] = this.pricesale;
     return data;

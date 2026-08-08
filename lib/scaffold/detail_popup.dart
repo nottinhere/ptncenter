@@ -1,7 +1,4 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:ptncenter/models/user_model.dart';
 import 'package:ptncenter/utility/my_style.dart';
 import 'package:ptncenter/models/popup_model.dart';
@@ -15,6 +12,160 @@ import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
 
 import 'my_service.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+
+class PopupCarouselDialog extends StatefulWidget {
+  final List<PopupModel> popupModels;
+  final UserModel? userModel;
+
+  const PopupCarouselDialog(
+      {Key? key, required this.popupModels, this.userModel})
+      : super(key: key);
+
+  @override
+  _PopupCarouselDialogState createState() => _PopupCarouselDialogState();
+}
+
+class _PopupCarouselDialogState extends State<PopupCarouselDialog> {
+  final PageController _pageController = PageController();
+  int _currentIndex = 0;
+
+  void routeToDetail(PopupModel popupModel) {
+    Navigator.of(context).pop();
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (BuildContext buildContext) => DetailPopup(
+        popupModel: popupModel,
+        userModel: widget.userModel,
+      ),
+    ));
+  }
+
+  Widget popupPage(PopupModel item) {
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          if ((item.detail ?? '').isNotEmpty)
+            Text(item.detail!.replaceAll('\\n', '\n'),
+                style: TextStyle(fontSize: 14.0, color: Colors.black87)),
+          if ((item.photo ?? '').isNotEmpty) ...[
+            SizedBox(height: 10.0),
+            GestureDetector(
+              onTap: () => routeToDetail(item),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8.0),
+                child: Image.network(item.photo!, fit: BoxFit.cover),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    List<PopupModel> items = widget.popupModels;
+    PopupModel current = items[_currentIndex];
+
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.0)),
+      child: ConstrainedBox(
+        constraints:
+            BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.8),
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Row(
+                children: <Widget>[
+                  Expanded(
+                    child: Text(current.subject ?? '',
+                        style: TextStyle(
+                            fontSize: 17.0,
+                            fontWeight: FontWeight.bold,
+                            color: MyStyle().textColor)),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.close),
+                    padding: EdgeInsets.zero,
+                    constraints: BoxConstraints(),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ],
+              ),
+              SizedBox(height: 8.0),
+              SizedBox(
+                height: 500.0,
+                child: PageView.builder(
+                  controller: _pageController,
+                  itemCount: items.length,
+                  onPageChanged: (int index) {
+                    setState(() {
+                      _currentIndex = index;
+                    });
+                  },
+                  itemBuilder: (BuildContext context, int index) =>
+                      popupPage(items[index]),
+                ),
+              ),
+              if (items.length > 1) ...[
+                SizedBox(height: 6.0),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    IconButton(
+                      icon: Icon(Icons.chevron_left),
+                      onPressed: _currentIndex > 0
+                          ? () => _pageController.previousPage(
+                              duration: Duration(milliseconds: 250),
+                              curve: Curves.easeInOut)
+                          : null,
+                    ),
+                    ...List.generate(items.length, (int index) {
+                      bool active = index == _currentIndex;
+                      return AnimatedContainer(
+                        duration: Duration(milliseconds: 200),
+                        margin: EdgeInsets.symmetric(horizontal: 3.0),
+                        width: active ? 18.0 : 6.0,
+                        height: 6.0,
+                        decoration: BoxDecoration(
+                          color:
+                              active ? MyStyle().mainColor : Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(3.0),
+                        ),
+                      );
+                    }),
+                    IconButton(
+                      icon: Icon(Icons.chevron_right),
+                      onPressed: _currentIndex < items.length - 1
+                          ? () => _pageController.nextPage(
+                              duration: Duration(milliseconds: 250),
+                              curve: Curves.easeInOut)
+                          : null,
+                    ),
+                  ],
+                ),
+              ],
+              SizedBox(height: 6.0),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style:
+                      ElevatedButton.styleFrom(backgroundColor: MyStyle().mainColor),
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text('ปิด', style: TextStyle(color: Colors.white)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 class DetailPopup extends StatefulWidget {
   final PopupModel? popupModel;
@@ -48,39 +199,12 @@ class _DetailState extends State<DetailPopup> {
     super.initState();
     currentPopupModel = widget.popupModel;
     myUserModel = widget.userModel;
-    setState(() {
-      getPopupWhereID();
-    });
-  }
-
-  Future<void> getPopupWhereID() async {
-    String url = '${MyStyle().serverName}/apishop/json_popupdetail.php';
-    print('urlPopup >> $url');
-
-    http.Response response = await http.get(Uri.parse(url));
-    var result = json.decode(response.body);
-
-    var mapItemPopup =
-        result['itemsData']; // dynamic    จะส่ง value อะไรก็ได้ รวมถึง null
-
-    for (var map in mapItemPopup) {
-      PopupModel? popupModel = PopupModel.fromJson(map);
-      String? urlImage = popupModel.photo;
-      String? subject = popupModel.subject;
-      String? postdate = popupModel.postdate;
-      String? detail = popupModel.detail;
-      String? txtBTN = popupModel.txtBTN;
-      String? txtURL = popupModel.url;
-      setState(() {
-        //promoteModels.add(promoteModel); // push ค่าลง arra
-        subjectPopup = subject;
-        imagePopup = urlImage;
-        detailPopup = detail;
-        postdatePopup = postdate;
-        textButton = txtBTN;
-        textURL = txtURL;
-      });
-    } // for
+    subjectPopup = currentPopupModel?.subject ?? '';
+    imagePopup = currentPopupModel?.photo ?? '';
+    detailPopup = currentPopupModel?.detail ?? '';
+    postdatePopup = currentPopupModel?.postdate ?? '';
+    textButton = currentPopupModel?.txtBTN ?? '';
+    textURL = currentPopupModel?.url ?? '';
   }
 
   Widget spaceBox() {
@@ -204,89 +328,6 @@ class _DetailState extends State<DetailPopup> {
     Navigator.of(context).push(materialPageRoute);
   }
 
-  // void changePage(int? index) {
-  //   // selected  >>  BubbleBottomBar
-  //   setState(() {
-  //     currentIndex = index;
-  //   });
-
-  //   //You can have a switch case to Navigate to different pages
-  //   switch (currentIndex) {
-  //     case 0:
-  //       MaterialPageRoute route = MaterialPageRoute(
-  //         builder: (value) => MyService(userModel: myUserModel),
-  //       );
-  //       Navigator.of(context).pushAndRemoveUntil(route, (route) => false);
-
-  //       break; // home
-  //     case 1:
-  //       routeToListProduct(0);
-  //       break; // all product
-  //     case 2:
-  //       routeToListProduct(2);
-  //       MaterialPageRoute materialPageRoute = MaterialPageRoute(
-  //         builder: (BuildContext buildContext) {
-  //           return DetailCart(userModel: myUserModel);
-  //         },
-  //       );
-  //       Navigator.of(context).push(materialPageRoute).then((value) {
-  //         setState(() {
-  //           // readCart();
-  //         });
-  //       });
-  //       break; // promotion
-  //   }
-  // }
-
-  // Widget showBubbleBottomBarNav() {
-  //   return BubbleBottomBar(
-  //     hasNotch: true,
-  //     // fabLocation: BubbleBottomBarFabLocation.end,
-  //     opacity: .2,
-  //     borderRadius: BorderRadius.vertical(
-  //         top: Radius.circular(
-  //             16)), //border radius doesn't work when the notch is enabled.
-  //     elevation: 8,
-  //     currentIndex: currentIndex,
-  //     onTap: changePage,
-  //     items: <BubbleBottomBarItem>[
-  //       BubbleBottomBarItem(
-  //           backgroundColor: Colors.red,
-  //           icon: Icon(
-  //             Icons.home,
-  //             color: Colors.black,
-  //           ),
-  //           activeIcon: Icon(
-  //             Icons.home,
-  //             color: Colors.red,
-  //           ),
-  //           title: Text("หน้าหลัก")),
-  //       BubbleBottomBarItem(
-  //           backgroundColor: Colors.green,
-  //           icon: Icon(
-  //             Icons.medical_services,
-  //             color: Colors.black,
-  //           ),
-  //           activeIcon: Icon(
-  //             Icons.medical_services,
-  //             color: Colors.green,
-  //           ),
-  //           title: Text("สินค้า")),
-  //       BubbleBottomBarItem(
-  //           backgroundColor: Colors.blue,
-  //           icon: Icon(
-  //             Icons.shopping_cart,
-  //             color: Colors.black,
-  //           ),
-  //           activeIcon: Icon(
-  //             Icons.shopping_cart,
-  //             color: Colors.blue,
-  //           ),
-  //           title: Text("ตะกร้าสินค้า")),
-  //     ],
-  //   );
-  // }
-
   void routeToDetailCart() {
     MaterialPageRoute materialPageRoute = MaterialPageRoute(
       builder: (BuildContext buildContext) {
@@ -314,32 +355,6 @@ class _DetailState extends State<DetailPopup> {
 
   Widget stylishBottomBar() {
     return StylishBottomBar(
-      //  option: AnimatedBarOptions(
-      //    iconSize: 32,
-      //    barAnimation: BarAnimation.liquid,
-      //    iconStyle: IconStyle.animated,
-      //    opacity: 0.3,
-      //  ),
-
-      // option: BubbleBarOptions(
-      //   barStyle: BubbleBarStyle.horizontal,
-      //   // barStyle: BubbleBarStyle.vertical,
-      //   bubbleFillStyle: BubbleFillStyle.fill,
-      //   // bubbleFillStyle: BubbleFillStyle.outlined,
-      //   opacity: 0.3,
-      // ),
-
-      // option: DotBarOptions(
-      //   dotStyle: DotStyle.tile,
-      //   gradient: const LinearGradient(
-      //     colors: [
-      //       Colors.deepPurple,
-      //       Colors.pink,
-      //     ],
-      //     begin: Alignment.topLeft,
-      //     end: Alignment.bottomRight,
-      //   ),
-      // ),
       option: AnimatedBarOptions(iconStyle: IconStyle.animated, opacity: 0.3),
       items: [
         BottomBarItem(

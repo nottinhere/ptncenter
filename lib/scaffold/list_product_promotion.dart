@@ -5,9 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:ptncenter/models/product_all_model.dart';
 import 'package:ptncenter/models/user_model.dart';
+import 'package:ptncenter/models/promotion_group_model.dart';
+import 'package:ptncenter/models/promotion_tier.dart';
+import 'package:ptncenter/models/gift_model.dart';
 import 'package:ptncenter/utility/my_style.dart';
 import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:ptncenter/utility/normal_dialog.dart';
+import 'package:ptncenter/scaffold/list_product.dart';
+import 'package:ptncenter/scaffold/list_product_promotion.dart';
 import 'package:ptncenter/scaffold/list_product_favorite.dart';
 import 'my_service.dart';
 import 'detail.dart';
@@ -20,7 +25,26 @@ import 'package:flutter/foundation.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:toast/toast.dart';
 
-class ListProduct extends StatefulWidget {
+class NearMissPromotion {
+  final String sourceLabel;
+  final String remaining;
+  final String remainingUnit;
+  final GiftModel? gift;
+  final String giftQty;
+  final String giftUnit;
+  final double progress; // 0.0 - 1.0 ความคืบหน้าไปยัง tier ถัดไป
+
+  NearMissPromotion(
+      {required this.sourceLabel,
+      required this.remaining,
+      required this.remainingUnit,
+      required this.gift,
+      required this.giftQty,
+      required this.giftUnit,
+      required this.progress});
+}
+
+class ListProductPromotion extends StatefulWidget {
   final int? index;
   final UserModel? userModel;
   final int? cate;
@@ -28,7 +52,7 @@ class ListProduct extends StatefulWidget {
   final String? searchStr;
   final String? promotionGroupId;
 
-  ListProduct(
+  ListProductPromotion(
       {Key? key,
       this.index,
       this.userModel,
@@ -39,7 +63,7 @@ class ListProduct extends StatefulWidget {
       : super(key: key);
 
   @override
-  _ListProductState createState() => _ListProductState();
+  _ListProductPromotionState createState() => _ListProductPromotionState();
 }
 
 //class
@@ -61,7 +85,7 @@ class Debouncer {
   }
 }
 
-class _ListProductState extends State<ListProduct> {
+class _ListProductPromotionState extends State<ListProductPromotion> {
   // Explicit
   int? myIndex;
   List<ProductAllModel>? productAllModels = []; // []; // set array
@@ -74,6 +98,13 @@ class _ListProductState extends State<ListProduct> {
 
   int? amountListView = 6;
   int? page = 1;
+
+  PromotionGroupModel? currentPromotionGroup;
+  Map<String, GiftModel> giftMap = {};
+  Map<String, String> unitNameMap = {};
+  // key: productId -> มูลค่ารวมในตะกร้า (สำหรับเทียบกับ target ของกลุ่มโปรโมชันนี้)
+  Map<int, double> cartValueByProduct = {};
+  NearMissPromotion? nearMiss;
 
   String? qrString;
   int? myCate = 0;
@@ -144,6 +175,9 @@ class _ListProductState extends State<ListProduct> {
       loadJsonAsset();
     });
 
+    readPromotionGroupRule();
+    readGiftItems();
+    readUnitNames();
   }
 
   void createController() {
@@ -186,18 +220,151 @@ class _ListProductState extends State<ListProduct> {
     ToastContext().init(context);
     showCreditAlertMessage();
 
+    cartValueByProduct.clear();
     var cartList = result['cart'];
     for (var map in cartList) {
       lastItemName = map['title'];
       amontCart = amontCart! + 1;
+
+      int? productID = map['id'];
+      var priceListMap = map['price_list'];
+      if (productID != null && priceListMap is Map) {
+        for (String size in ['s', 'm', 'l']) {
+          var sizeMap = priceListMap[size];
+          if (sizeMap == null || sizeMap is! Map || sizeMap.isEmpty) continue;
+
+          double qty = double.tryParse(
+                  (sizeMap['quantity'] ?? '').toString().replaceAll(',', '')) ??
+              0;
+          double price = double.tryParse(
+                  (sizeMap['price'] ?? '').toString().replaceAll(',', '')) ??
+              0;
+
+          cartValueByProduct[productID] =
+              (cartValueByProduct[productID] ?? 0) + (price * qty);
+        }
+      }
     }
     setState(() {
       lastItemName;
       amontCart;
-
-
-
     });
+
+    computeNearMiss();
+  }
+
+  Future<void> readPromotionGroupRule() async {
+    String url = 'https://ptnpharma.com/jsonData/medicinepromotiongroup.json';
+    try {
+      http.Response response = await http.get(Uri.parse(url));
+      var result = json.decode(response.body);
+      if (result is List) {
+        for (var map in result) {
+          PromotionGroupModel group = PromotionGroupModel.fromJson(map);
+          if (group.id == myPromotionGroupId) {
+            currentPromotionGroup = group;
+            break;
+          }
+        }
+        computeNearMiss();
+      }
+    } catch (e) {
+      print('readPromotionGroupRule error: $e');
+    }
+  }
+
+  Future<void> readGiftItems() async {
+    String url = 'https://ptnpharma.com/jsonData/gift.json';
+    try {
+      http.Response response = await http.get(Uri.parse(url));
+      var result = json.decode(response.body);
+      if (result is List) {
+        Map<String, GiftModel> map = {};
+        for (var itemMap in result) {
+          GiftModel gift = GiftModel.fromJson(itemMap);
+          if (gift.id != null) map[gift.id!] = gift;
+        }
+        giftMap = map;
+        computeNearMiss();
+      }
+    } catch (e) {
+      print('readGiftItems error: $e');
+    }
+  }
+
+  Future<void> readUnitNames() async {
+    String url = 'https://ptnpharma.com/jsonData/unit.json';
+    try {
+      http.Response response = await http.get(Uri.parse(url));
+      var result = json.decode(response.body);
+      if (result is List) {
+        Map<String, String> map = {};
+        for (var itemMap in result) {
+          String? unitId = itemMap['unit_id'];
+          String? unitName = itemMap['unit_name'];
+          if (unitId != null && unitName != null) map[unitId] = unitName;
+        }
+        unitNameMap = map;
+        computeNearMiss();
+      }
+    } catch (e) {
+      print('readUnitNames error: $e');
+    }
+  }
+
+  String formatNum(double value) {
+    return value == value.roundToDouble()
+        ? value.toInt().toString()
+        : value.toString();
+  }
+
+  void computeNearMiss() {
+    PromotionGroupModel? group = currentPromotionGroup;
+    if (group == null) return;
+
+    double subtotal = 0;
+    for (String idStr in group.medIds) {
+      int? id = int.tryParse(idStr);
+      if (id == null) continue;
+      subtotal += cartValueByProduct[id] ?? 0;
+    }
+
+    MedicinePromotionTier? tier = group.nextTierFor(subtotal);
+    if (tier == null) {
+      if (mounted) setState(() => nearMiss = null);
+      return;
+    }
+
+    double tierTarget = double.tryParse(tier.qty ?? '') ?? 0;
+    if (tierTarget <= 0) {
+      if (mounted) setState(() => nearMiss = null);
+      return;
+    }
+
+    double progress = subtotal / tierTarget;
+    if (progress < 0.5 || progress >= 1.0) {
+      if (mounted) setState(() => nearMiss = null);
+      return;
+    }
+
+    double remaining = (tierTarget - subtotal).ceilToDouble();
+    GiftModel? gift = giftMap[tier.gift];
+
+    NearMissPromotion item = NearMissPromotion(
+      sourceLabel: group.name ?? '',
+      remaining: formatNum(remaining),
+      remainingUnit: 'บาท',
+      gift: gift,
+      giftQty: formatNum(double.tryParse(tier.getqty ?? '') ?? 0),
+      giftUnit: unitNameMap[gift?.unit] ?? '',
+      progress: progress,
+    );
+
+    if (mounted) {
+      setState(() {
+        nearMiss = item;
+      });
+    }
   }
 
 
@@ -247,28 +414,8 @@ class _ListProductState extends State<ListProduct> {
 
     String memberId = myUserModel!.id.toString();
     String url =
-        '${MyStyle().serverName}/apishop/json_productlist.php?memberId=$memberId&searchKey=$searchString&page=$page';
-    if (myIndex != 0) {
-      if (myIndex == 1 || myIndex == 2 || myIndex == 3) {
-        url =
-            '${MyStyle().serverName}/apishop/json_productlist.php?memberId=$memberId&searchKey=$searchString&product_mode=$myIndex&page=$page';
-      } else if (myIndex == 4) {
-        url =
-            '${MyStyle().serverName}/apishop/json_productnotreceive.php?memberId=$memberId&page=$page';
-      } else if (myIndex == 5) {
-        url =
-            '${MyStyle().serverName}/apishop/json_productlist.php?memberId=$memberId&cate_id=$myCate&page=$page';
-      } else if (myIndex == 6) {
-        url =
             '${MyStyle().serverName}/apishop/json_productlist.php?memberId=$memberId&promotiongroup_id=$myPromotionGroupId&page=$page';
-      } else if (myIndex == 7) {
-        url =
-            '${MyStyle().serverName}/apishop/json_productbestseller.php?memberId=$memberId&page=$page';
-      } else if (myIndex == 8) {
-        url =
-            '${MyStyle().serverName}/apishop/json_productbestintrend.php?memberId=$memberId&page=$page';
-      }
-    }
+
 
     // url = '${MyStyle().readProductWhereMode}$myIndex';
     print("URL = $url");
@@ -571,6 +718,72 @@ class _ListProductState extends State<ListProduct> {
 
           /// Optional, the stroke backgroundColor
           ),
+    );
+  }
+
+  Widget nearMissSection() {
+    NearMissPromotion? item = nearMiss;
+    if (item == null) return Container();
+
+    String giftName = item.gift?.name ?? 'ของแถม';
+    String message = 'ใกล้ได้ของแถมแล้ว! เพิ่มอีก ${item.remaining} ${item.remainingUnit} '
+        'เพื่อรับ $giftName ${item.giftQty} ${item.giftUnit} ฟรี';
+    double clampedProgress = item.progress.clamp(0.0, 1.0);
+    int percent = (clampedProgress * 100).round();
+
+    return Container(
+      margin: EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 0.0),
+      padding: EdgeInsets.all(10.0),
+      decoration: BoxDecoration(
+        color: Color(0xFFFFFBEA),
+        borderRadius: BorderRadius.circular(10.0),
+        border: Border.all(color: Color(0xFFFFE8A3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              Container(
+                width: 32.0,
+                height: 32.0,
+                decoration:
+                    BoxDecoration(color: Colors.orange, shape: BoxShape.circle),
+                child: Icon(Icons.campaign, color: Colors.white, size: 18.0),
+              ),
+              SizedBox(width: 10.0),
+              Expanded(
+                child: Text(message,
+                    style:
+                        TextStyle(fontSize: 12.5, color: Colors.grey.shade800)),
+              ),
+            ],
+          ),
+          SizedBox(height: 8.0),
+          Row(
+            children: <Widget>[
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(4.0),
+                  child: LinearProgressIndicator(
+                    value: clampedProgress,
+                    minHeight: 6.0,
+                    backgroundColor: Color(0xFFFFE8A3),
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.orange),
+                  ),
+                ),
+              ),
+              SizedBox(width: 8.0),
+              Text('$percent%',
+                  style: TextStyle(
+                      fontSize: 11.0,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.orange.shade800)),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -1046,31 +1259,8 @@ Future<void> decodeQRcode(var code) async {
 
   @override
   Widget build(BuildContext context) {
-    String txtheader = '';
-    if (myIndex != 0) {
-      if (myIndex == 1) {
-        txtheader = 'สินค้าใหม่';
-      } else if (myIndex == 2) {
-        txtheader = 'สินค้าโปรโมชัน';
-      } else if (myIndex == 3) {
-        txtheader = 'สินค้าจะปรับราคา';
-      } else if (myIndex == 4) {
-        txtheader = 'สินค้าที่เคยสั่งแล้วไม่ได้รับ';
-      } else if (myIndex == 5) {
-        txtheader = myCateName!;
-      } else if (myIndex == 6) {
-        // searchString = Uri.decodeFull(searchString);
-        // searchString = json.decode(searchString);
-        txtheader = myCateName!;
-        // txtheader = 'รายการสินค้า';
-      } else if (myIndex == 7) {
-        txtheader = 'สินค้าขายดี';
-      } else if (myIndex == 8) {
-        txtheader = 'สินค้ามาแรง';
-      }
-    } else {
-      txtheader = 'รายการสินค้า';
-    }
+    String txtheader  = 'กลุ่ม'+myCateName!;
+
     return Scaffold(
       appBar: AppBar(
         iconTheme: IconThemeData(color: Colors.white),
@@ -1083,6 +1273,7 @@ Future<void> decodeQRcode(var code) async {
 
       body: Column(
         children: <Widget>[
+          nearMissSection(),
           searchForm(),
           lastItemInCart(),
           showContent(),
