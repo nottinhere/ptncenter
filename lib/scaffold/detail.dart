@@ -6,6 +6,9 @@ import 'package:ptncenter/models/product_all_model.dart';
 import 'package:ptncenter/models/product_all_model2.dart';
 import 'package:ptncenter/models/unit_size_model.dart';
 import 'package:ptncenter/models/user_model.dart';
+import 'package:ptncenter/models/medicine_promotion_model.dart';
+import 'package:ptncenter/models/promotion_tier.dart';
+import 'package:ptncenter/models/gift_model.dart';
 import 'package:ptncenter/scaffold/detail_cart.dart';
 import 'package:ptncenter/utility/my_style.dart';
 import 'package:ptncenter/utility/normal_dialog.dart';
@@ -27,6 +30,25 @@ import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
+
+class NearMissPromotion {
+  final String sourceLabel;
+  final String remaining;
+  final String remainingUnit;
+  final GiftModel? gift;
+  final String giftQty;
+  final String giftUnit;
+  final double progress; // 0.0 - 1.0 ความคืบหน้าไปยัง tier ถัดไป
+
+  NearMissPromotion(
+      {required this.sourceLabel,
+      required this.remaining,
+      required this.remainingUnit,
+      required this.gift,
+      required this.giftQty,
+      required this.giftUnit,
+      required this.progress});
+}
 
 class Detail extends StatefulWidget {
   final ProductAllModel? productAllModel;
@@ -78,6 +100,11 @@ class _DetailState extends State<Detail> {
   WebViewController? tiktokController;
   String? tiktokUrl;
 
+  MedicinePromotionModel? currentPromotion;
+  Map<String, GiftModel> giftMap = {};
+  Map<String, String> unitNameMap = {};
+  NearMissPromotion? nearMiss;
+
   // Method
   @override
   void initState() {
@@ -90,6 +117,9 @@ class _DetailState extends State<Detail> {
     });
     readSlide();
     readRelate();
+    readMedicinePromotion();
+    readGiftItems();
+    readUnitNames();
   }
 
   Future<void> getProductWhereID() async {
@@ -167,6 +197,121 @@ class _DetailState extends State<Detail> {
         }
       });
       print('videoCode >> $videoCode');
+      computeNearMiss();
+    }
+  }
+
+  Future<void> readMedicinePromotion() async {
+    String url = 'https://ptnpharma.com/jsonData/medicinepromotion.json';
+    try {
+      http.Response response = await http.get(Uri.parse(url));
+      var result = json.decode(response.body);
+      if (result is List) {
+        String productId = currentProductAllModel!.id.toString();
+        for (var map in result) {
+          MedicinePromotionModel promo = MedicinePromotionModel.fromJson(map);
+          if (promo.id == productId) {
+            currentPromotion = promo;
+            break;
+          }
+        }
+        computeNearMiss();
+      }
+    } catch (e) {
+      print('readMedicinePromotion error: $e');
+    }
+  }
+
+  Future<void> readGiftItems() async {
+    String url = 'https://ptnpharma.com/jsonData/gift.json';
+    try {
+      http.Response response = await http.get(Uri.parse(url));
+      var result = json.decode(response.body);
+      if (result is List) {
+        Map<String, GiftModel> map = {};
+        for (var itemMap in result) {
+          GiftModel gift = GiftModel.fromJson(itemMap);
+          if (gift.id != null) map[gift.id!] = gift;
+        }
+        giftMap = map;
+        computeNearMiss();
+      }
+    } catch (e) {
+      print('readGiftItems error: $e');
+    }
+  }
+
+  Future<void> readUnitNames() async {
+    String url = 'https://ptnpharma.com/jsonData/unit.json';
+    try {
+      http.Response response = await http.get(Uri.parse(url));
+      var result = json.decode(response.body);
+      if (result is List) {
+        Map<String, String> map = {};
+        for (var itemMap in result) {
+          String? unitId = itemMap['unit_id'];
+          String? unitName = itemMap['unit_name'];
+          if (unitId != null && unitName != null) map[unitId] = unitName;
+        }
+        unitNameMap = map;
+        computeNearMiss();
+      }
+    } catch (e) {
+      print('readUnitNames error: $e');
+    }
+  }
+
+  String formatNum(double value) {
+    return value == value.roundToDouble()
+        ? value.toInt().toString()
+        : value.toString();
+  }
+
+  void computeNearMiss() {
+    MedicinePromotionModel? promo = currentPromotion;
+    if (promo == null) return;
+
+    double cartQty = 0;
+    if (promo.size == 's') cartQty = (showSincart ?? 0).toDouble();
+    if (promo.size == 'm') cartQty = (showMincart ?? 0).toDouble();
+    if (promo.size == 'l') cartQty = (showLincart ?? 0).toDouble();
+
+    MedicinePromotionTier? tier = promo.nextTierFor(cartQty);
+    if (tier == null) {
+      if (mounted) setState(() => nearMiss = null);
+      return;
+    }
+
+    double tierQty = double.tryParse(tier.qty ?? '') ?? 0;
+    if (tierQty <= 0) {
+      if (mounted) setState(() => nearMiss = null);
+      return;
+    }
+
+    double progress = cartQty / tierQty;
+    if (progress < 0.5 || progress >= 1.0) {
+      if (mounted) setState(() => nearMiss = null);
+      return;
+    }
+
+    double remaining = (tierQty - cartQty).ceilToDouble();
+    GiftModel? gift = giftMap[tier.gift];
+
+    NearMissPromotion item = NearMissPromotion(
+      sourceLabel: promo.name ?? '',
+      remaining: formatNum(remaining),
+      remainingUnit:
+          promo.size == 's' ? (productAllModel?.priceList?.s?.lable ?? '') : '',
+      gift: gift,
+      giftQty: formatNum(double.tryParse(tier.getqty ?? '') ?? 0),
+      giftUnit: unitNameMap[gift?.unit] ?? '',
+      progress: progress,
+    );
+
+    if (mounted) {
+      setState(() {
+        nearMiss = item;
+      });
     }
   }
 
@@ -497,6 +642,73 @@ class _DetailState extends State<Detail> {
 
   Widget sectionDivider() {
     return Divider(height: 1.0, thickness: 1.0, color: MyStyle().borderColor);
+  }
+
+  Widget nearMissSection() {
+    NearMissPromotion? item = nearMiss;
+    if (item == null) return Container();
+
+    String giftName = item.gift?.name ?? 'ของแถม';
+    String unitPart = item.remainingUnit.isNotEmpty ? ' ${item.remainingUnit}' : '';
+    String message = 'ใกล้ได้ของแถมแล้ว! เพิ่มอีก ${item.remaining}$unitPart '
+        'เพื่อรับ $giftName ${item.giftQty} ${item.giftUnit} ฟรี';
+    double clampedProgress = item.progress.clamp(0.0, 1.0);
+    int percent = (clampedProgress * 100).round();
+
+    return Container(
+      margin: EdgeInsets.only(bottom: 14.0),
+      padding: EdgeInsets.all(10.0),
+      decoration: BoxDecoration(
+        color: Color(0xFFFFFBEA),
+        borderRadius: BorderRadius.circular(10.0),
+        border: Border.all(color: Color(0xFFFFE8A3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              Container(
+                width: 32.0,
+                height: 32.0,
+                decoration:
+                    BoxDecoration(color: Colors.orange, shape: BoxShape.circle),
+                child: Icon(Icons.campaign, color: Colors.white, size: 18.0),
+              ),
+              SizedBox(width: 10.0),
+              Expanded(
+                child: Text(message,
+                    style:
+                        TextStyle(fontSize: 12.5, color: Colors.grey.shade800)),
+              ),
+            ],
+          ),
+          SizedBox(height: 8.0),
+          Row(
+            children: <Widget>[
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(4.0),
+                  child: LinearProgressIndicator(
+                    value: clampedProgress,
+                    minHeight: 6.0,
+                    backgroundColor: Color(0xFFFFE8A3),
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.orange),
+                  ),
+                ),
+              ),
+              SizedBox(width: 8.0),
+              Text('$percent%',
+                  style: TextStyle(
+                      fontSize: 11.0,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.orange.shade800)),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
   Widget productSummaryCard() {
@@ -1171,6 +1383,7 @@ class _DetailState extends State<Detail> {
     return ListView(
       padding: EdgeInsets.all(14.0),
       children: <Widget>[
+        nearMissSection(),
         productSummaryCard(),
         SizedBox(height: 14.0),
         moreInfoCard(),
