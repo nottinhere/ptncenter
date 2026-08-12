@@ -208,7 +208,8 @@ class _AuthenState extends State<Authen> {
         userModel = UserModel.fromJson(map);
 
         String urlPop =
-            '${MyStyle().serverName}/apishop/json_popup.php?memberId=${userModel!.id}';
+            '${MyStyle().serverName}/apishop/json_mypopup.php?popup=1&memberId=${userModel!.id}';
+            print('urlPop = $urlPop');
         http.Response responsePop = await http.get(Uri.parse(urlPop));
         var resultPop = json.decode(responsePop.body);
         var mapItemPopup = resultPop[
@@ -275,7 +276,7 @@ class _AuthenState extends State<Authen> {
               userModel: userModel,
             );
           },
-        ).then((value) => gotoService());
+        );//.then((value) => gotoService());
       });
     } else {
       gotoService();
@@ -284,11 +285,15 @@ class _AuthenState extends State<Authen> {
 
   Widget userForm() {
     return Container(
-      decoration: MyStyle().boxLightGreen,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12.0),
+        color: MyStyle().primaryLight,
+        border: Border.all(color: MyStyle().mainColor),
+      ),
       height: 45.0,
       width: 250.0,
       child: TextFormField(
-        style: TextStyle(color: Colors.grey),
+        style: TextStyle(color: Colors.black87),
         //  initialValue: 'nott', // set default value
         onSaved: (String? string) {
           user = string!.trim();
@@ -314,11 +319,15 @@ class _AuthenState extends State<Authen> {
 
   Widget passwordForm() {
     return Container(
-      decoration: MyStyle().boxLightGreen,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12.0),
+        color: MyStyle().primaryLight,
+        border: Border.all(color: MyStyle().mainColor),
+      ),
       height: 45.0,
       width: 250.0,
       child: TextFormField(
-        style: TextStyle(color: Colors.grey),
+        style: TextStyle(color: Colors.black87),
         //  initialValue: '123456789', // set default value
         onSaved: (String? string) {
           password = string!.trim();

@@ -1,17 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:ptncenter/models/user_model.dart';
+import 'package:ptncenter/scaffold/my_service.dart';
 import 'package:ptncenter/utility/my_style.dart';
 import 'package:ptncenter/models/popup_model.dart';
-import 'package:ptncenter/scaffold/detail_cart.dart';
-import 'package:ptncenter/scaffold/list_product.dart';
-import 'package:ptncenter/scaffold/list_product_favorite.dart';
-
-// import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
-// import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
-import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
-
-import 'my_service.dart';
-import 'package:webview_flutter/webview_flutter.dart';
+import 'package:ptncenter/scaffold/detail_popup_page.dart';
 
 class PopupCarouselDialog extends StatefulWidget {
   final List<PopupModel> popupModels;
@@ -39,6 +31,15 @@ class _PopupCarouselDialogState extends State<PopupCarouselDialog> {
     ));
   }
 
+  void routeToHome() {
+    Navigator.of(context).pop();
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (BuildContext buildContext) => MyService(
+        userModel: widget.userModel,
+              ),
+    ));
+  }
+
   Widget popupPage(PopupModel item) {
     return SingleChildScrollView(
       child: Column(
@@ -46,7 +47,12 @@ class _PopupCarouselDialogState extends State<PopupCarouselDialog> {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           if ((item.detail ?? '').isNotEmpty)
-            Text(item.detail!.replaceAll('\\n', '\n'),
+            Text(
+                item.detail!
+                    .replaceAll('\r\n', '\n')
+                    .replaceAll('\\n', '\n'),
+                maxLines: 4,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(fontSize: 14.0, color: Colors.black87)),
           if ((item.photo ?? '').isNotEmpty) ...[
             SizedBox(height: 10.0),
@@ -92,13 +98,13 @@ class _PopupCarouselDialogState extends State<PopupCarouselDialog> {
                     icon: Icon(Icons.close),
                     padding: EdgeInsets.zero,
                     constraints: BoxConstraints(),
-                    onPressed: () => Navigator.of(context).pop(),
+                    onPressed: () => routeToHome(),
                   ),
                 ],
               ),
               SizedBox(height: 8.0),
               SizedBox(
-                height: 500.0,
+                height: 400.0,
                 child: PageView.builder(
                   controller: _pageController,
                   itemCount: items.length,
@@ -150,14 +156,32 @@ class _PopupCarouselDialogState extends State<PopupCarouselDialog> {
                 ),
               ],
               SizedBox(height: 6.0),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style:
-                      ElevatedButton.styleFrom(backgroundColor: MyStyle().mainColor),
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: Text('ปิด', style: TextStyle(color: Colors.white)),
-                ),
+              Row(
+                children: <Widget>[
+                  Expanded(
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.red,
+                        side: BorderSide(color: Colors.red),
+                        padding: EdgeInsets.symmetric(vertical: 12.0),
+                      ),
+                      onPressed: () => routeToHome(),
+                      child: Text('ปิด'),
+                    ),
+                  ),
+                  SizedBox(width: 10.0),
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        padding: EdgeInsets.symmetric(vertical: 12.0),
+                      ),
+                      onPressed: () => routeToDetail(current),
+                      child: Text('อ่านต่อ',
+                          style: TextStyle(color: Colors.white)),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -166,429 +190,3 @@ class _PopupCarouselDialogState extends State<PopupCarouselDialog> {
     );
   }
 }
-
-class DetailPopup extends StatefulWidget {
-  final PopupModel? popupModel;
-  final UserModel? userModel;
-
-  DetailPopup({Key? key, this.popupModel, this.userModel}) : super(key: key);
-
-  @override
-  _DetailState createState() => _DetailState();
-}
-
-class _DetailState extends State<DetailPopup> {
-  // Explicit
-  PopupModel? currentPopupModel;
-  PopupModel? popupModel;
-  UserModel? myUserModel;
-  String? id; // productID
-  String? memberID;
-  String? imagePopup = '';
-  String? textButton = '';
-  String? textURL = '';
-  String? subjectPopup = '';
-  String? detailPopup = '';
-  String? postdatePopup = '';
-  int? currentIndex = 1;
-  int selectIndex = 0;
-
-  // Method
-  @override
-  void initState() {
-    super.initState();
-    currentPopupModel = widget.popupModel;
-    myUserModel = widget.userModel;
-    subjectPopup = currentPopupModel?.subject ?? '';
-    imagePopup = currentPopupModel?.photo ?? '';
-    detailPopup = currentPopupModel?.detail ?? '';
-    postdatePopup = currentPopupModel?.postdate ?? '';
-    textButton = currentPopupModel?.txtBTN ?? '';
-    textURL = currentPopupModel?.url ?? '';
-  }
-
-  Widget spaceBox() {
-    return SizedBox(width: 10.0, height: 16.0);
-  }
-
-  Widget showTitle() {
-    return Card(
-      child: Column(
-        children: <Widget>[
-          Text(
-            subjectPopup!,
-            style: TextStyle(
-              fontSize: 18.0,
-              fontWeight: FontWeight.bold,
-              color: Color.fromARGB(0xff, 56, 80, 82),
-            ),
-          ),
-          SizedBox(width: 10.0, height: 15.0),
-        ],
-      ),
-    );
-  }
-
-  Widget showImage() {
-    return Card(
-      child: Container(
-        width: MediaQuery.of(context).size.width * 0.9,
-        padding: new EdgeInsets.all(10.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            Image.network(
-              imagePopup!,
-              width: MediaQuery.of(context).size.width * 0.9,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget showButton() {
-    return Container(
-      width: MediaQuery.of(context).size.width * 0.9,
-      padding: new EdgeInsets.all(10.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
-              textStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-           onPressed: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => WebViewExample(
-                            userModel: myUserModel!,
-                            webPage: textURL!,
-                          )));
-
-            },
-            child: Text(textButton!,style: TextStyle(fontSize: 16, color: Colors.white)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget showDetail() {
-    return Card(
-      child: Container(
-        // decoration: MyStyle().boxLightGreen,
-        // height: 35.0,
-        width: MediaQuery.of(context).size.width * 0.95,
-        padding: EdgeInsets.only(left: 10.0, right: 20.0),
-        child: Column(
-          children: <Widget>[
-            SizedBox(width: 10.0, height: 5.0),
-            Text(
-              'โพสเมื่อ :' + postdatePopup!,
-              style: TextStyle(
-                fontSize: 16.0,
-                fontWeight: FontWeight.bold,
-                color: Color.fromARGB(0xff, 0, 0, 0),
-              ),
-            ),
-            SizedBox(width: 10.0, height: 10.0),
-            Text(
-              detailPopup!.replaceAll('\\n', '\n'),
-              style: TextStyle(
-                fontSize: 19.0,
-                // fontWeight: FontWeight.bold,
-                color: Color.fromARGB(0xff, 0, 0, 0),
-              ),
-            ),
-            (textButton != '') ? showButton() : Container(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void routeToListProduct(int index) {
-    MaterialPageRoute materialPageRoute = MaterialPageRoute(
-      builder: (BuildContext buildContext) {
-        return ListProduct(index: index, userModel: myUserModel);
-      },
-    );
-    Navigator.of(context).push(materialPageRoute);
-  }
-
-  void routeToListProductfav(int index) {
-    MaterialPageRoute materialPageRoute = MaterialPageRoute(
-      builder: (BuildContext buildContext) {
-        return ListProductfav(index: index, userModel: myUserModel!);
-      },
-    );
-    Navigator.of(context).push(materialPageRoute);
-  }
-
-  void routeToDetailCart() {
-    MaterialPageRoute materialPageRoute = MaterialPageRoute(
-      builder: (BuildContext buildContext) {
-        return DetailCart(userModel: myUserModel);
-      },
-    );
-    Navigator.of(context).push(materialPageRoute);
-  }
-
-  void gotoService() {
-    MaterialPageRoute materialPageRoute =
-        MaterialPageRoute(builder: (BuildContext buildContext) {
-      return MyService(
-        userModel: myUserModel!,
-        firstLoadAds: true,
-      );
-    });
-
-    Navigator.of(context).pushAndRemoveUntil(
-        materialPageRoute, // pushAndRemoveUntil  clear หน้าก่อนหน้า route with out airrow back
-        (Route<dynamic> route) {
-      return false;
-    });
-  }
-
-  Widget stylishBottomBar() {
-    return StylishBottomBar(
-      option: AnimatedBarOptions(iconStyle: IconStyle.animated, opacity: 0.3),
-      items: [
-        BottomBarItem(
-          icon: const Icon(Icons.home),
-          title: const Text('Home'),
-          backgroundColor: Colors.blue,
-          // selectedIcon: const Icon(Icons.home),
-        ),
-        BottomBarItem(
-          icon: const Icon(Icons.medical_services),
-          title: const Text('Medicine'),
-          backgroundColor: Colors.green,
-        ),
-        BottomBarItem(
-          icon: const Icon(Icons.favorite),
-          title: const Text('Favorite'),
-          backgroundColor: Colors.red,
-        ),
-        BottomBarItem(
-          icon: const Icon(Icons.shopping_cart),
-          title: const Text('Cart'),
-          backgroundColor: Colors.brown,
-        ),
-      ],
-      // fabLocation: StylishBarFabLocation.end,
-      hasNotch: true,
-      currentIndex: selectIndex,
-      onTap: (index) {
-        setState(() {
-          selectIndex = index;
-          // controller.jumpToPage(index);
-          if (index == 0) {
-            MaterialPageRoute route = MaterialPageRoute(
-              builder: (value) => MyService(userModel: myUserModel),
-            );
-            Navigator.of(context).pushAndRemoveUntil(route, (route) => false);
-          } else if (index == 1) {
-            routeToListProduct(0);
-          } else if (index == 2) {
-            routeToListProductfav(0);
-          } else if (index == 3) {
-            routeToDetailCart();
-          }
-        });
-      },
-    );
-  }
-
-  Widget gotoHome() {
-    // all product
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        Container(
-          width: MediaQuery.of(context).size.width * 0.30,
-          // color: Colors.greenAccent,
-          // height: 80.0,
-          child: GestureDetector(
-            child: Card(
-              color: Color.fromARGB(0xff, 0x2c, 0xb5, 0x1b),
-              child: Container(
-                padding: EdgeInsets.all(5.0),
-                alignment: AlignmentDirectional(0.0, 0.0),
-                child: Row(
-                  children: <Widget>[
-                    Icon(Icons.home, size: 20.0, color: Colors.white),
-                    Text(
-                      '  หน้าหลัก',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            onTap: () {
-              print('You click home');
-              MaterialPageRoute materialPageRoute = MaterialPageRoute(
-                builder: (BuildContext buildContext) {
-                  return MyService(userModel: myUserModel);
-                },
-              );
-
-              Navigator.of(context).pushAndRemoveUntil(
-                materialPageRoute, // pushAndRemoveUntil  clear หน้าก่อนหน้า route with out airrow back
-                (Route<dynamic> route) {
-                  return false;
-                },
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget homeMenu() {
-    return Container(
-      margin: EdgeInsets.only(top: 5.0),
-      alignment: Alignment(0.0, 0.0),
-      // color: Colors.green.shade50,
-      // height: MediaQuery.of(context).size.height * 0.5 - 81,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[gotoHome()],
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: BackButton(
-          onPressed: () => gotoService(),
-        ),
-        iconTheme: IconThemeData(color: Colors.white),
-        actions: <Widget>[
-          //showCart(),
-        ],
-        backgroundColor: MyStyle().barColor,
-        title: Text('', style: TextStyle(color: Colors.white)),
-      ),
-      body: PopScope(
-        canPop: false,
-        child: ListView(
-          children: <Widget>[
-            // homeMenu(),
-            // spaceBox(),
-            showTitle(),
-            (imagePopup != '') ? showImage() : Container(),
-            showDetail(), //  popupModel == null ? showProgress() : detailBox(),
-          ],
-        ),
-      ),
-      bottomNavigationBar: stylishBottomBar(), //showBottomBarNav
-    );
-  }
-
-  // Widget showProgress() {
-  //   return Center(
-  //     child: CircularProgressIndicator(),
-  //   );
-  // }
-
-  // Widget showDetailList() {
-  //   return Stack(
-  //     children: <Widget>[
-  //       showController(),
-  //       // addButton(),
-  //     ],
-  //   );
-  // }
-
-  // ListView showController() {
-  //   return ListView(
-  //     padding: EdgeInsets.all(15.0),
-  //     children: <Widget>[
-  //       showTitle(),
-  //       // showImage(),
-  //       detailBox(),
-
-  //       // submitButton(),
-  //     ],
-  //   );
-  // }
-}
-
-class WebViewExample extends StatefulWidget {
-  final UserModel? userModel;
-  final String? webPage;
-  const WebViewExample({super.key, this.userModel, this.webPage});
-  @override
-  State<WebViewExample> createState() => _WebViewExampleState();
-}
-
-class _WebViewExampleState extends State<WebViewExample> {
-  UserModel? myUserModel;
-  String? mywebPage;
-  late final WebViewController controller;
-
-  @override
-  void initState() {
-    super.initState();
-    myUserModel = widget.userModel;
-    mywebPage = widget.webPage;
-
-    
-    String? url = mywebPage!; //
-    print('URL ==>> $url');
-
-    String? urlView =  url!;
-    
-
-    // #docregion webview_controller
-    controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onProgress: (int progress) {
-            // Update loading bar.
-          },
-          onPageStarted: (String url) {},
-          onPageFinished: (String url) {},
-          onHttpError: (HttpResponseError error) {},
-          onWebResourceError: (WebResourceError error) {},
-          onNavigationRequest: (NavigationRequest request) {
-            if (request.url.startsWith('https://www.youtube.com/')) {
-              return NavigationDecision.prevent;
-            }
-            return NavigationDecision.navigate;
-          },
-        ),
-      )
-      ..loadRequest(Uri.parse(urlView));
-    // #enddocregion webview_controller
-  }
-
-  // #docregion webview_widget
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-          backgroundColor: Colors.green,
-          iconTheme: IconThemeData(color: Colors.white),
-          title:
-              const Text('PTN Pharma', style: TextStyle(color: Colors.white))),
-      body: WebViewWidget(controller: controller),
-    );
-  }
-  // #enddocregion webview_widget
-}
-
-

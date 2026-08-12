@@ -342,7 +342,7 @@ class _ListProductPromotionState extends State<ListProductPromotion> {
     }
 
     double progress = subtotal / tierTarget;
-    if (progress < 0.5 || progress >= 1.0) {
+    if (progress >= 1.0) {
       if (mounted) setState(() => nearMiss = null);
       return;
     }
@@ -726,7 +726,8 @@ class _ListProductPromotionState extends State<ListProductPromotion> {
     if (item == null) return Container();
 
     String giftName = item.gift?.name ?? 'ของแถม';
-    String message = 'ใกล้ได้ของแถมแล้ว! เพิ่มอีก ${item.remaining} ${item.remainingUnit} '
+    String prefix = item.progress >= 0.5 ? 'ใกล้ได้ของแถมแล้ว! ' : '';
+    String message = '$prefixสั่งเพิ่มอีก ${item.remaining} ${item.remainingUnit} '
         'เพื่อรับ $giftName ${item.giftQty} ${item.giftUnit} ฟรี';
     double clampedProgress = item.progress.clamp(0.0, 1.0);
     int percent = (clampedProgress * 100).round();

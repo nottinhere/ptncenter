@@ -533,14 +533,28 @@ class _HomeState extends State<Home> {
             hintText: 'ค้นหาสินค้า ยา เวชภัณฑ์...',
             hintStyle: TextStyle(color: MyStyle().mutedTextColor),
             prefixIcon: Icon(Icons.search_rounded, color: MyStyle().mainColor),
-            suffixIcon: IconButton(
-              icon: Icon(Icons.qr_code_scanner_rounded,
-                  color: MyStyle().mainColor),
-              onPressed: readQRcodePreview,
+            suffixIcon: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                if (_searchController.text.isNotEmpty)
+                  IconButton(
+                    icon: Icon(Icons.clear, color: MyStyle().mutedTextColor),
+                    onPressed: () {
+                      setState(() {
+                        _searchController.clear();
+                      });
+                    },
+                  ),
+                IconButton(
+                  icon: Icon(Icons.qr_code_scanner_rounded,
+                      color: MyStyle().mainColor),
+                  onPressed: readQRcodePreview,
+                ),
+              ],
             ),
             contentPadding: EdgeInsets.symmetric(vertical: 12.0),
           ),
-          onChanged: (_) {},
+          onChanged: (_) => setState(() {}),
         ),
       ),
     );
@@ -688,7 +702,7 @@ class _HomeState extends State<Home> {
                     MaterialPageRoute materialPageRoute = MaterialPageRoute(
                         builder: (BuildContext buildContext) {
                       return ListProduct(
-                        index: 6,
+                        // index: 1,
                         userModel: myUserModel!,
                         cateName: slideshowModels![index].title.toString(),
                         searchStr: slideshowModels![index].productCode.toString(),

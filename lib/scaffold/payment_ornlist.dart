@@ -112,6 +112,9 @@ class _PaymentOrnListState extends State<PaymentOrnList> {
 
     String? url =
         '${MyStyle().serverName}/apishop/json_ornlist.php?memberId=$memberId&page=$page&searchKey=$searchString';
+    if (ornTab == 'unpaid') {
+      url = '$url&status=3';
+    }
     print("URL (payment orn list)= $url");
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
@@ -128,11 +131,22 @@ class _PaymentOrnListState extends State<PaymentOrnList> {
     applyOrnTab();
   }
 
+  // แถวของ BI เอง orn_no จะเท่ากับ bill_no; ORN ที่ถูกผูกไปรวมกับ BI อื่น bill_no จะไม่ตรงกับ orn_no ของตัวเอง
+  bool isMergedIntoBill(OrnModel o) {
+    return o.billNo != null &&
+        o.billNo != '' &&
+        o.billNo != '-' &&
+        o.billNo != o.ornNo;
+  }
+
   void applyOrnTab() {
+    // server กรองตาม status ให้แล้วผ่าน &status=3 ใน readData()
+    // แท็บรอชำระเงิน: แสดง BI ที่ยังไม่ชำระ และ ORN ที่ยังไม่ชำระ+ไม่ได้ผูก BI
+    // (ORN ที่ถูกผูกไปรวมกับ BI อื่นแล้ว ไม่ต้องแสดงซ้ำ เพราะแสดงผ่าน BI แทน)
     setState(() {
       if (ornTab == 'unpaid') {
         filterOrnAllModels =
-            ornAllModels!.where((o) => o.status == '3').toList();
+            ornAllModels!.where((o) => !isMergedIntoBill(o)).toList();
       } else {
         filterOrnAllModels = ornAllModels;
       }
@@ -216,7 +230,7 @@ class _PaymentOrnListState extends State<PaymentOrnList> {
         Row(
           children: [
             Container(
-              width: MediaQuery.of(context).size.width * 0.45,
+              width: MediaQuery.of(context).size.width * 0.55,
               child: Row(
                 children: [
                   Text(
@@ -236,11 +250,17 @@ class _PaymentOrnListState extends State<PaymentOrnList> {
                           style: MyStyle().h3StyleRed,
                         )
                       : Text(''),
+                  isMergedIntoBill(filterOrnAllModels![index])
+                      ? Text(
+                          '      (${filterOrnAllModels![index].billNo})',
+                          style: MyStyle().h4StyleRed,
+                        )
+                      : Text(''),
                 ],
               ),
             ),
             Container(
-              width: MediaQuery.of(context).size.width * 0.45,
+              width: MediaQuery.of(context).size.width * 0.40,
               child: showOrnStatus(index),
             ),
           ],
@@ -263,20 +283,20 @@ class _PaymentOrnListState extends State<PaymentOrnList> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Container(
-            width: MediaQuery.of(context).size.width * 0.45,
+            width: MediaQuery.of(context).size.width * 0.52,
             child: Text(outputDate)),
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: <Widget>[
             Container(
-              width: MediaQuery.of(context).size.width * 0.18,
+              width: MediaQuery.of(context).size.width * 0.16,
               child: Text(
                 'ยอดชำระ ',
                 style: MyStyle().h3StyleGray,
               ),
             ),
             Container(
-              width: MediaQuery.of(context).size.width * 0.28,
+              width: MediaQuery.of(context).size.width * 0.25,
               child: Text(
                 ' $customFormat  บ.',
                 style: (filterOrnAllModels![index].total.toString() != '0')
@@ -417,7 +437,11 @@ class _PaymentOrnListState extends State<PaymentOrnList> {
   }
 
   Widget totalOrn() {
-    String txttotalRecords = filterOrnAllModels!.length.toString();
+    // แท็บรอชำระเงิน กรอง ORN ที่ผูก BI แล้วออกฝั่ง client (server ไม่รองรับ filter นี้)
+    // จึงนับจากรายการที่กรองแล้วแทน totalRecords ของ server เพื่อไม่ให้ตัวเลขเกินกว่าที่แสดงจริง
+    String txttotalRecords = ornTab == 'unpaid'
+        ? filterOrnAllModels!.length.toString()
+        : totalRecords.toString();
 
     return Container(
       width: MediaQuery.of(context).size.width * 0.95,

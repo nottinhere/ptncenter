@@ -202,10 +202,16 @@ class _RewardListState extends State<RewardList> {
               style: MyStyle().h3Style,
             ),
             (reward.point != null && reward.point != '')
-                ? Text(
-                    'แต้มที่ใช้: ${reward.point}',
-                    style: MyStyle().h3StyleRed,
-                  )
+                ? Row(
+                  children: [
+                    Icon(Icons.stars, color: Colors.orange.shade700),
+                    const SizedBox(width: 8),
+                    Text(
+                        '${reward.point}',
+                        style: MyStyle().h3StyleRed,
+                      ),
+                  ],
+                )
                 : Container(),
             (reward.stock != null && reward.stock != '')
                 ? Text(

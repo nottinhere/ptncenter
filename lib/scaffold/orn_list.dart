@@ -96,8 +96,6 @@ class _OrnListState extends State<OrnList> {
   bool? visible = true;
   // String? ornGID,ornRGID;
 
-  String ornTab = 'all'; // 'notdelivered' or 'all'
-
   // Method
   @override
   void initState() {
@@ -174,67 +172,8 @@ class _OrnListState extends State<OrnList> {
     }
     setState(() {
       visible = false;
+      filterOrnAllModels = ornAllModels;
     });
-    applyOrnTab();
-  }
-
-  void applyOrnTab() {
-    setState(() {
-      if (ornTab == 'notdelivered') {
-        filterOrnAllModels = ornAllModels!
-            .where((o) =>
-                o.deliveryDate == null ||
-                o.deliveryDate == '' ||
-                o.deliveryDate == '-')
-            .toList();
-      } else {
-        filterOrnAllModels = ornAllModels;
-      }
-    });
-  }
-
-  Widget ornTabButton(String value, String label) {
-    bool selected = ornTab == value;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () {
-          ornTab = value;
-          setState(() {
-            page = 1;
-            ornAllModels!.clear();
-            readData();
-          });
-        },
-        child: Container(
-          padding: EdgeInsets.symmetric(vertical: 8.0),
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: selected ? MyStyle().bgColor : Colors.grey.shade200,
-            borderRadius: BorderRadius.circular(20.0),
-          ),
-          child: Text(
-            label,
-            style: TextStyle(
-              color: selected ? Colors.white : Colors.black87,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget ornTabBar() {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
-      child: Row(
-        children: <Widget>[
-          ornTabButton('notdelivered', 'ยังไม่จัดส่ง'),
-          SizedBox(width: 10.0),
-          ornTabButton('all', 'ทั้งหมด'),
-        ],
-      ),
-    );
   }
 
   static const Map<String, Map<String, dynamic>> ornStatusMap = {
@@ -350,7 +289,7 @@ class _OrnListState extends State<OrnList> {
 DateTime parseDate =
     new DateFormat("yyyy-MM-dd HH:mm:ss").parse(filterOrnAllModels![index].datepost!);
     var inputDate = DateTime.parse(parseDate.toString());
-    var outputFormat = DateFormat('MM/dd/yyyy HH:mm');
+    var outputFormat = DateFormat('dd/MM/yyyy HH:mm');
     var outputDate = outputFormat.format(inputDate);
 
     return Row(
@@ -822,7 +761,6 @@ DateTime parseDate =
       body: Column(
         children: <Widget>[
           searchForm(),
-          ornTabBar(),
           totalOrn(),
           showContent(),
         ],

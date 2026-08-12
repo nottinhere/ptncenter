@@ -243,55 +243,6 @@ class _DetailState extends State<DetailNews> {
     }
   }
 
-  // Widget showBubbleBottomBarNav() {
-  //   return BubbleBottomBar(
-  //     hasNotch: true,
-  //     // fabLocation: BubbleBottomBarFabLocation.end,
-  //     opacity: .2,
-  //     borderRadius: BorderRadius.vertical(
-  //         top: Radius.circular(
-  //             16)), //border radius doesn't work when the notch is enabled.
-  //     elevation: 8,
-  //     currentIndex: currentIndex,
-  //     onTap: changePage,
-  //     items: <BubbleBottomBarItem>[
-  //       BubbleBottomBarItem(
-  //           backgroundColor: Colors.red,
-  //           icon: Icon(
-  //             Icons.home,
-  //             color: Colors.black,
-  //           ),
-  //           activeIcon: Icon(
-  //             Icons.home,
-  //             color: Colors.red,
-  //           ),
-  //           title: Text("หน้าหลัก")),
-  //       BubbleBottomBarItem(
-  //           backgroundColor: Colors.green,
-  //           icon: Icon(
-  //             Icons.medical_services,
-  //             color: Colors.black,
-  //           ),
-  //           activeIcon: Icon(
-  //             Icons.medical_services,
-  //             color: Colors.green,
-  //           ),
-  //           title: Text("สินค้า")),
-  //       BubbleBottomBarItem(
-  //           backgroundColor: Colors.blue,
-  //           icon: Icon(
-  //             Icons.shopping_cart,
-  //             color: Colors.black,
-  //           ),
-  //           activeIcon: Icon(
-  //             Icons.shopping_cart,
-  //             color: Colors.blue,
-  //           ),
-  //           title: Text("ตะกร้าสินค้า")),
-  //     ],
-  //   );
-  // }
-
   void routeToDetailCart() {
     MaterialPageRoute materialPageRoute = MaterialPageRoute(
       builder: (BuildContext buildContext) {
@@ -303,32 +254,6 @@ class _DetailState extends State<DetailNews> {
 
   Widget stylishBottomBar() {
     return StylishBottomBar(
-      //  option: AnimatedBarOptions(
-      //    iconSize: 32,
-      //    barAnimation: BarAnimation.liquid,
-      //    iconStyle: IconStyle.animated,
-      //    opacity: 0.3,
-      //  ),
-
-      // option: BubbleBarOptions(
-      //   barStyle: BubbleBarStyle.horizontal,
-      //   // barStyle: BubbleBarStyle.vertical,
-      //   bubbleFillStyle: BubbleFillStyle.fill,
-      //   // bubbleFillStyle: BubbleFillStyle.outlined,
-      //   opacity: 0.3,
-      // ),
-
-      // option: DotBarOptions(
-      //   dotStyle: DotStyle.tile,
-      //   gradient: const LinearGradient(
-      //     colors: [
-      //       Colors.deepPurple,
-      //       Colors.pink,
-      //     ],
-      //     begin: Alignment.topLeft,
-      //     end: Alignment.bottomRight,
-      //   ),
-      // ),
       option: AnimatedBarOptions(iconStyle: IconStyle.animated, opacity: 0.3),
       items: [
         BottomBarItem(
@@ -465,33 +390,7 @@ class _DetailState extends State<DetailNews> {
     );
   }
 
-  // Widget showProgress() {
-  //   return Center(
-  //     child: CircularProgressIndicator(),
-  //   );
-  // }
 
-  // Widget showDetailList() {
-  //   return Stack(
-  //     children: <Widget>[
-  //       showController(),
-  //       // addButton(),
-  //     ],
-  //   );
-  // }
-
-  // ListView showController() {
-  //   return ListView(
-  //     padding: EdgeInsets.all(15.0),
-  //     children: <Widget>[
-  //       showTitle(),
-  //       // showImage(),
-  //       detailBox(),
-
-  //       // submitButton(),
-  //     ],
-  //   );
-  // }
 }
 
 class WebViewExample extends StatefulWidget {

@@ -289,7 +289,7 @@ class _DetailState extends State<Detail> {
     }
 
     double progress = cartQty / tierQty;
-    if (progress < 0.5 || progress >= 1.0) {
+    if (progress >= 1.0) {
       if (mounted) setState(() => nearMiss = null);
       return;
     }
@@ -650,7 +650,8 @@ class _DetailState extends State<Detail> {
 
     String giftName = item.gift?.name ?? 'ของแถม';
     String unitPart = item.remainingUnit.isNotEmpty ? ' ${item.remainingUnit}' : '';
-    String message = 'ใกล้ได้ของแถมแล้ว! เพิ่มอีก ${item.remaining}$unitPart '
+    String prefix = item.progress >= 0.5 ? 'ใกล้ได้ของแถมแล้ว! ' : '';
+    String message = '$prefixเพิ่มอีก ${item.remaining}$unitPart '
         'เพื่อรับ $giftName ${item.giftQty} ${item.giftUnit} ฟรี';
     double clampedProgress = item.progress.clamp(0.0, 1.0);
     int percent = (clampedProgress * 100).round();

@@ -3,7 +3,7 @@ import 'dart:convert';
 // import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:ptncenter/main.dart';
+import 'package:ptncenter/scaffold/authen.dart';
 import 'package:ptncenter/models/user_model.dart';
 import 'package:ptncenter/models/category_model.dart';
 
@@ -307,13 +307,14 @@ class _MyServiceState extends State<MyService> {
   Future<void> logOut() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     await sharedPreferences.clear();
-    // exit(0);
+
     MaterialPageRoute materialPageRoute = MaterialPageRoute(
       builder: (BuildContext buildContext) {
-        return MyApp();
+        return Authen();
       },
     );
-    Navigator.of(context).push(materialPageRoute);
+    Navigator.of(context)
+        .pushAndRemoveUntil(materialPageRoute, (Route<dynamic> route) => false);
   }
 
   Widget menuContact() {
@@ -636,21 +637,24 @@ class _MyServiceState extends State<MyService> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        iconTheme: IconThemeData(color: Colors.white),
-        actions: <Widget>[
-          // showMsg(),
-          showCart(),
-        ],
-        backgroundColor: MyStyle().bgColor,
-        title: Text('หน้าหลัก', style: TextStyle(color: Colors.white)),
-        // centerTitle: true,
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
+        appBar: AppBar(
+          iconTheme: IconThemeData(color: Colors.white),
+          actions: <Widget>[
+            // showMsg(),
+            showCart(),
+          ],
+          backgroundColor: MyStyle().bgColor,
+          title: Text('หน้าหลัก', style: TextStyle(color: Colors.white)),
+          // centerTitle: true,
+        ),
+        body: currentWidget,
+        drawer: showDrawer(),
+        // bottomNavigationBar: showBubbleBottomBarNav(), //showBottomBarNav
+        bottomNavigationBar: stylishBottomBar(), //showBottomBarNav
       ),
-      body: currentWidget,
-      drawer: showDrawer(),
-      // bottomNavigationBar: showBubbleBottomBarNav(), //showBottomBarNav
-      bottomNavigationBar: stylishBottomBar(), //showBottomBarNav
     );
   }
 }
