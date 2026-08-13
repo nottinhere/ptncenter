@@ -23,6 +23,7 @@ import 'package:ptncenter/scaffold/list_product_promotion.dart';
 import 'package:ptncenter/scaffold/list_product_frequent.dart';
 import 'package:ptncenter/scaffold/list_product_vote.dart';
 import 'package:ptncenter/scaffold/list_promotionbanner.dart';
+import 'package:ptncenter/scaffold/list_news.dart';
 
 import 'package:ptncenter/scaffold/history_list.dart';
 import 'package:ptncenter/scaffold/ocr_scan.dart';
@@ -533,14 +534,28 @@ class _HomeState extends State<Home> {
             hintText: 'ค้นหาสินค้า ยา เวชภัณฑ์...',
             hintStyle: TextStyle(color: MyStyle().mutedTextColor),
             prefixIcon: Icon(Icons.search_rounded, color: MyStyle().mainColor),
-            suffixIcon: IconButton(
-              icon: Icon(Icons.qr_code_scanner_rounded,
-                  color: MyStyle().mainColor),
-              onPressed: readQRcodePreview,
+            suffixIcon: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                if (_searchController.text.isNotEmpty)
+                  IconButton(
+                    icon: Icon(Icons.clear, color: MyStyle().mutedTextColor),
+                    onPressed: () {
+                      setState(() {
+                        _searchController.clear();
+                      });
+                    },
+                  ),
+                IconButton(
+                  icon: Icon(Icons.qr_code_scanner_rounded,
+                      color: MyStyle().mainColor),
+                  onPressed: readQRcodePreview,
+                ),
+              ],
             ),
             contentPadding: EdgeInsets.symmetric(vertical: 12.0),
           ),
-          onChanged: (_) {},
+          onChanged: (_) => setState(() {}),
         ),
       ),
     );
@@ -688,7 +703,7 @@ class _HomeState extends State<Home> {
                     MaterialPageRoute materialPageRoute = MaterialPageRoute(
                         builder: (BuildContext buildContext) {
                       return ListProduct(
-                        index: 6,
+                        // index: 1,
                         userModel: myUserModel!,
                         cateName: slideshowModels![index].title.toString(),
                         searchStr: slideshowModels![index].productCode.toString(),
@@ -750,7 +765,16 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Widget sectionHeader(String title, IconData iconData) {
+  void routeToNews() {
+    MaterialPageRoute materialPageRoute =
+        MaterialPageRoute(builder: (BuildContext buildContext) {
+      return News(userModel: myUserModel!);
+    });
+    Navigator.of(context).push(materialPageRoute);
+  }
+
+  Widget sectionHeader(String title, IconData iconData,
+      {VoidCallback? onSeeAll}) {
     return Padding(
       padding: EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
       child: Row(
@@ -758,6 +782,27 @@ class _HomeState extends State<Home> {
           Icon(iconData, size: 22.0, color: MyStyle().textColor),
           SizedBox(width: 8.0),
           Text(title, style: MyStyle().sectionTitleStyle),
+          if (onSeeAll != null) ...[
+            Spacer(),
+            GestureDetector(
+              onTap: onSeeAll,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Text(
+                    'ดูทั้งหมด',
+                    style: TextStyle(
+                      fontSize: 13.0,
+                      fontWeight: FontWeight.w600,
+                      color: MyStyle().mainColor,
+                    ),
+                  ),
+                  Icon(Icons.chevron_right_rounded,
+                      size: 18.0, color: MyStyle().mainColor),
+                ],
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -941,7 +986,8 @@ class _HomeState extends State<Home> {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16.0),
       child: Column(
-        children: List.generate(newsModels!.length, (index) {
+        children: List.generate(
+            newsModels!.length > 3 ? 3 : newsModels!.length, (index) {
           PopupModel news = newsModels![index];
           return Padding(
             padding: EdgeInsets.only(bottom: 8.0),
@@ -1038,7 +1084,8 @@ class _HomeState extends State<Home> {
             quickAccessProductGrid(),
             sectionHeader('เพิ่มเติม', Icons.menu_book_rounded),
             quickAccessGrid(),
-            sectionHeader('ข่าวสาร', Icons.newspaper_rounded),
+            sectionHeader('ข่าวสาร', Icons.newspaper_rounded,
+                onSeeAll: routeToNews),
             newsSection(),
           ],
         ),

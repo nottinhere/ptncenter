@@ -11,6 +11,7 @@ import 'package:ptncenter/models/medicine_promotion_model.dart';
 import 'package:ptncenter/models/promotion_group_model.dart';
 import 'package:ptncenter/models/promotion_tier.dart';
 import 'package:ptncenter/models/gift_model.dart';
+import 'package:ptncenter/models/reward_extrapoint_model.dart';
 import 'package:ptncenter/utility/my_style.dart';
 import 'package:ptncenter/scaffold/detail.dart';
 import 'package:ptncenter/scaffold/list_product.dart';
@@ -52,6 +53,7 @@ class NearMissPromotion {
   final double progress; // 0.0 - 1.0 ความคืบหน้าไปยัง tier ถัดไป
   final String? productId; // สำหรับโปรโมชันรายสินค้า
   final PromotionGroupModel? group; // สำหรับโปรโมชันกลุ่มสินค้า
+  final String? sizeLabel; // ไซส์ (S/M/L) ที่เข้าเงื่อนไขโปรโมชันนี้ ถ้ามี
 
   NearMissPromotion(
       {required this.sourceLabel,
@@ -62,7 +64,8 @@ class NearMissPromotion {
       required this.giftUnit,
       required this.progress,
       this.productId,
-      this.group});
+      this.group,
+      this.sizeLabel});
 }
 
 class DetailCart extends StatefulWidget {
@@ -133,6 +136,8 @@ class _DetailCartState extends State<DetailCart> {
   List<ReceivedGiftItem> groupGiftsReceived = [];
   List<NearMissPromotion> nearMissPromotions = [];
 
+  List<RewardExtrapointModel> rewardExtrapoints = [];
+
   List<String>? listTransport = [
     '',
     '1. รับสินค้าเองที่ พัฒนาเภสัช',
@@ -165,6 +170,7 @@ class _DetailCartState extends State<DetailCart> {
     readPromotionGroupRules();
     readGiftItems();
     readUnitNames();
+    readRewardExtrapoints();
   }
 
   // void _myCallback() {
@@ -378,6 +384,52 @@ class _DetailCartState extends State<DetailCart> {
     }
   }
 
+  Future<void> readRewardExtrapoints() async {
+    String url = 'https://ptnpharma.com/jsonData/reward_extrapoint.json';
+    try {
+      http.Response response = await http.get(Uri.parse(url));
+      var result = json.decode(response.body);
+      if (result is List) {
+        List<RewardExtrapointModel> rules = result
+            .map((map) => RewardExtrapointModel.fromJson(map))
+            .toList();
+        if (mounted) {
+          setState(() {
+            rewardExtrapoints = rules;
+          });
+        }
+      }
+    } catch (e) {
+      print('readRewardExtrapoints error: $e');
+    }
+  }
+
+  /// จำนวนคะแนนพิเศษที่สินค้าชิ้นนี้เข้าเงื่อนไข (รวมทุกขนาดบรรจุที่เข้าเงื่อนไข)
+  double extraPointsForProduct(int? productId) {
+    if (productId == null) return 0;
+    double total = 0;
+    for (RewardExtrapointModel rule in rewardExtrapoints) {
+      if (rule.medId != productId.toString()) continue;
+      double neededQty = double.tryParse(rule.qty ?? '') ?? 0;
+      if (neededQty <= 0) continue;
+
+      double cartQty = cartQtyBySizeKey['${productId}_${rule.size}'] ?? 0;
+      double sets = (cartQty / neededQty).floorToDouble();
+      if (sets > 0) {
+        total += sets * (double.tryParse(rule.point ?? '') ?? 0);
+      }
+    }
+    return total;
+  }
+
+  double totalExtraPoints() {
+    double total = 0;
+    for (ProductAllModel2 p in productAllModels ?? []) {
+      total += extraPointsForProduct(p.id);
+    }
+    return total;
+  }
+
   Future<void> readUnitNames() async {
     String url = 'https://ptnpharma.com/jsonData/unit.json';
     try {
@@ -442,6 +494,9 @@ class _DetailCartState extends State<DetailCart> {
     required String remainingUnit,
     String? productId,
     PromotionGroupModel? group,
+    String? sizeLabel,
+    double ownFactor = 1, // จำนวนตัดของไซส์ที่โปรโมชันกำหนด (promo.size)
+    double referenceFactor = 1, // จำนวนตัดของไซส์ที่จะใช้แสดงผล (sizeLabel)
   }) {
     double tierQty = double.tryParse(tier.qty ?? '') ?? 0;
     if (tierQty <= 0) return null;
@@ -449,7 +504,12 @@ class _DetailCartState extends State<DetailCart> {
     double progress = cartAmount / tierQty;
     if (progress < 0.5 || progress >= 1.0) return null;
 
-    double remaining = (tierQty - cartAmount).ceilToDouble();
+    // แปลงจำนวนที่ขาดจากหน่วยของ promo.size ให้เป็นหน่วยฐานก่อน (คูณ ownFactor)
+    // แล้วแปลงเป็นหน่วยของไซส์ที่ลูกค้ากำลังสั่งจริง (หาร referenceFactor)
+    double safeReferenceFactor = referenceFactor > 0 ? referenceFactor : 1;
+    double remaining =
+        ((tierQty - cartAmount) * ownFactor / safeReferenceFactor)
+            .ceilToDouble();
     GiftModel? gift = giftMap[tier.gift];
 
     return NearMissPromotion(
@@ -462,6 +522,7 @@ class _DetailCartState extends State<DetailCart> {
       progress: progress,
       productId: productId,
       group: group,
+      sizeLabel: sizeLabel,
     );
   }
 
@@ -470,7 +531,11 @@ class _DetailCartState extends State<DetailCart> {
     List<NearMissPromotion> nearMiss = [];
     for (MedicinePromotionModel promo in medicinePromotions) {
       String key = '${promo.id}_${promo.size}';
-      double cartQty = cartQtyBySizeKey[key] ?? 0;
+      double qtyS = cartQtyBySizeKey['${promo.id}_s'] ?? 0;
+      double qtyM = cartQtyBySizeKey['${promo.id}_m'] ?? 0;
+      double qtyL = cartQtyBySizeKey['${promo.id}_l'] ?? 0;
+      double cartQty =
+          promo.equivalentQty(qtyS: qtyS, qtyM: qtyM, qtyL: qtyL);
 
       MedicinePromotionTier? tier = promo.bestTierFor(cartQty);
       if (tier != null) {
@@ -481,12 +546,32 @@ class _DetailCartState extends State<DetailCart> {
 
       MedicinePromotionTier? next = promo.nextTierFor(cartQty);
       if (next != null) {
+        // แสดงจำนวนที่ขาดเป็นหน่วยของไซส์ที่ลูกค้าสั่งอยู่จริง (ไซส์ที่มีจำนวนในตะกร้ามากสุด)
+        // ไม่ใช่หน่วยของไซส์ที่โปรโมชันกำหนดไว้ (promo.size) เสมอไป
+        String referenceSize = promo.size ?? '';
+        double bestQty = 0;
+        Map<String, double> qtyBySize = {'s': qtyS, 'm': qtyM, 'l': qtyL};
+        qtyBySize.forEach((sizeKey, qty) {
+          if (qty > bestQty) {
+            bestQty = qty;
+            referenceSize = sizeKey;
+          }
+        });
+
+        double ownFactor = promo.subtractFactorFor(promo.size ?? '');
+        double referenceFactor = promo.subtractFactorFor(referenceSize);
+
         NearMissPromotion? item = buildNearMiss(
           sourceLabel: promo.name ?? '',
           cartAmount: cartQty,
           tier: next,
-          remainingUnit: cartLabelBySizeKey[key] ?? '',
+          remainingUnit: cartLabelBySizeKey['${promo.id}_$referenceSize'] ??
+              cartLabelBySizeKey[key] ??
+              '',
           productId: promo.id,
+          sizeLabel: referenceSize.toUpperCase(),
+          ownFactor: ownFactor > 0 ? ownFactor : 1,
+          referenceFactor: referenceFactor > 0 ? referenceFactor : 1,
         );
         if (item != null) nearMiss.add(item);
       }
@@ -612,14 +697,46 @@ class _DetailCartState extends State<DetailCart> {
     );
   }
 
+  Widget extraPointInlineBadge(double points) {
+    return Container(
+      margin: EdgeInsets.only(left: 6.0),
+      padding: EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
+      decoration: BoxDecoration(
+        color: Color(0xFFFFF3D6),
+        borderRadius: BorderRadius.circular(20.0),
+        border: Border.all(color: Color(0xFFFFE0A3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Icon(Icons.star, size: 12.0, color: Color(0xFFF5A623)),
+          SizedBox(width: 2.0),
+          Text('+${formatNum(points)}',
+              style: TextStyle(
+                  fontSize: 11.0,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF7A5B00))),
+        ],
+      ),
+    );
+  }
+
   Widget showHilight(int index) {
+    double extraPoints = extraPointsForProduct(productAllModels![index].id);
+
     return Row(
       children: <Widget>[
         Container(
           padding: EdgeInsets.only(left: 16.00),
           width: MediaQuery.of(context).size.width * 0.75,
-          child: Text(productAllModels![index].hilight!,
-              style: MyStyle().h3StyleRed),
+          child: Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: <Widget>[
+              Text(productAllModels![index].hilight!,
+                  style: MyStyle().h3StyleRed),
+              if (extraPoints > 0) extraPointInlineBadge(extraPoints),
+            ],
+          ),
         ),
       ],
     );
@@ -1132,6 +1249,35 @@ class _DetailCartState extends State<DetailCart> {
     );
   }
 
+  Widget extraPointSummaryBadge(double points) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
+      padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+      decoration: BoxDecoration(
+        color: Color(0xFFFFF3D6),
+        borderRadius: BorderRadius.circular(20.0),
+        border: Border.all(color: Color(0xFFFFE0A3)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Icon(Icons.star, size: 16.0, color: Color(0xFFF5A623)),
+          SizedBox(width: 6.0),
+          Flexible(
+            child: Text(
+              'คุณจะได้รับ ${formatNum(points)} คะแนน (อาจปรับตามสินค้าที่ได้รับจริง)',
+              style: TextStyle(
+                  fontSize: 13.0,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF7A5B00)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   bool isFreeGift(RewardredeemModel reward) {
     String? point = reward.point;
     return point == null || point.isEmpty || point == '0';
@@ -1383,8 +1529,11 @@ class _DetailCartState extends State<DetailCart> {
 
   Widget nearMissBanner(NearMissPromotion item) {
     String giftName = item.gift?.name ?? 'ของแถม';
-    String message = 'ใกล้ได้ของแถมแล้ว! เพิ่มอีก ${item.remaining} ${item.remainingUnit} '
-        'ของ "${item.sourceLabel}" เพื่อรับ $giftName ${item.giftQty} ${item.giftUnit} ฟรี';
+    // String sizeClause = (item.sizeLabel != null && item.sizeLabel!.isNotEmpty)
+    //     ? ' ไซส์ ${item.sizeLabel} (หน่วยเป็น${item.remainingUnit})'
+    //     : '';
+    String message = 'ใกล้ได้ของแถมแล้ว! "${item.sourceLabel}"' // $sizeClause 
+        ' ขาดอีก ${item.remaining} ${item.remainingUnit} เพื่อรับ $giftName ${item.giftQty} ${item.giftUnit} ฟรี';
 
     double clampedProgress = item.progress.clamp(0.0, 1.0);
     int percent = (clampedProgress * 100).round();
@@ -1714,7 +1863,7 @@ class _DetailCartState extends State<DetailCart> {
   Future<void> submitThread() async {
     try {
       String url =
-          '${MyStyle().serverName}/apishop/json_submit_myorder20022026.php?memberId=$memberID&transport=$transport&comment=$comment';
+          '${MyStyle().serverName}/apishop/json_submit_myorder.php?memberId=$memberID&transport=$transport&comment=$comment';
       print('url ==> $url');
 
       // await http.get(Uri.parse(url)).then((value) {
@@ -1770,7 +1919,7 @@ class _DetailCartState extends State<DetailCart> {
     Navigator.of(context).push(materialPageRoute);
   }
 
-  void routeToPromoProduct(String? productId) {
+  void routeToPromoProduct(String? productId) async {
     int? id = int.tryParse(productId ?? '');
     if (id == null) return;
 
@@ -1782,7 +1931,9 @@ class _DetailCartState extends State<DetailCart> {
         );
       },
     );
-    Navigator.of(context).push(materialPageRoute);
+    await Navigator.of(context).push(materialPageRoute);
+    // กลับมาจากหน้ารายละเอียดสินค้า ให้โหลดตะกร้าใหม่ เผื่อมีการเพิ่มสินค้าระหว่างอยู่หน้านั้น
+    readCart();
   }
 
   void routeToGroupProducts(PromotionGroupModel group) {
@@ -1898,6 +2049,9 @@ class _DetailCartState extends State<DetailCart> {
           showTotal(),
           showListCart(),
           showTotal(),
+          (totalExtraPoints() > 0)
+              ? extraPointSummaryBadge(totalExtraPoints())
+              : Container(),
           (productGiftsReceived.isNotEmpty || groupGiftsReceived.isNotEmpty)
               ? promotionSuccess()
               : Container(),

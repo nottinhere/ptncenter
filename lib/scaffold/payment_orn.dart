@@ -822,7 +822,7 @@ class _PaymentOrnState extends State<PaymentOrn> {
             ),
             paymentOptionTile(
               value: 'bank_transfer',
-              label: 'โอนผ่านธนาคาร',
+              label: 'โอน / เงินสด',
               icon: Icons.account_balance,
             ),
             SizedBox(height: 12.0),
@@ -870,6 +870,47 @@ class _PaymentOrnState extends State<PaymentOrn> {
                 fontWeight: FontWeight.bold,
                 color: statusInfo['color'],
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // แถวของ BI เอง orn_no จะเท่ากับ bill_no; ORN ที่ถูกผูกไปรวมกับ BI อื่น bill_no จะไม่ตรงกับ orn_no ของตัวเอง
+  bool isMergedIntoBill(OrnModel o) {
+    return o.billNo != null &&
+        o.billNo != '' &&
+        o.billNo != '-' &&
+        o.billNo != o.ornNo;
+  }
+
+  Widget linkedToBillBox() {
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+        side: BorderSide(color: Colors.orange.shade200, width: 2),
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(20.0),
+        child: Column(
+          children: <Widget>[
+            Icon(Icons.info_outline, color: Colors.orange, size: 48.0),
+            SizedBox(height: 12.0),
+            Text(
+              '${ornModel?.ornNo ?? ''} ได้ทำรายการไว้กับ ${ornModel?.billNo ?? ''}',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16.0,
+                fontWeight: FontWeight.bold,
+                color: Colors.orange.shade800,
+              ),
+            ),
+            SizedBox(height: 6.0),
+            Text(
+              'ท่านสามารถตรวจสอบหรือทำรายการได้ที่หมายเลขบิลที่แจ้ง',
+              textAlign: TextAlign.center,
+              style: MyStyle().h4StyleGray,
             ),
           ],
         ),
@@ -1227,9 +1268,11 @@ class _PaymentOrnState extends State<PaymentOrn> {
                     SizedBox(height: 16.0),
                     ornModel?.status != '3'
                         ? ornStatusBox()
-                        : (paymentCompleted
-                            ? paymentCompleteBox()
-                            : paymentOptionsCard()),
+                        : (isMergedIntoBill(ornModel!)
+                            ? linkedToBillBox()
+                            : (paymentCompleted
+                                ? paymentCompleteBox()
+                                : paymentOptionsCard())),
                     // if (selectedPayment != 'qr') SizedBox(height: 16.0),
                     // if (selectedPayment != 'qr') confirmButton(),
                   ],

@@ -39,6 +39,7 @@ class NearMissPromotion {
   final String giftQty;
   final String giftUnit;
   final double progress; // 0.0 - 1.0 ความคืบหน้าไปยัง tier ถัดไป
+  final String? sizeLabel; // ไซส์ (S/M/L) ที่เข้าเงื่อนไขโปรโมชันนี้ ถ้ามี
 
   NearMissPromotion(
       {required this.sourceLabel,
@@ -47,7 +48,8 @@ class NearMissPromotion {
       required this.gift,
       required this.giftQty,
       required this.giftUnit,
-      required this.progress});
+      required this.progress,
+      this.sizeLabel});
 }
 
 class Detail extends StatefulWidget {
@@ -103,6 +105,7 @@ class _DetailState extends State<Detail> {
   MedicinePromotionModel? currentPromotion;
   Map<String, GiftModel> giftMap = {};
   Map<String, String> unitNameMap = {};
+  Map<String, String> priceLabelBySize = {};
   NearMissPromotion? nearMiss;
 
   // Method
@@ -147,16 +150,19 @@ class _DetailState extends State<Detail> {
           if (sizeSmap != null) {
             UnitSizeModel unitSizeModel = UnitSizeModel.fromJson(sizeSmap);
             unitSizeModels!.add(unitSizeModel);
+            priceLabelBySize['s'] = unitSizeModel.lable ?? '';
           }
           Map<String, dynamic>? sizeMmap = priceListMap['m'];
           if (sizeMmap != null) {
             UnitSizeModel unitSizeModel = UnitSizeModel.fromJson(sizeMmap);
             unitSizeModels!.add(unitSizeModel);
+            priceLabelBySize['m'] = unitSizeModel.lable ?? '';
           }
           Map<String, dynamic>? sizeLmap = priceListMap['l'];
           if (sizeLmap != null) {
             UnitSizeModel unitSizeModel = UnitSizeModel.fromJson(sizeLmap);
             unitSizeModels!.add(unitSizeModel);
+            priceLabelBySize['l'] = unitSizeModel.lable ?? '';
           }
           print('sizeSmap = $sizeSmap');
           print('sizeMmap = $sizeMmap');
@@ -269,12 +275,15 @@ class _DetailState extends State<Detail> {
 
   void computeNearMiss() {
     MedicinePromotionModel? promo = currentPromotion;
-    if (promo == null) return;
+    if (promo == null) {
+      if (mounted) setState(() => nearMiss = null);
+      return;
+    }
 
-    double cartQty = 0;
-    if (promo.size == 's') cartQty = (showSincart ?? 0).toDouble();
-    if (promo.size == 'm') cartQty = (showMincart ?? 0).toDouble();
-    if (promo.size == 'l') cartQty = (showLincart ?? 0).toDouble();
+    double qtyS = (showSincart ?? 0).toDouble();
+    double qtyM = (showMincart ?? 0).toDouble();
+    double qtyL = (showLincart ?? 0).toDouble();
+    double cartQty = promo.equivalentQty(qtyS: qtyS, qtyM: qtyM, qtyL: qtyL);
 
     MedicinePromotionTier? tier = promo.nextTierFor(cartQty);
     if (tier == null) {
@@ -294,18 +303,37 @@ class _DetailState extends State<Detail> {
       return;
     }
 
-    double remaining = (tierQty - cartQty).ceilToDouble();
+    // แสดงจำนวนที่ขาดเป็นหน่วยของไซส์ที่ลูกค้าสั่งอยู่จริง (ไซส์ที่มีจำนวนในตะกร้ามากสุด)
+    // ไม่ใช่หน่วยของไซส์ที่โปรโมชันกำหนดไว้ (promo.size) เสมอไป
+    String referenceSize = promo.size ?? '';
+    double bestQty = 0;
+    Map<String, double> qtyBySize = {'s': qtyS, 'm': qtyM, 'l': qtyL};
+    qtyBySize.forEach((sizeKey, qty) {
+      if (qty > bestQty) {
+        bestQty = qty;
+        referenceSize = sizeKey;
+      }
+    });
+
+    double ownFactor = promo.subtractFactorFor(promo.size ?? '');
+    double referenceFactor = promo.subtractFactorFor(referenceSize);
+    double safeOwnFactor = ownFactor > 0 ? ownFactor : 1;
+    double safeReferenceFactor = referenceFactor > 0 ? referenceFactor : 1;
+    double remaining =
+        ((tierQty - cartQty) * safeOwnFactor / safeReferenceFactor)
+            .ceilToDouble();
+
     GiftModel? gift = giftMap[tier.gift];
 
     NearMissPromotion item = NearMissPromotion(
       sourceLabel: promo.name ?? '',
       remaining: formatNum(remaining),
-      remainingUnit:
-          promo.size == 's' ? (productAllModel?.priceList?.s?.lable ?? '') : '',
+      remainingUnit: priceLabelBySize[referenceSize] ?? '',
       gift: gift,
       giftQty: formatNum(double.tryParse(tier.getqty ?? '') ?? 0),
       giftUnit: unitNameMap[gift?.unit] ?? '',
       progress: progress,
+      sizeLabel: referenceSize.toUpperCase(),
     );
 
     if (mounted) {
@@ -650,7 +678,10 @@ class _DetailState extends State<Detail> {
 
     String giftName = item.gift?.name ?? 'ของแถม';
     String unitPart = item.remainingUnit.isNotEmpty ? ' ${item.remainingUnit}' : '';
-    String message = 'ใกล้ได้ของแถมแล้ว! เพิ่มอีก ${item.remaining}$unitPart '
+    String sizeClause = (item.sizeLabel != null && item.sizeLabel!.isNotEmpty)
+        ? ' ไซส์ ${item.sizeLabel}'
+        : '';
+    String message = 'ใกล้ได้ของแถมแล้ว!$sizeClause ขาดอีก ${item.remaining}$unitPart '
         'เพื่อรับ $giftName ${item.giftQty} ${item.giftUnit} ฟรี';
     double clampedProgress = item.progress.clamp(0.0, 1.0);
     int percent = (clampedProgress * 100).round();

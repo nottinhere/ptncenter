@@ -255,9 +255,9 @@ class _ListProductOrnState extends State<ListProductOrn> {
               'สั่ง: ${item.qty ?? ''} ${item.unit ?? ''}   รับแล้ว: ${item.receive ?? ''} ${item.unit ?? ''}',
               style: MyStyle().h4StyleGray,
             ),
-            (item.warehouse != null && item.warehouse != '')
-                ? Text('คลัง: ${item.warehouse}', style: MyStyle().h4StyleGray)
-                : Container(),
+            // (item.warehouse != null && item.warehouse != '')
+            //     ? Text('คลัง: ${item.warehouse}', style: MyStyle().h4StyleGray)
+            //     : Container(),
           ],
         ),
       ),

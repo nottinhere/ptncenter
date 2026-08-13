@@ -6,6 +6,9 @@ class MedicinePromotionModel {
   String? name;
   String? hilight;
   String? size;
+  String? subtractS;
+  String? subtractM;
+  String? subtractL;
   String? qty;
   String? gift;
   String? getqty;
@@ -25,6 +28,9 @@ class MedicinePromotionModel {
       this.name,
       this.hilight,
       this.size,
+      this.subtractS,
+      this.subtractM,
+      this.subtractL,
       this.qty,
       this.gift,
       this.getqty,
@@ -44,6 +50,9 @@ class MedicinePromotionModel {
     name = json['name'];
     hilight = json['hilight'];
     size = json['size'];
+    subtractS = json['subtract_s'];
+    subtractM = json['subtract_m'];
+    subtractL = json['subtract_l'];
     qty = json['qty'];
     gift = json['gift'];
     getqty = json['getqty'];
@@ -65,6 +74,9 @@ class MedicinePromotionModel {
     data['name'] = this.name;
     data['hilight'] = this.hilight;
     data['size'] = this.size;
+    data['subtract_s'] = this.subtractS;
+    data['subtract_m'] = this.subtractM;
+    data['subtract_l'] = this.subtractL;
     data['qty'] = this.qty;
     data['gift'] = this.gift;
     data['getqty'] = this.getqty;
@@ -78,6 +90,45 @@ class MedicinePromotionModel {
     data['getqty3'] = this.getqty3;
     data['limitgift3'] = this.limitgift3;
     return data;
+  }
+
+  /// จำนวนต่อ 1 หน่วยของขนาด [sizeKey] เทียบเป็นหน่วยฐาน (จำนวนตัด subtract_s/m/l)
+  double subtractFactorFor(String sizeKey) {
+    switch (sizeKey) {
+      case 's':
+        return double.tryParse(subtractS ?? '') ?? 0;
+      case 'm':
+        return double.tryParse(subtractM ?? '') ?? 0;
+      case 'l':
+        return double.tryParse(subtractL ?? '') ?? 0;
+      default:
+        return 0;
+    }
+  }
+
+  /// แปลงจำนวนที่สั่งของแต่ละขนาด (S/M/L) ให้เทียบเท่าหน่วยของ [size] ที่โปรโมชันนี้กำหนดไว้
+  /// โดยใช้จำนวนตัด (subtract_s/subtract_m/subtract_l) เป็นตัวคูณหน่วยฐาน
+  /// เช่น size = 'm', subtract_m = 12 หมายถึง 12 ชิ้นของ size S เทียบเท่า 1 หน่วยของ size M
+  double equivalentQty({
+    required double qtyS,
+    required double qtyM,
+    required double qtyL,
+  }) {
+    double factorS = subtractFactorFor('s');
+    double factorM = subtractFactorFor('m');
+    double factorL = subtractFactorFor('l');
+    double ownFactor = subtractFactorFor(size ?? '');
+
+    if (ownFactor <= 0) {
+      // ไม่มีตารางจำนวนตัดกำหนดไว้ ใช้จำนวนที่สั่งของ size เดียวกับโปรโมชันตามเดิม
+      if (size == 's') return qtyS;
+      if (size == 'm') return qtyM;
+      if (size == 'l') return qtyL;
+      return 0;
+    }
+
+    double baseUnits = (qtyS * factorS) + (qtyM * factorM) + (qtyL * factorL);
+    return baseUnits / ownFactor;
   }
 
   /// Best (highest-threshold) tier that [cartQty] qualifies for, or null if none match.

@@ -4,11 +4,11 @@ class MyStyle {
   double h1 = 24.0, h2 = 18.0;
 
   // Brand palette (modern pharmacy-shopping green)
-  Color mainColor = Color(0xFF12A669);
+  Color mainColor = Color.fromARGB(255, 56, 181, 27);
   Color textColor = Color(0xFF0B6B41);
-  Color lightColor = Color(0x2612A669);
-  Color bgColor = Color(0xFF12A669);
-  Color barColor = Color(0xFF12A669);
+  Color lightColor = Color.fromARGB(255, 56, 181, 27);
+  Color bgColor = Color.fromARGB(255, 56, 181, 27);//   Color(0xFF12A669);
+  Color barColor =Color.fromARGB(255, 56, 181, 27); //  Color(0xFF12A669);
 
   // Extended design-system tokens
   Color primaryDark = Color(0xFF0B7A4C);
@@ -184,7 +184,7 @@ class MyStyle {
 
   BoxDecoration boxLightGreen = BoxDecoration(
     borderRadius: BorderRadius.circular(12.0),
-    color: Color(0x2612A669),
+    color: Color.fromARGB(255, 56, 181, 27),
   );
 
   BoxDecoration boxLightGray = BoxDecoration(

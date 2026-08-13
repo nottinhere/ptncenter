@@ -11,7 +11,7 @@ import 'package:ptncenter/scaffold/detail_cart.dart';
 import 'package:ptncenter/utility/my_style.dart';
 
 import 'package:flutter/services.dart';
-import 'package:chat_bubbles/chat_bubbles.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class News extends StatefulWidget {
   final UserModel? userModel;
@@ -45,10 +45,15 @@ class _NewsState extends State<News> {
 
   bool firstLoad = false;
   List<PopupModel>? popupAllModel;
-  List<PopupModel>? newsModels;
+  List<PopupModel> newsModels = [];
 
   String? qrString;
   int? currentIndex = 0;
+
+  static const int perPage = 12;
+  int page = 1;
+  bool isLoadingMore = false;
+  bool hasMore = true;
 
   // Method
   @override
@@ -59,15 +64,35 @@ class _NewsState extends State<News> {
     setState(() {
       readCart();
     });
+    createController(); // เมื่อ scroll to bottom
     readNews();
   }
 
   /*************************** */
 
+  void createController() {
+    scrollController.addListener(() {
+      if (scrollController.position.atEdge) {
+        if (scrollController.position.pixels ==
+            scrollController.position.maxScrollExtent) {
+          if (!isLoadingMore && hasMore) {
+            page = page + 1;
+            readNews();
+            print('in the end');
+          }
+        }
+      }
+    });
+  }
+
   Future<void> readNews() async {
+    setState(() {
+      isLoadingMore = true;
+    });
+
     String? memberId = myUserModel!.id;
-    String? url =
-        '${MyStyle().serverName}/apishop/json_news.php?limit=5&memberId=$memberId'; // ?memberId=$memberId
+    String url = '${MyStyle().serverName}/apishop/json_newslist.php'
+        '?memberId=$memberId&page=$page&limit=$perPage';
     print('urlNews >> $url');
 
     http.Response response = await http.get(Uri.parse(url));
@@ -75,26 +100,40 @@ class _NewsState extends State<News> {
     var mapItemNews =
         result['itemsData']; // dynamic    จะส่ง value อะไรก็ได้ รวมถึง null
 
+    List<PopupModel> fetchedModels = [];
     for (var map in mapItemNews) {
-      PopupModel? popupModel = PopupModel.fromJson(map);
-      setState(() {
-        //promoteModels.add(promoteModel); // push ค่าลง array
-        newsModels!.add(popupModel);
-        // subjectList.add(subject);
-        // postdateList.add(postdate);
-      });
+      fetchedModels.add(PopupModel.fromJson(map));
     }
+
+    setState(() {
+      newsModels.addAll(fetchedModels);
+      hasMore = fetchedModels.length >= perPage;
+      isLoadingMore = false;
+    });
     // print('newsModels.length (readNews) >> ' + newsModels.length.toString());
   }
 
-  Widget showNews() {
-    print('newsModels.length (showNews) >> ' + newsModels!.length.toString());
-
-    return Container(
-      width: MediaQuery.of(context).size.width * 0.9,
-      height: MediaQuery.of(context).size.height * 0.8,
-      child: newsModels!.length > 0 ? listNews() : Container(),
+  Widget myLoadingIndicator() {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 16.0),
+      child: Center(
+        child: LoadingAnimationWidget.staggeredDotsWave(
+          color: Colors.green,
+          size: 24,
+        ),
+      ),
     );
+  }
+
+  Widget showNews() {
+    print('newsModels.length (showNews) >> ' + newsModels.length.toString());
+
+    if (newsModels.isEmpty) {
+      return isLoadingMore
+          ? myLoadingIndicator()
+          : Center(child: Text('ไม่พบข่าวสาร', style: MyStyle().h4StyleGray));
+    }
+    return listNews();
   }
 
   Widget cartBox() {
@@ -153,67 +192,67 @@ class _NewsState extends State<News> {
     );
   }
 
+  Widget newsCard(PopupModel news) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 8.0),
+      child: GestureDetector(
+        onTap: () {
+          MaterialPageRoute materialPageRoute =
+              MaterialPageRoute(builder: (BuildContext buildContext) {
+            return DetailNews(
+              popupModel: news,
+              userModel: myUserModel!,
+            );
+          });
+          Navigator.of(context).push(materialPageRoute);
+        },
+        child: Container(
+          padding: EdgeInsets.all(12.0),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(MyStyle().radiusS),
+            border: Border.all(color: MyStyle().borderColor),
+          ),
+          child: Row(
+            children: <Widget>[
+              Container(
+                width: 36.0,
+                height: 36.0,
+                decoration: BoxDecoration(
+                  color: MyStyle().primaryLight,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.campaign_rounded,
+                    color: MyStyle().mainColor, size: 20.0),
+              ),
+              SizedBox(width: 12.0),
+              Expanded(
+                child: Text(
+                  '${news.subject}',
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: MyStyle().h3Style,
+                ),
+              ),
+              Icon(Icons.chevron_right_rounded,
+                  color: MyStyle().mutedTextColor),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget listNews() {
-    final now = new DateTime.now();
     return ListView.builder(
       controller: scrollController,
-      itemCount: newsModels!.length,
+      padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      itemCount: newsModels.length + (hasMore ? 1 : 0),
       itemBuilder: (BuildContext buildContext, int index) {
-        return Column(
-          children: [
-            // Text(newsLists.length.toString()),
-            GestureDetector(
-              child: Column(
-                children: [
-                  DateChip(
-                    // date: new DateTime(now.year, now.month, now.day - 1),
-                    date: new DateTime(now.year, now.month,
-                        now.day - int.parse(newsModels![index].diffdate!)),
-                  ),
-                  Container(
-                      height: 70,
-                      child: BubbleSpecialOne(
-                        text: newsModels![index].subject!,
-                        isSender: false,
-                        color: Color(0xFF1B97F3),
-                        tail: true,
-                        textStyle: TextStyle(
-                          fontSize: 16,
-                          color: Colors.white,
-                        ),
-                      )
-                      // Card(
-                      //   child: Container(
-                      //     decoration: myBoxDecoration(),
-                      //     padding: EdgeInsets.only(top: 1.5),
-                      //     child: Row(
-                      //       children: <Widget>[
-                      //         Flexible(
-                      //           child: Text(
-                      //             newsModels[index].subject,
-                      //             style: MyStyle().h3Style,
-                      //           ),
-                      //         ),
-                      //       ],
-                      //     ),
-                      //   ),
-                      // ),
-                      ),
-                ],
-              ),
-              onTap: () {
-                MaterialPageRoute materialPageRoute =
-                    MaterialPageRoute(builder: (BuildContext buildContext) {
-                  return DetailNews(
-                    popupModel: newsModels![index],
-                    userModel: myUserModel!,
-                  );
-                });
-                Navigator.of(context).push(materialPageRoute);
-              },
-            ),
-          ],
-        );
+        if (index >= newsModels.length) {
+          return myLoadingIndicator();
+        }
+        return newsCard(newsModels[index]);
       },
     );
   }
@@ -282,7 +321,7 @@ class _NewsState extends State<News> {
       ),
       body: Column(
         children: <Widget>[
-          showNews(),
+          Expanded(child: showNews()),
         ],
       ),
       // bottomNavigationBar: showBubbleBottomBarNav(), //showBottomBarNav
