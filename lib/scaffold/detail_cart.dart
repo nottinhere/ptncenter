@@ -1196,9 +1196,6 @@ class _DetailCartState extends State<DetailCart> {
     print('allArrIncartL >> $allArrIncartL');
 
 
-    var iS = 0;
-    var iM = 0;
-    var iL = 0;
     return ListView.builder(
       padding: EdgeInsets.only(top: 5.0, bottom: 5.0),
       physics: ScrollPhysics(),
@@ -1222,13 +1219,13 @@ class _DetailCartState extends State<DetailCart> {
                     ? Container()
                     : showHilight(index),
                 (allArrIncartS!.contains(proID))
-                    ? showSText(index, iS++)
+                    ? showSText(index, allArrIncartS!.indexOf(proID))
                     : Container(),
                 (allArrIncartM!.contains(proID))
-                    ? showMText(index, iM++)
+                    ? showMText(index, allArrIncartM!.indexOf(proID))
                     : Container(),
                 (allArrIncartL!.contains(proID))
-                    ? showLText(index, iL++)
+                    ? showLText(index, allArrIncartL!.indexOf(proID))
                     : Container(),
               ],
             ),
