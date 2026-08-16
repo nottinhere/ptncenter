@@ -952,20 +952,20 @@ class _ListProductPromotionState extends State<ListProductPromotion> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Row(
-            children: <Widget>[
-              Icon(Icons.card_giftcard, color: Colors.red.shade400, size: 20.0),
-              SizedBox(width: 6.0),
-              Expanded(
-                child: Text(group.name ?? '',
-                    style: TextStyle(
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.bold,
-                        color: MyStyle().textColor)),
-              ),
-            ],
-          ),
-          SizedBox(height: 10.0),
+          // Row(
+          //   children: <Widget>[
+          //     Icon(Icons.card_giftcard, color: Colors.red.shade400, size: 20.0),
+          //     SizedBox(width: 6.0),
+          //     Expanded(
+          //       child: Text(group.name ?? '',
+          //           style: TextStyle(
+          //               fontSize: 16.0,
+          //               fontWeight: FontWeight.bold,
+          //               color: MyStyle().textColor)),
+          //     ),
+          //   ],
+          // ),
+          // SizedBox(height: 10.0),
           ...tierRows.map((row) {
             bool isCurrent = row.reached && row.level == highestReachedLevel;
             bool isSurpassed = row.reached && !isCurrent;
@@ -1096,11 +1096,11 @@ class _ListProductPromotionState extends State<ListProductPromotion> {
             ),
           ],
           SizedBox(height: 8.0),
-          Text('* เงื่อนไข: ยอดซื้อเฉพาะสินค้าในกลุ่มนี้เท่านั้น',
-              style: TextStyle(
-                  fontSize: 10.5,
-                  color: Colors.grey.shade500,
-                  fontStyle: FontStyle.italic)),
+          // Text('* เงื่อนไข: ยอดซื้อเฉพาะสินค้าในกลุ่มนี้เท่านั้น',
+          //     style: TextStyle(
+          //         fontSize: 10.5,
+          //         color: Colors.grey.shade500,
+          //         fontStyle: FontStyle.italic)),
         ],
       ),
     );
@@ -1232,28 +1232,28 @@ class _ListProductPromotionState extends State<ListProductPromotion> {
   }
   */
 
-  Widget lastItemInCart() {
-    return Column(
-      children: <Widget>[
-        Container(
-          width: MediaQuery.of(context).size.width * 0.9,
-          child: Text(
-            'รายการล่าสุดในตะกร้า',
-            style: MyStyle().h3bStyle,
-          ),
-        ),
-        Container(
-          width: MediaQuery.of(context).size.width * 0.9,
-          child: Text(lastItemName.toString(),
-              style: TextStyle(
-                fontSize: 14.0,
-                // fontWeight: FontWeight.bold,
-                color: Color.fromARGB(0xff, 0x00, 0x73, 0x26),
-              )),
-        ),
-      ],
-    );
-  }
+  // Widget lastItemInCart() {
+  //   return Column(
+  //     children: <Widget>[
+  //       Container(
+  //         width: MediaQuery.of(context).size.width * 0.9,
+  //         child: Text(
+  //           'รายการล่าสุดในตะกร้า',
+  //           style: MyStyle().h3bStyle,
+  //         ),
+  //       ),
+  //       Container(
+  //         width: MediaQuery.of(context).size.width * 0.9,
+  //         child: Text(lastItemName.toString(),
+  //             style: TextStyle(
+  //               fontSize: 14.0,
+  //               // fontWeight: FontWeight.bold,
+  //               color: Color.fromARGB(0xff, 0x00, 0x73, 0x26),
+  //             )),
+  //       ),
+  //     ],
+  //   );
+  // }
 
 
   Future<void> readQRcodePreview() async {
@@ -1594,7 +1594,7 @@ Future<void> decodeQRcode(var code) async {
         children: <Widget>[
           groupPromotionCard(),
           searchForm(),
-          lastItemInCart(),
+          // lastItemInCart(),
           showContent(),
         ],
       ),

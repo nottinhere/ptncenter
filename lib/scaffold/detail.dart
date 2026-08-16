@@ -897,20 +897,20 @@ class _DetailState extends State<Detail> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Row(
-            children: <Widget>[
-              Icon(Icons.card_giftcard, color: Colors.red.shade400, size: 20.0),
-              SizedBox(width: 6.0),
-              Expanded(
-                child: Text(promo.name ?? '',
-                    style: TextStyle(
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.bold,
-                        color: MyStyle().textColor)),
-              ),
-            ],
-          ),
-          SizedBox(height: 10.0),
+          // Row(
+          //   children: <Widget>[
+          //     Icon(Icons.card_giftcard, color: Colors.red.shade400, size: 20.0),
+          //     SizedBox(width: 6.0),
+          //     Expanded(
+          //       child: Text(promo.name ?? '',
+          //           style: TextStyle(
+          //               fontSize: 16.0,
+          //               fontWeight: FontWeight.bold,
+          //               color: MyStyle().textColor)),
+          //     ),
+          //   ],
+          // ),
+          // SizedBox(height: 10.0),
           ...tierRows.map((row) => Container(
                 margin: EdgeInsets.only(bottom: 8.0),
                 padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
@@ -1044,9 +1044,9 @@ class _DetailState extends State<Detail> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          imageSection(),
-          sectionDivider(),
           titleCard(),
+          sectionDivider(),
+          imageSection(),
           sectionDivider(),
           showStockExpire(),
           sectionDivider(),
