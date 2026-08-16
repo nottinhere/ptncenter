@@ -40,6 +40,7 @@ class NearMissPromotion {
   final String giftUnit;
   final double progress; // 0.0 - 1.0 ความคืบหน้าไปยัง tier ถัดไป
   final String? sizeLabel; // ไซส์ (S/M/L) ที่เข้าเงื่อนไขโปรโมชันนี้ ถ้ามี
+  final String? maxSets; // จำนวนชุดสูงสุดที่ได้รับได้ (คำนวนจาก limitgift) ถ้ามีการตั้ง limit
 
   NearMissPromotion(
       {required this.sourceLabel,
@@ -49,7 +50,25 @@ class NearMissPromotion {
       required this.giftQty,
       required this.giftUnit,
       required this.progress,
-      this.sizeLabel});
+      this.sizeLabel,
+      this.maxSets});
+}
+
+class ReceivedGiftItem {
+  final String sourceLabel;
+  final GiftModel? gift;
+  final String sets; // จำนวนชุดที่ได้ คำนวนจากจำนวนในตะกร้า
+  final String perSetQty; // จำนวนของแถมต่อชุด มาจาก getqty/getqty2/getqty3
+  final String totalQty; // sets * perSetQty (ไม่เกิน limitgift ถ้ามีการกำหนด)
+  final String? maxSets; // จำนวนชุดสูงสุดที่ได้รับได้ (คำนวนจาก limitgift) ถ้ามีการตั้ง limit
+
+  ReceivedGiftItem(
+      {required this.sourceLabel,
+      required this.gift,
+      required this.sets,
+      required this.perSetQty,
+      required this.totalQty,
+      this.maxSets});
 }
 
 class Detail extends StatefulWidget {
@@ -78,7 +97,7 @@ class _DetailState extends State<Detail> {
   String? id; // productID
   // String qtyS = '', qtyM = '', qtyL = '';
   int? sizeSincart = 0, sizeMincart = 0, sizeLincart = 0;
-  int? qtyS = 0, qtyM = 0, qtyL = 0;
+  int? qtyS, qtyM, qtyL;
   int? showSincart = 0, showMincart = 0, showLincart = 0;
   int? limitS = 0, limitM = 0, limitL = 0;
   // var showSincart = '', showMincart = '', showLincart = '';
@@ -107,6 +126,7 @@ class _DetailState extends State<Detail> {
   Map<String, String> unitNameMap = {};
   Map<String, String> priceLabelBySize = {};
   NearMissPromotion? nearMiss;
+  ReceivedGiftItem? receivedGift;
 
   // Method
   @override
@@ -273,10 +293,49 @@ class _DetailState extends State<Detail> {
         : value.toString();
   }
 
+  /// จำนวนชุดสูงสุดที่รับของแถมได้ ถ้ามีการตั้ง limitgift ไว้ (null = ไม่จำกัด)
+  String? maxSetsText(double? limit, double perSet) {
+    if (limit == null || limit <= 0 || perSet <= 0) return null;
+    double maxSets = (limit / perSet).floorToDouble();
+    if (maxSets <= 0) return null;
+    return formatNum(maxSets);
+  }
+
+  /// รายการของแถมที่ได้รับแล้วจากโปรโมชันรายสินค้านี้ (tier สูงสุดที่ cartQty เข้าเงื่อนไข)
+  ReceivedGiftItem? buildReceivedGift(
+      MedicinePromotionModel promo, double cartQty) {
+    MedicinePromotionTier? tier = promo.bestTierFor(cartQty);
+    if (tier == null) return null;
+
+    double tierQty = double.tryParse(tier.qty ?? '') ?? 0;
+    if (tierQty <= 0) return null;
+
+    double sets = (cartQty / tierQty).floorToDouble();
+    if (sets <= 0) return null;
+
+    double perSet = double.tryParse(tier.getqty ?? '') ?? 0;
+    double rawTotal = sets * perSet;
+    double? limit = double.tryParse(tier.limitgift ?? '');
+    double total =
+        (limit != null && limit > 0 && rawTotal > limit) ? limit : rawTotal;
+
+    return ReceivedGiftItem(
+      sourceLabel: promo.name ?? '',
+      gift: giftMap[tier.gift],
+      sets: formatNum(sets),
+      perSetQty: formatNum(perSet),
+      totalQty: formatNum(total),
+      maxSets: maxSetsText(limit, perSet),
+    );
+  }
+
   void computeNearMiss() {
     MedicinePromotionModel? promo = currentPromotion;
     if (promo == null) {
-      if (mounted) setState(() => nearMiss = null);
+      if (mounted) setState(() {
+        nearMiss = null;
+        receivedGift = null;
+      });
       return;
     }
 
@@ -285,23 +344,7 @@ class _DetailState extends State<Detail> {
     double qtyL = (showLincart ?? 0).toDouble();
     double cartQty = promo.equivalentQty(qtyS: qtyS, qtyM: qtyM, qtyL: qtyL);
 
-    MedicinePromotionTier? tier = promo.nextTierFor(cartQty);
-    if (tier == null) {
-      if (mounted) setState(() => nearMiss = null);
-      return;
-    }
-
-    double tierQty = double.tryParse(tier.qty ?? '') ?? 0;
-    if (tierQty <= 0) {
-      if (mounted) setState(() => nearMiss = null);
-      return;
-    }
-
-    double progress = cartQty / tierQty;
-    if (progress >= 1.0) {
-      if (mounted) setState(() => nearMiss = null);
-      return;
-    }
+    ReceivedGiftItem? receivedItem = buildReceivedGift(promo, cartQty);
 
     // แสดงจำนวนที่ขาดเป็นหน่วยของไซส์ที่ลูกค้าสั่งอยู่จริง (ไซส์ที่มีจำนวนในตะกร้ามากสุด)
     // ไม่ใช่หน่วยของไซส์ที่โปรโมชันกำหนดไว้ (promo.size) เสมอไป
@@ -319,26 +362,77 @@ class _DetailState extends State<Detail> {
     double referenceFactor = promo.subtractFactorFor(referenceSize);
     double safeOwnFactor = ownFactor > 0 ? ownFactor : 1;
     double safeReferenceFactor = referenceFactor > 0 ? referenceFactor : 1;
-    double remaining =
-        ((tierQty - cartQty) * safeOwnFactor / safeReferenceFactor)
-            .ceilToDouble();
 
-    GiftModel? gift = giftMap[tier.gift];
+    MedicinePromotionTier? tier = promo.nextTierFor(cartQty);
+    NearMissPromotion? item;
 
-    NearMissPromotion item = NearMissPromotion(
-      sourceLabel: promo.name ?? '',
-      remaining: formatNum(remaining),
-      remainingUnit: priceLabelBySize[referenceSize] ?? '',
-      gift: gift,
-      giftQty: formatNum(double.tryParse(tier.getqty ?? '') ?? 0),
-      giftUnit: unitNameMap[gift?.unit] ?? '',
-      progress: progress,
-      sizeLabel: referenceSize.toUpperCase(),
-    );
+    if (tier != null) {
+      // ยังไม่เข้าเงื่อนไข tier ถัดไป (tier ที่สูงกว่า) แสดง progress จาก 0 ไปยัง tier นี้ตามเดิม
+      double tierQty = double.tryParse(tier.qty ?? '') ?? 0;
+      if (tierQty > 0) {
+        double progress = cartQty / tierQty;
+        double remaining =
+            ((tierQty - cartQty) * safeOwnFactor / safeReferenceFactor)
+                .ceilToDouble();
+        double tierPerSet = double.tryParse(tier.getqty ?? '') ?? 0;
+        double? tierLimit = double.tryParse(tier.limitgift ?? '');
+        GiftModel? gift = giftMap[tier.gift];
+        item = NearMissPromotion(
+          sourceLabel: promo.name ?? '',
+          remaining: formatNum(remaining),
+          remainingUnit: priceLabelBySize[referenceSize] ?? '',
+          gift: gift,
+          giftQty: formatNum(tierPerSet),
+          giftUnit: unitNameMap[gift?.unit] ?? '',
+          progress: progress,
+          sizeLabel: referenceSize.toUpperCase(),
+          maxSets: maxSetsText(tierLimit, tierPerSet),
+        );
+      }
+    } else {
+      // เข้าเงื่อนไข tier สูงสุดแล้ว (ได้ของแถมอย่างน้อย 1 ชุด) โปรโมชันนี้ให้ของแถมซ้ำได้ทุกๆ
+      // ครบจำนวน tier.qty อีกรอบ (ไม่เกิน limitgift) จึงแสดง progress มองจาก "ชุดถัดไป" แทน
+      // คือ progress ภายในรอบปัจจุบัน ไม่ใช่จาก 0 และจะไม่แสดงถ้าได้รับของแถมครบ limit แล้ว
+      MedicinePromotionTier? bestTier = promo.bestTierFor(cartQty);
+      if (bestTier != null) {
+        double tierQty = double.tryParse(bestTier.qty ?? '') ?? 0;
+        double perSet = double.tryParse(bestTier.getqty ?? '') ?? 0;
+        double? limit = double.tryParse(bestTier.limitgift ?? '');
+
+        if (tierQty > 0) {
+          double sets = (cartQty / tierQty).floorToDouble();
+          bool atLimit = limit != null &&
+              limit > 0 &&
+              perSet > 0 &&
+              (sets * perSet) >= limit;
+
+          if (!atLimit) {
+            double remainder = cartQty - (sets * tierQty);
+            double progress = remainder / tierQty;
+            double remaining =
+                ((tierQty - remainder) * safeOwnFactor / safeReferenceFactor)
+                    .ceilToDouble();
+            GiftModel? gift = giftMap[bestTier.gift];
+            item = NearMissPromotion(
+              sourceLabel: promo.name ?? '',
+              remaining: formatNum(remaining),
+              remainingUnit: priceLabelBySize[referenceSize] ?? '',
+              gift: gift,
+              giftQty: formatNum(perSet),
+              giftUnit: unitNameMap[gift?.unit] ?? '',
+              progress: progress,
+              sizeLabel: referenceSize.toUpperCase(),
+              maxSets: maxSetsText(limit, perSet),
+            );
+          }
+        }
+      }
+    }
 
     if (mounted) {
       setState(() {
         nearMiss = item;
+        receivedGift = receivedItem;
       });
     }
   }
@@ -672,72 +766,267 @@ class _DetailState extends State<Detail> {
     return Divider(height: 1.0, thickness: 1.0, color: MyStyle().borderColor);
   }
 
-  Widget nearMissSection() {
-    NearMissPromotion? item = nearMiss;
-    if (item == null) return Container();
+  /// การ์ดสรุปโปรโมชันรายสินค้า แสดงทุกขั้น (ขั้น 1/2/3) พร้อมสถานะสำเร็จ/ยังไม่สำเร็จ
+  /// จำนวนในตะกร้าปัจจุบัน progress bar ไปยัง "ชุดถัดไป" ของขั้นที่กำลังสะสม และของแถมที่จะได้รับ
+  /// (มองลำดับขั้นแบบเดียวกับโปรโมชันกลุ่มสินค้าใน list_product_promotion.dart)
+  Widget productPromotionCard() {
+    MedicinePromotionModel? promo = currentPromotion;
+    if (promo == null) return Container();
 
-    String giftName = item.gift?.name ?? 'ของแถม';
-    String unitPart = item.remainingUnit.isNotEmpty ? ' ${item.remainingUnit}' : '';
-    String sizeClause = (item.sizeLabel != null && item.sizeLabel!.isNotEmpty)
-        ? ' ไซส์ ${item.sizeLabel}'
-        : '';
-    String prefix = item.progress >= 0.5 ? 'ใกล้ได้ของแถมแล้ว!$sizeClause ' : '';
-    String message = '$prefixขาดอีก ${item.remaining}$unitPart '
-        'เพื่อรับ $giftName ${item.giftQty} ${item.giftUnit} ฟรี';
-    double clampedProgress = item.progress.clamp(0.0, 1.0);
-    int percent = (clampedProgress * 100).round();
+    double qtyS = (showSincart ?? 0).toDouble();
+    double qtyM = (showMincart ?? 0).toDouble();
+    double qtyL = (showLincart ?? 0).toDouble();
+    double cartQty = promo.equivalentQty(qtyS: qtyS, qtyM: qtyM, qtyL: qtyL);
+
+    // แสดงจำนวนที่ขาดเป็นหน่วยของไซส์ที่ลูกค้าสั่งอยู่จริง (ไซส์ที่มีจำนวนในตะกร้ามากสุด)
+    // ไม่ใช่หน่วยของไซส์ที่โปรโมชันกำหนดไว้ (promo.size) เสมอไป
+    String referenceSize = promo.size ?? '';
+    double bestQty = 0;
+    Map<String, double> qtyBySize = {'s': qtyS, 'm': qtyM, 'l': qtyL};
+    qtyBySize.forEach((sizeKey, qty) {
+      if (qty > bestQty) {
+        bestQty = qty;
+        referenceSize = sizeKey;
+      }
+    });
+
+    double ownFactor = promo.subtractFactorFor(promo.size ?? '');
+    double referenceFactor = promo.subtractFactorFor(referenceSize);
+    double safeOwnFactor = ownFactor > 0 ? ownFactor : 1;
+    double safeReferenceFactor = referenceFactor > 0 ? referenceFactor : 1;
+    String promoUnit = priceLabelBySize[promo.size] ?? '';
+    String referenceUnit = priceLabelBySize[referenceSize] ?? promoUnit;
+
+    List<
+        ({
+          int level,
+          double target,
+          GiftModel? gift,
+          double perSet,
+          String getqty,
+          double? maxSetsRaw,
+          String? maxSets,
+          bool reached
+        })> tierRows = [];
+
+    void addTier(int level, String? qtyStr, String? giftId,
+        String? getqtyStr, String? limitStr) {
+      double? target = double.tryParse(qtyStr ?? '');
+      if (target == null || target <= 0) return;
+      if ((giftId ?? '').isEmpty) return;
+      double perSet = double.tryParse(getqtyStr ?? '') ?? 0;
+      double? limit = double.tryParse(limitStr ?? '');
+      double? maxSetsRaw = (limit != null && limit > 0 && perSet > 0)
+          ? (limit / perSet).floorToDouble()
+          : null;
+      tierRows.add((
+        level: level,
+        target: target,
+        gift: giftMap[giftId],
+        perSet: perSet,
+        getqty: formatNum(perSet),
+        maxSetsRaw: (maxSetsRaw != null && maxSetsRaw > 0) ? maxSetsRaw : null,
+        maxSets: maxSetsText(limit, perSet),
+        reached: cartQty >= target,
+      ));
+    }
+
+    addTier(1, promo.qty, promo.gift, promo.getqty, promo.limitgift);
+    addTier(2, promo.qty2, promo.gift2, promo.getqty2, promo.limitgift2);
+    addTier(3, promo.qty3, promo.gift3, promo.getqty3, promo.limitgift3);
+
+    if (tierRows.isEmpty) return Container();
+
+    // หาขั้นที่ "กำลังสะสม" อยู่ตอนนี้ (ขั้นแรกที่ยังไม่ครบ limit ตามลำดับขั้น 1 -> 2 -> 3)
+    // แต่ละขั้นให้ของแถมซ้ำได้ทุกๆ ครบจำนวน qty ของขั้นนั้น (ไม่เกิน limitgift ถ้ามีการกำหนด)
+    // ถ้าขั้นนั้นไม่มี limit จะค้างเป็นขั้นที่กำลังสะสมไปเรื่อยๆ ไม่ข้ามไปขั้นถัดไป
+    ({
+      int level,
+      double target,
+      GiftModel? gift,
+      double perSet,
+      String getqty,
+      double? maxSetsRaw,
+      String? maxSets,
+      bool reached
+    })? activeTier;
+    // รอบแรก: หาขั้นที่ "ถึงแล้วและยังไม่ครบ limit" ที่สูงที่สุด (ไล่ overwrite ขึ้นไปเรื่อยๆ)
+    // เพราะถ้าถึงขั้นที่สูงกว่าแล้ว ควรมองความคืบหน้าจากขั้นนั้น ไม่ใช่ขั้นล่างที่ยังไม่ครบ limit
+    // (เช่น ขั้น 1 ไม่มี limit แต่จำนวนถึงขั้น 2 แล้ว ต้องมองจากขั้น 2 ไม่ใช่วนอยู่ขั้น 1 ตลอดไป)
+    for (var row in tierRows) {
+      double currentSets = (cartQty / row.target).floorToDouble();
+      bool maxedOut = row.maxSetsRaw != null && currentSets >= row.maxSetsRaw!;
+      if (row.reached && !maxedOut) {
+        activeTier = row;
+      }
+    }
+    // รอบสอง: ถ้าไม่มีขั้นที่ถึงแล้วและยังไม่ครบ limit เลย (ยังไม่ถึงขั้นไหนเลย หรือถึงแล้วแต่ครบ
+    // limit หมดทุกขั้น) ให้มองไปยังขั้นถัดไปที่ยังไม่ถึง (ไล่จากขั้นต่ำสุดที่ยังไม่ถึง)
+    if (activeTier == null) {
+      for (var row in tierRows) {
+        if (!row.reached) {
+          activeTier = row;
+          break;
+        }
+      }
+    }
+
+    bool showNextTier = activeTier != null;
+    double nextSetOrdinal = 0;
+    double remainingPromoUnit = 0;
+    double progress = 1.0;
+    if (activeTier != null) {
+      double currentSets = (cartQty / activeTier.target).floorToDouble();
+      nextSetOrdinal = currentSets + 1;
+      double amountForNextSet = nextSetOrdinal * activeTier.target;
+      remainingPromoUnit = (amountForNextSet - cartQty).ceilToDouble();
+      progress = ((cartQty - currentSets * activeTier.target) / activeTier.target)
+          .clamp(0.0, 1.0);
+    }
+    double remainingReferenceUnit =
+        (remainingPromoUnit * safeOwnFactor / safeReferenceFactor).ceilToDouble();
 
     return Container(
       margin: EdgeInsets.only(bottom: 14.0),
-      padding: EdgeInsets.all(10.0),
+      padding: EdgeInsets.all(14.0),
       decoration: BoxDecoration(
-        color: Color(0xFFFFFBEA),
-        borderRadius: BorderRadius.circular(10.0),
-        border: Border.all(color: Color(0xFFFFE8A3)),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(MyStyle().radiusM),
+        border: Border.all(color: MyStyle().borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-              Container(
-                width: 32.0,
-                height: 32.0,
-                decoration:
-                    BoxDecoration(color: Colors.orange, shape: BoxShape.circle),
-                child: Icon(Icons.campaign, color: Colors.white, size: 18.0),
-              ),
-              SizedBox(width: 10.0),
+              Icon(Icons.card_giftcard, color: Colors.red.shade400, size: 20.0),
+              SizedBox(width: 6.0),
               Expanded(
-                child: Text(message,
-                    style:
-                        TextStyle(fontSize: 12.5, color: Colors.grey.shade800)),
+                child: Text(promo.name ?? '',
+                    style: TextStyle(
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.bold,
+                        color: MyStyle().textColor)),
               ),
             ],
           ),
-          SizedBox(height: 8.0),
-          Row(
-            children: <Widget>[
-              Expanded(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(4.0),
-                  child: LinearProgressIndicator(
-                    value: clampedProgress,
-                    minHeight: 6.0,
-                    backgroundColor: Color(0xFFFFE8A3),
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.orange),
-                  ),
+          SizedBox(height: 10.0),
+          ...tierRows.map((row) => Container(
+                margin: EdgeInsets.only(bottom: 8.0),
+                padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
+                decoration: BoxDecoration(
+                  color: row.reached ? Color(0xFFEFF9F0) : Color(0xFFFFFBEA),
+                  borderRadius: BorderRadius.circular(8.0),
+                  border: Border.all(
+                      color: row.reached
+                          ? Colors.green.shade200
+                          : Color(0xFFFFE8A3)),
                 ),
+                child: Row(
+                  children: <Widget>[
+                    Text('ขั้น ${row.level}',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12.5,
+                            color: row.reached
+                                ? Colors.green.shade800
+                                : Colors.orange.shade800)),
+                    SizedBox(width: 8.0),
+                    Text('ซื้อครบ ${formatNum(row.target)} $promoUnit',
+                        style:
+                            TextStyle(fontSize: 12.5, color: Colors.grey.shade800)),
+                    SizedBox(width: 4.0),
+                    Icon(Icons.arrow_forward, size: 12.0, color: Colors.grey.shade600),
+                    SizedBox(width: 4.0),
+                    Icon(Icons.card_giftcard, size: 14.0, color: Colors.red.shade400),
+                    SizedBox(width: 4.0),
+                    Expanded(
+                      child: Text('${row.gift?.name ?? 'ของแถม'} x${row.getqty}',
+                          style: TextStyle(fontSize: 12.5, color: Colors.grey.shade800),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis),
+                    ),
+                    if (row.maxSets != null) ...[
+                      SizedBox(width: 6.0),
+                      Container(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.shade50,
+                          border: Border.all(color: Colors.orange.shade200),
+                          borderRadius: BorderRadius.circular(20.0),
+                        ),
+                        child: Text('จำกัด ${row.maxSets} ชุด',
+                            style: TextStyle(
+                                fontSize: 10.0, color: Colors.orange.shade800)),
+                      ),
+                    ],
+                    if (row.reached) ...[
+                      SizedBox(width: 6.0),
+                      Icon(Icons.check_circle, size: 14.0, color: Colors.green),
+                      SizedBox(width: 2.0),
+                      Text('สำเร็จ',
+                          style: TextStyle(
+                              fontSize: 12.0,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green)),
+                    ],
+                  ],
+                ),
+              )),
+          if (showNextTier) ...[
+            Divider(height: 20.0),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Text('จำนวนในตะกร้าปัจจุบัน ${formatNum(cartQty)} $promoUnit',
+                    style: TextStyle(fontSize: 12.5, color: Colors.grey.shade700)),
+                Text(
+                    'ขาดอีก ${formatNum(remainingReferenceUnit)} $referenceUnit ได้ ${formatNum(nextSetOrdinal)} ชุด '
+                    '(ของขั้นที่ ${activeTier.level})',
+                    style: TextStyle(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.orange.shade800)),
+              ],
+            ),
+            SizedBox(height: 6.0),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4.0),
+              child: LinearProgressIndicator(
+                value: progress,
+                minHeight: 8.0,
+                backgroundColor: Color(0xFFFFE8A3),
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
               ),
-              SizedBox(width: 8.0),
-              Text('$percent%',
-                  style: TextStyle(
-                      fontSize: 11.0,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.orange.shade800)),
-            ],
-          ),
+            ),
+            SizedBox(height: 10.0),
+            Container(
+              padding: EdgeInsets.all(10.0),
+              decoration: BoxDecoration(
+                color: Color(0xFFFFFBEA),
+                borderRadius: BorderRadius.circular(8.0),
+                border: Border.all(color: Color(0xFFFFE8A3)),
+              ),
+              child: Row(
+                children: <Widget>[
+                  Icon(Icons.card_giftcard, size: 16.0, color: Colors.red.shade400),
+                  SizedBox(width: 8.0),
+                  Expanded(
+                    child: Text(
+                      'ครบ ${formatNum(activeTier.target)} $promoUnit '
+                      'รับ ${activeTier.gift?.name ?? 'ของแถม'} x${activeTier.getqty} ต่อชุด'
+                      '${activeTier.maxSets != null ? ' (จำกัด ${activeTier.maxSets} ชุด)' : ''}',
+                      style: TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey.shade800),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -868,7 +1157,7 @@ class _DetailState extends State<Detail> {
           children: <Widget>[
             Padding(
               child: SpinBox(
-                min: 1,
+                min: 0,
                 max: (limitValue==0)?10000:limitValue!.toDouble(),  //10000,//
                 value: (iniValue)!
                     .toDouble(), //(iniValue == 0) ? 0 : (iniValue).toInt(),
@@ -1352,32 +1641,49 @@ class _DetailState extends State<Detail> {
             String? productID = id;
             String? memberID = myUserModel!.id.toString();
 
-            if ((qtyS == 0 || qtyS == null) &&
-                (qtyM == 0 || qtyM == null) &&
-                (qtyL == 0 || qtyL == null)) {
-              normalDialog(context, 'แจ้งเตือน', 'กรุณาระบุจำนวน');
-            }
-
-            if (qtyS != 0) {
+            // qtyS/qtyM/qtyL เป็น null หมายถึงผู้ใช้ยังไม่แตะช่องจำนวนไซส์นั้น (ไม่ต้องทำอะไร)
+            // ถ้าแตะแล้วปรับเป็น 0 และของไซส์นั้นมีอยู่ในตะกร้า ให้ลบออกจากตะกร้า
+            if (qtyS != null) {
               String unitSize = 's';
-              print(
-                'productID = $productID, memberID=$memberID, unitSize=s, QTY=$qtyS',
-              );
-              addCart(productID!, unitSize, qtyS!, memberID);
+              if (qtyS != 0) {
+                print(
+                  'productID = $productID, memberID=$memberID, unitSize=s, QTY=$qtyS',
+                );
+                addCart(productID!, unitSize, qtyS!, memberID);
+              } else if (showSincart != 0) {
+                print(
+                  'productID = $productID, memberID=$memberID, unitSize=s, remove from cart',
+                );
+                removeCart(productID!, unitSize, memberID);
+              }
             }
-            if (qtyM != 0) {
+            if (qtyM != null) {
               String unitSize = 'm';
-              print(
-                'productID = $productID, memberID=$memberID, unitSize=m, QTY=$qtyM',
-              );
-              addCart(productID!, unitSize, qtyM!, memberID);
+              if (qtyM != 0) {
+                print(
+                  'productID = $productID, memberID=$memberID, unitSize=m, QTY=$qtyM',
+                );
+                addCart(productID!, unitSize, qtyM!, memberID);
+              } else if (showMincart != 0) {
+                print(
+                  'productID = $productID, memberID=$memberID, unitSize=m, remove from cart',
+                );
+                removeCart(productID!, unitSize, memberID);
+              }
             }
-            if (qtyL != 0) {
+            if (qtyL != null) {
               String unitSize = 'l';
-              print(
-                'productID = $productID, memberID=$memberID, unitSize=l, QTY=$qtyL',
-              );
-              addCart(productID!, unitSize, qtyL!, memberID);
+              if (qtyL != 0) {
+                print(
+                  'productID = $productID, memberID=$memberID, unitSize=l, QTY=$qtyL',
+                );
+                addCart(productID!, unitSize, qtyL!, memberID);
+              } else if (showLincart != 0) {
+                print(
+                  'productID = $productID, memberID=$memberID, unitSize=l, remove from cart',
+                );
+                removeCart(productID!, unitSize, memberID);
+              }
             }
           },
         ),
@@ -1400,6 +1706,20 @@ class _DetailState extends State<Detail> {
     Navigator.pop(context, true);
   }
 
+  Future<void> removeCart(
+    String productID,
+    String unitSize,
+    String memberID,
+  ) async {
+    String url =
+        '${MyStyle().serverName}/apishop/json_removeitemincart.php?productID=$productID&unitSize=$unitSize&memberId=$memberID';
+    print('urlRemoveCart = $url');
+    await http.get(Uri.parse(url)).then((response) {});
+    print('remove ok');
+
+    Navigator.pop(context, true);
+  }
+
   Widget showDetailList() {
     return SafeArea(
       child: Column(
@@ -1415,7 +1735,7 @@ class _DetailState extends State<Detail> {
     return ListView(
       padding: EdgeInsets.all(14.0),
       children: <Widget>[
-        nearMissSection(),
+        productPromotionCard(),
         productSummaryCard(),
         SizedBox(height: 14.0),
         moreInfoCard(),

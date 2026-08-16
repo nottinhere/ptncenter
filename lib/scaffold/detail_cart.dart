@@ -54,6 +54,7 @@ class NearMissPromotion {
   final String? productId; // สำหรับโปรโมชันรายสินค้า
   final PromotionGroupModel? group; // สำหรับโปรโมชันกลุ่มสินค้า
   final String? sizeLabel; // ไซส์ (S/M/L) ที่เข้าเงื่อนไขโปรโมชันนี้ ถ้ามี
+  final int? level; // ขั้นของ tier ที่กำลังจะไปถึง (1, 2, 3) level > 1 หมายถึงได้ของแถมขั้นก่อนหน้าแล้ว
 
   NearMissPromotion(
       {required this.sourceLabel,
@@ -65,7 +66,8 @@ class NearMissPromotion {
       required this.progress,
       this.productId,
       this.group,
-      this.sizeLabel});
+      this.sizeLabel,
+      this.level});
 }
 
 class DetailCart extends StatefulWidget {
@@ -180,7 +182,6 @@ class _DetailCartState extends State<DetailCart> {
   // }
 
   Future<void> readCart() async {
-    clearArray();
     String? memberId = myUserModel!.id.toString();
     String? url = '${MyStyle().loadMyCart}$memberId&screen=cart';
     print('url Detail Cart ====>>>>> $url');
@@ -190,12 +191,16 @@ class _DetailCartState extends State<DetailCart> {
     var cartList = result['cart'];
     print('cartList =======>>> $cartList');
 
+    // เคลียร์หลัง await (ไม่ใช่ก่อนเรียก) เพื่อกัน race condition เวลา readCart() ถูกเรียกซ้อนกัน
+    // (เช่น แก้ไข/ลบสินค้าติดกันเร็วๆ) ไม่งั้นการเรียกครั้งหลังจะ "บวกเพิ่ม" บนข้อมูลของครั้งก่อน
+    // ที่เพิ่ง populate ไป (cartQtyBySizeKey/cartValueByProduct สะสมค่าด้วย +=) ทำให้จำนวนเพี้ยน
+    // เกินทุก tier จน nextTierFor() คืน null และ nearMissSection() หายไปเป็นบางครั้ง
+    clearArray();
+
     // List<Map<bool, dynamic>> arrIncart = [];
     List<dynamic>? arrIncartS = [];
     List<dynamic>? arrIncartM = [];
     List<dynamic>? arrIncartL = [];
-    productAllModels = [];
-        total = 0;
 
 
     for (var map in cartList) {
@@ -477,8 +482,13 @@ class _DetailCartState extends State<DetailCart> {
     double total =
         (limit != null && limit > 0 && rawTotal > limit) ? limit : rawTotal;
 
+    // ระบุขั้นของโปรโมชันที่เข้าเงื่อนไข (ขั้นที่ 2, 3) ให้เห็นชัดเจนว่าได้ของแถมจาก tier ไหน
+    // ไม่ต้องระบุขั้นที่ 1 เพราะเป็นขั้นพื้นฐานที่ไม่มีขั้นอื่นให้สับสน
+    String levelSuffix =
+        (tier.level != null && tier.level! > 1) ? ' (ขั้นที่ ${tier.level})' : '';
+
     return ReceivedGiftItem(
-      sourceLabel: sourceLabel,
+      sourceLabel: '$sourceLabel$levelSuffix',
       gift: giftMap[tier.gift],
       sets: formatNum(sets),
       perSetQty: formatNum(perSet),
@@ -523,6 +533,7 @@ class _DetailCartState extends State<DetailCart> {
       productId: productId,
       group: group,
       sizeLabel: sizeLabel,
+      level: tier.level,
     );
   }
 
@@ -1529,7 +1540,12 @@ class _DetailCartState extends State<DetailCart> {
     // String sizeClause = (item.sizeLabel != null && item.sizeLabel!.isNotEmpty)
     //     ? ' ไซส์ ${item.sizeLabel} (หน่วยเป็น${item.remainingUnit})'
     //     : '';
-    String message = 'ใกล้ได้ของแถมแล้ว! "${item.sourceLabel}"' // $sizeClause 
+    // level > 1 หมายถึงได้ของแถมขั้นก่อนหน้าไปแล้ว กำลังจะขยับไปขั้นที่ดีกว่า จึงเรียกว่า "อัปเกรด"
+    // แทนที่จะเป็น "ใกล้ได้ของแถมแล้ว" ซึ่งสื่อถึงการได้ของแถมเป็นครั้งแรก
+    String prefix = (item.level != null && item.level! > 1)
+        ? 'อัปเกรดของแถมได้!'
+        : 'ใกล้ได้ของแถมแล้ว!';
+    String message = '$prefix "${item.sourceLabel}"' // $sizeClause
         ' ขาดอีก ${item.remaining} ${item.remainingUnit} เพื่อรับ $giftName ${item.giftQty} ${item.giftUnit} ฟรี';
 
     double clampedProgress = item.progress.clamp(0.0, 1.0);
@@ -1628,6 +1644,14 @@ class _DetailCartState extends State<DetailCart> {
   Widget receivedGiftTile(ReceivedGiftItem item) {
     String unitName = unitNameMap[item.gift?.unit] ?? '';
 
+    // ถ้าโดน limitgift ตัดยอดจนไม่เท่ากับ perSetQty x sets จริง (เช่น limit น้อยกว่า
+    // 1 ชุดเต็ม) การโชว์ breakdown "x sets" จะขัดกับยอดรวมที่แสดง จึงซ่อน breakdown ไว้
+    double perSetVal = double.tryParse(item.perSetQty) ?? 0;
+    double setsVal = double.tryParse(item.sets) ?? 0;
+    double totalVal = double.tryParse(item.totalQty) ?? 0;
+    bool showBreakdown =
+        perSetVal <= 0 || (perSetVal * setsVal) <= totalVal + 0.0001;
+
     return Card(
       margin: EdgeInsets.only(bottom: 8.0),
       shape: RoundedRectangleBorder(
@@ -1665,17 +1689,11 @@ class _DetailCartState extends State<DetailCart> {
               'ฟรี',
               style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
             ),
-            SizedBox(width: 10.0),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: <Widget>[
-                Text('${item.sets} ชุด',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                if (unitName.isNotEmpty)
-                  Text('${item.perSetQty} $unitName/ชุด',
-                      style: TextStyle(fontSize: 10.0, color: Colors.grey)),
-              ],
-            ),
+            if (showBreakdown) ...[
+              SizedBox(width: 10.0),
+              Text('${item.perSetQty} $unitName x ${item.sets} ชุด',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+            ],
             SizedBox(width: 10.0),
             Text('${item.totalQty} $unitName',
                 style: TextStyle(fontWeight: FontWeight.bold)),

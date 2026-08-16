@@ -87,11 +87,11 @@ class PromotionGroupModel {
   MedicinePromotionTier? bestTierFor(double subtotal) {
     List<MedicinePromotionTier> tiers = [
       MedicinePromotionTier(
-          qty: target3, gift: gift3, getqty: getqty3, limitgift: limitgift3),
+          qty: target3, gift: gift3, getqty: getqty3, limitgift: limitgift3, level: 3),
       MedicinePromotionTier(
-          qty: target2, gift: gift2, getqty: getqty2, limitgift: limitgift2),
+          qty: target2, gift: gift2, getqty: getqty2, limitgift: limitgift2, level: 2),
       MedicinePromotionTier(
-          qty: target, gift: gift, getqty: getqty, limitgift: limitgift),
+          qty: target, gift: gift, getqty: getqty, limitgift: limitgift, level: 1),
     ];
 
     for (MedicinePromotionTier tier in tiers) {
@@ -107,11 +107,11 @@ class PromotionGroupModel {
   MedicinePromotionTier? nextTierFor(double subtotal) {
     List<MedicinePromotionTier> tiers = [
       MedicinePromotionTier(
-          qty: target, gift: gift, getqty: getqty, limitgift: limitgift),
+          qty: target, gift: gift, getqty: getqty, limitgift: limitgift, level: 1),
       MedicinePromotionTier(
-          qty: target2, gift: gift2, getqty: getqty2, limitgift: limitgift2),
+          qty: target2, gift: gift2, getqty: getqty2, limitgift: limitgift2, level: 2),
       MedicinePromotionTier(
-          qty: target3, gift: gift3, getqty: getqty3, limitgift: limitgift3),
+          qty: target3, gift: gift3, getqty: getqty3, limitgift: limitgift3, level: 3),
     ];
 
     for (MedicinePromotionTier tier in tiers) {

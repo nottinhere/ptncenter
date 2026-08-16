@@ -339,24 +339,31 @@ class _ListProductfavState extends State<ListProductfav> {
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var cartList = result['cart'];
-    for (var mapCart in cartList) {
-      if (mapCart['id'] == productID) {
-        setState(() {
-          if (mapCart['price_list'].containsKey('s')) {
-            filterProductAllModels![index].itemincartSunit =
-                mapCart['price_list']['s']['quantity'];
-          }
-          if (mapCart['price_list'].containsKey('m')) {
-            filterProductAllModels![index].itemincartMunit =
-                mapCart['price_list']['m']['quantity'];
-          }
-          if (mapCart['price_list'].containsKey('l')) {
-            filterProductAllModels![index].itemincartLunit =
-                mapCart['price_list']['l']['quantity'];
-          }
-        });
+
+    Map<String, dynamic>? mapCart;
+    for (var m in cartList) {
+      if (m['id'] == productID) {
+        mapCart = m;
+        break;
       }
     }
+
+    // ถ้าไม่พบสินค้าในตะกร้าแล้ว (ถูกลบออกทั้งหมด) หรือไซส์นั้นไม่มีอยู่ในตะกร้าแล้ว
+    // (ถูกลบออกโดยการตั้งจำนวนเป็น 0) ให้เคลียร์ข้อความจำนวนในตะกร้าของไซส์นั้นด้วย
+    setState(() {
+      filterProductAllModels![index].itemincartSunit =
+          (mapCart != null && mapCart['price_list'].containsKey('s'))
+              ? mapCart['price_list']['s']['quantity']
+              : '0';
+      filterProductAllModels![index].itemincartMunit =
+          (mapCart != null && mapCart['price_list'].containsKey('m'))
+              ? mapCart['price_list']['m']['quantity']
+              : '0';
+      filterProductAllModels![index].itemincartLunit =
+          (mapCart != null && mapCart['price_list'].containsKey('l'))
+              ? mapCart['price_list']['l']['quantity']
+              : '0';
+    });
   }
 
   Widget showName(int index) {

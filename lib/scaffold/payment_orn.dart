@@ -90,6 +90,12 @@ class _PaymentOrnState extends State<PaymentOrn> {
   }
 
   Future<void> checkScanSuccess() async {
+    // เช็คสถานะสแกนจ่าย QR เฉพาะตอนที่ผู้ใช้เลือกช่องทาง QR อยู่เท่านั้น
+    // ป้องกันไม่ให้หน้าเด้งไปหน้าสำเร็จระหว่างที่ผู้ใช้กำลังกรอกช่องทางอื่นอยู่
+    if (selectedPayment != 'qr') {
+      return;
+    }
+
     String? cusCode = myUserModel?.customerCode;
     String? ornNo = ornModel?.ornNo;
     if (cusCode == null || ornNo == null) {
@@ -282,11 +288,21 @@ class _PaymentOrnState extends State<PaymentOrn> {
     bool selected = selectedPayment == value;
     return GestureDetector(
       onTap: () {
-        setState(() {
-          selectedPayment = value;
-        });
         if (onSelected != null) {
+          // ตัวเลือกที่ต้องยืนยันข้อมูลก่อน (เช่น บัตรเครดิต) จะสลับ selectedPayment
+          // เองเมื่อผู้ใช้กด "ตกลง" ในไดอะล็อกเท่านั้น ถ้ากด "ยกเลิก" จะไม่เปลี่ยน
           onSelected();
+        } else {
+          setState(() {
+            selectedPayment = value;
+          });
+          if (value == 'qr') {
+            // กลับมาเลือก QR อีกครั้ง เริ่มเช็คสถานะสแกนจ่ายใหม่
+            startScanCheckTimer();
+          } else {
+            // ออกจากช่องทาง QR หยุดเช็คสถานะสแกนจ่ายไว้ก่อน
+            scanCheckTimer?.cancel();
+          }
         }
       },
       child: Container(
@@ -607,8 +623,7 @@ class _PaymentOrnState extends State<PaymentOrn> {
     );
   }
 
-  Future<void> showCardLast4Dialog() async {
-
+  Future<void> confirmCcPayment(String cardLast4) async {
     String? cusCode = myUserModel?.customerCode;
     String? ornNo = ornModel?.ornNo;
     final totalValue = ornModel?.total ?? '0';
@@ -621,7 +636,7 @@ class _PaymentOrnState extends State<PaymentOrn> {
         'cus_code': cusCode,
         'orn_no': ornNo,
         'orn_id': ornId,
-        'strCCcode': cardLast4Controller.text,
+        'strCCcode': cardLast4,
         'totalPay': totalValue,
         'totalPayCC': totalWithFee.toString(),
       });
@@ -632,12 +647,16 @@ class _PaymentOrnState extends State<PaymentOrn> {
         );
       }
     }
+  }
 
-
+  Future<void> showCardLast4Dialog() async {
     final dialogController =
         TextEditingController(text: cardLast4Controller.text);
     String? dialogError;
 
+    // แสดงไดอะล็อกให้กรอกเลข 4 หลักสุดท้ายของบัตรก่อน
+    // ถ้ากด "ยกเลิก" จะไม่เปลี่ยนช่องทางชำระเงินและไม่ยิง API ยืนยันบัตรเครดิต
+    // ถ้ากด "ตกลง" จึงค่อยเปลี่ยนช่องทางชำระเงินเป็นบัตรเครดิตและยิง API
     await showDialog(
       context: context,
       builder: (context) {
@@ -677,14 +696,19 @@ class _PaymentOrnState extends State<PaymentOrn> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: MyStyle().bgColor,
                   ),
-                  onPressed: () {
+                  onPressed: () async {
                     if (dialogController.text.length != 4) {
                       setDialogState(() {
                         dialogError = 'กรุณากรอกเลข 4 หลักสุดท้ายของบัตรให้ครบ';
                       });
                       return;
                     }
+
+                    await confirmCcPayment(dialogController.text);
+                    if (!context.mounted) return;
+
                     setState(() {
+                      selectedPayment = 'credit_card';
                       cardLast4Controller.text = dialogController.text;
                       cardLast4Error = null;
                     });
