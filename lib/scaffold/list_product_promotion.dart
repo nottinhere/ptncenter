@@ -1459,7 +1459,7 @@ Future<void> decodeQRcode(var code) async {
                               onTap: () => onSelected(option),
                               child: Padding(
                                 padding: EdgeInsets.symmetric(
-                                    horizontal: 16.0, vertical: 10.0),
+                                    horizontal: 5.0, vertical: 5.0),
                                 child: highlightedOptionText(
                                     context, displayName, autocompleteQuery),
                               ),

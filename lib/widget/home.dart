@@ -812,6 +812,10 @@ class _HomeState extends State<Home> {
     return <_QuickAction>[
       _QuickAction(Icons.medication_liquid_rounded, 'สั่งสินค้า',
           () => routeToListProduct(0)),
+      _QuickAction(Icons.local_fire_department_rounded, 'สินค้าขายดี',
+          () => routeToListProduct(7)),
+      _QuickAction(Icons.trending_up_rounded, 'สินค้ามาแรง',
+          () => routeToListProduct(8)),
       _QuickAction(Icons.fiber_new_rounded, 'สินค้าใหม่',
           () => routeToListProduct(1)),
       _QuickAction(Icons.local_offer_rounded, 'สินค้าโปรโมชัน',
@@ -827,10 +831,6 @@ class _HomeState extends State<Home> {
       }),
       _QuickAction(Icons.remove_shopping_cart_rounded, 'สั่งแล้วไม่ได้รับ',
           () => routeToListProduct(4)),
-      _QuickAction(Icons.local_fire_department_rounded, 'สินค้าขายดี',
-          () => routeToListProduct(7)),
-      _QuickAction(Icons.trending_up_rounded, 'สินค้ามาแรง',
-          () => routeToListProduct(8)),
       _QuickAction(Icons.favorite_rounded, 'สินค้าโปรด', () {
         MaterialPageRoute materialPageRoute =
             MaterialPageRoute(builder: (BuildContext buildContext) {
