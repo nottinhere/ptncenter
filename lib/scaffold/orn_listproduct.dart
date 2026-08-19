@@ -62,7 +62,7 @@ class _ListProductOrnState extends State<ListProductOrn> {
   Future<void> readCart() async {
     String? memberId = myUserModel?.id;
     String url =
-        '${MyStyle().serverName}/apishop/json_loadmycart.php?memberId=$memberId';
+        '${MyStyle().serverName}/json_loadmycart.php?memberId=$memberId';
     print('url readCart (orn product) > $url');
 
     try {
@@ -97,7 +97,7 @@ class _ListProductOrnState extends State<ListProductOrn> {
 
     int qty = item.qty ?? 1;
     String? memberId = myUserModel?.id;
-    String url = '${MyStyle().serverName}/apishop/json_savemycart.php'
+    String url = '${MyStyle().serverName}/json_savemycart.php'
         '?productID=${item.medId}&unitSize=${item.size}&QTY=$qty&memberId=$memberId';
     print('url addToCart (orn product) > $url');
 
@@ -142,7 +142,7 @@ class _ListProductOrnState extends State<ListProductOrn> {
 
     String? memberId = myUserModel!.id;
     String url =
-        '${MyStyle().serverName}/apishop/json_orn_productlist.php?memberId=$memberId&orn_id=$ornId&page=$page';
+        '${MyStyle().serverName}/json_orn_productlist.php?memberId=$memberId&orn_id=$ornId&page=$page';
     print('url > $url');
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
@@ -396,7 +396,7 @@ class _ListProductOrnState extends State<ListProductOrn> {
         String? memberId = myUserModel!.id.toString();
         // id = currentOrnAllModel!.id.toString();
         String? url =
-            '${MyStyle().serverName}/apishop/json_ornlist.php?memberId=$memberId&code=$code'; // &code=$code
+            '${MyStyle().serverName}/json_ornlist.php?memberId=$memberId&code=$code'; // &code=$code
         print("URL = $url");
         http.Response response = await http.get(Uri.parse(url));
         var result = json.decode(response.body);

@@ -226,7 +226,7 @@ class _ListProductPromotionState extends State<ListProductPromotion> {
     lastItemName = '';
     String memberId = myUserModel!.id.toString();
     String url =
-        '${MyStyle().serverName}/apishop/json_loadmycart.php?memberId=$memberId&screen=listproduct';
+        '${MyStyle().serverName}/json_loadmycart.php?memberId=$memberId&screen=listproduct';
 
     print('url Detail =====>>>>>>>> $url');
 
@@ -519,7 +519,7 @@ class _ListProductPromotionState extends State<ListProductPromotion> {
 
     String memberId = myUserModel!.id.toString();
     String url =
-            '${MyStyle().serverName}/apishop/json_productlist.php?memberId=$memberId&promotiongroup_id=$myPromotionGroupId&page=$page';
+            '${MyStyle().serverName}/json_productlist.php?memberId=$memberId&promotiongroup_id=$myPromotionGroupId&page=$page';
 
 
     // url = '${MyStyle().readProductWhereMode}$myIndex';
@@ -577,7 +577,7 @@ class _ListProductPromotionState extends State<ListProductPromotion> {
     String? memberId = myUserModel!.id.toString();
     int? productID = filterProductAllModels![index].id!;
     String? url =
-        '${MyStyle().serverName}/apishop/json_loadmycart.php?memberId=$memberId';
+        '${MyStyle().serverName}/json_loadmycart.php?memberId=$memberId';
 
     print("URL update item = $url");
     http.Response response = await http.get(Uri.parse(url));
@@ -1279,7 +1279,7 @@ Future<void> decodeQRcode(var code) async {
     try {
       if(code != '' && code != null){
         String url =
-            '${MyStyle().serverName}/apishop/json_productlist.php?bqcode=$code';
+            '${MyStyle().serverName}/json_productlist.php?bqcode=$code';
             print('url === (decodeQRcode) >>>> $url');
         http.Response response = await http.get(Uri.parse(url));
         var result = json.decode(response.body);

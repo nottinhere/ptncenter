@@ -137,7 +137,7 @@ class _ListProductfavState extends State<ListProductfav> {
     lastItemName = '';
     String memberId = myUserModel!.id.toString();
     String url =
-        '${MyStyle().serverName}/apishop/json_loadmycart.php?memberId=$memberId&screen=listproductfav';
+        '${MyStyle().serverName}/json_loadmycart.php?memberId=$memberId&screen=listproductfav';
 
     print('url Detail =====>>>>>>>> $url');
 
@@ -196,7 +196,7 @@ class _ListProductfavState extends State<ListProductfav> {
       print(barcodeScanRes);
 
       String url =
-          '${MyStyle().serverName}/apishop/json_productlist.php?bqcode=$barcodeScanRes';
+          '${MyStyle().serverName}/json_productlist.php?bqcode=$barcodeScanRes';
       http.Response response = await http.get(Uri.parse(url));
       var result = json.decode(response.body);
       // print('result ===*******>>>> $result');
@@ -289,7 +289,7 @@ class _ListProductfavState extends State<ListProductfav> {
 
     String memberId = myUserModel!.id.toString();
     String url =
-        '${MyStyle().serverName}/apishop/json_productfavoritelist.php?memberId=$memberId&searchKey=$searchString&page=$page';
+        '${MyStyle().serverName}/json_productfavoritelist.php?memberId=$memberId&searchKey=$searchString&page=$page';
 
     // url = '${MyStyle().readProductWhereMode}$myIndex';
     print("URL = $url");
@@ -333,7 +333,7 @@ class _ListProductfavState extends State<ListProductfav> {
     String? memberId = myUserModel!.id.toString();
     int? productID = filterProductAllModels![index].id!;
     String? url =
-        '${MyStyle().serverName}/apishop/json_loadmycart.php?memberId=$memberId';
+        '${MyStyle().serverName}/json_loadmycart.php?memberId=$memberId';
 
     print("URL update item = $url");
     http.Response response = await http.get(Uri.parse(url));
@@ -805,7 +805,7 @@ class _ListProductfavState extends State<ListProductfav> {
     try {
       if(code != '' && code != null){
         String url =
-            '${MyStyle().serverName}/apishop/json_productlist.php?bqcode=$code';
+            '${MyStyle().serverName}/json_productlist.php?bqcode=$code';
         http.Response response = await http.get(Uri.parse(url));
         var result = json.decode(response.body);
         // print('result ===*******>>>> $result');

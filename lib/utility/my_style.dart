@@ -201,20 +201,20 @@ class MyStyle {
 
   String fontName = 'Sarabun';
 
-  String? serverName = 'https://ptnpharma.com';
+  String? serverName = 'https://ptnpharma.com/apiptnshop';
 
 
-  String readAllProduct =
-      'https://www.ptnpharma.com/apishop/json_productlist.php?top=100';
-  String readProductWhereMode =
-      'https://www.ptnpharma.com/apishop/json_productlist.php?searchKey=';
-  String getUserWhereUserAndPass =
-      'https://www.ptnpharma.com/apishop/json_login.php';
-  String getProductWhereId =
-      'https://www.ptnpharma.com/apishop/json_productdetail.php?id=';
+  late String readAllProduct =
+      '${serverName}/json_productlist.php?top=100';
+  late String readProductWhereMode =
+      '${serverName}/json_productlist.php?searchKey=';
+  late String getUserWhereUserAndPass =
+      '${serverName}/json_login.php';
+  late String getProductWhereId =
+      '${serverName}/json_productdetail.php?id=';
 
-  String loadMyCart =
-      'https://www.ptnpharma.com/apishop/json_loadmycart.php?memberId='; //  json_loadmycart_gift.php
+  late String loadMyCart =
+      '${serverName}/json_loadmycart.php?memberId='; //  json_loadmycart_gift.php
 
   MyStyle();
 }

@@ -123,7 +123,7 @@ class _HistoryDetailState extends State<HistoryDetail> {
   Future<void> readCart() async {
     String? memberId = myUserModel?.id;
     String url =
-        '${MyStyle().serverName}/apishop/json_loadmycart.php?memberId=$memberId';
+        '${MyStyle().serverName}/json_loadmycart.php?memberId=$memberId';
     print('url readCart (history detail) > $url');
 
     try {
@@ -269,7 +269,7 @@ class _HistoryDetailState extends State<HistoryDetail> {
 
     int qty = int.tryParse(item.orderedQty) ?? 1;
     String? memberId = myUserModel?.id;
-    String url = '${MyStyle().serverName}/apishop/json_savemycart.php'
+    String url = '${MyStyle().serverName}/json_savemycart.php'
         '?productID=${item.productId}&unitSize=${item.unitCode}&QTY=$qty&memberId=$memberId';
     print('url addToCart (history detail) > $url');
 

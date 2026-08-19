@@ -127,7 +127,7 @@ class _ListProductvoteState extends State<ListProductvote> {
     lastItemName = '';
     String memberId = myUserModel!.id.toString();
     String url =
-        '${MyStyle().serverName}/apishop/json_loadmycart.php?memberId=$memberId&screen=listproductvote';
+        '${MyStyle().serverName}/json_loadmycart.php?memberId=$memberId&screen=listproductvote';
 
     print('url Detail =====>>>>>>>> $url');
 
@@ -192,7 +192,7 @@ class _ListProductvoteState extends State<ListProductvote> {
 
     String memberId = myUserModel!.id.toString();
     String url =
-        '${MyStyle().serverName}/apishop/json_productvotelist.php?memberId=$memberId&searchKey=$searchString&page=$page';
+        '${MyStyle().serverName}/json_productvotelist.php?memberId=$memberId&searchKey=$searchString&page=$page';
 
     // url = '${MyStyle().readProductWhereMode}$myIndex';
     print("URL = $url");
@@ -235,7 +235,7 @@ class _ListProductvoteState extends State<ListProductvote> {
 
     String memberId = myUserModel!.id.toString();
     String url =
-        '${MyStyle().serverName}/apishop/json_loadmycart.php?memberId=$memberId';
+        '${MyStyle().serverName}/json_loadmycart.php?memberId=$memberId';
 
     print("URL update item = $url");
     http.Response response = await http.get(Uri.parse(url));
@@ -362,7 +362,7 @@ class _ListProductvoteState extends State<ListProductvote> {
   Future<void> thumbLike(
       String productID, String memberID, bool _isFavorite) async {
     String url =
-        '${MyStyle().serverName}/apishop/json_productvote.php?productID=$productID&memberId=$memberID&status=$_isFavorite';
+        '${MyStyle().serverName}/json_productvote.php?productID=$productID&memberId=$memberID&status=$_isFavorite';
 
     print('url Favorites url ====>>>>> $url');
     await http.get(Uri.parse(url)).then((response) {

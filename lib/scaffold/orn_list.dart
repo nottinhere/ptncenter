@@ -158,7 +158,7 @@ class _OrnListState extends State<OrnList> {
 
 
     String? url =
-        '${MyStyle().serverName}/apishop/json_ornlist.php?memberId=$memberId&page=$page&searchKey=$searchString';
+        '${MyStyle().serverName}/json_ornlist.php?memberId=$memberId&page=$page&searchKey=$searchString';
     print("URL (orn list)= $url");
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
@@ -570,7 +570,7 @@ DateTime parseDate =
         String? memberId = myUserModel!.id.toString();
         // id = currentOrnAllModel!.id.toString();
         String? url =
-            '${MyStyle().serverName}/apishop/json_ornlist.php?memberId=$memberId&code=$code'; // &code=$code
+            '${MyStyle().serverName}/json_ornlist.php?memberId=$memberId&code=$code'; // &code=$code
         print("URL = $url");
         http.Response response = await http.get(Uri.parse(url));
         var result = json.decode(response.body);

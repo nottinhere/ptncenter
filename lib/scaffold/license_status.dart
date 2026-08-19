@@ -56,7 +56,7 @@ UserModel? updateuserModel;
 Future<void> updateUserProfile() async {
     String? memberId = myUserModel!.id.toString();
     String? url =
-        '${MyStyle().serverName}/apishop/json_customer_profile.php?memberId=$memberId';
+        '${MyStyle().serverName}/json_customer_profile.php?memberId=$memberId';
 
     print("URL update item = $url");
     http.Response response = await http.get(Uri.parse(url));
@@ -76,7 +76,7 @@ Future<void> updateUserProfile() async {
   String? licenseAlertStatus;
   String? licenseAlertYear;
   Future<void> readLicenseAlert() async {
-      String urlPop = '${MyStyle().serverName}/apishop/json_license_alert.php';
+      String urlPop = '${MyStyle().serverName}/json_license_alert.php';
       http.Response responsePop = await http.get(Uri.parse(urlPop));
       var resultPop = json.decode(responsePop.body);
       var mapItemPopup = resultPop[

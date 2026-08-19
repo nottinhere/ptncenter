@@ -160,7 +160,7 @@ class _PaymentOrnState extends State<PaymentOrn> {
 
     String? memberId = myUserModel!.id;
     String url =
-        '${MyStyle().serverName}/apishop/json_ornlist.php?memberId=$memberId&ornId=$ornId';
+        '${MyStyle().serverName}/json_ornlist.php?memberId=$memberId&ornId=$ornId';
     print('url > $url');
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
@@ -1166,7 +1166,7 @@ class _PaymentOrnState extends State<PaymentOrn> {
         String? memberId = myUserModel!.id.toString();
         // id = currentOrnAllModel!.id.toString();
         String? url =
-            '${MyStyle().serverName}/apishop/json_ornlist.php?memberId=$memberId&code=$code'; // &code=$code
+            '${MyStyle().serverName}/json_ornlist.php?memberId=$memberId&code=$code'; // &code=$code
         print("URL = $url");
         http.Response response = await http.get(Uri.parse(url));
         var result = json.decode(response.body);

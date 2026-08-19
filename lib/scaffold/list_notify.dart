@@ -74,7 +74,7 @@ class _NotifyState extends State<Notify> {
   Future<void> readNotify() async {
     String? memberId = myUserModel!.id;
     String? url =
-        '${MyStyle().serverName}/apishop/json_notify.php?limit=10&memberId=$memberId'; // ?memberId=$memberId
+        '${MyStyle().serverName}/json_notify.php?limit=10&memberId=$memberId'; // ?memberId=$memberId
     print('urlNotify >> $url');
 
     http.Response response = await http.get(Uri.parse(url));
@@ -210,7 +210,7 @@ class _NotifyState extends State<Notify> {
     amontCart = 0;
     String memberId = myUserModel!.id.toString();
     String url =
-        '${MyStyle().serverName}/apishop/json_loadmycart.php?memberId=$memberId&screen=listnotify';
+        '${MyStyle().serverName}/json_loadmycart.php?memberId=$memberId&screen=listnotify';
 
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);

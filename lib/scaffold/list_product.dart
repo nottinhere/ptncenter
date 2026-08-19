@@ -172,7 +172,7 @@ class _ListProductState extends State<ListProduct> {
     lastItemName = '';
     String memberId = myUserModel!.id.toString();
     String url =
-        '${MyStyle().serverName}/apishop/json_loadmycart.php?memberId=$memberId&screen=listproduct';
+        '${MyStyle().serverName}/json_loadmycart.php?memberId=$memberId&screen=listproduct';
 
     print('url Detail =====>>>>>>>> $url');
 
@@ -247,26 +247,26 @@ class _ListProductState extends State<ListProduct> {
 
     String memberId = myUserModel!.id.toString();
     String url =
-        '${MyStyle().serverName}/apishop/json_productlist.php?memberId=$memberId&searchKey=$searchString&page=$page';
+        '${MyStyle().serverName}/json_productlist.php?memberId=$memberId&searchKey=$searchString&page=$page';
     if (myIndex != 0) {
       if (myIndex == 1 || myIndex == 2 || myIndex == 3) {
         url =
-            '${MyStyle().serverName}/apishop/json_productlist.php?memberId=$memberId&searchKey=$searchString&product_mode=$myIndex&page=$page';
+            '${MyStyle().serverName}/json_productlist.php?memberId=$memberId&searchKey=$searchString&product_mode=$myIndex&page=$page';
       } else if (myIndex == 4) {
         url =
-            '${MyStyle().serverName}/apishop/json_productnotreceive.php?memberId=$memberId&page=$page';
+            '${MyStyle().serverName}/json_productnotreceive.php?memberId=$memberId&page=$page';
       } else if (myIndex == 5) {
         url =
-            '${MyStyle().serverName}/apishop/json_productlist.php?memberId=$memberId&cate_id=$myCate&page=$page';
+            '${MyStyle().serverName}/json_productlist.php?memberId=$memberId&cate_id=$myCate&page=$page';
       } else if (myIndex == 6) {
         url =
-            '${MyStyle().serverName}/apishop/json_productlist.php?memberId=$memberId&promotiongroup_id=$myPromotionGroupId&page=$page';
+            '${MyStyle().serverName}/json_productlist.php?memberId=$memberId&promotiongroup_id=$myPromotionGroupId&page=$page';
       } else if (myIndex == 7) {
         url =
-            '${MyStyle().serverName}/apishop/json_productbestseller.php?memberId=$memberId&page=$page';
+            '${MyStyle().serverName}/json_productbestseller.php?memberId=$memberId&page=$page';
       } else if (myIndex == 8) {
         url =
-            '${MyStyle().serverName}/apishop/json_productbestintrend.php?memberId=$memberId&page=$page';
+            '${MyStyle().serverName}/json_productbestintrend.php?memberId=$memberId&page=$page';
       }
     }
 
@@ -325,7 +325,7 @@ class _ListProductState extends State<ListProduct> {
     String? memberId = myUserModel!.id.toString();
     int? productID = filterProductAllModels![index].id!;
     String? url =
-        '${MyStyle().serverName}/apishop/json_loadmycart.php?memberId=$memberId';
+        '${MyStyle().serverName}/json_loadmycart.php?memberId=$memberId';
 
     print("URL update item = $url");
     http.Response response = await http.get(Uri.parse(url));
@@ -754,7 +754,7 @@ Future<void> decodeQRcode(var code) async {
     try {
       if(code != '' && code != null){
         String url =
-            '${MyStyle().serverName}/apishop/json_productlist.php?bqcode=$code';
+            '${MyStyle().serverName}/json_productlist.php?bqcode=$code';
             print('url === (decodeQRcode) >>>> $url');
         http.Response response = await http.get(Uri.parse(url));
         var result = json.decode(response.body);

@@ -630,7 +630,7 @@ class _DetailCartState extends State<DetailCart> {
     String? memberId = myUserModel!.id;
     String? memberCode = myUserModel!.customerCode;
     String? url =
-        '${MyStyle().serverName}/apishop/json_loadmyreward.php?memberId=$memberId&memberCode=$memberCode'; // ?memberId=$memberId
+        '${MyStyle().serverName}/json_loadmyreward.php?memberId=$memberId&memberCode=$memberCode'; // ?memberId=$memberId
     print('urlReward >> $url');
 
     http.Response response = await http.get(Uri.parse(url));
@@ -929,7 +929,7 @@ class _DetailCartState extends State<DetailCart> {
     String memberID,
   ) async {
     String url =
-        '${MyStyle().serverName}/apishop/json_updatemycart.php?productID=$productID&unitSize=$unitSize&newQTY=$newQTY&memberId=$memberID';
+        '${MyStyle().serverName}/json_updatemycart.php?productID=$productID&unitSize=$unitSize&newQTY=$newQTY&memberId=$memberID';
 
     print('url editDetailCart ====>>>>> $url');
 
@@ -946,7 +946,7 @@ class _DetailCartState extends State<DetailCart> {
     String memberID,
   ) async {
     String url =
-        '${MyStyle().serverName}/apishop/json_updatemycart.php?productID=$productID&unitSize=$unitSize&newQTY=$newQTY&memberId=$memberID';
+        '${MyStyle().serverName}/json_updatemycart.php?productID=$productID&unitSize=$unitSize&newQTY=$newQTY&memberId=$memberID';
     print('url editDetailCart ====>>>>> $url');
     await http.get(Uri.parse(url)).then((response) {});
 
@@ -1020,7 +1020,7 @@ class _DetailCartState extends State<DetailCart> {
     print('productID = $productID ,unitSize = $unitSize ,memberID = $memberID');
 
     String url =
-        '${MyStyle().serverName}/apishop/json_removeitemincart.php?productID=$productID&unitSize=$unitSize&memberId=$memberID';
+        '${MyStyle().serverName}/json_removeitemincart.php?productID=$productID&unitSize=$unitSize&memberId=$memberID';
     print('url DeleteCart======>>>> $url');
 
     await http.get(Uri.parse(url)).then((response) {
@@ -1878,7 +1878,7 @@ class _DetailCartState extends State<DetailCart> {
   Future<void> submitThread() async {
     try {
       String url =
-          '${MyStyle().serverName}/apishop/json_submit_myorder.php?memberId=$memberID&transport=$transport&comment=$comment';
+          '${MyStyle().serverName}/json_submit_myorder.php?memberId=$memberID&transport=$transport&comment=$comment';
       print('url ==> $url');
 
       // await http.get(Uri.parse(url)).then((value) {

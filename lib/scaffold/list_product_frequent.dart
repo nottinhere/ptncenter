@@ -134,7 +134,7 @@ class _ListProductFrequent extends State<ListProductFrequent> {
     lastItemName = '';
     String memberId = myUserModel!.id.toString();
     String url =
-        '${MyStyle().serverName}/apishop/json_loadmycart.php?memberId=$memberId&screen=listproductfeq';
+        '${MyStyle().serverName}/json_loadmycart.php?memberId=$memberId&screen=listproductfeq';
 
     // print('url Detail =====>>>>>>>> $url');
 
@@ -199,7 +199,7 @@ class _ListProductFrequent extends State<ListProductFrequent> {
 
     String memberId = myUserModel!.id.toString();
     String url =
-        '${MyStyle().serverName}/apishop/json_productfrequentlist.php?memberId=$memberId&searchKey=$searchString&page=$page';
+        '${MyStyle().serverName}/json_productfrequentlist.php?memberId=$memberId&searchKey=$searchString&page=$page';
 
     // url = '${MyStyle().readProductWhereMode}$myIndex';
     print("URL = $url");
@@ -374,7 +374,7 @@ class _ListProductFrequent extends State<ListProductFrequent> {
       String productName,
       String unit) async {
     String url =
-        '${MyStyle().serverName}/apishop/json_addfeqitemtocart.php?memberId=$memberID&productID=$productID&selectUnit=$selectUnit&qty=$qty&status=$_isFavorite';
+        '${MyStyle().serverName}/json_addfeqitemtocart.php?memberId=$memberID&productID=$productID&selectUnit=$selectUnit&qty=$qty&status=$_isFavorite';
 
     print('url Favorites url ====>>>>> $url');
     await http.get(Uri.parse(url)).then((response) {
@@ -655,7 +655,7 @@ class _ListProductFrequent extends State<ListProductFrequent> {
   Future<void> addAlltoCart() async {
     String memberID = myUserModel!.id.toString();
     String url =
-        '${MyStyle().serverName}/apishop/json_addallfeqitemtocart.php?memberId=$memberID';
+        '${MyStyle().serverName}/json_addallfeqitemtocart.php?memberId=$memberID';
 
     print('url Favorites url ====>>>>> $url');
     await http.get(Uri.parse(url)).then((response) {

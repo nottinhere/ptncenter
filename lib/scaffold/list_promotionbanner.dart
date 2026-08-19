@@ -72,7 +72,7 @@ class _PromotionbannerState extends State<Promotionbanner> {
   /*************************** */
 
   Future<void> readSlide() async {
-    String? url = '${MyStyle().serverName}/apishop/json_slideshow.php';
+    String? url = '${MyStyle().serverName}/json_slideshow.php';
 
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
@@ -203,7 +203,7 @@ class _PromotionbannerState extends State<Promotionbanner> {
     amontCart = 0;
     String memberId = myUserModel!.id.toString();
     String url =
-        '${MyStyle().serverName}/apishop/json_loadmycart.php?memberId=$memberId&screen=promotionbanner';
+        '${MyStyle().serverName}/json_loadmycart.php?memberId=$memberId&screen=promotionbanner';
 
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);

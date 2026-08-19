@@ -208,7 +208,7 @@ class _AuthenState extends State<Authen> {
         userModel = UserModel.fromJson(map);
 
         String urlPop =
-            '${MyStyle().serverName}/apishop/json_mypopup.php?popup=1&memberId=${userModel!.id}';
+            '${MyStyle().serverName}/json_mypopup.php?popup=1&memberId=${userModel!.id}';
             print('urlPop = $urlPop');
         http.Response responsePop = await http.get(Uri.parse(urlPop));
         var resultPop = json.decode(responsePop.body);

@@ -87,7 +87,7 @@ class _MyServiceState extends State<MyService> {
     // List map;
     String memberId = myUserModel!.id.toString();
     String url =
-        '${MyStyle().serverName}/apishop/json_loadmycart.php?memberId=$memberId&screen=service';
+        '${MyStyle().serverName}/json_loadmycart.php?memberId=$memberId&screen=service';
     // print('url readCart >> $url');
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);

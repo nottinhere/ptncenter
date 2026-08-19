@@ -102,7 +102,7 @@ class _RewardListState extends State<RewardList> {
     String? memberId = myUserModel!.id;
     String? memberCode = myUserModel!.customerCode;
     String url =
-        '${MyStyle().serverName}/apishop/json_loadmyreward.php?memberId=$memberId&memberCode=$memberCode';
+        '${MyStyle().serverName}/json_loadmyreward.php?memberId=$memberId&memberCode=$memberCode';
     print('url > $url');
 
     http.Response response = await http.get(Uri.parse(url));
@@ -138,7 +138,7 @@ class _RewardListState extends State<RewardList> {
     String? memberId = myUserModel!.id;
     String? memberCode = myUserModel!.customerCode;
     String url =
-        '${MyStyle().serverName}/apishop/json_reward.php?memberId=$memberId&memberCode=$memberCode&page=$page';
+        '${MyStyle().serverName}/json_reward.php?memberId=$memberId&memberCode=$memberCode&page=$page';
     if (selectedCateId != null && selectedCateId!.isNotEmpty) {
       url = '$url&cate_id=$selectedCateId';
     }

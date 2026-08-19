@@ -451,8 +451,8 @@ class _DetailState extends State<Detail> {
 
 
     String url =
-        '${MyStyle().serverName}/apishop/json_productimage.php?memberId=$memId&id=$id';
-    // String url = '${MyStyle().serverName}/apishop/json_slideshow.php';
+        '${MyStyle().serverName}/json_productimage.php?memberId=$memId&id=$id';
+    // String url = '${MyStyle().serverName}/json_slideshow.php';
 
     print('URL image detail >> $url');
 
@@ -483,7 +483,7 @@ class _DetailState extends State<Detail> {
     id = currentProductAllModel!.id.toString();
 
     String url =
-        '${MyStyle().serverName}/apishop/json_relate.php?memberId=$memId&productId=$id'; // ?memberId=$memberId
+        '${MyStyle().serverName}/json_relate.php?memberId=$memId&productId=$id'; // ?memberId=$memberId
 
     print('URL relate >> $url');
     http.Response response = await http.get(Uri.parse(url));
@@ -683,7 +683,7 @@ class _DetailState extends State<Detail> {
     bool _isFavorite,
   ) async {
     String url =
-        '${MyStyle().serverName}/apishop/json_favorite.php?productID=$productID&memberId=$memberID&status=$_isFavorite';
+        '${MyStyle().serverName}/json_favorite.php?productID=$productID&memberId=$memberID&status=$_isFavorite';
 
     print('url Favorites url ====>>>>> $url');
     await http.get(Uri.parse(url)).then((response) {
@@ -1474,7 +1474,7 @@ class _DetailState extends State<Detail> {
     amontCart = 0;
     String memberId = myUserModel!.id.toString();
     String url =
-        '${MyStyle().serverName}/apishop/json_loadmycart.php?memberId=$memberId&screen=detaiil';
+        '${MyStyle().serverName}/json_loadmycart.php?memberId=$memberId&screen=detaiil';
 
     print('url Detail =====>>>>>>>> $url');
 
@@ -1698,7 +1698,7 @@ class _DetailState extends State<Detail> {
     String memberID,
   ) async {
     String url =
-        '${MyStyle().serverName}/apishop/json_savemycart.php?productID=$productID&unitSize=$unitSize&QTY=$qTY&memberId=$memberID';
+        '${MyStyle().serverName}/json_savemycart.php?productID=$productID&unitSize=$unitSize&QTY=$qTY&memberId=$memberID';
     print('urlAddcart = $url');
     await http.get(Uri.parse(url)).then((response) {});
     print('upload ok');
@@ -1712,7 +1712,7 @@ class _DetailState extends State<Detail> {
     String memberID,
   ) async {
     String url =
-        '${MyStyle().serverName}/apishop/json_removeitemincart.php?productID=$productID&unitSize=$unitSize&memberId=$memberID';
+        '${MyStyle().serverName}/json_removeitemincart.php?productID=$productID&unitSize=$unitSize&memberId=$memberID';
     print('urlRemoveCart = $url');
     await http.get(Uri.parse(url)).then((response) {});
     print('remove ok');

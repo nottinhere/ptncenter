@@ -56,7 +56,7 @@ class _DetailState extends State<DetailNews> {
   Future<void> getPopupWhereID() async {
     String id = currentPopupModel!.id.toString();
 
-    String url = '${MyStyle().serverName}/apishop/json_newsdetail.php?id=$id';
+    String url = '${MyStyle().serverName}/json_newsdetail.php?id=$id';
     print('urlPopup >> $url');
 
     http.Response response = await http.get(Uri.parse(url));

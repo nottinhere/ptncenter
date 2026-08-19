@@ -54,7 +54,7 @@ class _DetailState extends State<DetailNotify> {
   Future<void> getPopupWhereID() async {
     String id = currentPopupModel!.id.toString();
 
-    String url = '${MyStyle().serverName}/apishop/json_notifydetail.php?id=$id';
+    String url = '${MyStyle().serverName}/json_notifydetail.php?id=$id';
     print('urlPopup >> $url');
 
     http.Response response = await http.get(Uri.parse(url));

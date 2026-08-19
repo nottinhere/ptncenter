@@ -208,7 +208,7 @@ class _OcrScanState extends State<OcrScan> {
 
   Future<ProductAllModel?> lookupProductByBarcode(String barcode) async {
     String? memberId = myUserModel?.id;
-    String url = '${MyStyle().serverName}/apishop/json_productlist.php'
+    String url = '${MyStyle().serverName}/json_productlist.php'
         '?memberId=$memberId&bqcode=$barcode&page=1';
     print('url > $url');
     return _fetchFirstProduct(url);
@@ -216,7 +216,7 @@ class _OcrScanState extends State<OcrScan> {
 
   Future<List<ProductAllModel>> lookupProductByKeyword(String keyword) async {
     String? memberId = myUserModel?.id;
-    String url = '${MyStyle().serverName}/apishop/json_productlist.php'
+    String url = '${MyStyle().serverName}/json_productlist.php'
         '?memberId=$memberId&searchKey=ocr|${Uri.encodeComponent(keyword)}&page=1';
     print('url > $url');
     return _fetchAllProduct(url);
@@ -358,7 +358,7 @@ class _OcrScanState extends State<OcrScan> {
   Future<void> addToCart(
       ProductAllModel product, String unitSize, int qty) async {
     String? memberId = myUserModel?.id;
-    String url = '${MyStyle().serverName}/apishop/json_savemycart.php'
+    String url = '${MyStyle().serverName}/json_savemycart.php'
         '?productID=${product.id}&unitSize=$unitSize&QTY=$qty&memberId=$memberId';
     print('url addToCart > $url');
     await http.get(Uri.parse(url));

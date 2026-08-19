@@ -121,7 +121,7 @@ class _HomeState extends State<Home> {
   /***************************  */
 
   Future<void> readSlide() async {
-    String? url = '${MyStyle().serverName}/apishop/json_slideshow.php';
+    String? url = '${MyStyle().serverName}/json_slideshow.php';
 
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
@@ -362,7 +362,7 @@ class _HomeState extends State<Home> {
   String? licenseAlertStatus;
   String? licenseAlertYear;
   Future<void> readLicenseAlert() async {
-    String urlPop = '${MyStyle().serverName}/apishop/json_license_alert.php';
+    String urlPop = '${MyStyle().serverName}/json_license_alert.php';
     http.Response responsePop = await http.get(Uri.parse(urlPop));
     var resultPop = json.decode(responsePop.body);
     var mapItemPopup = resultPop['itemsData'];
@@ -384,7 +384,7 @@ class _HomeState extends State<Home> {
   Future<void> updateUserProfile() async {
     String? memberId = myUserModel!.id.toString();
     String? url =
-        '${MyStyle().serverName}/apishop/json_customer_profile.php?memberId=$memberId';
+        '${MyStyle().serverName}/json_customer_profile.php?memberId=$memberId';
 
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
@@ -397,7 +397,7 @@ class _HomeState extends State<Home> {
   }
 
   Future<void> readNews() async {
-    String? url = '${MyStyle().serverName}/apishop/json_news.php?limit=7';
+    String? url = '${MyStyle().serverName}/json_news.php?limit=7';
 
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
@@ -488,7 +488,7 @@ class _HomeState extends State<Home> {
     try {
       if (code != '' && code != null) {
         String url =
-            '${MyStyle().serverName}/apishop/json_productlist.php?bqcode=$code';
+            '${MyStyle().serverName}/json_productlist.php?bqcode=$code';
         http.Response response = await http.get(Uri.parse(url));
         var result = json.decode(response.body);
 
@@ -1046,7 +1046,7 @@ class _HomeState extends State<Home> {
     amontCart = 0;
     String memberId = myUserModel!.id.toString();
     String url =
-        '${MyStyle().serverName}/apishop/json_loadmycart.php?memberId=$memberId&screen=home';
+        '${MyStyle().serverName}/json_loadmycart.php?memberId=$memberId&screen=home';
 
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);

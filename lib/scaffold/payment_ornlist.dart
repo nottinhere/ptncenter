@@ -111,7 +111,7 @@ class _PaymentOrnListState extends State<PaymentOrnList> {
     String? memberId = myUserModel!.id.toString();
 
     String? url =
-        '${MyStyle().serverName}/apishop/json_ornlist.php?memberId=$memberId&page=$page&searchKey=$searchString';
+        '${MyStyle().serverName}/json_ornlist.php?memberId=$memberId&page=$page&searchKey=$searchString';
     if (ornTab == 'unpaid') {
       url = '$url&status=3';
     }
@@ -481,7 +481,7 @@ class _PaymentOrnListState extends State<PaymentOrnList> {
       if (code != '' && code != null) {
         String? memberId = myUserModel!.id.toString();
         String? url =
-            '${MyStyle().serverName}/apishop/json_ornlist.php?memberId=$memberId&code=$code';
+            '${MyStyle().serverName}/json_ornlist.php?memberId=$memberId&code=$code';
         http.Response response = await http.get(Uri.parse(url));
         var result = json.decode(response.body);
 

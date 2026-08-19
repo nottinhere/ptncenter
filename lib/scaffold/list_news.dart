@@ -91,7 +91,7 @@ class _NewsState extends State<News> {
     });
 
     String? memberId = myUserModel!.id;
-    String url = '${MyStyle().serverName}/apishop/json_newslist.php'
+    String url = '${MyStyle().serverName}/json_newslist.php'
         '?memberId=$memberId&page=$page&limit=$perPage';
     print('urlNews >> $url');
 
@@ -261,7 +261,7 @@ class _NewsState extends State<News> {
     amontCart = 0;
     String memberId = myUserModel!.id.toString();
     String url =
-        '${MyStyle().serverName}/apishop/json_loadmycart.php?memberId=$memberId&screen=listnews';
+        '${MyStyle().serverName}/json_loadmycart.php?memberId=$memberId&screen=listnews';
 
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);

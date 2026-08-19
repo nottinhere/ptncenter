@@ -43,7 +43,7 @@ class _RewardDetailState extends State<RewardDetail> {
   Future<void> checkAlreadyInCart() async {
     String? memberId = myUserModel?.id;
     String? memberCode = myUserModel?.customerCode;
-    String url = '${MyStyle().serverName}/apishop/json_loadmyreward.php'
+    String url = '${MyStyle().serverName}/json_loadmyreward.php'
         '?memberId=$memberId&memberCode=$memberCode';
     print('url > $url');
 
@@ -171,7 +171,7 @@ class _RewardDetailState extends State<RewardDetail> {
   Future<void> checkRewardCartThenSubmit() async {
     String? memberId = myUserModel?.id;
     String? memberCode = myUserModel?.customerCode;
-    String url = '${MyStyle().serverName}/apishop/json_loadmyreward.php'
+    String url = '${MyStyle().serverName}/json_loadmyreward.php'
         '?memberId=$memberId&memberCode=$memberCode';
     print('url > $url');
 
@@ -209,7 +209,7 @@ class _RewardDetailState extends State<RewardDetail> {
 
   Future<void> submitRedeem() async {
     String? memberId = myUserModel?.id;
-    String url = '${MyStyle().serverName}/apishop/json_submit_reward_redeem.php'
+    String url = '${MyStyle().serverName}/json_submit_reward_redeem.php'
         '?memberId=$memberId&rw_id=${rewardModel!.id}&qty=$qty';
     print('url > $url');
 
