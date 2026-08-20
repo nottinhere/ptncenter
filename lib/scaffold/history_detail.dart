@@ -175,7 +175,7 @@ class _HistoryDetailState extends State<HistoryDetail> {
 
     String? memberCode = myUserModel?.customerCode;
     String url = 'https://www.ptnpharma.com/shop/pages/tables/'
-        'orderhistory_detail_mb_app2026.php?mode=v&id=${widget.detailId}&memberCode=$memberCode';
+        'pageforapp_orderhistory_detail.php?mode=v&id=${widget.detailId}&memberCode=$memberCode';
     print('url (history detail) > $url');
 
     try {
