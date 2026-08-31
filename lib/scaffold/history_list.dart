@@ -57,7 +57,7 @@ class _HistoryListState extends State<HistoryList> {
 
     String? memberId = myUserModel?.id;
     String? memberCode = myUserModel?.customerCode;
-    String url = 'https://www.ptnpharma.com/shop/pages/tables/pageforapp_orderhistory.php'
+    String url = 'https://ptnpharma.com/shop/pages/tables/pageforapp_orderhistory.php'
         '?memberId=$memberId&memberCode=$memberCode&page=$page';
     print('url (history) > $url');
 

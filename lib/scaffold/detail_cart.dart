@@ -34,13 +34,15 @@ class ReceivedGiftItem {
   final String sets; // จำนวนชุดที่ได้ คำนวนจากจำนวนในตะกร้า
   final String perSetQty; // จำนวนของแถมต่อชุด มาจาก getqty/getqty2/getqty3
   final String totalQty; // sets * perSetQty (ไม่เกิน limitgift ถ้ามีการกำหนด)
+  final bool isInhouse; // true = โปรโมชันร้าน (inhousepromotion.json) อิงยอดรวมทั้งบิล
 
   ReceivedGiftItem(
       {required this.sourceLabel,
       required this.gift,
       required this.sets,
       required this.perSetQty,
-      required this.totalQty});
+      required this.totalQty,
+      this.isInhouse = false});
 }
 
 class NearMissPromotion {
@@ -124,6 +126,7 @@ class _DetailCartState extends State<DetailCart> {
 
   List<MedicinePromotionModel> medicinePromotions = [];
   List<PromotionGroupModel> promotionGroupModels = [];
+  List<PromotionGroupModel> inhousePromotions = [];
   Map<String, GiftModel> giftMap = {};
   Map<String, String> unitNameMap = {};
 
@@ -136,6 +139,7 @@ class _DetailCartState extends State<DetailCart> {
 
   List<ReceivedGiftItem> productGiftsReceived = [];
   List<ReceivedGiftItem> groupGiftsReceived = [];
+  List<ReceivedGiftItem> inhouseGiftsReceived = [];
   List<NearMissPromotion> nearMissPromotions = [];
 
   List<RewardExtrapointModel> rewardExtrapoints = [];
@@ -170,6 +174,7 @@ class _DetailCartState extends State<DetailCart> {
     });
     readMedicinePromotions();
     readPromotionGroupRules();
+    readInhousePromotions();
     readGiftItems();
     readUnitNames();
     readRewardExtrapoints();
@@ -370,6 +375,21 @@ class _DetailCartState extends State<DetailCart> {
     }
   }
 
+  Future<void> readInhousePromotions() async {
+    String url = 'https://ptnpharma.com/jsonData/inhousepromotion.json';
+    try {
+      http.Response response = await http.get(Uri.parse(url));
+      var result = json.decode(response.body);
+      if (result is List) {
+        inhousePromotions =
+            result.map((map) => PromotionGroupModel.fromJson(map)).toList();
+        computeReceivedGifts();
+      }
+    } catch (e) {
+      print('readInhousePromotions error: $e');
+    }
+  }
+
   Future<void> readGiftItems() async {
     String url = 'https://ptnpharma.com/jsonData/gift.json';
     try {
@@ -472,7 +492,8 @@ class _DetailCartState extends State<DetailCart> {
   }
 
   ReceivedGiftItem? buildReceivedGift(
-      String sourceLabel, double cartAmount, MedicinePromotionTier tier) {
+      String sourceLabel, double cartAmount, MedicinePromotionTier tier,
+      {bool isInhouse = false}) {
     double sets = setsFor(cartAmount, tier);
     if (sets <= 0) return null;
 
@@ -493,6 +514,7 @@ class _DetailCartState extends State<DetailCart> {
       sets: formatNum(sets),
       perSetQty: formatNum(perSet),
       totalQty: formatNum(total),
+      isInhouse: isInhouse,
     );
   }
 
@@ -617,13 +639,61 @@ class _DetailCartState extends State<DetailCart> {
       }
     }
 
+    // โปรโมชันร้าน (inhousepromotion.json) อิงยอดรวมทั้งบิล ไม่จำกัดตาม med
+    // เหมือนโปรโมชันกลุ่มสินค้าทั่วไป แต่ไม่ต้องแสดง near miss
+    List<ReceivedGiftItem> inhouseGifts = [];
+    double orderTotal = total ?? 0;
+    for (PromotionGroupModel promo in inhousePromotions) {
+      MedicinePromotionTier? tier = promo.bestTierFor(orderTotal);
+      if (tier != null) {
+        ReceivedGiftItem? item = buildReceivedGift(
+            promo.name ?? '', orderTotal, tier,
+            isInhouse: true);
+        if (item != null) inhouseGifts.add(item);
+      }
+    }
+
     if (mounted) {
       setState(() {
         productGiftsReceived = productGifts;
         groupGiftsReceived = groupGifts;
+        inhouseGiftsReceived = inhouseGifts;
         nearMissPromotions = nearMiss;
       });
     }
+  }
+
+  /// รวมจำนวนของแถมที่ต้องใช้ทั้งหมดต่อ gift id (โปรโมชันต่างกันอาจให้ของแถมชิ้นเดียวกัน)
+  Map<String, double> giftQtyNeeded() {
+    Map<String, double> needed = {};
+    List<ReceivedGiftItem> allGifts = [
+      ...productGiftsReceived,
+      ...groupGiftsReceived,
+      ...inhouseGiftsReceived,
+    ];
+    for (ReceivedGiftItem item in allGifts) {
+      String? giftId = item.gift?.id;
+      if (giftId == null) continue;
+      double qty = double.tryParse(item.totalQty) ?? 0;
+      needed[giftId] = (needed[giftId] ?? 0) + qty;
+    }
+    return needed;
+  }
+
+  /// รายชื่อของแถมที่สต๊อกคงเหลือ (gift.json > stock) ไม่พอกับจำนวนที่ลูกค้าจะได้รับตามเงื่อนไขปัจจุบัน
+  /// เพื่อกันไม่ให้ submit order ผ่าน ต้องให้ลูกค้าปรับจำนวนสินค้าในตะกร้าก่อน
+  List<String> insufficientStockGiftNames() {
+    List<String> names = [];
+    giftQtyNeeded().forEach((giftId, neededQty) {
+      GiftModel? gift = giftMap[giftId];
+      if (gift == null) return;
+      double? stock = double.tryParse(gift.stock ?? '');
+      if (stock != null && neededQty > stock) {
+        names.add(
+            '${gift.name ?? giftId} (ต้องการ ${formatNum(neededQty)} เหลือ ${formatNum(stock)})');
+      }
+    });
+    return names;
   }
 
   Future<void> readReward() async {
@@ -1291,6 +1361,23 @@ class _DetailCartState extends State<DetailCart> {
     return point == null || point.isEmpty || point == '0';
   }
 
+  Widget storeGiftBadge() {
+    Color color = Colors.pink;
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 2.0),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        border: Border.all(color: color),
+        borderRadius: BorderRadius.circular(20.0),
+      ),
+      child: Text(
+        'ของสมนาคุณจากทางร้าน',
+        style: TextStyle(
+            color: color, fontSize: 12.0, fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+
   Widget rewardTypeBadge(bool isFree) {
     Color color = isFree ? Colors.green : Colors.blue;
     return Container(
@@ -1675,7 +1762,7 @@ class _DetailCartState extends State<DetailCart> {
                     runSpacing: 4.0,
                     children: <Widget>[
                       Text(item.gift?.name ?? 'ของแถม', style: MyStyle().h4bStyleGray),
-                      rewardTypeBadge(true),
+                      item.isInhouse ? storeGiftBadge() : rewardTypeBadge(true),
                     ],
                   ),
                   SizedBox(height: 2.0),
@@ -1707,6 +1794,7 @@ class _DetailCartState extends State<DetailCart> {
     List<ReceivedGiftItem> giftItems = [
       ...productGiftsReceived,
       ...groupGiftsReceived,
+      ...inhouseGiftsReceived,
     ];
 
     return Card(
@@ -1855,13 +1943,36 @@ class _DetailCartState extends State<DetailCart> {
 
                               ).show();
                         } else {
-                          _isPressed = true;
-                          memberID = myUserModel!.id.toString();
-                          print(
-                            'Submit >> transport = $transport, comment = $comment, memberId = $memberID, promotionsuccess = $promotionsuccess',
-                          );
-                          print('promotionsuccessgift = $promotionsuccessgift');
-                          submitThread();
+                          List<String> insufficientGifts =
+                              insufficientStockGiftNames();
+                          if (insufficientGifts.isNotEmpty) {
+                            AwesomeDialog(
+                              context: context,
+                              headerAnimationLoop: false,
+                              dialogType: DialogType.warning,
+                              title: 'ของแถมในสต๊อกไม่เพียงพอ',
+                              desc:
+                                  'ของแถมต่อไปนี้มีสต๊อกไม่พอกับจำนวนที่ท่านจะได้รับตามเงื่อนไข '
+                                  'กรุณาปรับจำนวนสินค้าในตะกร้า หรือติดต่อเจ้าหน้าที่:\n'
+                                  '${insufficientGifts.join('\n')}',
+                              btnOkText: ('ok'),
+                              btnOkColor:
+                                  const Color.fromARGB(255, 252, 183, 36),
+                              btnOkOnPress: () {
+                                debugPrint('OnClcik');
+                              },
+                              btnOkIcon: Icons.error,
+                            ).show();
+                          } else {
+                            _isPressed = true;
+                            memberID = myUserModel!.id.toString();
+                            print(
+                              'Submit >> transport = $transport, comment = $comment, memberId = $memberID, promotionsuccess = $promotionsuccess',
+                            );
+                            print(
+                                'promotionsuccessgift = $promotionsuccessgift');
+                            submitThread();
+                          }
                         }
                       }
                     });
@@ -2067,7 +2178,9 @@ class _DetailCartState extends State<DetailCart> {
           (totalExtraPoints() > 0)
               ? extraPointSummaryBadge(totalExtraPoints())
               : Container(),
-          (productGiftsReceived.isNotEmpty || groupGiftsReceived.isNotEmpty)
+          (productGiftsReceived.isNotEmpty ||
+                  groupGiftsReceived.isNotEmpty ||
+                  inhouseGiftsReceived.isNotEmpty)
               ? promotionSuccess()
               : Container(),
           (rewardredeemModels!.length != 0) ? showReward() : Container(),

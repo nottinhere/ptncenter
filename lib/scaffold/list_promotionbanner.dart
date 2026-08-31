@@ -73,7 +73,7 @@ class _PromotionbannerState extends State<Promotionbanner> {
 
   Future<void> readSlide() async {
     String? url = '${MyStyle().serverName}/json_slideshow.php';
-
+    print('url = $url');
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var mapItemProduct =

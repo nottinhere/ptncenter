@@ -246,27 +246,34 @@ class _ListProductState extends State<ListProduct> {
     });
 
     String memberId = myUserModel!.id.toString();
-    String url =
-        '${MyStyle().serverName}/json_productlist.php?memberId=$memberId&searchKey=$searchString&page=$page';
-    if (myIndex != 0) {
-      if (myIndex == 1 || myIndex == 2 || myIndex == 3) {
-        url =
-            '${MyStyle().serverName}/json_productlist.php?memberId=$memberId&searchKey=$searchString&product_mode=$myIndex&page=$page';
-      } else if (myIndex == 4) {
-        url =
-            '${MyStyle().serverName}/json_productnotreceive.php?memberId=$memberId&page=$page';
-      } else if (myIndex == 5) {
-        url =
-            '${MyStyle().serverName}/json_productlist.php?memberId=$memberId&cate_id=$myCate&page=$page';
-      } else if (myIndex == 6) {
-        url =
-            '${MyStyle().serverName}/json_productlist.php?memberId=$memberId&promotiongroup_id=$myPromotionGroupId&page=$page';
-      } else if (myIndex == 7) {
-        url =
-            '${MyStyle().serverName}/json_productbestseller.php?memberId=$memberId&page=$page';
-      } else if (myIndex == 8) {
-        url =
-            '${MyStyle().serverName}/json_productbestintrend.php?memberId=$memberId&page=$page';
+    String? jsQuery = decodeProductCodeQuery(searchString);
+    String url;
+    if (jsQuery != null) {
+      url =
+          '${MyStyle().serverName}/json_productlist.php?memberId=$memberId&$jsQuery&page=$page';
+    } else {
+      url =
+          '${MyStyle().serverName}/json_productlist.php?memberId=$memberId&searchKey=$searchString&page=$page';
+      if (myIndex != 0) {
+        if (myIndex == 1 || myIndex == 2 || myIndex == 3) {
+          url =
+              '${MyStyle().serverName}/json_productlist.php?memberId=$memberId&searchKey=$searchString&product_mode=$myIndex&page=$page';
+        } else if (myIndex == 4) {
+          url =
+              '${MyStyle().serverName}/json_productnotreceive.php?memberId=$memberId&page=$page';
+        } else if (myIndex == 5) {
+          url =
+              '${MyStyle().serverName}/json_productlist.php?memberId=$memberId&cate_id=$myCate&page=$page';
+        } else if (myIndex == 6) {
+          url =
+              '${MyStyle().serverName}/json_productlist.php?memberId=$memberId&promotiongroup_id=$myPromotionGroupId&page=$page';
+        } else if (myIndex == 7) {
+          url =
+              '${MyStyle().serverName}/json_productbestseller.php?memberId=$memberId&page=$page';
+        } else if (myIndex == 8) {
+          url =
+              '${MyStyle().serverName}/json_productbestintrend.php?memberId=$memberId&page=$page';
+        }
       }
     }
 
@@ -846,6 +853,22 @@ Future<void> decodeQRcode(var code) async {
     TextStyle baseStyle =
         DefaultTextStyle.of(context).style.copyWith(fontSize: 15.0);
     return RichText(text: TextSpan(style: baseStyle, children: spans));
+  }
+
+  // productCode รูปแบบ "js|<url-encoded query string ในเครื่องหมายคำพูด>"
+  // เช่น js|%22sup%3D102%22 => decode => "sup=102" => query string จริงคือ sup=102
+  String? decodeProductCodeQuery(String? raw) {
+    if (raw == null || !raw.startsWith('js|')) return null;
+    String decoded;
+    try {
+      decoded = Uri.decodeComponent(raw.substring(3));
+    } catch (_) {
+      return null;
+    }
+    if (decoded.length >= 2 && decoded.startsWith('"') && decoded.endsWith('"')) {
+      decoded = decoded.substring(1, decoded.length - 1);
+    }
+    return decoded;
   }
 
   String buildSearchKey(String query) {

@@ -159,18 +159,6 @@ class _PopupCarouselDialogState extends State<PopupCarouselDialog> {
               Row(
                 children: <Widget>[
                   Expanded(
-                    child: OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.red,
-                        side: BorderSide(color: Colors.red),
-                        padding: EdgeInsets.symmetric(vertical: 12.0),
-                      ),
-                      onPressed: () => routeToHome(),
-                      child: Text('ปิด'),
-                    ),
-                  ),
-                  SizedBox(width: 10.0),
-                  Expanded(
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
@@ -179,6 +167,18 @@ class _PopupCarouselDialogState extends State<PopupCarouselDialog> {
                       onPressed: () => routeToDetail(current),
                       child: Text('อ่านต่อ',
                           style: TextStyle(color: Colors.white)),
+                    ),
+                  ),
+                  SizedBox(width: 10.0),
+                  Expanded(
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.red,
+                        side: BorderSide(color: Colors.red),
+                        padding: EdgeInsets.symmetric(vertical: 12.0),
+                      ),
+                      onPressed: () => routeToHome(),
+                      child: Text('ปิด'),
                     ),
                   ),
                 ],
