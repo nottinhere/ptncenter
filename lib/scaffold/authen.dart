@@ -43,14 +43,29 @@ class _AuthenState extends State<Authen> {
       user = sharedPreferences.getString('User');
       password = sharedPreferences.getString('Password');
 
-      if (user != null) {
-        checkAuthen();
+      if (user != null && user!.isNotEmpty) {
+        await checkAuthen();
+        // ถ้า checkAuthen() login ผ่าน จะ navigate ออกจากหน้านี้ไปแล้ว (pushAndRemoveUntil)
+        // ถ้ายังอยู่หน้านี้ (login ไม่ผ่าน/ต่อเน็ตไม่ได้) ต้องเลิกโชว์ loading แล้วกลับมาที่ฟอร์ม login
+        // ไม่งั้นจะค้างที่ loading spinner ตลอดไปเมื่อ auto-login ไม่สำเร็จ
+        if (mounted) {
+          setState(() {
+            status = false;
+          });
+        }
       } else {
         setState(() {
           status = false;
         });
       }
-    } catch (e) {}
+    } catch (e) {
+      print('checkLogin error: $e');
+      if (mounted) {
+        setState(() {
+          status = false;
+        });
+      }
+    }
   }
 
   Widget rememberCheckbox() {
@@ -186,56 +201,79 @@ class _AuthenState extends State<Authen> {
       
     } else {
       // No space
-      String url =
-          '${MyStyle().getUserWhereUserAndPass}?username=$user&password=$password';
-      print('url = $url');
-      http.Response response = await http.get(Uri.parse(
-          url)); // await จะต้องทำงานใน await จะเสร็จจึงจะไปทำ process ต่อไป
-      var result = json.decode(response.body);
-      int statusInt = result['status'];
+      try {
+        String url =
+            '${MyStyle().getUserWhereUserAndPass}?username=$user&password=$password';
+        print('url = $url');
+        http.Response response = await http.get(Uri.parse(
+            url)); // await จะต้องทำงานใน await จะเสร็จจึงจะไปทำ process ต่อไป
+        var result = json.decode(response.body);
+        int statusInt = result['status'];
 
-      if (statusInt == 0) {
-        String message = result['message'];
-        SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-        await sharedPreferences.clear();
-        await sharedPreferences.remove('user');
-        await sharedPreferences.remove('password');
+        if (statusInt == 0) {
+          String message = result['message'];
+          SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+          await sharedPreferences.clear();
+          await sharedPreferences.remove('user');
+          await sharedPreferences.remove('password');
 
-        normalDialogLogin(context, 'ข้อมูลไม่ถูกต้อง', message);
-      } else if (statusInt == 1) {
-        Map<String, dynamic> map = result['data'];
-        print('map = $map');
-        userModel = UserModel.fromJson(map);
+          normalDialogLogin(context, 'ข้อมูลไม่ถูกต้อง', message);
+        } else if (statusInt == 1) {
+          Map<String, dynamic> map = result['data'];
+          print('map = $map');
+          userModel = UserModel.fromJson(map);
 
-        String urlPop =
-            '${MyStyle().serverName}/json_mypopup.php?popup=1&memberId=${userModel!.id}';
-            print('urlPop = $urlPop');
-        http.Response responsePop = await http.get(Uri.parse(urlPop));
-        var resultPop = json.decode(responsePop.body);
-        var mapItemPopup = resultPop[
-            'itemsData']; // dynamic    จะส่ง value อะไรก็ได้ รวมถึง null
-        List<PopupModel> popups = [];
-        if (mapItemPopup != null) {
-          for (var map in mapItemPopup) {
-            PopupModel popupModel = PopupModel.fromJson(map);
-            if (popupModel.popstatus == '1') {
-              popups.add(popupModel);
+          String urlPop =
+              '${MyStyle().serverName}/json_mypopup.php?popup=1&memberId=${userModel!.id}';
+              print('urlPop = $urlPop');
+          List<PopupModel> popups = [];
+          try {
+            http.Response responsePop = await http.get(Uri.parse(urlPop));
+            var resultPop = json.decode(responsePop.body);
+            var mapItemPopup = resultPop[
+                'itemsData']; // dynamic    จะส่ง value อะไรก็ได้ รวมถึง null
+            if (mapItemPopup != null) {
+              for (var map in mapItemPopup) {
+                PopupModel popupModel = PopupModel.fromJson(map);
+                if (popupModel.popstatus == '1') {
+                  popups.add(popupModel);
+                }
+              }
             }
+          } catch (e) {
+            // โหลด popup ไม่สำเร็จ ไม่ critical พอที่จะบล็อก login ไม่ให้ผ่าน
+            print('load popup error: $e');
+          }
+          setState(() {
+            popupModels = popups;
+          });
+
+          if (remember!) {
+            saveSharePreference();
+          } else {
+            routeToMyService(popupModels);
           }
         }
-        setState(() {
-          popupModels = popups;
-        });
-
-        if (remember!) {
-          saveSharePreference();
-        } else {
-          routeToMyService(popupModels);
+        if (statusInt == 2) {
+          String message = 'กรุณาติดต่อทางร้าน';
+          normalDialog(context, 'ข้อมูลไม่ถูกต้อง !!!', message);
         }
-      }
-      if (statusInt == 2) {
-        String message = 'กรุณาติดต่อทางร้าน';
-        normalDialog(context, 'ข้อมูลไม่ถูกต้อง !!!', message);
+      } catch (e) {
+        print('checkAuthen error: $e');
+        AwesomeDialog(
+          context: context,
+          headerAnimationLoop: false,
+          dialogType: DialogType.error,
+          autoHide: const Duration(seconds: 4),
+          title: 'เชื่อมต่อไม่สำเร็จ',
+          desc: 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่อีกครั้ง',
+          btnOkText: ('ok'),
+          btnOkColor: const Color.fromARGB(255, 252, 183, 36),
+          btnOkOnPress: () {
+            debugPrint('OnClcik');
+          },
+          btnOkIcon: Icons.error,
+        ).show();
       }
     }
   }

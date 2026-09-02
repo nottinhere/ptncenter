@@ -16,6 +16,11 @@ class ProductAllModel2 {
   int? limitS;
   int? limitM;
   int? limitL;
+  int? subtractS; // จำนวนตัดของ S เทียบหน่วยฐาน (ปกติ = 1)
+  int? subtractM; // จำนวนตัดของ M เช่น 12 ชิ้น/โหล
+  int? subtractL; // จำนวนตัดของ L เช่น 96 ชิ้น/ลัง
+  int? btnAdd1; // 1 = แสดงปุ่ม quick-add ไซส์ M (จำนวนตัดM/หน่วยM)
+  int? btnAdd2; // 1 = แสดงปุ่ม quick-add ไซส์ L (จำนวนตัดL/หน่วยL)
   int? recommend;
   int? promotion;
   int? updateprice;
@@ -49,6 +54,11 @@ class ProductAllModel2 {
       this.limitS,
       this.limitM,
       this.limitL,
+      this.subtractS,
+      this.subtractM,
+      this.subtractL,
+      this.btnAdd1,
+      this.btnAdd2,
       this.recommend,
       this.promotion,
       this.updateprice,
@@ -84,6 +94,11 @@ class ProductAllModel2 {
     limitS = json['limitS'];
     limitM = json['limitM'];
     limitL = json['limitL'];
+    subtractS = json['subtract_s'];
+    subtractM = json['subtract_m'];
+    subtractL = json['subtract_l'];
+    btnAdd1 = json['btnAdd1'];
+    btnAdd2 = json['btnAdd2'];
     recommend = json['recommend'];
     promotion = json['promotion'];
     updateprice = json['updateprice'];
@@ -121,6 +136,11 @@ class ProductAllModel2 {
     data['limitS'] = this.limitS;
     data['limitM'] = this.limitM;
     data['limitL'] = this.limitL;
+    data['subtract_s'] = this.subtractS;
+    data['subtract_m'] = this.subtractM;
+    data['subtract_l'] = this.subtractL;
+    data['btnAdd1'] = this.btnAdd1;
+    data['btnAdd2'] = this.btnAdd2;
     data['recommend'] = this.recommend;
     data['promotion'] = this.promotion;
     data['updateprice'] = this.updateprice;

@@ -201,7 +201,16 @@ class MyStyle {
 
   String fontName = 'Sarabun';
 
-  String? serverName = 'https://ptnpharma.com/apiptnshop';
+  // สลับเป็น true เพื่อทดสอบผ่าน localhost (เช่นรัน backend ในเครื่องผ่าน XAMPP/Laragon)
+  // - ทดสอบผ่าน Flutter Web (Chrome) หรือ Windows/macOS/Linux desktop: ใช้ 'localhost' ได้ตรงๆ
+  // - ทดสอบผ่าน Android emulator: ต้องใช้ '10.0.2.2' แทน 'localhost' (alias ของเครื่อง host)
+  // - ทดสอบผ่านมือถือจริง/iOS simulator: ต้องใช้ IP ของเครื่อง host ในวง LAN แทน (เช่น 192.168.x.x)
+  static const bool useLocalServer = false;
+  static const String localServerHost = 'localhost';
+
+  String? serverName = useLocalServer
+      ? 'https://$localServerHost/pattana/apiptnshop'
+      : 'https://ptnpharma.com/apiptnshop';
 
 
   late String readAllProduct =

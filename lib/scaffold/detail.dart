@@ -100,6 +100,8 @@ class _DetailState extends State<Detail> {
   int? qtyS, qtyM, qtyL;
   int? showSincart = 0, showMincart = 0, showLincart = 0;
   int? limitS = 0, limitM = 0, limitL = 0;
+  // ไซส์นั้นมีวางขายจริง (มีราคา > 0) หรือไม่ ใช้ตัดสินใจปลายทางของปุ่ม quick-add (btnAdd1/btnAdd2)
+  bool mSoldSeparately = false, lSoldSeparately = false;
   // var showSincart = '', showMincart = '', showLincart = '';
 
   List<Widget>? promoteLists = [];
@@ -177,12 +179,14 @@ class _DetailState extends State<Detail> {
             UnitSizeModel unitSizeModel = UnitSizeModel.fromJson(sizeMmap);
             unitSizeModels!.add(unitSizeModel);
             priceLabelBySize['m'] = unitSizeModel.lable ?? '';
+            mSoldSeparately = (double.tryParse(unitSizeModel.price ?? '') ?? 0) > 0;
           }
           Map<String, dynamic>? sizeLmap = priceListMap['l'];
           if (sizeLmap != null) {
             UnitSizeModel unitSizeModel = UnitSizeModel.fromJson(sizeLmap);
             unitSizeModels!.add(unitSizeModel);
             priceLabelBySize['l'] = unitSizeModel.lable ?? '';
+            lSoldSeparately = (double.tryParse(unitSizeModel.price ?? '') ?? 0) > 0;
           }
           print('sizeSmap = $sizeSmap');
           print('sizeMmap = $sizeMmap');
@@ -1416,6 +1420,13 @@ class _DetailState extends State<Detail> {
   }
 
   Widget showPrice() {
+    // ซ่อนไซส์ที่งดจำหน่าย (ราคา = 0) ไม่ต้องขึ้นแถวให้เห็นเลย ตัด index ที่จะโชว์ไว้ล่วงหน้า
+    // (แต่ยังอ้าง index เดิมใน unitSizeModels ต่อไป เพราะ showValue() ผูก index 0/1/2 กับ S/M/L)
+    List<int> sellableIndexes = List<int>.generate(
+            unitSizeModels!.length, (index) => index)
+        .where((index) => unitSizeModels![index].price.toString() != '0')
+        .toList();
+
     return Padding(
       padding: EdgeInsets.all(14.0),
       child: Column(
@@ -1423,14 +1434,103 @@ class _DetailState extends State<Detail> {
         children: <Widget>[
           Text('เลือกขนาดบรรจุ', style: MyStyle().h4bStyleGray),
           SizedBox(height: 8.0),
-          ...List<Widget>.generate(unitSizeModels!.length, (index) {
+          ...sellableIndexes.asMap().entries.map((entry) {
+            int position = entry.key;
+            int index = entry.value;
             return Padding(
               padding: EdgeInsets.only(
-                  bottom: index == unitSizeModels!.length - 1 ? 0 : 10.0),
+                  bottom: position == sellableIndexes.length - 1 ? 0 : 10.0),
               child: showChoosePricePackage(index),
             );
           }),
+          quickAddButtonsRow(),
         ],
+      ),
+    );
+  }
+
+  /// เพิ่มจำนวนแบบด่วนจากปุ่ม quick-add (btnAdd1/btnAdd2)
+  /// - ถ้าไซส์นั้น (M/L) มีวางขายจริง ให้เพิ่มที่ไซส์นั้นทีละ 1 หน่วย (เช่น +1 โหล / +1 ลัง)
+  /// - ถ้าไม่ได้ขายแยกไซส์นั้น ให้ไปเพิ่มที่ไซส์ S แทน ตามจำนวนตัด (subtract_m / subtract_l)
+  void quickAddPack(String sizeKey, int subtractQty, bool soldSeparately) {
+    setState(() {
+      if (soldSeparately && sizeKey == 'm') {
+        int newVal = (showMincart ?? 0) + 1;
+        if (limitM != null && limitM! > 0 && newVal > limitM!) newVal = limitM!;
+        showMincart = newVal;
+        qtyM = newVal;
+      } else if (soldSeparately && sizeKey == 'l') {
+        int newVal = (showLincart ?? 0) + 1;
+        if (limitL != null && limitL! > 0 && newVal > limitL!) newVal = limitL!;
+        showLincart = newVal;
+        qtyL = newVal;
+      } else {
+        int newVal = (showSincart ?? 0) + subtractQty;
+        if (limitS != null && limitS! > 0 && newVal > limitS!) newVal = limitS!;
+        showSincart = newVal;
+        qtyS = newVal;
+      }
+    });
+  }
+
+  Widget quickAddButton(String label, VoidCallback onTap) {
+    return ElevatedButton.icon(
+      onPressed: onTap,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: MyStyle().mainColor,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.0),
+        ),
+        padding: EdgeInsets.symmetric(horizontal: 14.0, vertical: 8.0),
+      ),
+      icon: Icon(Icons.shopping_cart, color: Colors.white, size: 16.0),
+      label: Text(label,
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+    );
+  }
+
+  Widget quickAddButtonsRow() {
+    List<Widget> buttons = [];
+
+    int? subtractM = productAllModel?.subtractM;
+    String? unitM = priceLabelBySize['m'];
+    if (productAllModel?.btnAdd1 == 1 &&
+        subtractM != null &&
+        subtractM > 0 &&
+        unitM != null &&
+        unitM.isNotEmpty) {
+      buttons.add(quickAddButton(
+        '$subtractM/$unitM',
+        () => quickAddPack('m', subtractM, mSoldSeparately),
+      ));
+    }
+
+    int? subtractL = productAllModel?.subtractL;
+    String? unitL = priceLabelBySize['l'];
+    if (productAllModel?.btnAdd2 == 1 &&
+        subtractL != null &&
+        subtractL > 0 &&
+        unitL != null &&
+        unitL.isNotEmpty) {
+      buttons.add(quickAddButton(
+        '$subtractL/$unitL',
+        () => quickAddPack('l', subtractL, lSoldSeparately),
+      ));
+    }
+
+    if (buttons.isEmpty) return Container();
+
+    return Padding(
+      padding: EdgeInsets.only(top: 10.0),
+      // Wrap ไม่ขยายเต็มความกว้างเอง ต้องบังคับด้วย SizedBox ไม่งั้น WrapAlignment.end จะไม่มีที่ว่างให้ชิดขวา
+      child: SizedBox(
+        width: double.infinity,
+        child: Wrap(
+          alignment: WrapAlignment.end,
+          spacing: 8.0,
+          runSpacing: 8.0,
+          children: buttons,
+        ),
       ),
     );
   }
