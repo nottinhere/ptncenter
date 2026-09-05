@@ -95,6 +95,7 @@ class _ListProductState extends State<ListProduct> {
   int substart = 0;
   bool visible = true;
   int selectIndex = 1;
+  bool isGridView = false;
   // bool creditAlert = false; 
 
   // Method
@@ -463,7 +464,7 @@ class _ListProductState extends State<ListProduct> {
     ]);
   }
 
-  Widget showPrice(int index) {
+  String priceUnitText(int index) {
     String txtShowPrice;
     String txtShowUnit;
     String txtPriceUnit = '';
@@ -485,11 +486,14 @@ class _ListProductState extends State<ListProduct> {
       if (txtShowPrice != '' && txtShowUnit != '')
         txtPriceUnit = '$txtPriceUnit' + " [$txtShowPrice/$txtShowUnit] ";
     }
+    return txtPriceUnit;
+  }
 
+  Widget showPrice(int index) {
     return Row(
       children: <Widget>[
         Text(
-          '$txtPriceUnit',
+          priceUnitText(index),
           style: TextStyle(
             fontSize: 16.0,
             //  fontWeight: FontWeight.bold,
@@ -498,7 +502,6 @@ class _ListProductState extends State<ListProduct> {
         ),
       ],
     );
-    // return Text('na');
   }
 
   Widget showText(int index) {
@@ -610,9 +613,217 @@ class _ListProductState extends State<ListProduct> {
     );
   }
 
+  void onTapProduct(int index) {
+    print('index select item => ${filterProductAllModels![index]}');
+    MaterialPageRoute materialPageRoute =
+        MaterialPageRoute(builder: (BuildContext buildContext) {
+      return Detail(
+        productAllModel: filterProductAllModels![index],
+        userModel: myUserModel,
+      );
+    });
+
+    Navigator.of(context)
+        .push(materialPageRoute)
+        .then((value) => setState(() {
+              readCart();
+              updateDatalist(index);
+            }));
+  }
+
+  Widget showGridImage(int index) {
+    String? photo = filterProductAllModels![index].photo;
+    return ClipRRect(
+      borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(6.0),
+        topRight: Radius.circular(6.0),
+      ),
+      child: AspectRatio(
+        aspectRatio: 1.1,
+        child: Container(
+          color: Colors.white,
+          padding: EdgeInsets.only(
+              left: 10.0, right: 10.0, top: 2.0, bottom: 5.0),
+          alignment: Alignment.center,
+          // ลดขนาดรูปลง 10% จากพื้นที่เดิม โดยไม่กระทบขนาด container/ตาราง
+          child: FractionallySizedBox(
+            widthFactor: 0.9,
+            heightFactor: 0.9,
+            child: (photo != null && photo.isNotEmpty)
+                ? Image.network(
+                    photo,
+                    fit: BoxFit.cover,
+                    alignment: FractionalOffset.topCenter,
+                    loadingBuilder: (context, child, progress) {
+                      if (progress == null) return child;
+                      return Center(
+                        child: SizedBox(
+                          width: 10.0,
+                          height: 10.0,
+                          child: CircularProgressIndicator(strokeWidth: 2.0),
+                        ),
+                      );
+                    },
+                    errorBuilder: (context, error, stackTrace) => Icon(
+                      Icons.image_not_supported_outlined,
+                      color: Colors.grey.shade400,
+                    ),
+                  )
+                : Icon(Icons.image_not_supported_outlined,
+                    color: Colors.grey.shade400),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget showGridStock(int index) {
+    ProductAllModel model = filterProductAllModels![index];
+    bool inStock = model.stock.toString() != '0';
+    bool hasInCart = model.itemincartSunit != '0' ||
+        model.itemincartMunit != '0' ||
+        model.itemincartLunit != '0';
+
+    String txtIncart = ((model.itemincartSunit != '0')
+            ? '${model.itemincartSunit} ${model.itemSunit}  '
+            : '') +
+        ((model.itemincartMunit != '0')
+            ? '${model.itemincartMunit} ${model.itemMunit}  '
+            : '') +
+        ((model.itemincartLunit != '0')
+            ? '${model.itemincartLunit} ${model.itemLunit}'
+            : '');
+
+    return Row(
+      children: <Widget>[
+        Expanded(
+          child: Text(
+            'Stock: ${model.stock}',
+            style: TextStyle(
+              fontSize: 13.0,
+              color: inStock ? Colors.grey.shade900 : Colors.red,
+            ),
+          ),
+        ),
+        if (hasInCart)
+          Flexible(
+            child: Text(
+              'ตะกร้า: $txtIncart',
+              style: TextStyle(fontSize: 13.0, color: Colors.red),
+              textAlign: TextAlign.right,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget showGridItem(int index) {
+    ProductAllModel model = filterProductAllModels![index];
+    return GestureDetector(
+      onTap: () => onTapProduct(index),
+      child: Card(
+        color: Colors.white,
+        elevation: 1.5,
+        margin: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(6.0),
+          side: BorderSide(color: Colors.green.shade100),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            showGridImage(index),
+            Padding(
+              padding: EdgeInsets.fromLTRB(8.0, 2.0, 8.0, 4.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Text(
+                    model.title ?? '',
+                    style: TextStyle(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF0B6B41),
+                      height: 1.2,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if ((model.hilight ?? '') != '')
+                    Padding(
+                      padding: EdgeInsets.only(top: 2.0),
+                      child: Text(
+                        model.hilight!,
+                        style: TextStyle(fontSize: 14.0, color: Colors.red),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  if ((model.extrapoint ?? '') != '')
+                    Padding(
+                      padding: EdgeInsets.only(top: 2.0),
+                      child: Text(
+                        model.extrapoint!,
+                        style: TextStyle(fontSize: 11.0, color: Colors.orange),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  Padding(
+                    padding: EdgeInsets.only(top: 4.0),
+                    child: Text(
+                      priceUnitText(index),
+                      style: TextStyle(
+                        fontSize: 12.5,
+                        color: Color.fromRGBO(50, 117, 168, 1.0),
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(top: 4.0),
+                    child: showGridStock(index),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget showProductItem() {
     int itemCount = filterProductAllModels!.length;
     bool showLoadingFooter = visible && itemCount > 0;
+
+    if (isGridView) {
+      return Expanded(
+        child: GridView.builder(
+          controller: scrollController,
+          padding: EdgeInsets.all(5.0),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            childAspectRatio: 0.66,
+            crossAxisSpacing: 8.0,
+            mainAxisSpacing: 8.0,
+          ),
+          itemCount: itemCount + (showLoadingFooter ? 1 : 0),
+          itemBuilder: (BuildContext buildContext, int index) {
+            if (index >= itemCount) {
+              return loadMoreIndicator();
+            }
+            return showGridItem(index);
+          },
+        ),
+      );
+    }
 
     return Expanded(
       child: ListView.builder(
@@ -638,24 +849,7 @@ class _ListProductState extends State<ListProduct> {
                 ),
               ),
             ),
-            onTap: () {
-              print('index select item => ${filterProductAllModels![index]}');
-              MaterialPageRoute materialPageRoute =
-                  MaterialPageRoute(builder: (BuildContext buildContext) {
-                return Detail(
-                  productAllModel: filterProductAllModels![index],
-                  userModel: myUserModel,
-                );
-              });
-
-              Navigator.of(context)
-                  .push(materialPageRoute)
-                  .then((value) => setState(() {
-                        readCart();
-                        updateDatalist(index);
-                      }));
-              // Navigator.of(context).push(materialPageRoute);
-            },
+            onTap: () => onTapProduct(index),
           );
         },
       ),
@@ -715,25 +909,30 @@ class _ListProductState extends State<ListProduct> {
   */
 
   Widget lastItemInCart() {
-    return Column(
-      children: <Widget>[
-        Container(
-          width: MediaQuery.of(context).size.width * 0.9,
-          child: Text(
-            'รายการล่าสุดในตะกร้า',
-            style: MyStyle().h3bStyle,
+    return Container(
+      padding: EdgeInsets.only(left: 8.0),
+      child: Row(
+        children: [
+          Expanded(
+           child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  'รายการล่าสุดในตะกร้า',
+                  style: MyStyle().h3bStyle,
+                ),
+                Text(lastItemName.toString(),
+                    style: TextStyle(
+                      fontSize: 14.0,
+                      // fontWeight: FontWeight.bold,
+                      color: Color.fromARGB(0xff, 0x00, 0x73, 0x26),
+                    )),
+              ],
+            ),
           ),
-        ),
-        Container(
-          width: MediaQuery.of(context).size.width * 0.9,
-          child: Text(lastItemName.toString(),
-              style: TextStyle(
-                fontSize: 14.0,
-                // fontWeight: FontWeight.bold,
-                color: Color.fromARGB(0xff, 0x00, 0x73, 0x26),
-              )),
-        ),
-      ],
+          showViewToggle(),
+        ],
+      ),
     );
   }
 
@@ -994,6 +1193,47 @@ Future<void> decodeQRcode(var code) async {
           ],
         ),
       ],
+    );
+  }
+
+  Widget showViewToggle() {
+    return Container(
+      margin: EdgeInsets.only(right: 8.0),
+      // padding: EdgeInsets.symmetric(vertical: 1.0, horizontal: 3.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(5),
+        border: Border.all(color: Colors.green.shade300),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          _viewToggleButton(icon: Icons.grid_view, selected: isGridView),
+          _viewToggleButton(icon: Icons.view_list, selected: !isGridView),
+        ],
+      ),
+    );
+  }
+
+  Widget _viewToggleButton({required IconData icon, required bool selected}) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          isGridView = icon == Icons.grid_view;
+        });
+      },
+      child: Container(
+        padding: EdgeInsets.all(9.0),
+        decoration: BoxDecoration(
+          color: selected ? MyStyle().bgColor : Colors.transparent,
+          borderRadius: BorderRadius.circular(5.0),
+        ),
+        child: Icon(
+          icon,
+          size: 20.0,
+          color: selected ? Colors.white : Colors.grey.shade600,
+        ),
+      ),
     );
   }
 

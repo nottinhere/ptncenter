@@ -91,7 +91,8 @@ class _NewsState extends State<News> {
     });
 
     String? memberId = myUserModel!.id;
-    String url = '${MyStyle().serverName}/json_newslist.php'
+    
+    String url = '${MyStyle().serverName}/json_news.php'
         '?memberId=$memberId&page=$page&limit=$perPage';
     print('urlNews >> $url');
 

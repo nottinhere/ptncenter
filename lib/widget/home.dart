@@ -90,6 +90,9 @@ class _HomeState extends State<Home> {
   final CarouselSliderController _groupPromoController =
       CarouselSliderController();
 
+  List<ProductAllModel> bestSellerModels = [];
+  List<ProductAllModel> trendingModels = [];
+
   // Method
   @override
   void initState() {
@@ -107,6 +110,8 @@ class _HomeState extends State<Home> {
     readLicenseAlert();
     readPromotionGroups();
     readGifts();
+    readBestSellers();
+    readTrending();
     Future.delayed(Duration.zero, () => showOrderSuccessDialog(context));
   }
 
@@ -178,6 +183,56 @@ class _HomeState extends State<Home> {
       }
     } catch (e) {
       print('readGifts error: $e');
+    }
+  }
+
+  Future<void> readBestSellers() async {
+    String? memberId = myUserModel?.id.toString();
+    if (memberId == null) return;
+    String url =
+        '${MyStyle().serverName}/json_productbestseller.php?memberId=$memberId&page=1';
+    try {
+      http.Response response = await http.get(Uri.parse(url));
+      var result = json.decode(response.body);
+      var itemsProduct = result['itemsProduct'];
+      List<ProductAllModel> models = [];
+      if (itemsProduct != null) {
+        for (var map in itemsProduct) {
+          models.add(ProductAllModel.fromJson(map));
+        }
+      }
+      if (mounted) {
+        setState(() {
+          bestSellerModels = models;
+        });
+      }
+    } catch (e) {
+      print('readBestSellers error: $e');
+    }
+  }
+
+  Future<void> readTrending() async {
+    String? memberId = myUserModel?.id.toString();
+    if (memberId == null) return;
+    String url =
+        '${MyStyle().serverName}/json_productbestintrend.php?memberId=$memberId&page=1';
+    try {
+      http.Response response = await http.get(Uri.parse(url));
+      var result = json.decode(response.body);
+      var itemsProduct = result['itemsProduct'];
+      List<ProductAllModel> models = [];
+      if (itemsProduct != null) {
+        for (var map in itemsProduct) {
+          models.add(ProductAllModel.fromJson(map));
+        }
+      }
+      if (mounted) {
+        setState(() {
+          trendingModels = models;
+        });
+      }
+    } catch (e) {
+      print('readTrending error: $e');
     }
   }
 
@@ -356,6 +411,256 @@ class _HomeState extends State<Home> {
             },
           ),
         ],
+      ),
+    );
+  }
+
+  Widget bestSellerSection() {
+    if (bestSellerModels.isEmpty) return SizedBox();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        sectionHeader('สินค้าขายดี', Icons.local_fire_department_rounded,
+            onSeeAll: () => routeToListProduct(7)),
+        SizedBox(
+          height: 260.0,
+          child: CarouselSlider.builder(
+            options: CarouselOptions(
+              height: 260.0,
+              viewportFraction: 0.42,
+              enableInfiniteScroll: false,
+              padEnds: false,
+            ),
+            itemCount: bestSellerModels.length,
+            itemBuilder: (context, index, realIdx) {
+              return bestSellerCard(bestSellerModels[index]);
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget trendingSection() {
+    if (trendingModels.isEmpty) return SizedBox();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        sectionHeader('สินค้ามาแรง', Icons.trending_up_rounded,
+            onSeeAll: () => routeToListProduct(8)),
+        SizedBox(
+          height: 260.0,
+          child: CarouselSlider.builder(
+            options: CarouselOptions(
+              height: 260.0,
+              viewportFraction: 0.42,
+              enableInfiniteScroll: false,
+              padEnds: false,
+            ),
+            itemCount: trendingModels.length,
+            itemBuilder: (context, index, realIdx) {
+              return bestSellerCard(trendingModels[index]);
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  void routeToBestSellerDetail(ProductAllModel product) {
+    MaterialPageRoute materialPageRoute =
+        MaterialPageRoute(builder: (BuildContext buildContext) {
+      return Detail(userModel: myUserModel, productAllModel: product);
+    });
+    Navigator.of(context).push(materialPageRoute).then((value) => readCart());
+  }
+
+  /// เหมือน priceUnitText() ในหน้า list_product (grid view) แต่รับ model ตรงๆ แทนดัชนี
+  String bestSellerPriceUnitText(ProductAllModel model) {
+    String txtPriceUnit = '';
+    if ((model.itemSprice ?? '0').toString() != '0') {
+      txtPriceUnit += ' [${model.itemSprice}/${model.itemSunit}] ';
+    }
+    if ((model.itemMprice ?? '0').toString() != '0') {
+      txtPriceUnit += ' [${model.itemMprice}/${model.itemMunit}] ';
+    }
+    if ((model.itemLprice ?? '0').toString() != '0') {
+      txtPriceUnit += ' [${model.itemLprice}/${model.itemLunit}] ';
+    }
+    return txtPriceUnit;
+  }
+
+  /// เหมือน showGridImage() ในหน้า list_product
+  Widget bestSellerImage(ProductAllModel product) {
+    String? photo = product.photo;
+    return ClipRRect(
+      borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(6.0),
+        topRight: Radius.circular(6.0),
+      ),
+      child: AspectRatio(
+        aspectRatio: 1.0,
+        child: Container(
+          color: Colors.white,
+          padding:
+              EdgeInsets.only(left: 10.0, right: 10.0, top: 5.0, bottom: 5.0),
+          alignment: Alignment.center,
+          child: FractionallySizedBox(
+            widthFactor: 0.9,
+            heightFactor: 0.9,
+            child: (photo != null && photo.isNotEmpty)
+                ? Image.network(
+                    photo,
+                    fit: BoxFit.cover,
+                    alignment: FractionalOffset.topCenter,
+                    loadingBuilder: (context, child, progress) {
+                      if (progress == null) return child;
+                      return Center(
+                        child: SizedBox(
+                          width: 10.0,
+                          height: 10.0,
+                          child: CircularProgressIndicator(strokeWidth: 2.0),
+                        ),
+                      );
+                    },
+                    errorBuilder: (context, error, stackTrace) => Icon(
+                      Icons.image_not_supported_outlined,
+                      color: Colors.grey.shade400,
+                    ),
+                  )
+                : Icon(Icons.image_not_supported_outlined,
+                    color: Colors.grey.shade400),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// เหมือน showGridStock() ในหน้า list_product
+  Widget bestSellerStockRow(ProductAllModel model) {
+    bool inStock = model.stock.toString() != '0';
+    bool hasInCart = model.itemincartSunit != '0' ||
+        model.itemincartMunit != '0' ||
+        model.itemincartLunit != '0';
+
+    String txtIncart = ((model.itemincartSunit != '0')
+            ? '${model.itemincartSunit} ${model.itemSunit}  '
+            : '') +
+        ((model.itemincartMunit != '0')
+            ? '${model.itemincartMunit} ${model.itemMunit}  '
+            : '') +
+        ((model.itemincartLunit != '0')
+            ? '${model.itemincartLunit} ${model.itemLunit}'
+            : '');
+
+    return Row(
+      children: <Widget>[
+        Expanded(
+          child: Text(
+            'Stock: ${model.stock}',
+            style: TextStyle(
+              fontSize: 13.0,
+              color: inStock ? Colors.grey.shade900 : Colors.red,
+            ),
+          ),
+        ),
+        if (hasInCart)
+          Flexible(
+            child: Text(
+              'ตะกร้า: $txtIncart',
+              style: TextStyle(fontSize: 13.0, color: Colors.red),
+              textAlign: TextAlign.right,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+      ],
+    );
+  }
+
+  /// เหมือน showGridItem() ในหน้า list_product (แสดงแบบ gridview) แต่ใช้ในแนวนอนแบบ carousel
+  Widget bestSellerCard(ProductAllModel product) {
+    return GestureDetector(
+      onTap: () => routeToBestSellerDetail(product),
+      child: Container(
+        margin: EdgeInsets.symmetric(horizontal: 6.0),
+        child: Card(
+          color: Colors.white,
+          elevation: 1.5,
+          margin: EdgeInsets.zero,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(6.0),
+            side: BorderSide(color: Colors.green.shade100),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              bestSellerImage(product),
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Text(
+                        product.title ?? '',
+                        style: TextStyle(
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF0B6B41),
+                          height: 1.2,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if ((product.hilight ?? '') != '')
+                        Padding(
+                          padding: EdgeInsets.only(top: 2.0),
+                          child: Text(
+                            product.hilight!,
+                            style: TextStyle(fontSize: 14.0, color: Colors.red),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      if ((product.extrapoint ?? '') != '')
+                        Padding(
+                          padding: EdgeInsets.only(top: 2.0),
+                          child: Text(
+                            product.extrapoint!,
+                            style:
+                                TextStyle(fontSize: 11.0, color: Colors.orange),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      Padding(
+                        padding: EdgeInsets.only(top: 4.0),
+                        child: Text(
+                          bestSellerPriceUnitText(product),
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            color: Color.fromRGBO(50, 117, 168, 1.0),
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(top: 4.0),
+                        child: bestSellerStockRow(product),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -894,9 +1199,10 @@ class _HomeState extends State<Home> {
         });
         Navigator.of(context).push(materialPageRoute);
       }),
-            _QuickAction(Icons.history_rounded, 'ประวัติสั่ง(Web)',
+      _QuickAction(Icons.history_rounded, 'ประวัติสั่ง(Web)',
           () => _openWebPage('history')),
-
+      _QuickAction(Icons.newspaper, 'ข่าวสาร',
+          () => routeToNews()),
     ];
   }
 
@@ -1085,9 +1391,11 @@ class _HomeState extends State<Home> {
             quickAccessProductGrid(),
             sectionHeader('เพิ่มเติม', Icons.menu_book_rounded),
             quickAccessGrid(),
-            sectionHeader('ข่าวสาร', Icons.newspaper_rounded,
-                onSeeAll: routeToNews),
-            newsSection(),
+            bestSellerSection(),
+            trendingSection(),
+            // sectionHeader('ข่าวสาร', Icons.newspaper_rounded,
+            //     onSeeAll: routeToNews),
+            // newsSection(),
           ],
         ),
       ),
