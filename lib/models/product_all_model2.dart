@@ -81,7 +81,7 @@ class ProductAllModel2 {
     productCode = json['product_code'];
     photo = json['photo'];
     priceList = json['price_list'] != null
-        ? new PriceList.fromJson(json['price_list'])
+        ? PriceList.fromJson(json['price_list'])
         : null;
     expire = json['expire'];
     expireColor = json['expire_color'];
@@ -116,45 +116,45 @@ class ProductAllModel2 {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['title'] = this.title;
-    data['hilight'] = this.hilight;
-    data['extrapoint'] = this.extrapoint;
-    data['product_code'] = this.productCode;
-    data['photo'] = this.photo;
-    if (this.priceList != null) {
-      data['price_list'] = this.priceList!.toJson();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['title'] = title;
+    data['hilight'] = hilight;
+    data['extrapoint'] = extrapoint;
+    data['product_code'] = productCode;
+    data['photo'] = photo;
+    if (priceList != null) {
+      data['price_list'] = priceList!.toJson();
     }
-    data['expire'] = this.expire;
-    data['expire_color'] = this.expireColor;
-    data['detail'] = this.detail;
-    data['usefor'] = this.usefor;
-    data['method'] = this.method;
-    data['itemincartSunit'] = this.itemincartSunit;
-    data['itemincartMunit'] = this.itemincartMunit;
-    data['itemincartLunit'] = this.itemincartLunit;
-    data['limitS'] = this.limitS;
-    data['limitM'] = this.limitM;
-    data['limitL'] = this.limitL;
-    data['subtract_s'] = this.subtractS;
-    data['subtract_m'] = this.subtractM;
-    data['subtract_l'] = this.subtractL;
-    data['btnAdd1'] = this.btnAdd1;
-    data['btnAdd2'] = this.btnAdd2;
-    data['recommend'] = this.recommend;
-    data['promotion'] = this.promotion;
-    data['updateprice'] = this.updateprice;
-    data['newproduct'] = this.newproduct;
-    data['notreceive'] = this.notreceive;
-    data['favorite'] = this.favorite;
-    data['stock'] = this.stock;
-    data['id'] = this.id;
-    data['cateID'] = this.cateID;
-    data['cateName'] = this.cateName;
-    data['youtube'] = this.youtube;
-    data['tiktok'] = this.tiktok;
-    data['pricelabel'] = this.pricelabel;
-    data['pricesale'] = this.pricesale;
+    data['expire'] = expire;
+    data['expire_color'] = expireColor;
+    data['detail'] = detail;
+    data['usefor'] = usefor;
+    data['method'] = method;
+    data['itemincartSunit'] = itemincartSunit;
+    data['itemincartMunit'] = itemincartMunit;
+    data['itemincartLunit'] = itemincartLunit;
+    data['limitS'] = limitS;
+    data['limitM'] = limitM;
+    data['limitL'] = limitL;
+    data['subtract_s'] = subtractS;
+    data['subtract_m'] = subtractM;
+    data['subtract_l'] = subtractL;
+    data['btnAdd1'] = btnAdd1;
+    data['btnAdd2'] = btnAdd2;
+    data['recommend'] = recommend;
+    data['promotion'] = promotion;
+    data['updateprice'] = updateprice;
+    data['newproduct'] = newproduct;
+    data['notreceive'] = notreceive;
+    data['favorite'] = favorite;
+    data['stock'] = stock;
+    data['id'] = id;
+    data['cateID'] = cateID;
+    data['cateName'] = cateName;
+    data['youtube'] = youtube;
+    data['tiktok'] = tiktok;
+    data['pricelabel'] = pricelabel;
+    data['pricesale'] = pricesale;
     return data;
   }
 }
@@ -165,13 +165,13 @@ class PriceList {
   PriceList({this.s});
 
   PriceList.fromJson(Map<String, dynamic> json) {
-    s = json['s'] != null ? new S.fromJson(json['s']) : null;
+    s = json['s'] != null ? S.fromJson(json['s']) : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    if (this.s != null) {
-      data['s'] = this.s!.toJson();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    if (s != null) {
+      data['s'] = s!.toJson();
     }
     return data;
   }
@@ -193,11 +193,11 @@ class S {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['lable'] = this.lable;
-    data['price'] = this.price;
-    data['unit'] = this.unit;
-    data['limitorder'] = this.limitorder;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['lable'] = lable;
+    data['price'] = price;
+    data['unit'] = unit;
+    data['limitorder'] = limitorder;
     return data;
   }
 }

@@ -39,18 +39,18 @@ class PopupModel {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['subject'] = this.subject;
-    data['detail'] = this.detail;
-    data['txtBTN'] = this.txtBTN;
-    data['url'] = this.url;
-    data['postdate'] = this.postdate;
-    data['diffdate'] = this.diffdate;
-    data['absdiffdate'] = this.absdiffdate;
-    data['photo'] = this.photo;
-    data['document'] = this.document;
-    data['popstatus'] = this.popstatus;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['subject'] = subject;
+    data['detail'] = detail;
+    data['txtBTN'] = txtBTN;
+    data['url'] = url;
+    data['postdate'] = postdate;
+    data['diffdate'] = diffdate;
+    data['absdiffdate'] = absdiffdate;
+    data['photo'] = photo;
+    data['document'] = document;
+    data['popstatus'] = popstatus;
     return data;
   }
 }

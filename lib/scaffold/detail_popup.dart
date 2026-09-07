@@ -10,8 +10,7 @@ class PopupCarouselDialog extends StatefulWidget {
   final UserModel? userModel;
 
   const PopupCarouselDialog(
-      {Key? key, required this.popupModels, this.userModel})
-      : super(key: key);
+      {super.key, required this.popupModels, this.userModel});
 
   @override
   _PopupCarouselDialogState createState() => _PopupCarouselDialogState();

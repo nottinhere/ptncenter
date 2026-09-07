@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -13,6 +13,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 
 class Authen extends StatefulWidget {
+  const Authen({super.key});
+
   @override
   _AuthenState createState() => _AuthenState();
 }
@@ -59,7 +61,6 @@ class _AuthenState extends State<Authen> {
         });
       }
     } catch (e) {
-      print('checkLogin error: $e');
       if (mounted) {
         setState(() {
           status = false;
@@ -69,7 +70,7 @@ class _AuthenState extends State<Authen> {
   }
 
   Widget rememberCheckbox() {
-    return Container(
+    return SizedBox(
       width: 250.0,
       child: Theme(
         data: Theme.of(context)
@@ -93,7 +94,7 @@ class _AuthenState extends State<Authen> {
 
   // Method
   Widget loginButton() {
-    return Container(
+    return SizedBox(
       width: 250.0,
       child: ElevatedButton(
         // shape: RoundedRectangleBorder(
@@ -111,9 +112,6 @@ class _AuthenState extends State<Authen> {
             )),
         onPressed: () {
           formKey.currentState!.save();
-          print(
-            'user = $user,password = $password',
-          );
           checkAuthen();
         },
       ),
@@ -204,9 +202,9 @@ class _AuthenState extends State<Authen> {
       try {
         String url =
             '${MyStyle().getUserWhereUserAndPass}?username=$user&password=$password';
-        print('url = $url');
         http.Response response = await http.get(Uri.parse(
             url)); // await จะต้องทำงานใน await จะเสร็จจึงจะไปทำ process ต่อไป
+        if (!mounted) return;
         var result = json.decode(response.body);
         int statusInt = result['status'];
 
@@ -217,15 +215,14 @@ class _AuthenState extends State<Authen> {
           await sharedPreferences.remove('user');
           await sharedPreferences.remove('password');
 
+          if (!mounted) return;
           normalDialogLogin(context, 'ข้อมูลไม่ถูกต้อง', message);
         } else if (statusInt == 1) {
           Map<String, dynamic> map = result['data'];
-          print('map = $map');
           userModel = UserModel.fromJson(map);
 
           String urlPop =
               '${MyStyle().serverName}/json_mypopup.php?popup=1&memberId=${userModel!.id}';
-              print('urlPop = $urlPop');
           List<PopupModel> popups = [];
           try {
             http.Response responsePop = await http.get(Uri.parse(urlPop));
@@ -242,7 +239,6 @@ class _AuthenState extends State<Authen> {
             }
           } catch (e) {
             // โหลด popup ไม่สำเร็จ ไม่ critical พอที่จะบล็อก login ไม่ให้ผ่าน
-            print('load popup error: $e');
           }
           setState(() {
             popupModels = popups;
@@ -256,10 +252,11 @@ class _AuthenState extends State<Authen> {
         }
         if (statusInt == 2) {
           String message = 'กรุณาติดต่อทางร้าน';
+          if (!mounted) return;
           normalDialog(context, 'ข้อมูลไม่ถูกต้อง !!!', message);
         }
       } catch (e) {
-        print('checkAuthen error: $e');
+        if (!mounted) return;
         AwesomeDialog(
           context: context,
           headerAnimationLoop: false,
@@ -388,7 +385,7 @@ class _AuthenState extends State<Authen> {
   }
 
   Widget showLogo() {
-    return Container(
+    return SizedBox(
       width: 150.0,
       height: 150.0,
       child: Image.asset('images/logo_master.png'),

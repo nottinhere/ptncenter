@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -12,16 +12,13 @@ import 'package:ptncenter/utility/my_style.dart';
 import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:ptncenter/utility/normal_dialog.dart';
 import 'package:ptncenter/scaffold/list_product.dart';
-import 'package:ptncenter/scaffold/list_product_promotion.dart';
 import 'package:ptncenter/scaffold/list_product_favorite.dart';
 import 'my_service.dart';
 import 'detail.dart';
 import 'detail_cart.dart';
 import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
 import 'package:loading_indicator/loading_indicator.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/foundation.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:toast/toast.dart';
 
@@ -71,15 +68,14 @@ class ListProductPromotion extends StatefulWidget {
   final String? searchStr;
   final String? promotionGroupId;
 
-  ListProductPromotion(
-      {Key? key,
+  const ListProductPromotion(
+      {super.key,
       this.index,
       this.userModel,
       this.cate,
       this.cateName,
       this.searchStr,
-      this.promotionGroupId})
-      : super(key: key);
+      this.promotionGroupId});
 
   @override
   _ListProductPromotionState createState() => _ListProductPromotionState();
@@ -207,7 +203,6 @@ class _ListProductPromotionState extends State<ListProductPromotion> {
             scrollController.position.maxScrollExtent) {
           page = page! + 1;
           readData();
-          print('in the end');
         }
       } else {
         setState(() {
@@ -218,9 +213,8 @@ class _ListProductPromotionState extends State<ListProductPromotion> {
     });
   }
 
-/************************************** */
+/// ************************************
   Future<void> readCart() async {
-    print('Here is readcart function');
 
     amontCart = 0;
     lastItemName = '';
@@ -228,9 +222,9 @@ class _ListProductPromotionState extends State<ListProductPromotion> {
     String url =
         '${MyStyle().serverName}/json_loadmycart.php?memberId=$memberId&screen=listproduct';
 
-    print('url Detail =====>>>>>>>> $url');
 
     http.Response response = await http.get(Uri.parse(url));
+    if (!mounted) return;
     var result = json.decode(response.body);
 
     final Map<String, dynamic>  myCredit = result['data'];
@@ -288,9 +282,7 @@ class _ListProductPromotionState extends State<ListProductPromotion> {
         }
         computeNearMiss();
       }
-    } catch (e) {
-      print('readPromotionGroupRule error: $e');
-    }
+    } catch (e) {} // ignore: empty_catches
   }
 
   Future<void> readGiftItems() async {
@@ -307,9 +299,7 @@ class _ListProductPromotionState extends State<ListProductPromotion> {
         giftMap = map;
         computeNearMiss();
       }
-    } catch (e) {
-      print('readGiftItems error: $e');
-    }
+    } catch (e) {} // ignore: empty_catches
   }
 
   Future<void> readUnitNames() async {
@@ -327,9 +317,7 @@ class _ListProductPromotionState extends State<ListProductPromotion> {
         unitNameMap = map;
         computeNearMiss();
       }
-    } catch (e) {
-      print('readUnitNames error: $e');
-    }
+    } catch (e) {} // ignore: empty_catches
   }
 
   String formatNum(double value) {
@@ -512,7 +500,6 @@ class _ListProductPromotionState extends State<ListProductPromotion> {
   Future<void> readData() async {
     // List<ProductAllModel> productAllModels_buffer = List(); // []; //
     // String url = MyStyle().readAllProduct;
-    print('Here is readdata function');
     setState(() {
       visible = true;
     });
@@ -523,15 +510,12 @@ class _ListProductPromotionState extends State<ListProductPromotion> {
 
 
     // url = '${MyStyle().readProductWhereMode}$myIndex';
-    print("URL = $url");
 
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var itemProducts = result['itemsProduct'];
     // print('itemProducts >> ${itemProducts}');
     int i = 0;
-
-    int len = (filterProductAllModels!.length);
 
     for (var map in itemProducts) {
       ProductAllModel productAllModel = ProductAllModel.fromJson(map);
@@ -540,8 +524,6 @@ class _ListProductPromotionState extends State<ListProductPromotion> {
         productAllModels!.add(productAllModel);
         filterProductAllModels = productAllModels;
       });
-      print(
-          ' >> ${len} =>($i)  ${productAllModel.id}  || ${productAllModels![i].title} (${filterProductAllModels![i].itemincartSunit}) <<  (${productAllModel.itemincartSunit})');
 
       i = i + 1;
     }
@@ -551,35 +533,34 @@ class _ListProductPromotionState extends State<ListProductPromotion> {
   }
 
   Future<void>? showCreditAlertMessage() {
-    print('CREDIT CHECK > $creditterm + $financialamount + $contactAdmin');
     if (creditterm !='-' || financialamount !='-' || contactAdmin !='-') {
         var txtCreditTitle =  '';
-        if(creditterm !='-' )
+        if(creditterm !='-' ) {
           txtCreditTitle =  'ท่านมียอดค้างชำระเกินกำหนด';
-        else if(financialamount !='-' )
+        } else if(financialamount !='-' ) {
           txtCreditTitle =  'ท่านมียอดค้างชำระเกินวงเงินที่กำหนด';
-        else if(contactAdmin !='-' )
+        } else if(contactAdmin !='-' ) {
           txtCreditTitle =  'กรุณาติดต่อผู้ดูแลระบบ';
+        }
 
       Toast.show(txtCreditTitle,
           duration: 5,// Toast.lengthLong,
           gravity: Toast.bottom,
           backgroundColor: const Color.fromARGB(255, 243, 88, 61));
     }
+    return null;
   }
 
 
   Future<void> updateDatalist(index) async {
     // List<ProductAllModel> productAllModels_buffer = List(); // []; //
     // String url = MyStyle().readAllProduct;
-    print('Here is updateDatalist function');
 
     String? memberId = myUserModel!.id.toString();
     int? productID = filterProductAllModels![index].id!;
     String? url =
         '${MyStyle().serverName}/json_loadmycart.php?memberId=$memberId';
 
-    print("URL update item = $url");
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var cartList = result['cart'];
@@ -613,7 +594,7 @@ class _ListProductPromotionState extends State<ListProductPromotion> {
   Widget showName(int index) {
     return Row(
       children: <Widget>[
-        Container(
+        SizedBox(
           width: MediaQuery.of(context).size.width * 0.75,
           child: Text(
             filterProductAllModels![index].title!,
@@ -627,7 +608,7 @@ class _ListProductPromotionState extends State<ListProductPromotion> {
   Widget showHilight(int index) {
     return Row(
       children: <Widget>[
-        Container(
+        SizedBox(
           width: MediaQuery.of(context).size.width * 0.75,
           child: Text(
             filterProductAllModels![index].hilight!,
@@ -641,7 +622,7 @@ class _ListProductPromotionState extends State<ListProductPromotion> {
   Widget showExtrapoint(int index) {
     return Row(
       children: <Widget>[
-        Container(
+        SizedBox(
           width: MediaQuery.of(context).size.width * 0.75,
           child: Text(
             filterProductAllModels![index].extrapoint!,
@@ -655,14 +636,14 @@ class _ListProductPromotionState extends State<ListProductPromotion> {
   Widget showStock(int index) {
     return Row(
       children: <Widget>[
-        Container(
+        SizedBox(
           width: MediaQuery.of(context).size.width * 0.12,
           child: Text(
             'Stock:',
             style: MyStyle().h4StyleGray,
           ),
         ),
-        Container(
+        SizedBox(
           width: MediaQuery.of(context).size.width * 0.12,
           child: Text(
             ' ${filterProductAllModels![index].stock}',
@@ -679,7 +660,7 @@ class _ListProductPromotionState extends State<ListProductPromotion> {
 
   Widget showIncart(int index) {
     return Row(children: <Widget>[
-      Container(
+      SizedBox(
         width: MediaQuery.of(context).size.width * 0.13,
         child: Text(
           (filterProductAllModels![index].itemincartSunit != '0' ||
@@ -690,7 +671,7 @@ class _ListProductPromotionState extends State<ListProductPromotion> {
           style: MyStyle().h4StyleRed,
         ),
       ),
-      Container(
+      SizedBox(
         width: MediaQuery.of(context).size.width * 0.25,
         child: Text(
           ((filterProductAllModels![index].itemincartSunit != '0')
@@ -715,26 +696,29 @@ class _ListProductPromotionState extends State<ListProductPromotion> {
     if (filterProductAllModels![index].itemSprice.toString() != '0') {
       txtShowPrice = filterProductAllModels![index].itemSprice.toString();
       txtShowUnit = filterProductAllModels![index].itemSunit.toString();
-      if (txtShowPrice != '' && txtShowUnit != '')
-        txtPriceUnit = '$txtPriceUnit' + " [$txtShowPrice/$txtShowUnit] ";
+      if (txtShowPrice != '' && txtShowUnit != '') {
+        txtPriceUnit += " [$txtShowPrice/$txtShowUnit] ";
+      }
     }
     if (filterProductAllModels![index].itemMprice.toString() != '0') {
       txtShowPrice = filterProductAllModels![index].itemMprice.toString();
       txtShowUnit = filterProductAllModels![index].itemMunit.toString();
-      if (txtShowPrice != '' && txtShowUnit != '')
-        txtPriceUnit = '$txtPriceUnit' + " [$txtShowPrice/$txtShowUnit] ";
+      if (txtShowPrice != '' && txtShowUnit != '') {
+        txtPriceUnit += " [$txtShowPrice/$txtShowUnit] ";
+      }
     }
     if (filterProductAllModels![index].itemLprice.toString() != '0') {
       txtShowPrice = filterProductAllModels![index].itemLprice.toString();
       txtShowUnit = filterProductAllModels![index].itemLunit.toString();
-      if (txtShowPrice != '' && txtShowUnit != '')
-        txtPriceUnit = '$txtPriceUnit' + " [$txtShowPrice/$txtShowUnit] ";
+      if (txtShowPrice != '' && txtShowUnit != '') {
+        txtPriceUnit += " [$txtShowPrice/$txtShowUnit] ";
+      }
     }
 
     return Row(
       children: <Widget>[
         Text(
-          '$txtPriceUnit',
+          txtPriceUnit,
           style: TextStyle(
             fontSize: 16.0,
             //  fontWeight: FontWeight.bold,
@@ -778,11 +762,11 @@ class _ListProductPromotionState extends State<ListProductPromotion> {
       // child: Image.network(filterProductAllModels![index].photo),
       width: 80,
       height: 80,
-      decoration: new BoxDecoration(
-          image: new DecorationImage(
+      decoration: BoxDecoration(
+          image: DecorationImage(
         fit: BoxFit.cover,
         alignment: FractionalOffset.topCenter,
-        image: new NetworkImage(filterProductAllModels![index].photo!),
+        image: NetworkImage(filterProductAllModels![index].photo!),
       )),
     );
   }
@@ -1142,22 +1126,19 @@ class _ListProductPromotionState extends State<ListProductPromotion> {
           }
 
           return GestureDetector(
-            child: Container(
-              child: Card(
-                child: Container(
-                  decoration: myBoxDecoration(),
-                  padding: EdgeInsets.only(top: 0.5),
-                  child: Row(
-                    children: <Widget>[
-                      showImage(index),
-                      showText(index),
-                    ],
-                  ),
+            child: Card(
+              child: Container(
+                decoration: myBoxDecoration(),
+                padding: EdgeInsets.only(top: 0.5),
+                child: Row(
+                  children: <Widget>[
+                    showImage(index),
+                    showText(index),
+                  ],
                 ),
               ),
             ),
             onTap: () {
-              print('index select item => ${filterProductAllModels![index]}');
               MaterialPageRoute materialPageRoute =
                   MaterialPageRoute(builder: (BuildContext buildContext) {
                 return Detail(
@@ -1186,7 +1167,7 @@ class _ListProductPromotionState extends State<ListProductPromotion> {
       searchKey = true;
     }
 
-    if (filterProductAllModels!.length == 0) {
+    if (filterProductAllModels!.isEmpty) {
       if (myIndex != 4) {
         return showProgressIndicate(searchKey);
       } else {
@@ -1201,7 +1182,7 @@ class _ListProductPromotionState extends State<ListProductPromotion> {
     // print('searchKey >> $searchKey');
 
     if (searchKey == true) {
-      if (filterProductAllModels!.length == 0) {
+      if (filterProductAllModels!.isEmpty) {
         return Center(child: Text('')); // Search not found
       } else {
         return Center(child: Text(''));
@@ -1260,19 +1241,14 @@ class _ListProductPromotionState extends State<ListProductPromotion> {
     try {
       // final qrScanString = await Navigator.push(this.context,
       //     MaterialPageRoute(builder: (context) => ScanPreviewPage()));
-      var qrScanString;
-      print('Before scan');
+      ScanResult qrScanString;
       qrScanString = await BarcodeScanner.scan();
-      print('After scan');
-      print('scanl result: $qrScanString');
       qrString = qrScanString.rawContent;
       if (qrString != null) {
         decodeQRcode(qrString);
       }
       // setState(() => scanResult = qrScanString);
-    } on PlatformException catch (e) {
-      print('e = $e');
-    }
+    } on PlatformException {} // ignore: empty_catches
   }
 
 Future<void> decodeQRcode(var code) async {
@@ -1280,13 +1256,12 @@ Future<void> decodeQRcode(var code) async {
       if(code != '' && code != null){
         String url =
             '${MyStyle().serverName}/json_productlist.php?bqcode=$code';
-            print('url === (decodeQRcode) >>>> $url');
         http.Response response = await http.get(Uri.parse(url));
+        if (!mounted) return;
         var result = json.decode(response.body);
         // print('result (decodeQRcode) ===>>>> $result');
 
         int status = result['status'];
-        print('status ===>>> $status');
         if (status == 0) {
           normalDialog(context, 'Not found', 'ไม่พบ code :: $code ในระบบ');
         } else {
@@ -1306,7 +1281,13 @@ Future<void> decodeQRcode(var code) async {
           }
         }
       }
-    } catch (e) {}
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('ค้นหาสินค้าไม่สำเร็จ กรุณาลองใหม่อีกครั้ง')),
+        );
+      }
+    }
   }
 
   List<String> jsonSuggestMed =[];
@@ -1316,7 +1297,7 @@ Future<void> decodeQRcode(var code) async {
     http.Response response = await http.get(Uri.parse(url));
     var result =  json.decode(response.body.toLowerCase()); // json.decode(utf8.decode(response.bodyBytes).toLowerCase());
     for (var map in result) {
-      jsonSuggestMed.add(map['name']+"|"+map['code']);   // map['code']+"|"+map['name']
+      jsonSuggestMed.add('${map['name']}|${map['code']}');   // map['code']+"|"+map['name']
     }
     setState(() {
        jsonSuggestMed;
@@ -1390,7 +1371,6 @@ Future<void> decodeQRcode(var code) async {
   Widget searchForm() {
     
     List<String> listjsonSuggestMed = jsonSuggestMed;
-    print('listjsonSuggestMed > $listjsonSuggestMed');
     // const List<String> _kOptions = jsonSuggestMed;
     return Column(
 
@@ -1472,7 +1452,7 @@ Future<void> decodeQRcode(var code) async {
                 },
                 onSelected: (String selection) {    // onSelected: (String selection) {
                     var parts = selection.split('|');
-                    searchString = 'x|'+parts.sublist(1).join('|').trim();
+                    searchString = 'x|${parts.sublist(1).join('|').trim()}';
                     setState(() {
                       page = 1;
                       myIndex = 0;
@@ -1485,7 +1465,6 @@ Future<void> decodeQRcode(var code) async {
             ),
              GestureDetector(
               onTap: () {
-                print('You click barcode scan');
                 readQRcodePreview();
               }, // Image tapped
               // padding: EdgeInsets.only(left: 5.00,right: 5.00),
@@ -1578,7 +1557,7 @@ Future<void> decodeQRcode(var code) async {
 
   @override
   Widget build(BuildContext context) {
-    String txtheader  = 'กลุ่ม'+myCateName!;
+    String txtheader  = 'กลุ่ม${myCateName!}';
 
     return Scaffold(
       appBar: AppBar(
@@ -1604,6 +1583,8 @@ Future<void> decodeQRcode(var code) async {
 }
 
 class ScanPreviewPage extends StatefulWidget {
+  const ScanPreviewPage({super.key});
+
   @override
   _ScanPreviewPageState createState() => _ScanPreviewPageState();
 }

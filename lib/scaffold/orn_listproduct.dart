@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -21,8 +21,7 @@ class ListProductOrn extends StatefulWidget {
   final String? ornId;
   final String? ornNo;
 
-  const ListProductOrn({Key? key, this.userModel, this.ornId, this.ornNo})
-      : super(key: key);
+  const ListProductOrn({super.key, this.userModel, this.ornId, this.ornNo});
 
   @override
   _ListProductOrnState createState() => _ListProductOrnState();
@@ -63,7 +62,6 @@ class _ListProductOrnState extends State<ListProductOrn> {
     String? memberId = myUserModel?.id;
     String url =
         '${MyStyle().serverName}/json_loadmycart.php?memberId=$memberId';
-    print('url readCart (orn product) > $url');
 
     try {
       http.Response response = await http.get(Uri.parse(url));
@@ -87,9 +85,7 @@ class _ListProductOrnState extends State<ListProductOrn> {
           });
         }
       }
-    } catch (e) {
-      print('readCart (orn product) error: $e');
-    }
+    } catch (e) {} // ignore: empty_catches
   }
 
   Future<void> addToCart(OrnProductModel item) async {
@@ -99,7 +95,6 @@ class _ListProductOrnState extends State<ListProductOrn> {
     String? memberId = myUserModel?.id;
     String url = '${MyStyle().serverName}/json_savemycart.php'
         '?productID=${item.medId}&unitSize=${item.size}&QTY=$qty&memberId=$memberId';
-    print('url addToCart (orn product) > $url');
 
     try {
       await http.get(Uri.parse(url));
@@ -114,7 +109,6 @@ class _ListProductOrnState extends State<ListProductOrn> {
         );
       }
     } catch (e) {
-      print('addToCart (orn product) error: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('เพิ่มลงตะกร้าไม่สำเร็จ')),
@@ -143,12 +137,10 @@ class _ListProductOrnState extends State<ListProductOrn> {
     String? memberId = myUserModel!.id;
     String url =
         '${MyStyle().serverName}/json_orn_productlist.php?memberId=$memberId&orn_id=$ornId&page=$page';
-    print('url > $url');
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var itemsProduct = result['itemsProduct'] ?? [];
     totalRecords = int.tryParse(result['totalRecords']?.toString() ?? '0') ?? 0;
-    print('totalRecords > $totalRecords');
 
     if (itemsProduct is List) {
       for (var map in itemsProduct) {
@@ -371,22 +363,17 @@ class _ListProductOrnState extends State<ListProductOrn> {
     try {
       // final qrScanString = await Navigator.push(this.context,
       //     MaterialPageRoute(builder: (context) => ScanPreviewPage()));
-      var qrScanString;
+      ScanResult qrScanString;
       qrString = '';
-      print('Before scan');
       qrScanString = await BarcodeScanner.scan();
-      print('After scan');
       // print('scan result: $qrScanString');
-      qrString = qrScanString!.rawContent;
-      print('scan result: $qrString');
+      qrString = qrScanString.rawContent;
 
       if (qrString != null) {
         decodeQRcodeORN(qrString!);
       }
       // setState(() => scanResult = qrScanString);
-    } on PlatformException catch (e) {
-      print('e = $e');
-    }
+    } on PlatformException {} // ignore: empty_catches
   }
 
   Future<void> decodeQRcodeORN(var code) async {
@@ -397,17 +384,15 @@ class _ListProductOrnState extends State<ListProductOrn> {
         // id = currentOrnAllModel!.id.toString();
         String? url =
             '${MyStyle().serverName}/json_ornlist.php?memberId=$memberId&code=$code'; // &code=$code
-        print("URL = $url");
         http.Response response = await http.get(Uri.parse(url));
+        if (!mounted) return;
         var result = json.decode(response.body);
 
-        print('result (decodeQRcode) ===>>>> $result');
 
         int? status = result!['status'];
         String? title = 'ข้อมูลไม่ถูกต้อง';
         String? message = result!['message'];
         OrnModel? ornScanAllModel;
-        print('status ===>>> $status');
         if (status == 0) {
           // normalDialog(context, 'Not found', 'ไม่พบ code :: $code ในระบบ');
           AwesomeDialog(
@@ -436,7 +421,13 @@ class _ListProductOrnState extends State<ListProductOrn> {
           Navigator.of(context).push(materialPageRoute);
         }
       }
-    } catch (e) {}
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('ค้นหาข้อมูลไม่สำเร็จ กรุณาลองใหม่อีกครั้ง')),
+        );
+      }
+    }
   }
 
 

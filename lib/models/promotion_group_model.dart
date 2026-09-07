@@ -59,24 +59,24 @@ class PromotionGroupModel {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['code'] = this.code;
-    data['name'] = this.name;
-    data['hilight'] = this.hilight;
-    data['med'] = this.med;
-    data['target'] = this.target;
-    data['gift'] = this.gift;
-    data['getqty'] = this.getqty;
-    data['limitgift'] = this.limitgift;
-    data['target2'] = this.target2;
-    data['gift2'] = this.gift2;
-    data['getqty2'] = this.getqty2;
-    data['limitgift2'] = this.limitgift2;
-    data['target3'] = this.target3;
-    data['gift3'] = this.gift3;
-    data['getqty3'] = this.getqty3;
-    data['limitgift3'] = this.limitgift3;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['code'] = code;
+    data['name'] = name;
+    data['hilight'] = hilight;
+    data['med'] = med;
+    data['target'] = target;
+    data['gift'] = gift;
+    data['getqty'] = getqty;
+    data['limitgift'] = limitgift;
+    data['target2'] = target2;
+    data['gift2'] = gift2;
+    data['getqty2'] = getqty2;
+    data['limitgift2'] = limitgift2;
+    data['target3'] = target3;
+    data['gift3'] = gift3;
+    data['getqty3'] = getqty3;
+    data['limitgift3'] = limitgift3;
     return data;
   }
 

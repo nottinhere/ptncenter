@@ -3,6 +3,8 @@ import 'package:ptncenter/scaffold/map.dart';
 import 'package:ptncenter/utility/my_style.dart';
 
 class Contact extends StatefulWidget {
+  const Contact({super.key});
+
   @override
   _ContactState createState() => _ContactState();
 }

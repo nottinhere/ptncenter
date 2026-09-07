@@ -12,10 +12,10 @@ class UnitSizeModel {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['lable'] = this.lable;
-    data['price'] = this.price;
-    data['unit'] = this.unit;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['lable'] = lable;
+    data['price'] = price;
+    data['unit'] = unit;
     return data;
   }
 }

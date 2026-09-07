@@ -66,6 +66,9 @@ dependencies:
   # flutter_barcode_scanner: ^2.0.0  #request to change
 
 
+  firebase_core: any
+  intl: any
+  http_parser: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

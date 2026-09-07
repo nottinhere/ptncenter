@@ -25,5 +25,9 @@ linter:
     # avoid_print: false  # Uncomment to disable the `avoid_print` rule
     # prefer_single_quotes: true  # Uncomment to enable the `prefer_single_quotes` rule
 
+    # State class ต้องเป็น private ตาม convention มาตรฐานของ Flutter (createState()
+    # คืนค่า type private) lint นี้เตือนทุก StatefulWidget ในโปรเจกต์เลย ไม่มีประโยชน์ที่จะไล่แก้
+    library_private_types_in_public_api: false
+
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options

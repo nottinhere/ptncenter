@@ -27,14 +27,14 @@ class RewardExtrapointModel {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['med_id'] = this.medId;
-    data['med_name'] = this.medName;
-    data['subject'] = this.subject;
-    data['size'] = this.size;
-    data['qty'] = this.qty;
-    data['point'] = this.point;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['med_id'] = medId;
+    data['med_name'] = medName;
+    data['subject'] = subject;
+    data['size'] = size;
+    data['qty'] = qty;
+    data['point'] = point;
     return data;
   }
 }

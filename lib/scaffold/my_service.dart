@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 
 // import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:flutter/material.dart';
@@ -23,10 +23,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 // import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
 import 'detail_cart.dart';
 
-import 'package:flutter/services.dart';
 
 // import 'package:scan_preview/scan_preview_widget.dart';
-import 'package:flutter/foundation.dart';
 
 // import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 
@@ -36,14 +34,14 @@ import 'package:webview_flutter/webview_flutter.dart';
 
 class MyService extends StatefulWidget {
   final UserModel? userModel;
-  bool? firstLoadAds;
-  bool? orderSuccess;
-  MyService({
-    Key? key,
+  final bool? firstLoadAds;
+  final bool? orderSuccess;
+  const MyService({
+    super.key,
     this.userModel,
     this.firstLoadAds = false,
     this.orderSuccess = false,
-  }) : super(key: key);
+  });
 
   @override
   _MyServiceState createState() => _MyServiceState();
@@ -76,7 +74,6 @@ class _MyServiceState extends State<MyService> {
         firstLoadAds: widget.firstLoadAds!,
         orderSuccess: widget.orderSuccess!,
       );
-      print('Here is initState');
       readCategory(); // read  ข้อมูลมาแสดง
       readCart();
     });
@@ -120,7 +117,6 @@ class _MyServiceState extends State<MyService> {
         categoryModels!.add(categoryModel);
       });
     }
-    print(' cateList ()>> $categoryModels');
   }
 
   void routeToListProduct(int index) {
@@ -233,7 +229,6 @@ class _MyServiceState extends State<MyService> {
       iconColor: MyStyle().tileIconColors[0],
       onTap: () {
         setState(() {
-          print('Here is menu home');
           readCart();
           currentWidget = Home(userModel: myUserModel!);
         });
@@ -243,7 +238,6 @@ class _MyServiceState extends State<MyService> {
   }
 
   Widget menuCategory() {
-    print('menuCategory >> ' + categoryModels!.length.toString());
     return Theme(
       data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
       child: ExpansionTile(
@@ -308,6 +302,7 @@ class _MyServiceState extends State<MyService> {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     await sharedPreferences.clear();
 
+    if (!mounted) return;
     MaterialPageRoute materialPageRoute = MaterialPageRoute(
       builder: (BuildContext buildContext) {
         return Authen();
@@ -374,7 +369,6 @@ class _MyServiceState extends State<MyService> {
       title: Text('ตรวจสอบใบส่งของ'),
       // subtitle: Text('Read QR code or barcode'),
       onTap: () {
-        print('You click $webPage');
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -464,7 +458,7 @@ class _MyServiceState extends State<MyService> {
   }
 
   Widget showLogo() {
-    return Container(
+    return SizedBox(
       width: 68.0,
       height: 68.0,
       child: Image.asset('images/logo_master.png', fit: BoxFit.contain),
@@ -489,8 +483,8 @@ class _MyServiceState extends State<MyService> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Colors.black.withOpacity(0.05),
-              Colors.black.withOpacity(0.55),
+              Colors.black.withValues(alpha: 0.05),
+              Colors.black.withValues(alpha: 0.55),
             ],
           ),
         ),
@@ -572,7 +566,6 @@ class _MyServiceState extends State<MyService> {
     );
     Navigator.of(context).push(materialPageRoute).then((value) {
       setState(() {
-        print('Here is routeToDetailCart');
 
         readCart();
       });
@@ -580,11 +573,6 @@ class _MyServiceState extends State<MyService> {
   }
 
   Widget stylishBottomBar() {
-    print(
-      myUserModel!.lastNotifyId!.toString() +
-          ' >> ' +
-          myUserModel!.lastNotifyOpen!.toString(),
-    );
     int? unread = myUserModel!.lastNotifyId!.toInt() -
         myUserModel!.lastNotifyOpen!.toInt();
 
@@ -678,6 +666,8 @@ class _MyServiceState extends State<MyService> {
 }
 
 class ScanPreviewPage extends StatefulWidget {
+  const ScanPreviewPage({super.key});
+
   @override
   _ScanPreviewPageState createState() => _ScanPreviewPageState();
 }

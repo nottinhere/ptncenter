@@ -12,10 +12,10 @@ class RewardCategoryModel {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['cate_id'] = this.cateId;
-    data['cate_name'] = this.cateName;
-    data['status'] = this.status;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['cate_id'] = cateId;
+    data['cate_name'] = cateName;
+    data['status'] = status;
     return data;
   }
 }

@@ -39,18 +39,18 @@ class GiftModel {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['code'] = this.code;
-    data['name'] = this.name;
-    data['warehouse'] = this.warehouse;
-    data['station'] = this.station;
-    data['cate_id'] = this.cateId;
-    data['stock'] = this.stock;
-    data['unit'] = this.unit;
-    data['status'] = this.status;
-    data['c_min'] = this.cMin;
-    data['c_max'] = this.cMax;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['code'] = code;
+    data['name'] = name;
+    data['warehouse'] = warehouse;
+    data['station'] = station;
+    data['cate_id'] = cateId;
+    data['stock'] = stock;
+    data['unit'] = unit;
+    data['status'] = status;
+    data['c_min'] = cMin;
+    data['c_max'] = cMax;
     return data;
   }
 }

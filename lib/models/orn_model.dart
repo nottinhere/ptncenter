@@ -90,35 +90,35 @@ class OrnModel {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['customer_code'] = this.customerCode;
-    data['shopname'] = this.shopname;
-    data['orn_no'] = this.ornNo;
-    data['box'] = this.box;
-    data['note'] = this.note;
-    data['total'] = this.total;
-    data['amount'] = this.amount;
-    data['shipping'] = this.shipping;
-    data['cn'] = this.cn;
-    data['cn_ref'] = this.cnRef;
-    data['datepost'] = this.datepost;
-    data['datemodify'] = this.datemodify;
-    data['paytype'] = this.paytype;
-    data['paydate'] = this.paydate;
-    data['ref'] = this.ref;
-    data['ship_id'] = this.shipId;
-    data['shipping_box'] = this.shippingBox;
-    data['shipping_orndate'] = this.shippingOrndate;    
-    data['delivery_box'] = this.deliveryBox;
-    data['delivery_date'] = this.deliveryDate;
-    data['delivery_note'] = this.deliveryNote;
-    data['delivery_reply'] = this.deliveryReply;
-    data['billing_balance'] = this.billingBalance;
-    data['billing_status'] = this.billingStatus;
-    data['billing_date'] = this.billingDate;
-    data['status'] = this.status;
-    data['bill_no'] = this.billNo;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['customer_code'] = customerCode;
+    data['shopname'] = shopname;
+    data['orn_no'] = ornNo;
+    data['box'] = box;
+    data['note'] = note;
+    data['total'] = total;
+    data['amount'] = amount;
+    data['shipping'] = shipping;
+    data['cn'] = cn;
+    data['cn_ref'] = cnRef;
+    data['datepost'] = datepost;
+    data['datemodify'] = datemodify;
+    data['paytype'] = paytype;
+    data['paydate'] = paydate;
+    data['ref'] = ref;
+    data['ship_id'] = shipId;
+    data['shipping_box'] = shippingBox;
+    data['shipping_orndate'] = shippingOrndate;    
+    data['delivery_box'] = deliveryBox;
+    data['delivery_date'] = deliveryDate;
+    data['delivery_note'] = deliveryNote;
+    data['delivery_reply'] = deliveryReply;
+    data['billing_balance'] = billingBalance;
+    data['billing_status'] = billingStatus;
+    data['billing_date'] = billingDate;
+    data['status'] = status;
+    data['bill_no'] = billNo;
     return data;
   }
 }

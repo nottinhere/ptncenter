@@ -45,20 +45,20 @@ class RewardModel {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['code'] = this.code;
-    data['barcode'] = this.barcode;
-    data['subject'] = this.subject;
-    data['detail'] = this.detail;
-    data['point'] = this.point;
-    data['stock'] = this.stock;
-    data['maxqty'] = this.maxqty;
-    data['unit'] = this.unit;
-    data['cate_id'] = this.cateId;
-    data['warehouse'] = this.warehouse;
-    data['status'] = this.status;
-    data['photo'] = this.photo;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['code'] = code;
+    data['barcode'] = barcode;
+    data['subject'] = subject;
+    data['detail'] = detail;
+    data['point'] = point;
+    data['stock'] = stock;
+    data['maxqty'] = maxqty;
+    data['unit'] = unit;
+    data['cate_id'] = cateId;
+    data['warehouse'] = warehouse;
+    data['status'] = status;
+    data['photo'] = photo;
     return data;
   }
 }

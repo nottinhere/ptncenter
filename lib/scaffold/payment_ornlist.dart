@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -7,7 +7,6 @@ import 'package:ptncenter/models/orn_model.dart';
 import 'package:ptncenter/models/user_model.dart';
 import 'package:ptncenter/utility/my_style.dart';
 import 'package:barcode_scan2/barcode_scan2.dart';
-import 'package:ptncenter/scaffold/orn_list.dart';
 import 'package:ptncenter/scaffold/payment_orn.dart';
 
 import 'my_service.dart';
@@ -22,7 +21,7 @@ class PaymentOrnList extends StatefulWidget {
   final int? index;
   final UserModel? userModel;
 
-  PaymentOrnList({Key? key, this.index, this.userModel}) : super(key: key);
+  const PaymentOrnList({super.key, this.index, this.userModel});
 
   @override
   _PaymentOrnListState createState() => _PaymentOrnListState();
@@ -64,7 +63,7 @@ class _PaymentOrnListState extends State<PaymentOrnList> {
 
   int? selectIndex = 2;
 
-  var _controller = TextEditingController();
+  final _controller = TextEditingController();
 
   bool? visible = true;
 
@@ -92,7 +91,6 @@ class _PaymentOrnListState extends State<PaymentOrnList> {
             scrollController.position.maxScrollExtent) {
           page = page! + 1;
           readData();
-          print('in the end');
         }
       } else {
         setState(() {
@@ -115,7 +113,6 @@ class _PaymentOrnListState extends State<PaymentOrnList> {
     if (ornTab == 'unpaid') {
       url = '$url&status=3';
     }
-    print("URL (payment orn list)= $url");
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var itemData = result['itemsData'];
@@ -229,7 +226,7 @@ class _PaymentOrnListState extends State<PaymentOrnList> {
       children: <Widget>[
         Row(
           children: [
-            Container(
+            SizedBox(
               width: MediaQuery.of(context).size.width * 0.55,
               child: Row(
                 children: [
@@ -259,7 +256,7 @@ class _PaymentOrnListState extends State<PaymentOrnList> {
                 ],
               ),
             ),
-            Container(
+            SizedBox(
               width: MediaQuery.of(context).size.width * 0.40,
               child: showOrnStatus(index),
             ),
@@ -270,7 +267,7 @@ class _PaymentOrnListState extends State<PaymentOrnList> {
   }
 
   Widget showPackbox(int index) {
-    DateTime parseDate = new DateFormat("yyyy-MM-dd HH:mm:ss")
+    DateTime parseDate = DateFormat("yyyy-MM-dd HH:mm:ss")
         .parse(filterOrnAllModels![index].datepost!);
     var inputDate = DateTime.parse(parseDate.toString());
     var outputFormat = DateFormat('MM/dd/yyyy HH:mm');
@@ -282,20 +279,20 @@ class _PaymentOrnListState extends State<PaymentOrnList> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Container(
+        SizedBox(
             width: MediaQuery.of(context).size.width * 0.52,
             child: Text(outputDate)),
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: <Widget>[
-            Container(
+            SizedBox(
               width: MediaQuery.of(context).size.width * 0.16,
               child: Text(
                 'ยอดชำระ ',
                 style: MyStyle().h3StyleGray,
               ),
             ),
-            Container(
+            SizedBox(
               width: MediaQuery.of(context).size.width * 0.25,
               child: Text(
                 ' $customFormat  บ.',
@@ -387,16 +384,14 @@ class _PaymentOrnListState extends State<PaymentOrnList> {
             return Column(
               children: [
                 GestureDetector(
-                  child: Container(
-                    child: Card(
-                      child: Container(
-                        decoration: myBoxDecoration(),
-                        padding: EdgeInsets.only(top: 0.5),
-                        child: Row(
-                          children: <Widget>[
-                            showText(index),
-                          ],
-                        ),
+                  child: Card(
+                    child: Container(
+                      decoration: myBoxDecoration(),
+                      padding: EdgeInsets.only(top: 0.5),
+                      child: Row(
+                        children: <Widget>[
+                          showText(index),
+                        ],
                       ),
                     ),
                   ),
@@ -408,16 +403,14 @@ class _PaymentOrnListState extends State<PaymentOrnList> {
           }
 
           return GestureDetector(
-            child: Container(
-              child: Card(
-                child: Container(
-                  decoration: myBoxDecoration(),
-                  padding: EdgeInsets.only(top: 0.5),
-                  child: Row(
-                    children: <Widget>[
-                      showText(index),
-                    ],
-                  ),
+            child: Card(
+              child: Container(
+                decoration: myBoxDecoration(),
+                padding: EdgeInsets.only(top: 0.5),
+                child: Row(
+                  children: <Widget>[
+                    showText(index),
+                  ],
                 ),
               ),
             ),
@@ -429,7 +422,7 @@ class _PaymentOrnListState extends State<PaymentOrnList> {
   }
 
   Widget showContent() {
-    if (filterOrnAllModels!.length == 0) {
+    if (filterOrnAllModels!.isEmpty) {
       return Center(child: Text(''));
     } else {
       return showProductItem();
@@ -463,17 +456,15 @@ class _PaymentOrnListState extends State<PaymentOrnList> {
   String? qrString;
   Future<void> readQRcodeORNPreview() async {
     try {
-      var qrScanString;
+      ScanResult qrScanString;
       qrString = '';
       qrScanString = await BarcodeScanner.scan();
-      qrString = qrScanString!.rawContent;
+      qrString = qrScanString.rawContent;
 
       if (qrString != null) {
         decodeQRcodeORN(qrString!);
       }
-    } on PlatformException catch (e) {
-      print('e = $e');
-    }
+    } on PlatformException {} // ignore: empty_catches
   }
 
   Future<void> decodeQRcodeORN(var code) async {
@@ -483,6 +474,7 @@ class _PaymentOrnListState extends State<PaymentOrnList> {
         String? url =
             '${MyStyle().serverName}/json_ornlist.php?memberId=$memberId&code=$code';
         http.Response response = await http.get(Uri.parse(url));
+        if (!mounted) return;
         var result = json.decode(response.body);
 
         int? status = result!['status'];
@@ -522,14 +514,20 @@ class _PaymentOrnListState extends State<PaymentOrnList> {
                   }));
         }
       }
-    } catch (e) {}
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('ค้นหาข้อมูลไม่สำเร็จ กรุณาลองใหม่อีกครั้ง')),
+        );
+      }
+    }
   }
 
   Widget searchForm() {
     return Container(
       padding: EdgeInsets.only(left: 5.0, right: 5.0, top: 2.0, bottom: 2.0),
       child: ListTile(
-        trailing: Container(
+        trailing: SizedBox(
           width: 45.0,
           child: Image.asset('images/qr_code.png'),
         ),

@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -14,16 +14,14 @@ import 'my_service.dart';
 
 import 'package:ptncenter/utility/my_style.dart';
 
-import 'package:flutter/services.dart';
 import 'package:chat_bubbles/chat_bubbles.dart';
 import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
 
 class Notify extends StatefulWidget {
   final UserModel? userModel;
-  bool? firstLoadAds;
+  final bool? firstLoadAds;
 
-  Notify({Key? key, this.userModel, this.firstLoadAds = false})
-      : super(key: key);
+  const Notify({super.key, this.userModel, this.firstLoadAds = false});
 
   @override
   _NotifyState createState() => _NotifyState();
@@ -69,13 +67,12 @@ class _NotifyState extends State<Notify> {
     readNotify();
   }
 
-  /*************************** */
+  /// *************************
 
   Future<void> readNotify() async {
     String? memberId = myUserModel!.id;
     String? url =
         '${MyStyle().serverName}/json_notify.php?limit=10&memberId=$memberId'; // ?memberId=$memberId
-    print('urlNotify >> $url');
 
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
@@ -95,19 +92,15 @@ class _NotifyState extends State<Notify> {
   }
 
   Widget showNotify() {
-    print(
-      'notifyModels.length (showNotify) >> ' + notifyModels!.length.toString(),
-    );
-
-    return Container(
+    return SizedBox(
       width: MediaQuery.of(context).size.width * 0.9,
       height: MediaQuery.of(context).size.height * 0.8,
-      child: notifyModels!.length > 0 ? listNotify() : Container(),
+      child: notifyModels!.isNotEmpty ? listNotify() : Container(),
     );
   }
 
   Widget cartBox() {
-    return Container(
+    return SizedBox(
       width: MediaQuery.of(context).size.width * 0.45,
       // height: 80.0,
       child: GestureDetector(
@@ -118,7 +111,7 @@ class _NotifyState extends State<Notify> {
             alignment: AlignmentDirectional(0.0, 0.0),
             child: Column(
               children: <Widget>[
-                Container(
+                SizedBox(
                   width: 45.0,
                   child: Image.asset('images/icon_cart.png'),
                 ),
@@ -135,7 +128,6 @@ class _NotifyState extends State<Notify> {
           ),
         ),
         onTap: () {
-          print('You click cart');
           MaterialPageRoute materialPageRoute = MaterialPageRoute(
             builder: (BuildContext buildContext) {
               return DetailCart(userModel: myUserModel);
@@ -160,7 +152,7 @@ class _NotifyState extends State<Notify> {
   }
 
   Widget listNotify() {
-    final now = new DateTime.now();
+    final now = DateTime.now();
     return ListView.builder(
       controller: scrollController,
       itemCount: notifyModels!.length,
@@ -172,19 +164,16 @@ class _NotifyState extends State<Notify> {
               child: Column(
                 children: [
                   DateChip(
-                    date: new DateTime(now.year, now.month, now.day).subtract(
+                    date: DateTime(now.year, now.month, now.day).subtract(
                       Duration(days: (notifyModels![index].absdiffdate!)),
                     ),
                   ),
-                  Container(
-                    // height: 70,
-                    child: BubbleSpecialOne(
-                      text: notifyModels![index].subject!,
-                      isSender: false,
-                      color: Color(0xFF1B97F3),
-                      tail: true,
-                      textStyle: TextStyle(fontSize: 16, color: Colors.white),
-                    ),
+                  BubbleSpecialOne(
+                    text: notifyModels![index].subject!,
+                    isSender: false,
+                    color: Color(0xFF1B97F3),
+                    tail: true,
+                    textStyle: TextStyle(fontSize: 16, color: Colors.white),
                   ),
                 ],
               ),
@@ -218,7 +207,7 @@ class _NotifyState extends State<Notify> {
     if (cartList != null) {
       for (var _ in cartList) {
         setState(() {
-          amontCart = amontCart! + 1;
+          amontCart = amontCart + 1;
         });
         // print('amontCart (service page))>>>> $amontCart');
       }
@@ -285,7 +274,6 @@ class _NotifyState extends State<Notify> {
     );
     Navigator.of(context).push(materialPageRoute).then((value) {
       setState(() {
-        print('Here is routeToDetailCart');
 
         readCart();
       });

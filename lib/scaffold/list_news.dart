@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -10,14 +10,13 @@ import 'package:ptncenter/scaffold/detail_cart.dart';
 
 import 'package:ptncenter/utility/my_style.dart';
 
-import 'package:flutter/services.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class News extends StatefulWidget {
   final UserModel? userModel;
-  bool? firstLoadAds;
+  final bool? firstLoadAds;
 
-  News({Key? key, this.userModel, this.firstLoadAds = false}) : super(key: key);
+  const News({super.key, this.userModel, this.firstLoadAds = false});
 
   @override
   _NewsState createState() => _NewsState();
@@ -68,7 +67,7 @@ class _NewsState extends State<News> {
     readNews();
   }
 
-  /*************************** */
+  /// *************************
 
   void createController() {
     scrollController.addListener(() {
@@ -78,7 +77,6 @@ class _NewsState extends State<News> {
           if (!isLoadingMore && hasMore) {
             page = page + 1;
             readNews();
-            print('in the end');
           }
         }
       }
@@ -94,7 +92,6 @@ class _NewsState extends State<News> {
     
     String url = '${MyStyle().serverName}/json_news.php'
         '?memberId=$memberId&page=$page&limit=$perPage';
-    print('urlNews >> $url');
 
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
@@ -127,7 +124,6 @@ class _NewsState extends State<News> {
   }
 
   Widget showNews() {
-    print('newsModels.length (showNews) >> ' + newsModels.length.toString());
 
     if (newsModels.isEmpty) {
       return isLoadingMore
@@ -138,7 +134,7 @@ class _NewsState extends State<News> {
   }
 
   Widget cartBox() {
-    return Container(
+    return SizedBox(
       width: MediaQuery.of(context).size.width * 0.45,
       // height: 80.0,
       child: GestureDetector(
@@ -149,7 +145,7 @@ class _NewsState extends State<News> {
             alignment: AlignmentDirectional(0.0, 0.0),
             child: Column(
               children: <Widget>[
-                Container(
+                SizedBox(
                   width: 45.0,
                   child: Image.asset('images/icon_cart.png'),
                 ),
@@ -165,7 +161,6 @@ class _NewsState extends State<News> {
           ),
         ),
         onTap: () {
-          print('You click cart');
           MaterialPageRoute materialPageRoute =
               MaterialPageRoute(builder: (BuildContext buildContext) {
             return DetailCart(
@@ -270,7 +265,7 @@ class _NewsState extends State<News> {
     if (cartList != null) {
       for (var _ in cartList) {
         setState(() {
-          amontCart = amontCart! + 1;
+          amontCart = amontCart + 1;
         });
         // print('amontCart (service page))>>>> $amontCart');
       }

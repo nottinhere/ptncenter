@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -15,9 +15,7 @@ import 'package:loading_indicator/loading_indicator.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:favorite_button/favorite_button.dart';
 
-import 'package:flutter/services.dart';
 
-import 'package:flutter/foundation.dart';
 
 class ListProductvote extends StatefulWidget {
   final int? index;
@@ -25,9 +23,8 @@ class ListProductvote extends StatefulWidget {
   final int? cate;
   final String? cateName;
 
-  ListProductvote(
-      {Key? key, this.index, this.userModel, this.cate, this.cateName})
-      : super(key: key);
+  const ListProductvote(
+      {super.key, this.index, this.userModel, this.cate, this.cateName});
 
   @override
   _ListProductvoteState createState() => _ListProductvoteState();
@@ -78,7 +75,7 @@ class _ListProductvoteState extends State<ListProductvote> {
 
   // List<ProductVoteModel> productVoteModels_buffer = List(); // []; //
 
-  var _controller = TextEditingController();
+  final _controller = TextEditingController();
 
   int? substart = 0;
   bool? visible = true;
@@ -109,7 +106,6 @@ class _ListProductvoteState extends State<ListProductvote> {
             scrollController.position.maxScrollExtent) {
           page = page! + 1;
           readData();
-          print('in the end');
         }
       } else {
         setState(() {
@@ -119,9 +115,8 @@ class _ListProductvoteState extends State<ListProductvote> {
     });
   }
 
-/************************************** */
+/// ************************************
   Future<void> readCart() async {
-    print('Here is readcart function');
 
     amontCart = 0;
     lastItemName = '';
@@ -129,7 +124,6 @@ class _ListProductvoteState extends State<ListProductvote> {
     String url =
         '${MyStyle().serverName}/json_loadmycart.php?memberId=$memberId&screen=listproductvote';
 
-    print('url Detail =====>>>>>>>> $url');
 
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
@@ -185,7 +179,6 @@ class _ListProductvoteState extends State<ListProductvote> {
   Future<void> readData() async {
     // List<ProductVoteModel> productVoteModels_buffer = List(); // []; //
     // String url = MyStyle().readAllProduct;
-    print('Here is readdata function');
     setState(() {
       visible = true;
     });
@@ -195,7 +188,6 @@ class _ListProductvoteState extends State<ListProductvote> {
         '${MyStyle().serverName}/json_productvotelist.php?memberId=$memberId&searchKey=$searchString&page=$page';
 
     // url = '${MyStyle().readProductWhereMode}$myIndex';
-    print("URL = $url");
 
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
@@ -209,8 +201,6 @@ class _ListProductvoteState extends State<ListProductvote> {
     // else
     //   int substart = 20;
 
-    int len = (filterProductVoteModels!.length);
-
     for (var map in itemProductvotes) {
       ProductVoteModel productVoteModel = ProductVoteModel.fromJson(map);
 
@@ -218,8 +208,6 @@ class _ListProductvoteState extends State<ListProductvote> {
         productVoteModels!.add(productVoteModel);
         filterProductVoteModels = productVoteModels;
       });
-      print(
-          ' >> ${len} =>($i)  ${productVoteModel.id}  || ${productVoteModels![i].title} (${filterProductVoteModels![i].votescore}) <<  (${productVoteModel.votescore})');
 
       i = i + 1;
     }
@@ -231,13 +219,11 @@ class _ListProductvoteState extends State<ListProductvote> {
   Future<void> updateDatalist(index) async {
     // List<ProductVoteModel> productVoteModels_buffer = List(); // []; //
     // String url = MyStyle().readAllProduct;
-    print('Here is updateDatalist function');
 
     String memberId = myUserModel!.id.toString();
     String url =
         '${MyStyle().serverName}/json_loadmycart.php?memberId=$memberId';
 
-    print("URL update item = $url");
     http.Response response = await http.get(Uri.parse(url));
     json.decode(response.body);
   }
@@ -245,7 +231,7 @@ class _ListProductvoteState extends State<ListProductvote> {
   Widget showName(int index) {
     return Row(
       children: <Widget>[
-        Container(
+        SizedBox(
           width: MediaQuery.of(context).size.width * 0.75,
           child: Text(
             filterProductVoteModels![index].title!,
@@ -266,10 +252,10 @@ class _ListProductvoteState extends State<ListProductvote> {
         //     style: MyStyle().h4StyleGray,
         //   ),
         // ),
-        Container(
+        SizedBox(
           width: MediaQuery.of(context).size.width * 0.66,
           child: Text(
-            'ใช้เพื่อ:' + ' ${filterProductVoteModels![index].usefor}',
+            'ใช้เพื่อ:' ' ${filterProductVoteModels![index].usefor}',
             style: MyStyle().h4StyleGray,
           ),
         ),
@@ -280,14 +266,14 @@ class _ListProductvoteState extends State<ListProductvote> {
 
   Widget showIncart(int index) {
     return Row(children: <Widget>[
-      Container(
+      SizedBox(
         width: MediaQuery.of(context).size.width * 0.13,
         child: Text(
           (filterProductVoteModels![index].votescore != '0') ? 'ตะกร้า:' : '',
           style: MyStyle().h4StyleRed,
         ),
       ),
-      Container(
+      SizedBox(
         width: MediaQuery.of(context).size.width * 0.25,
         child: Text(
           ((filterProductVoteModels![index].votescore != '0')
@@ -305,14 +291,15 @@ class _ListProductvoteState extends State<ListProductvote> {
     String? txtPriceUnit = '';
     if (filterProductVoteModels![index].pricelabel.toString() != '0') {
       txtShowPrice = filterProductVoteModels![index].pricesale.toString();
-      if (txtShowPrice != '' && txtShowUnit != '')
-        txtPriceUnit = '$txtPriceUnit' + " [$txtShowPrice/$txtShowUnit] ";
+      if (txtShowPrice != '' && txtShowUnit != '') {
+        txtPriceUnit = '$txtPriceUnit [$txtShowPrice/$txtShowUnit] ';
+      }
     }
 
     return Row(
       children: <Widget>[
         Text(
-          '$txtPriceUnit',
+          txtPriceUnit,
           style: TextStyle(
             fontSize: 16.0,
             //  fontWeight: FontWeight.bold,
@@ -350,21 +337,20 @@ class _ListProductvoteState extends State<ListProductvote> {
       // child: Image.network(filterProductVoteModels![index].photo),
       width: 60,
       height: 60,
-      decoration: new BoxDecoration(
-          image: new DecorationImage(
+      decoration: BoxDecoration(
+          image: DecorationImage(
         fit: BoxFit.cover,
         alignment: FractionalOffset.topCenter,
-        image: new NetworkImage(filterProductVoteModels![index].photo!),
+        image: NetworkImage(filterProductVoteModels![index].photo!),
       )),
     );
   }
 
   Future<void> thumbLike(
-      String productID, String memberID, bool _isFavorite) async {
+      String productID, String memberID, bool isFavorite) async {
     String url =
-        '${MyStyle().serverName}/json_productvote.php?productID=$productID&memberId=$memberID&status=$_isFavorite';
+        '${MyStyle().serverName}/json_productvote.php?productID=$productID&memberId=$memberID&status=$isFavorite';
 
-    print('url Favorites url ====>>>>> $url');
     await http.get(Uri.parse(url)).then((response) {
       setState(() {
         //readCart();
@@ -377,7 +363,7 @@ class _ListProductvoteState extends State<ListProductvote> {
         (filterProductVoteModels![index].yourvote == true) ? true : false;
     String productID = filterProductVoteModels![index].id.toString();
     String memberID = myUserModel!.id.toString();
-    return Container(
+    return SizedBox(
       width: MediaQuery.of(context).size.width * 0.06,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -386,9 +372,9 @@ class _ListProductvoteState extends State<ListProductvote> {
             isFavorite: favStatus,
             iconSize: 40.0,
             // iconDisabledColor: Colors.white,
-            valueChanged: (_isFavorite) {
+            valueChanged: (isFavorite) {
               // print('Is Favorite : $_isFavorite');
-              thumbLike(productID, memberID, _isFavorite);
+              thumbLike(productID, memberID, isFavorite);
 
               // http.Response response =  http.get(Uri.parse(url));
             },
@@ -467,18 +453,16 @@ class _ListProductvoteState extends State<ListProductvote> {
             return Column(
               children: [
                 GestureDetector(
-                  child: Container(
-                    child: Card(
-                      child: Container(
-                        decoration: myBoxDecoration(),
-                        padding: EdgeInsets.only(top: 0.5),
-                        child: Row(
-                          children: <Widget>[
-                            showImage(index),
-                            showText(index),
-                            showThumb(index),
-                          ],
-                        ),
+                  child: Card(
+                    child: Container(
+                      decoration: myBoxDecoration(),
+                      padding: EdgeInsets.only(top: 0.5),
+                      child: Row(
+                        children: <Widget>[
+                          showImage(index),
+                          showText(index),
+                          showThumb(index),
+                        ],
                       ),
                     ),
                   ),
@@ -489,18 +473,16 @@ class _ListProductvoteState extends State<ListProductvote> {
           }
 
           return GestureDetector(
-            child: Container(
-              child: Card(
-                child: Container(
-                  decoration: myBoxDecoration(),
-                  padding: EdgeInsets.only(top: 0.5),
-                  child: Row(
-                    children: <Widget>[
-                      showImage(index),
-                      showText(index),
-                      showThumb(index),
-                    ],
-                  ),
+            child: Card(
+              child: Container(
+                decoration: myBoxDecoration(),
+                padding: EdgeInsets.only(top: 0.5),
+                child: Row(
+                  children: <Widget>[
+                    showImage(index),
+                    showText(index),
+                    showThumb(index),
+                  ],
                 ),
               ),
             ),
@@ -516,7 +498,7 @@ class _ListProductvoteState extends State<ListProductvote> {
       searchKey = true;
     }
 
-    if (filterProductVoteModels!.length == 0) {
+    if (filterProductVoteModels!.isEmpty) {
       if (myIndex != 4) {
         return showProgressIndicate(searchKey);
       } else {
@@ -531,7 +513,7 @@ class _ListProductvoteState extends State<ListProductvote> {
     // print('searchKey >> $searchKey');
 
     if (searchKey == true) {
-      if (filterProductVoteModels!.length == 0) {
+      if (filterProductVoteModels!.isEmpty) {
         return Center(child: Text('')); // Search not found
       } else {
         return Center(child: Text(''));
@@ -561,14 +543,14 @@ class _ListProductvoteState extends State<ListProductvote> {
   Widget lastItemInCart() {
     return Column(
       children: <Widget>[
-        Container(
+        SizedBox(
           width: MediaQuery.of(context).size.width * 0.9,
           child: Text(
             'รายการล่าสุดในตะกร้า',
             style: MyStyle().h3bStyle,
           ),
         ),
-        Container(
+        SizedBox(
           width: MediaQuery.of(context).size.width * 0.9,
           child: Text(lastItemName.toString(),
               style: TextStyle(
@@ -587,12 +569,11 @@ class _ListProductvoteState extends State<ListProductvote> {
       // color: Colors.grey,
       padding: EdgeInsets.only(left: 5.0, right: 5.0, top: 2.0, bottom: 2.0),
       child: ListTile(
-        trailing: Container(
+        trailing: SizedBox(
           width: 45.0,
           child: Image.asset('images/icon_barcode.png'),
         ),
         onTap: () {
-          print('You click barcode scan');
           // readQRcode();
           // readQRcodePreview();
           // Navigator.of(context).pop();
@@ -671,9 +652,6 @@ class _ListProductvoteState extends State<ListProductvote> {
       case 1:
         break; // all product
       case 2:
-        String webPage = 'request';
-
-        print('You click $webPage');
         // Navigator.push(
         //     context,
         //     MaterialPageRoute(
@@ -715,6 +693,8 @@ class _ListProductvoteState extends State<ListProductvote> {
 
 
 class ScanPreviewPage extends StatefulWidget {
+  const ScanPreviewPage({super.key});
+
   @override
   _ScanPreviewPageState createState() => _ScanPreviewPageState();
 }

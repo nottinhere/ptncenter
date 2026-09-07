@@ -39,18 +39,18 @@ class RewardredeemModel {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['rw_id'] = this.rwId;
-    data['customer_code'] = this.customerCode;
-    data['rw_code'] = this.rwCode;
-    data['rw_subject'] = this.rwSubject;
-    data['barcode'] = this.barcode;
-    data['point'] = this.point;
-    data['qty'] = this.qty;
-    data['unit'] = this.unit;
-    data['warehouse'] = this.warehouse;
-    data['note'] = this.note;
-    data['photo'] = this.photo;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['rw_id'] = rwId;
+    data['customer_code'] = customerCode;
+    data['rw_code'] = rwCode;
+    data['rw_subject'] = rwSubject;
+    data['barcode'] = barcode;
+    data['point'] = point;
+    data['qty'] = qty;
+    data['unit'] = unit;
+    data['warehouse'] = warehouse;
+    data['note'] = note;
+    data['photo'] = photo;
     return data;
   }
 }

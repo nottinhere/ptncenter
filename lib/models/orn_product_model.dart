@@ -54,23 +54,23 @@ class OrnProductModel {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = Map<String, dynamic>();
-    data['od_id'] = this.odId;
-    data['o_id'] = this.oId;
-    data['med_id'] = this.medId;
-    data['product_code'] = this.productCode;
-    data['title'] = this.title;
-    data['warehouse'] = this.warehouse;
-    data['hilight'] = this.hilight;
-    data['station'] = this.station;
-    data['medStock'] = this.medStock;
-    data['medStockTop'] = this.medStockTop;
-    data['qty'] = this.qty;
-    data['receive'] = this.receive;
-    data['unit'] = this.unit;
-    data['size'] = this.size;
-    data['photo'] = this.photo;
-    data['sale'] = this.sale;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['od_id'] = odId;
+    data['o_id'] = oId;
+    data['med_id'] = medId;
+    data['product_code'] = productCode;
+    data['title'] = title;
+    data['warehouse'] = warehouse;
+    data['hilight'] = hilight;
+    data['station'] = station;
+    data['medStock'] = medStock;
+    data['medStockTop'] = medStockTop;
+    data['qty'] = qty;
+    data['receive'] = receive;
+    data['unit'] = unit;
+    data['size'] = size;
+    data['photo'] = photo;
+    data['sale'] = sale;
     return data;
   }
 }

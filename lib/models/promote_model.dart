@@ -27,14 +27,14 @@ class PromoteModel {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['title'] = this.title;
-    data['product_code'] = this.productCode;
-    data['photo'] = this.photo;
-    data['price'] = this.price;
-    data['unit'] = this.unit;
-    data['stock'] = this.stock;
-    data['id'] = this.id;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['title'] = title;
+    data['product_code'] = productCode;
+    data['photo'] = photo;
+    data['price'] = price;
+    data['unit'] = unit;
+    data['stock'] = stock;
+    data['id'] = id;
     return data;
   }
 }

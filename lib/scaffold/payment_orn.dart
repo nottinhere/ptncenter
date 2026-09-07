@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -11,7 +11,6 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:ptncenter/models/orn_model.dart';
 import 'package:ptncenter/models/user_model.dart';
-import 'package:ptncenter/scaffold/orn_list.dart';
 import 'package:ptncenter/scaffold/orn_menu.dart';
 import 'package:ptncenter/scaffold/payment_ornlist.dart';
 
@@ -25,7 +24,7 @@ class PaymentOrn extends StatefulWidget {
   final UserModel? userModel;
   final String? ornId;
 
-  const PaymentOrn({Key? key, this.userModel, this.ornId}) : super(key: key);
+  const PaymentOrn({super.key, this.userModel, this.ornId});
 
   @override
   _PaymentOrnState createState() => _PaymentOrnState();
@@ -114,14 +113,12 @@ class _PaymentOrnState extends State<PaymentOrn> {
           });
         }
       }
-    } catch (e) {
-      print('checkScanSuccess error: $e');
-    }
+    } catch (e) {} // ignore: empty_catches
   }
 
   Future<void> createQrImage() async {
     String createqrUrl = 'https://ptnpharma.com/shop/qrpromptpay.php?orn_id=$ornId';
-    http.Response response = await http.get(Uri.parse(createqrUrl));
+    await http.get(Uri.parse(createqrUrl));
   }
 
   Future<void> saveQrImage(String url) async {
@@ -161,7 +158,6 @@ class _PaymentOrnState extends State<PaymentOrn> {
     String? memberId = myUserModel!.id;
     String url =
         '${MyStyle().serverName}/json_ornlist.php?memberId=$memberId&ornId=$ornId';
-    print('url > $url');
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var itemsData = result['itemsData'];
@@ -185,7 +181,7 @@ class _PaymentOrnState extends State<PaymentOrn> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Container(
+          SizedBox(
             width: MediaQuery.of(context).size.width * 0.32,
             child: Text(label, style: MyStyle().h4bStyleGray),
           ),
@@ -310,7 +306,7 @@ class _PaymentOrnState extends State<PaymentOrn> {
         padding: EdgeInsets.all(12.0),
         decoration: BoxDecoration(
           color: selected
-              ? MyStyle().mainColor.withOpacity(0.08)
+              ? MyStyle().mainColor.withValues(alpha: 0.08)
               : Colors.white,
           borderRadius: BorderRadius.circular(10.0),
           border: Border.all(
@@ -417,7 +413,7 @@ class _PaymentOrnState extends State<PaymentOrn> {
         padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 12.0),
         margin: EdgeInsets.only(bottom: 8.0),
         decoration: BoxDecoration(
-          color: selected ? MyStyle().mainColor.withOpacity(0.08) : Colors.white,
+          color: selected ? MyStyle().mainColor.withValues(alpha: 0.08) : Colors.white,
           borderRadius: BorderRadius.circular(10.0),
           border: Border.all(
             color: selected ? MyStyle().mainColor : Colors.grey.shade300,
@@ -491,7 +487,7 @@ class _PaymentOrnState extends State<PaymentOrn> {
         SizedBox(height: 10.0),
         if (selectedBankTransferMethod == 'bank_transfer') ...[
           DropdownButtonFormField<String>(
-            value: selectedBankOption,
+            initialValue: selectedBankOption,
             decoration: InputDecoration(
               border: OutlineInputBorder(),
               labelText: 'โอนผ่านธนาคาร',
@@ -563,7 +559,7 @@ class _PaymentOrnState extends State<PaymentOrn> {
         width: double.infinity,
         padding: EdgeInsets.all(16.0),
         decoration: BoxDecoration(
-          color: MyStyle().mainColor.withOpacity(0.08),
+          color: MyStyle().mainColor.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(10.0),
           border: Border.all(color: MyStyle().mainColor, width: 2.0),
         ),
@@ -977,7 +973,6 @@ class _PaymentOrnState extends State<PaymentOrn> {
 
     try {
       String url = 'https://ptnpharma.com/shop/confirm_cc_payment.php?rd=2';
-      print('Submitting credit card payment to $url with cus_code=$cusCode, orn_no=$ornNo, orn_id=$ornId, strCCcode=${cardLast4Controller.text}, totalPay=$totalValue, totalPayCC=$totalWithFee');
 
       var request = http.MultipartRequest('POST', Uri.parse(url));
       request.fields['cus_code'] = cusCode ?? '';
@@ -1141,22 +1136,17 @@ class _PaymentOrnState extends State<PaymentOrn> {
     try {
       // final qrScanString = await Navigator.push(this.context,
       //     MaterialPageRoute(builder: (context) => ScanPreviewPage()));
-      var qrScanString;
+      ScanResult qrScanString;
       qrString = '';
-      print('Before scan');
       qrScanString = await BarcodeScanner.scan();
-      print('After scan');
       // print('scan result: $qrScanString');
-      qrString = qrScanString!.rawContent;
-      print('scan result: $qrString');
+      qrString = qrScanString.rawContent;
 
       if (qrString != null) {
         decodeQRcodeORN(qrString!);
       }
       // setState(() => scanResult = qrScanString);
-    } on PlatformException catch (e) {
-      print('e = $e');
-    }
+    } on PlatformException {} // ignore: empty_catches
   }
 
   Future<void> decodeQRcodeORN(var code) async {
@@ -1167,17 +1157,15 @@ class _PaymentOrnState extends State<PaymentOrn> {
         // id = currentOrnAllModel!.id.toString();
         String? url =
             '${MyStyle().serverName}/json_ornlist.php?memberId=$memberId&code=$code'; // &code=$code
-        print("URL = $url");
         http.Response response = await http.get(Uri.parse(url));
+        if (!mounted) return;
         var result = json.decode(response.body);
 
-        print('result (decodeQRcode) ===>>>> $result');
 
         int? status = result!['status'];
         String? title = 'ข้อมูลไม่ถูกต้อง';
         String? message = result!['message'];
         OrnModel? ornScanAllModel;
-        print('status ===>>> $status');
         if (status == 0) {
           // normalDialog(context, 'Not found', 'ไม่พบ code :: $code ในระบบ');
           AwesomeDialog(
@@ -1206,7 +1194,13 @@ class _PaymentOrnState extends State<PaymentOrn> {
           Navigator.of(context).push(materialPageRoute);
         }
       }
-    } catch (e) {}
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('ค้นหาข้อมูลไม่สำเร็จ กรุณาลองใหม่อีกครั้ง')),
+        );
+      }
+    }
   }
 
 

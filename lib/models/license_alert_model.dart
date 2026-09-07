@@ -17,12 +17,12 @@ class LicenseAlertModel {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['subject'] = this.subject;
-    data['detail'] = this.detail;
-    data['postdate'] = this.postdate;
-    data['popstatus'] = this.popstatus;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['subject'] = subject;
+    data['detail'] = detail;
+    data['postdate'] = postdate;
+    data['popstatus'] = popstatus;
     return data;
   }
 }

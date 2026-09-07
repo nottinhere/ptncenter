@@ -78,31 +78,31 @@ class ProductAllModel {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['title'] = this.title;
-    data['hilight'] = this.hilight;
-    data['extrapoint'] = this.extrapoint;
-    data['product_code'] = this.productCode;
-    data['photo'] = this.photo;
-    data['price_list'] = this.priceList;
-    data['selectUnit'] = this.selectUnit;
-    data['itemSprice'] = this.itemSprice;
-    data['itemSunit'] = this.itemSunit;
-    data['itemincartSunit'] = this.itemincartSunit;
-    data['itemMprice'] = this.itemMprice;
-    data['itemMunit'] = this.itemMunit;
-    data['itemincartMunit'] = this.itemincartMunit;
-    data['itemLprice'] = this.itemLprice;
-    data['itemLunit'] = this.itemLunit;
-    data['itemincartLunit'] = this.itemincartLunit;
-    data['itemFeqSunit'] = this.itemFeqSunit;
-    data['itemFeqMunit'] = this.itemFeqMunit;
-    data['itemFeqLunit'] = this.itemFeqLunit;
-    data['detail'] = this.detail;
-    data['usefor'] = this.usefor;
-    data['method'] = this.method;
-    data['stock'] = this.stock;
-    data['id'] = this.id;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['title'] = title;
+    data['hilight'] = hilight;
+    data['extrapoint'] = extrapoint;
+    data['product_code'] = productCode;
+    data['photo'] = photo;
+    data['price_list'] = priceList;
+    data['selectUnit'] = selectUnit;
+    data['itemSprice'] = itemSprice;
+    data['itemSunit'] = itemSunit;
+    data['itemincartSunit'] = itemincartSunit;
+    data['itemMprice'] = itemMprice;
+    data['itemMunit'] = itemMunit;
+    data['itemincartMunit'] = itemincartMunit;
+    data['itemLprice'] = itemLprice;
+    data['itemLunit'] = itemLunit;
+    data['itemincartLunit'] = itemincartLunit;
+    data['itemFeqSunit'] = itemFeqSunit;
+    data['itemFeqMunit'] = itemFeqMunit;
+    data['itemFeqLunit'] = itemFeqLunit;
+    data['detail'] = detail;
+    data['usefor'] = usefor;
+    data['method'] = method;
+    data['stock'] = stock;
+    data['id'] = id;
     return data;
   }
 }

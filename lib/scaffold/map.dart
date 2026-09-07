@@ -5,12 +5,14 @@ import 'package:ptncenter/utility/my_style.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
   @override
   HomePageState createState() => HomePageState();
 }
 
 class HomePageState extends State<HomePage> {
-  Completer<GoogleMapController> _controller = Completer();
+  final Completer<GoogleMapController> _controller = Completer();
 
   @override
   void initState() {
@@ -82,42 +84,38 @@ class HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _boxes(String _image, double lat, double long, String restaurantName,
+  Widget _boxes(String image, double lat, double long, String restaurantName,
       String officeHours) {
     return GestureDetector(
       onTap: () {
         _gotoLocation(lat, long);
       },
-      child: Container(
-        child: new FittedBox(
-          child: Material(
-              color: Colors.white,
-              elevation: 14.0,
-              borderRadius: BorderRadius.circular(24.0),
-              shadowColor: Color(0x802196F3),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Container(
-                    width: 180,
-                    height: 200,
-                    child: ClipRRect(
-                      borderRadius: new BorderRadius.circular(24.0),
-                      child: Image(
-                        fit: BoxFit.fill,
-                        image: NetworkImage(_image),
-                      ),
+      child: FittedBox(
+        child: Material(
+            color: Colors.white,
+            elevation: 14.0,
+            borderRadius: BorderRadius.circular(24.0),
+            shadowColor: Color(0x802196F3),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                SizedBox(
+                  width: 180,
+                  height: 200,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(24.0),
+                    child: Image(
+                      fit: BoxFit.fill,
+                      image: NetworkImage(image),
                     ),
                   ),
-                  Container(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: myDetailsContainer1(restaurantName, officeHours),
-                    ),
-                  ),
-                ],
-              )),
-        ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: myDetailsContainer1(restaurantName, officeHours),
+                ),
+              ],
+            )),
       ),
     );
   }
@@ -128,30 +126,28 @@ class HomePageState extends State<HomePage> {
       children: <Widget>[
         Padding(
           padding: const EdgeInsets.only(left: 8.0),
-          child: Container(
-              child: Text(
+          child: Text(
             restaurantName,
             style: TextStyle(
                 color: Color(0xff6200ee),
                 fontSize: 24.0,
                 fontWeight: FontWeight.bold),
-          )),
+          ),
         ),
         SizedBox(height: 5.0),
-        Container(
-            child: Text(
+        Text(
           officeHours,
           style: TextStyle(
             color: Colors.black54,
             fontSize: 18.0,
           ),
-        )),
+        ),
       ],
     );
   }
 
   Widget _buildGoogleMap(BuildContext context) {
-    return Container(
+    return SizedBox(
       height: MediaQuery.of(context).size.height,
       width: MediaQuery.of(context).size.width,
       child: GoogleMap(

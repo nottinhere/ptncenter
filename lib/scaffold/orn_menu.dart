@@ -1,45 +1,31 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'dart:async';
 // import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:ptncenter/models/product_all_model.dart';
 import 'package:ptncenter/models/user_model.dart';
 import 'package:ptncenter/models/orn_model.dart';
 
 
-import 'package:ptncenter/scaffold/authen.dart';
-import 'package:ptncenter/scaffold/detail.dart';
 
 import 'package:ptncenter/scaffold/orn_list.dart';
-import 'package:ptncenter/scaffold/detail_orn.dart';
 import 'package:ptncenter/scaffold/orn_listproduct.dart';
-import 'package:ptncenter/scaffold/payment_orn.dart';
 
 
-import 'package:ptncenter/scaffold/detail_cart.dart';
 import 'my_service.dart';
 
-import 'package:ptncenter/widget/home.dart';
 
 import 'package:ptncenter/utility/my_style.dart';
-import 'package:ptncenter/utility/normal_dialog.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:flutter/services.dart';
 
-import 'package:permission_handler/permission_handler.dart';
-import 'package:flutter/foundation.dart';
 import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
-import 'package:awesome_dialog/awesome_dialog.dart';
 
 class MenuOrn extends StatefulWidget {
   final String? ornID;
   final UserModel? userModel;
 
-  MenuOrn(
-      {Key? key,this.ornID, this.userModel})
-      : super(key: key);
+  const MenuOrn(
+      {super.key,this.ornID, this.userModel});
 
   @override
   _MenuOrnState createState() => _MenuOrnState();
@@ -87,15 +73,12 @@ class _MenuOrnState extends State<MenuOrn> {
       String? url =
       '${MyStyle().serverName}/apipacking/json_ornlist.php?memberId=$staffID&ornId=$id';
     
-    print("URL (orn detail)= $url");
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var mapItemOrn = result['itemsData']; 
     for (var map in mapItemOrn) {
       setState(() {
               ornAllModel = OrnModel.fromJson(map);
-              var valbox = (ornAllModel!.shippingBox==0 || ornAllModel!.shippingBox =='-')?ornAllModel!.box!:ornAllModel!.shippingBox!;
-
       });
     } // for
   }
@@ -105,7 +88,7 @@ class _MenuOrnState extends State<MenuOrn> {
     String? address = myUserModel!.address;
     // int loginStatus = myUserModel.status;
 
-    return Container(
+    return SizedBox(
       width: MediaQuery.of(context).size.width * 0.9,
       // height: 80.0,
       child: GestureDetector(
@@ -118,8 +101,8 @@ class _MenuOrnState extends State<MenuOrn> {
               children: <Widget>[
                 Container(
                     width: 45.0,
-                    child: Image.asset('images/icon_user.png'),
-                    padding: EdgeInsets.only(right: 8.0)),
+                    padding: EdgeInsets.only(right: 8.0),
+                    child: Image.asset('images/icon_user.png')),
                 Column(
                   children: [
                     Text(
@@ -145,7 +128,6 @@ class _MenuOrnState extends State<MenuOrn> {
           ),
         ),
         onTap: () {
-          print('You click profile');
           // routeToListProduct(0);
         },
       ),
@@ -154,7 +136,7 @@ class _MenuOrnState extends State<MenuOrn> {
 
 
    Widget ornBox() {
-    return Container(
+    return SizedBox(
       width: MediaQuery.of(context).size.width * 0.45,
       // height: 80.0,
       child: GestureDetector(
@@ -172,7 +154,7 @@ class _MenuOrnState extends State<MenuOrn> {
             alignment: AlignmentDirectional(0.0, 0.0),
             child: Column(
               children: <Widget>[
-                Container(
+                SizedBox(
                   width: 45.0,
                   child: Image.asset('images/icon_vote.png'),
                 ),
@@ -188,7 +170,6 @@ class _MenuOrnState extends State<MenuOrn> {
           ),
         ),
         onTap: () {
-          print('You click vote list');
           // MaterialPageRoute materialPageRoute =
           //     MaterialPageRoute(builder: (BuildContext buildContext) {
           //   return OrnList(
@@ -230,7 +211,7 @@ class _MenuOrnState extends State<MenuOrn> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Container(
+          SizedBox(
             width: MediaQuery.of(context).size.width * 0.32,
             child: Text(label, style: MyStyle().h4bStyleGray),
           ),
@@ -552,7 +533,7 @@ class _MenuOrnState extends State<MenuOrn> {
                     ),
                   ),
                   Text(
-                    done ? date! : 'รอดำเนินการ',
+                    done ? date : 'รอดำเนินการ',
                     style: MyStyle().h4StyleGray,
                   ),
                 ],
@@ -599,8 +580,6 @@ class _MenuOrnState extends State<MenuOrn> {
   }
 
   Widget stylishBottomBar() {
-    int? unread =
-        myUserModel!.lastNewsId!.toInt() - myUserModel!.lastNewsOpen!.toInt();
     return StylishBottomBar(
       option: AnimatedBarOptions(
         iconStyle: IconStyle.animated,

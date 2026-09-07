@@ -1,30 +1,18 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:ptncenter/models/orn_model.dart';
 import 'package:ptncenter/models/user_model.dart';
-import 'package:ptncenter/models/orn_model.dart';
 import 'package:ptncenter/utility/my_style.dart';
 import 'package:barcode_scan2/barcode_scan2.dart';
-import 'package:ptncenter/utility/normal_dialog.dart';
-import 'detail.dart';
-import 'detail_cart.dart';
-import 'package:ptncenter/widget/home.dart';
 import 'package:ptncenter/scaffold/orn_menu.dart';
-import 'package:ptncenter/scaffold/detail_orn.dart';
 
 import 'my_service.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 
-import 'package:permission_handler/permission_handler.dart';
-import 'package:flutter/foundation.dart';
-import 'package:loading_indicator/loading_indicator.dart';
 
-import 'package:flutter_overlay_loader/flutter_overlay_loader.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
 import 'package:intl/intl.dart';
@@ -33,9 +21,8 @@ import 'package:awesome_dialog/awesome_dialog.dart';
 class OrnList extends StatefulWidget {
   final int? index;
   final UserModel? userModel;
-  String? _result = '';
 
-  OrnList({Key? key, this.index, this.userModel}) : super(key: key);
+  const OrnList({super.key, this.index, this.userModel});
 
   @override
   _OrnListState createState() => _OrnListState();
@@ -90,7 +77,7 @@ class _OrnListState extends State<OrnList> {
 
   // List<OrnModel> productAllModels_buffer = []; // []; //
 
-  var _controller = TextEditingController();
+  final _controller = TextEditingController();
 
   int? substart = 0;
   bool? visible = true;
@@ -99,7 +86,6 @@ class _OrnListState extends State<OrnList> {
   // Method
   @override
   void initState() {
-    print('auto load');
 
     // auto load
     super.initState();
@@ -135,7 +121,6 @@ class _OrnListState extends State<OrnList> {
             scrollController.position.maxScrollExtent) {
           page = page! + 1;
           readData();
-          print('in the end');
         }
       } else {
         setState(() {
@@ -159,12 +144,10 @@ class _OrnListState extends State<OrnList> {
 
     String? url =
         '${MyStyle().serverName}/json_ornlist.php?memberId=$memberId&page=$page&searchKey=$searchString';
-    print("URL (orn list)= $url");
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var itemData = result['itemsData'];
     totalRecords = result['totalRecords'];
-    print("totalRecords = $totalRecords");
 
     for (var map in itemData) {
       OrnModel ornAllModel = OrnModel.fromJson(map);
@@ -241,22 +224,22 @@ class _OrnListState extends State<OrnList> {
       children: <Widget>[
         Row(
           children: [
-            Container(
+            SizedBox(
               width: MediaQuery.of(context).size.width * 0.45,
               child: Row(
                 children: [
                   Text(
-                    filterOrnAllModels![index!].ornNo!,
+                    filterOrnAllModels![index].ornNo!,
                     style: MyStyle().h3bStyle,
                   ),
-                  (filterOrnAllModels![index!].billingStatus! == '1' ||
-                          filterOrnAllModels![index!].billingStatus! == '2')
+                  (filterOrnAllModels![index].billingStatus! == '1' ||
+                          filterOrnAllModels![index].billingStatus! == '2')
                       ? Text(
                           ' (เก็บบิล)',
                           style: MyStyle().h3StyleRed,
                         )
                       : Text(''),
-                  (filterOrnAllModels![index!].ornNo!.substring(0, 3) == 'ORC')
+                  (filterOrnAllModels![index].ornNo!.substring(0, 3) == 'ORC')
                       ? Text(
                           ' (สั่งงาน)',
                           style: MyStyle().h3StyleRed,
@@ -265,13 +248,13 @@ class _OrnListState extends State<OrnList> {
                 ],
               ),
             ),
-            Container(
+            SizedBox(
               width: MediaQuery.of(context).size.width * 0.45,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // showOrnStatus(index!),
-                  showDeliveryStatus(index!),
+                  showDeliveryStatus(index),
                 ],
               ),
             ),
@@ -287,7 +270,7 @@ class _OrnListState extends State<OrnList> {
 
     
 DateTime parseDate =
-    new DateFormat("yyyy-MM-dd HH:mm:ss").parse(filterOrnAllModels![index].datepost!);
+    DateFormat("yyyy-MM-dd HH:mm:ss").parse(filterOrnAllModels![index].datepost!);
     var inputDate = DateTime.parse(parseDate.toString());
     var outputFormat = DateFormat('dd/MM/yyyy HH:mm');
     var outputDate = outputFormat.format(inputDate);
@@ -295,20 +278,20 @@ DateTime parseDate =
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Container(
+        SizedBox(
         width: MediaQuery.of(context).size.width * 0.45,
         child: Text(outputDate)),
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: <Widget>[
-            Container(
+            SizedBox(
               width: MediaQuery.of(context).size.width * 0.15,
               child: Text(
                 'จำนวน ',
                 style: MyStyle().h3StyleGray,
               ),
             ),
-            Container(
+            SizedBox(
               width: MediaQuery.of(context).size.width * 0.25,
               child: Text(
                 ' ${filterOrnAllModels![index].box}  กล่อง',
@@ -385,22 +368,19 @@ DateTime parseDate =
 
           if (loadingIcon == true) {
             // return CupertinoActivityIndicator();
-                        print('with loading');
 
             return Column(
               children: [
                 GestureDetector(
-                  child: Container(
-                    child: Card(
-                      child: Container(
-                        decoration: myBoxDecoration(),
-                        padding: EdgeInsets.only(top: 0.5),
-                        child: Row(
-                          children: <Widget>[
-                            showText(index!),
-                            // showShipBox(index!),
-                          ],
-                        ),
+                  child: Card(
+                    child: Container(
+                      decoration: myBoxDecoration(),
+                      padding: EdgeInsets.only(top: 0.5),
+                      child: Row(
+                        children: <Widget>[
+                          showText(index),
+                          // showShipBox(index!),
+                        ],
                       ),
                     ),
                   ),
@@ -410,7 +390,7 @@ DateTime parseDate =
                     MaterialPageRoute materialPageRoute =
                         MaterialPageRoute(builder: (BuildContext buildContext) {
                       return MenuOrn(
-                        ornID: filterOrnAllModels![index!].id.toString(),
+                        ornID: filterOrnAllModels![index].id.toString(),
                         userModel: myUserModel,
                       );
                     });
@@ -430,17 +410,15 @@ DateTime parseDate =
           }
 
           return GestureDetector(
-            child: Container(
-              child: Card(
-                child: Container(
-                  decoration: myBoxDecoration(),
-                  padding: EdgeInsets.only(top: 0.5),
-                  child: Row(
-                    children: <Widget>[
-                      showText(index!),
-                      // showShipBox(index!),
-                    ],
-                  ),
+            child: Card(
+              child: Container(
+                decoration: myBoxDecoration(),
+                padding: EdgeInsets.only(top: 0.5),
+                child: Row(
+                  children: <Widget>[
+                    showText(index),
+                    // showShipBox(index!),
+                  ],
                 ),
               ),
             ),
@@ -450,7 +428,7 @@ DateTime parseDate =
               MaterialPageRoute materialPageRoute =
                   MaterialPageRoute(builder: (BuildContext buildContext) {
                 return MenuOrn(
-                  ornID: filterOrnAllModels![index!].id.toString(),
+                  ornID: filterOrnAllModels![index].id.toString(),
                   userModel: myUserModel,
                 );
               });
@@ -477,13 +455,8 @@ DateTime parseDate =
   }
 
   Widget showContent() {
-    print(filterOrnAllModels!.length);
-    bool? searchKey;
-    if (searchString != '') {
-      searchKey = true;
-    }
 
-    if (filterOrnAllModels!.length == 0) {
+    if (filterOrnAllModels!.isEmpty) {
       return Center(child: Text(''));
     } else {
       return showProductItem();
@@ -494,7 +467,7 @@ DateTime parseDate =
     // print('searchKey >> $searchKey');
 
     if (searchKey == true) {
-      if (filterOrnAllModels!.length == 0) {
+      if (filterOrnAllModels!.isEmpty) {
         return Center(child: Text('')); // Search not found
       } else {
         return Center(child: Text(''));
@@ -510,12 +483,7 @@ DateTime parseDate =
   }
 
   Widget totalOrn() {
-    print('totalRecords >> $totalRecords');
-    late MaterialColor colorTotalBTN;
-    colorTotalBTN = Colors.grey;
     String txttotalRecords = totalRecords.toString();
-
-    String? memberId = myUserModel!.id.toString();
 
     return GestureDetector(
       child: Container(
@@ -545,22 +513,17 @@ DateTime parseDate =
     try {
       // final qrScanString = await Navigator.push(this.context,
       //     MaterialPageRoute(builder: (context) => ScanPreviewPage()));
-      var qrScanString;
+      ScanResult qrScanString;
       qrString = '';
-      print('Before scan');
       qrScanString = await BarcodeScanner.scan();
-      print('After scan');
       // print('scan result: $qrScanString');
-      qrString = qrScanString!.rawContent;
-      print('scan result: $qrString');
+      qrString = qrScanString.rawContent;
 
       if (qrString != null) {
         decodeQRcodeORN(qrString!);
       }
       // setState(() => scanResult = qrScanString);
-    } on PlatformException catch (e) {
-      print('e = $e');
-    }
+    } on PlatformException {} // ignore: empty_catches
   }
 
   Future<void> decodeQRcodeORN(var code) async {
@@ -571,17 +534,15 @@ DateTime parseDate =
         // id = currentOrnAllModel!.id.toString();
         String? url =
             '${MyStyle().serverName}/json_ornlist.php?memberId=$memberId&code=$code'; // &code=$code
-        print("URL = $url");
         http.Response response = await http.get(Uri.parse(url));
+        if (!mounted) return;
         var result = json.decode(response.body);
 
-        print('result (decodeQRcode) ===>>>> $result');
 
         int? status = result!['status'];
         String? title = 'ข้อมูลไม่ถูกต้อง';
         String? message = result!['message'];
         OrnModel? ornScanAllModel;
-        print('status ===>>> $status');
         if (status == 0) {
           // normalDialog(context, 'Not found', 'ไม่พบ code :: $code ในระบบ');
           AwesomeDialog(
@@ -610,11 +571,16 @@ DateTime parseDate =
           Navigator.of(context).push(materialPageRoute);
         }
       }
-    } catch (e) {}
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('ค้นหาข้อมูลไม่สำเร็จ กรุณาลองใหม่อีกครั้ง')),
+        );
+      }
+    }
   }
 
   Widget searchForm() {
-    print('searchString >> $searchString');
 
 
     return Container(
@@ -622,7 +588,7 @@ DateTime parseDate =
       // color: Colors.grey,
       padding: EdgeInsets.only(left: 5.0, right: 5.0, top: 2.0, bottom: 2.0),
       child: ListTile(
-        trailing: Container(
+        trailing: SizedBox(
           width: 45.0,
           child: Image.asset('images/qr_code.png'),
         ),
@@ -659,7 +625,6 @@ DateTime parseDate =
           },
           textInputAction: TextInputAction.search,
           onSubmitted: (value) {
-            print('onSubmitted');
             setState(() {
               page = 1;
               myIndex = 0;
@@ -684,8 +649,6 @@ DateTime parseDate =
   }
 
   Widget stylishBottomBar() {
-    int? unread =
-        myUserModel!.lastNewsId!.toInt() - myUserModel!.lastNewsOpen!.toInt();
     return StylishBottomBar(
       option: AnimatedBarOptions(
         iconStyle: IconStyle.animated,

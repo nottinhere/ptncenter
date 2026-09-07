@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -11,7 +11,6 @@ import 'package:ptncenter/models/promotion_tier.dart';
 import 'package:ptncenter/models/gift_model.dart';
 import 'package:ptncenter/scaffold/detail_cart.dart';
 import 'package:ptncenter/utility/my_style.dart';
-import 'package:ptncenter/utility/normal_dialog.dart';
 
 import 'package:ptncenter/scaffold/list_product.dart';
 import 'package:ptncenter/scaffold/list_product_favorite.dart';
@@ -21,9 +20,7 @@ import 'my_service.dart';
 import 'package:flutter_spinbox/flutter_spinbox.dart';
 import 'package:favorite_button/favorite_button.dart';
 
-import 'package:flutter/services.dart';
 
-import 'package:flutter/foundation.dart';
 
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 // import 'package:youtube_player_iframe/youtube_player_iframe.dart';
@@ -75,7 +72,7 @@ class Detail extends StatefulWidget {
   final ProductAllModel? productAllModel;
   final UserModel? userModel;
 
-  Detail({Key? key, this.productAllModel, this.userModel}) : super(key: key);
+  const Detail({super.key, this.productAllModel, this.userModel});
 
   @override
   _DetailState createState() => _DetailState();
@@ -148,25 +145,21 @@ class _DetailState extends State<Detail> {
   }
 
   Future<void> getProductWhereID() async {
-    if (currentProductAllModel! != '') {
+    if (currentProductAllModel != null) {
       String? memberId = myUserModel!.id.toString();
       id = currentProductAllModel!.id.toString();
       String? url = '${MyStyle().getProductWhereId}$id&memberId=$memberId';
-      print('url Detaillll ====>>> $url');
       http.Response response = await http.get(Uri.parse(url));
       var result = json.decode(response.body);
       // print('result =0000000>>> $result');
 
       var itemProducts = result['itemsProduct'];
-      print('itemProducts ===>>>>$itemProducts');
       for (var map in itemProducts) {
-        print('map DEtail ==========>>>>>>>> $map');
 
         setState(() {
           productAllModel = ProductAllModel2.fromJson(map);
 
           Map<String, dynamic> priceListMap = map['price_list'];
-          print('currentProductAllModel = $currentProductAllModel');
 
           Map<String, dynamic>? sizeSmap = priceListMap['s'];
           if (sizeSmap != null) {
@@ -188,9 +181,6 @@ class _DetailState extends State<Detail> {
             priceLabelBySize['l'] = unitSizeModel.lable ?? '';
             lSoldSeparately = (double.tryParse(unitSizeModel.price ?? '') ?? 0) > 0;
           }
-          print('sizeSmap = $sizeSmap');
-          print('sizeMmap = $sizeMmap');
-          print('sizeLmap = $sizeLmap');
         });
       } // for
 
@@ -226,7 +216,6 @@ class _DetailState extends State<Detail> {
             ..loadRequest(Uri.parse(tiktok));
         }
       });
-      print('videoCode >> $videoCode');
       computeNearMiss();
     }
   }
@@ -247,9 +236,7 @@ class _DetailState extends State<Detail> {
         }
         computeNearMiss();
       }
-    } catch (e) {
-      print('readMedicinePromotion error: $e');
-    }
+    } catch (e) {} // ignore: empty_catches
   }
 
   Future<void> readGiftItems() async {
@@ -266,9 +253,7 @@ class _DetailState extends State<Detail> {
         giftMap = map;
         computeNearMiss();
       }
-    } catch (e) {
-      print('readGiftItems error: $e');
-    }
+    } catch (e) {} // ignore: empty_catches
   }
 
   Future<void> readUnitNames() async {
@@ -286,9 +271,7 @@ class _DetailState extends State<Detail> {
         unitNameMap = map;
         computeNearMiss();
       }
-    } catch (e) {
-      print('readUnitNames error: $e');
-    }
+    } catch (e) {} // ignore: empty_catches
   }
 
   String formatNum(double value) {
@@ -336,10 +319,12 @@ class _DetailState extends State<Detail> {
   void computeNearMiss() {
     MedicinePromotionModel? promo = currentPromotion;
     if (promo == null) {
-      if (mounted) setState(() {
+      if (mounted) {
+        setState(() {
         nearMiss = null;
         receivedGift = null;
       });
+      }
       return;
     }
 
@@ -441,13 +426,13 @@ class _DetailState extends State<Detail> {
     }
   }
 
-  /*************************** */
+  /// *************************
 
   Image showImageNetWork(String urlImage) {
     return Image.network(urlImage);
   }
 
-  /*************************** */
+  /// *************************
 
   Future<void> readSlide() async {
     String? memId = myUserModel!.id;
@@ -458,7 +443,6 @@ class _DetailState extends State<Detail> {
         '${MyStyle().serverName}/json_productimage.php?memberId=$memId&id=$id';
     // String url = '${MyStyle().serverName}/json_slideshow.php';
 
-    print('URL image detail >> $url');
 
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
@@ -489,12 +473,10 @@ class _DetailState extends State<Detail> {
     String url =
         '${MyStyle().serverName}/json_relate.php?memberId=$memId&productId=$id'; // ?memberId=$memberId
 
-    print('URL relate >> $url');
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var mapItemProduct =
         result['itemsProduct']; // dynamic    จะส่ง value อะไรก็ได้ รวมถึง null
-    print('mapItemProduct >> $mapItemProduct');
 
     for (var map in mapItemProduct) {
       PromoteModel? relateslideshowModel = PromoteModel.fromJson(map);
@@ -509,7 +491,6 @@ class _DetailState extends State<Detail> {
         urlImagesRelate!.add(urlImage);
       });
     }
-    print('relateslideshowModels >> $relateslideshowModels');
   }
 
   Widget myCircularProgress() {
@@ -570,7 +551,6 @@ class _DetailState extends State<Detail> {
   }
 
   Widget showCarouseSlideshow() {
-    print('slideshowLists.length >> ' + slideshowLists!.length.toString());
     return ClipRRect(
       borderRadius: BorderRadius.circular(MyStyle().radiusM),
       child: GestureDetector(
@@ -608,10 +588,6 @@ class _DetailState extends State<Detail> {
   }
 
   Widget showCarouseSliderRelate() {
-    print(
-      'relateslideshowLists.length  (Widget) > ' +
-          relateslideshowLists!.length.toString(),
-    );
     return GestureDetector(
       child: CarouselSlider.builder(
         options: CarouselOptions(
@@ -638,13 +614,13 @@ class _DetailState extends State<Detail> {
                     child: Column(
                       children: [
                         Container(
+                          height: 100.00,
+                          padding: EdgeInsets.all(8.0),
                           child: Image.network(
                             urlImagesRelate![idx],
                             fit: BoxFit.cover,
                             width: 1000,
                           ),
-                          height: 100.00,
-                          padding: EdgeInsets.all(8.0),
                         ),
                         Padding(
                           padding: EdgeInsets.symmetric(
@@ -662,7 +638,6 @@ class _DetailState extends State<Detail> {
                     ),
                   ),
                   onTap: () {
-                    print('You Click index >> $idx');
                     MaterialPageRoute route = MaterialPageRoute(
                       builder: (BuildContext context) => Detail(
                         productAllModel: relateslideshowModels![idx],
@@ -684,12 +659,11 @@ class _DetailState extends State<Detail> {
   Future<void> editFavorite(
     String productID,
     String memberID,
-    bool _isFavorite,
+    bool isFavorite,
   ) async {
     String url =
-        '${MyStyle().serverName}/json_favorite.php?productID=$productID&memberId=$memberID&status=$_isFavorite';
+        '${MyStyle().serverName}/json_favorite.php?productID=$productID&memberId=$memberID&status=$isFavorite';
 
-    print('url Favorites url ====>>>>> $url');
     await http.get(Uri.parse(url)).then((response) {
       setState(() {
         //readCart();
@@ -713,9 +687,9 @@ class _DetailState extends State<Detail> {
       child: FavoriteButton(
         isFavorite: favStatus,
         iconSize: 34.0,
-        valueChanged: (_isFavorite) {
+        valueChanged: (isFavorite) {
           // print('Is Favorite : $_isFavorite');
-          editFavorite(productID!, memberID, _isFavorite);
+          editFavorite(productID!, memberID, isFavorite);
 
           // http.Response response =  http.get(Uri.parse(url));
         },
@@ -1103,9 +1077,8 @@ class _DetailState extends State<Detail> {
     int? iniValue = 0;
     int? limitValue = 0;
     bool? readOnlyMode;
-    var iconName;
-    var iconColor;
-    print('incart all size -> $sizeSincart / $sizeMincart / $sizeLincart ');
+    IconData iconName;
+    Color iconColor;
     if (index == 0) {
       iniValue = showSincart;
       limitValue = limitS;
@@ -1160,6 +1133,7 @@ class _DetailState extends State<Detail> {
         child: Column(
           children: <Widget>[
             Padding(
+              padding: const EdgeInsets.all(0),
               child: SpinBox(
                 min: 0,
                 max: (limitValue==0)?10000:limitValue!.toDouble(),  //10000,//
@@ -1185,7 +1159,6 @@ class _DetailState extends State<Detail> {
                   border: UnderlineInputBorder(), // InputBorder.none,
                 ),
               ),
-              padding: const EdgeInsets.all(0),
             ),
           ],
         ),
@@ -1257,8 +1230,7 @@ class _DetailState extends State<Detail> {
   Widget showVideo() {
     // String videoSelectCode = videoCode!;
     String videoSelectCode = productAllModel!.youtube!;
-    print('videoSelectCode ====>>>>> $videoSelectCode');
-    final _controllers = YoutubePlayerController(
+    final controllers = YoutubePlayerController(
       initialVideoId: videoSelectCode,
       flags: const YoutubePlayerFlags(
         mute: false,
@@ -1274,8 +1246,8 @@ class _DetailState extends State<Detail> {
     return ClipRRect(
       borderRadius: BorderRadius.circular(MyStyle().radiusM),
       child: YoutubePlayer(
-        key: ObjectKey(_controllers),
-        controller: _controllers,
+        key: ObjectKey(controllers),
+        controller: controllers,
         actionsPadding: const EdgeInsets.only(left: 16.0),
         bottomActions: [
           CurrentPosition(),
@@ -1536,10 +1508,6 @@ class _DetailState extends State<Detail> {
   }
 
   Widget relate() {
-    print(
-      'relateslideshowLists!.length (Widget relate)>> ' +
-          relateslideshowLists!.length.toString(),
-    );
     return Container(
       width: double.infinity,
       height: MediaQuery.of(context).size.height * 0.25,
@@ -1569,14 +1537,12 @@ class _DetailState extends State<Detail> {
   }
 
   Future<void> readCart() async {
-    print('Here is readcart function');
 
     amontCart = 0;
     String memberId = myUserModel!.id.toString();
     String url =
         '${MyStyle().serverName}/json_loadmycart.php?memberId=$memberId&screen=detaiil';
 
-    print('url Detail =====>>>>>>>> $url');
 
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
@@ -1688,7 +1654,6 @@ class _DetailState extends State<Detail> {
 
   @override
   Widget build(BuildContext context) {
-    print('productAllModel (build)>> $productAllModel');
     return Scaffold(
       backgroundColor: MyStyle().scaffoldBackground,
       appBar: AppBar(
@@ -1746,42 +1711,24 @@ class _DetailState extends State<Detail> {
             if (qtyS != null) {
               String unitSize = 's';
               if (qtyS != 0) {
-                print(
-                  'productID = $productID, memberID=$memberID, unitSize=s, QTY=$qtyS',
-                );
                 addCart(productID!, unitSize, qtyS!, memberID);
               } else if (showSincart != 0) {
-                print(
-                  'productID = $productID, memberID=$memberID, unitSize=s, remove from cart',
-                );
                 removeCart(productID!, unitSize, memberID);
               }
             }
             if (qtyM != null) {
               String unitSize = 'm';
               if (qtyM != 0) {
-                print(
-                  'productID = $productID, memberID=$memberID, unitSize=m, QTY=$qtyM',
-                );
                 addCart(productID!, unitSize, qtyM!, memberID);
               } else if (showMincart != 0) {
-                print(
-                  'productID = $productID, memberID=$memberID, unitSize=m, remove from cart',
-                );
                 removeCart(productID!, unitSize, memberID);
               }
             }
             if (qtyL != null) {
               String unitSize = 'l';
               if (qtyL != 0) {
-                print(
-                  'productID = $productID, memberID=$memberID, unitSize=l, QTY=$qtyL',
-                );
                 addCart(productID!, unitSize, qtyL!, memberID);
               } else if (showLincart != 0) {
-                print(
-                  'productID = $productID, memberID=$memberID, unitSize=l, remove from cart',
-                );
                 removeCart(productID!, unitSize, memberID);
               }
             }
@@ -1799,10 +1746,9 @@ class _DetailState extends State<Detail> {
   ) async {
     String url =
         '${MyStyle().serverName}/json_savemycart.php?productID=$productID&unitSize=$unitSize&QTY=$qTY&memberId=$memberID';
-    print('urlAddcart = $url');
     await http.get(Uri.parse(url)).then((response) {});
-    print('upload ok');
 
+    if (!mounted) return;
     Navigator.pop(context, true);
   }
 
@@ -1813,10 +1759,9 @@ class _DetailState extends State<Detail> {
   ) async {
     String url =
         '${MyStyle().serverName}/json_removeitemincart.php?productID=$productID&unitSize=$unitSize&memberId=$memberID';
-    print('urlRemoveCart = $url');
     await http.get(Uri.parse(url)).then((response) {});
-    print('remove ok');
 
+    if (!mounted) return;
     Navigator.pop(context, true);
   }
 

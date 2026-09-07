@@ -9,7 +9,7 @@ import 'package:ptncenter/utility/my_style.dart';
 class CropImagePage extends StatefulWidget {
   final Uint8List imageBytes;
 
-  const CropImagePage({Key? key, required this.imageBytes}) : super(key: key);
+  const CropImagePage({super.key, required this.imageBytes});
 
   @override
   _CropImagePageState createState() => _CropImagePageState();
@@ -86,7 +86,7 @@ class _CropImagePageState extends State<CropImagePage> {
               controller: _cropController,
               interactive: true,
               baseColor: Colors.black,
-              maskColor: Colors.black.withOpacity(0.6),
+              maskColor: Colors.black.withValues(alpha: 0.6),
               initialRectBuilder: (viewportRect, imageRect) {
                 const double inset = 50.0;
                 return Rect.fromLTRB(

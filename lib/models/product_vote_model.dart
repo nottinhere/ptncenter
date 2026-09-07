@@ -42,19 +42,19 @@ class ProductVoteModel {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['title'] = this.title;
-    data['genericname'] = this.genericname;
-    data['usefor'] = this.usefor;
-    data['method'] = this.method;
-    data['company'] = this.company;
-    data['pricelabel'] = this.pricelabel;
-    data['pricesale'] = this.pricesale;
-    data['votescore'] = this.votescore;
-    data['yourvote'] = this.yourvote;
-    data['photo'] = this.photo;
-    data['detail'] = this.detail;
-    data['id'] = this.id;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['title'] = title;
+    data['genericname'] = genericname;
+    data['usefor'] = usefor;
+    data['method'] = method;
+    data['company'] = company;
+    data['pricelabel'] = pricelabel;
+    data['pricesale'] = pricesale;
+    data['votescore'] = votescore;
+    data['yourvote'] = yourvote;
+    data['photo'] = photo;
+    data['detail'] = detail;
+    data['id'] = id;
     return data;
   }
 }

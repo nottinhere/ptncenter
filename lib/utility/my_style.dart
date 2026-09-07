@@ -209,21 +209,21 @@ class MyStyle {
   static const String localServerHost = 'localhost';
 
   String? serverName = useLocalServer
-      ? 'https://$localServerHost/pattana/apiptnshop'
+      ? 'http://$localServerHost/pattana/apiptnshop'
       : 'https://ptnpharma.com/apiptnshop';
 
 
   late String readAllProduct =
-      '${serverName}/json_productlist.php?top=100';
+      '$serverName/json_productlist.php?top=100';
   late String readProductWhereMode =
-      '${serverName}/json_productlist.php?searchKey=';
+      '$serverName/json_productlist.php?searchKey=';
   late String getUserWhereUserAndPass =
-      '${serverName}/json_login.php';
+      '$serverName/json_login.php';
   late String getProductWhereId =
-      '${serverName}/json_productdetail.php?id=';
+      '$serverName/json_productdetail.php?id=';
 
   late String loadMyCart =
-      '${serverName}/json_loadmycart.php?memberId='; //  json_loadmycart_gift.php
+      '$serverName/json_loadmycart.php?memberId='; //  json_loadmycart_gift.php
 
   MyStyle();
 }

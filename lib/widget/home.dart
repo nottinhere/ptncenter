@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'dart:async';
 import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -39,7 +39,6 @@ import 'package:ptncenter/utility/my_style.dart';
 import 'package:flutter/services.dart';
 
 import 'package:permission_handler/permission_handler.dart';
-import 'package:flutter/foundation.dart';
 
 import 'package:awesome_dialog/awesome_dialog.dart';
 
@@ -47,15 +46,14 @@ import 'package:webview_flutter/webview_flutter.dart';
 
 class Home extends StatefulWidget {
   final UserModel? userModel;
-  bool? firstLoadAds;
-  bool? orderSuccess;
+  final bool? firstLoadAds;
+  final bool? orderSuccess;
 
-  Home(
-      {Key? key,
+  const Home(
+      {super.key,
       this.userModel,
       this.firstLoadAds = false,
-      this.orderSuccess = false})
-      : super(key: key);
+      this.orderSuccess = false});
 
   @override
   _HomeState createState() => _HomeState();
@@ -66,6 +64,12 @@ class _QuickAction {
   final String label;
   final VoidCallback onTap;
   _QuickAction(this.icon, this.label, this.onTap);
+}
+
+class _HashtagItem {
+  final String label;
+  final int count;
+  _HashtagItem(this.label, this.count);
 }
 
 class _HomeState extends State<Home> {
@@ -92,6 +96,13 @@ class _HomeState extends State<Home> {
 
   List<ProductAllModel> bestSellerModels = [];
   List<ProductAllModel> trendingModels = [];
+  List<ProductAllModel> medicinePromotionProducts = [];
+  List<ProductAllModel> updatePriceProducts = [];
+
+  List<_HashtagItem> bestSearchTags = [];
+  List<_HashtagItem> bestGenericTags = [];
+  List<_HashtagItem> bestIndyTags = [];
+  int hashtagTabIndex = 0;
 
   // Method
   @override
@@ -112,7 +123,14 @@ class _HomeState extends State<Home> {
     readGifts();
     readBestSellers();
     readTrending();
-    Future.delayed(Duration.zero, () => showOrderSuccessDialog(context));
+    readMedicinePromotionProducts();
+    readUpdatePriceProducts();
+    readBestSearchTags();
+    readBestGenericTags();
+    readBestIndyTags();
+    Future.delayed(Duration.zero, () {
+      if (mounted) showOrderSuccessDialog(context);
+    });
   }
 
   _requestPermission() async {
@@ -123,11 +141,10 @@ class _HomeState extends State<Home> {
     return Image.network(urlImage);
   }
 
-  /***************************  */
+  /// *************************
 
   Future<void> readSlide() async {
     String? url = '${MyStyle().serverName}/json_slideshow.php';
-    print('url = $url');
 
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
@@ -159,9 +176,7 @@ class _HomeState extends State<Home> {
           });
         }
       }
-    } catch (e) {
-      print('readPromotionGroups error: $e');
-    }
+    } catch (e) {} // ignore: empty_catches
   }
 
   Future<void> readGifts() async {
@@ -181,9 +196,7 @@ class _HomeState extends State<Home> {
           });
         }
       }
-    } catch (e) {
-      print('readGifts error: $e');
-    }
+    } catch (e) {} // ignore: empty_catches
   }
 
   Future<void> readBestSellers() async {
@@ -206,9 +219,7 @@ class _HomeState extends State<Home> {
           bestSellerModels = models;
         });
       }
-    } catch (e) {
-      print('readBestSellers error: $e');
-    }
+    } catch (e) {} // ignore: empty_catches
   }
 
   Future<void> readTrending() async {
@@ -231,9 +242,125 @@ class _HomeState extends State<Home> {
           trendingModels = models;
         });
       }
-    } catch (e) {
-      print('readTrending error: $e');
-    }
+    } catch (e) {} // ignore: empty_catches
+  }
+
+  Future<void> readMedicinePromotionProducts() async {
+    String? memberId = myUserModel?.id.toString();
+    if (memberId == null) return;
+    String url =
+        '${MyStyle().serverName}/json_medicinepromotion.php?memberId=$memberId&page=1';
+    try {
+      http.Response response = await http.get(Uri.parse(url));
+      var result = json.decode(response.body);
+      var itemsProduct = result['itemsProduct'];
+      List<ProductAllModel> models = [];
+      if (itemsProduct != null) {
+        for (var map in itemsProduct) {
+          models.add(ProductAllModel.fromJson(map));
+        }
+      }
+      if (mounted) {
+        setState(() {
+          medicinePromotionProducts = models;
+        });
+      }
+    } catch (e) {} // ignore: empty_catches
+  }
+
+  Future<void> readUpdatePriceProducts() async {
+    String? memberId = myUserModel?.id.toString();
+    if (memberId == null) return;
+    String url =
+        '${MyStyle().serverName}/json_productlist.php?memberId=$memberId&searchKey=&product_mode=3&page=1';
+    try {
+      http.Response response = await http.get(Uri.parse(url));
+      var result = json.decode(response.body);
+      var itemsProduct = result['itemsProduct'];
+      List<ProductAllModel> models = [];
+      if (itemsProduct != null) {
+        for (var map in itemsProduct) {
+          models.add(ProductAllModel.fromJson(map));
+        }
+      }
+      if (mounted) {
+        setState(() {
+          updatePriceProducts = models;
+        });
+      }
+    } catch (e) {} // ignore: empty_catches
+  }
+
+  Future<void> readBestSearchTags() async {
+    String url = 'https://ptnpharma.com/jsonData/bestsearch.json';
+    try {
+      http.Response response = await http.get(Uri.parse(url));
+      var result = json.decode(response.body);
+      List<_HashtagItem> items = [];
+      if (result is List) {
+        for (var map in result) {
+          String? keyword = map['keyword']?.toString();
+          int count = int.tryParse(map['numsearch']?.toString() ?? '') ?? 0;
+          if (keyword != null && keyword.isNotEmpty) {
+            items.add(_HashtagItem(keyword, count));
+          }
+        }
+      }
+      items.sort((a, b) => b.count.compareTo(a.count));
+      if (mounted) {
+        setState(() {
+          bestSearchTags = items;
+        });
+      }
+    } catch (e) {} // ignore: empty_catches
+  }
+
+  Future<void> readBestGenericTags() async {
+    String url = 'https://ptnpharma.com/jsonData/bestgeneric.json';
+    try {
+      http.Response response = await http.get(Uri.parse(url));
+      var result = json.decode(response.body);
+      List<_HashtagItem> items = [];
+      if (result is Map) {
+        result.forEach((key, value) {
+          String? name = value['genericnameTxT']?.toString();
+          int count = int.tryParse(value['num']?.toString() ?? '') ?? 0;
+          if (name != null && name.isNotEmpty) {
+            items.add(_HashtagItem(name, count));
+          }
+        });
+      }
+      items.sort((a, b) => b.count.compareTo(a.count));
+      if (mounted) {
+        setState(() {
+          bestGenericTags = items;
+        });
+      }
+    } catch (e) {} // ignore: empty_catches
+  }
+
+  Future<void> readBestIndyTags() async {
+    String url = 'https://ptnpharma.com/jsonData/bestindy.json';
+    try {
+      http.Response response = await http.get(Uri.parse(url));
+      var result = json.decode(response.body);
+      List<_HashtagItem> items = [];
+      if (result is Map) {
+        result.forEach((key, value) {
+          String? name = value['indName']?.toString();
+          int count = int.tryParse(value['num']?.toString() ?? '') ?? 0;
+          if (name != null && name.isNotEmpty) {
+            items.add(_HashtagItem(name, count));
+          }
+        });
+      }
+      items.sort((a, b) => b.count.compareTo(a.count));
+      if (mounted) {
+        setState(() {
+          bestIndyTags = items;
+        });
+      }
+    } catch (e) {} // ignore: empty_catches
   }
 
   String formatPromotionTarget(String? target) {
@@ -469,12 +596,247 @@ class _HomeState extends State<Home> {
     );
   }
 
+  Widget medicinePromotionSection() {
+    if (medicinePromotionProducts.isEmpty) return SizedBox();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        sectionHeader('รายการโปรโมชัน', Icons.local_offer_rounded,
+            onSeeAll: () => routeToListProduct(9)),
+        SizedBox(
+          height: 260.0,
+          child: CarouselSlider.builder(
+            options: CarouselOptions(
+              height: 260.0,
+              viewportFraction: 0.42,
+              enableInfiniteScroll: false,
+              padEnds: false,
+            ),
+            itemCount: medicinePromotionProducts.length,
+            itemBuilder: (context, index, realIdx) {
+              return bestSellerCard(medicinePromotionProducts[index]);
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget updatepriceSection() {
+    if (updatePriceProducts.isEmpty) return SizedBox();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        sectionHeader('สินค้าจะปรับราคา', Icons.price_change_rounded,
+            onSeeAll: () => routeToListProduct(3)),
+        SizedBox(
+          height: 260.0,
+          child: CarouselSlider.builder(
+            options: CarouselOptions(
+              height: 260.0,
+              viewportFraction: 0.42,
+              enableInfiniteScroll: false,
+              padEnds: false,
+            ),
+            itemCount: updatePriceProducts.length,
+            itemBuilder: (context, index, realIdx) {
+              return bestSellerCard(updatePriceProducts[index]);
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  void searchByTag(String query) {
+    MaterialPageRoute materialPageRoute =
+        MaterialPageRoute(builder: (BuildContext buildContext) {
+      return ListProduct(
+        index: 0,
+        userModel: myUserModel!,
+        searchStr: query,
+      );
+    });
+    Navigator.of(context).push(materialPageRoute).then((value) => readCart());
+  }
+
+  Widget hashtagChip(String label) {
+    return GestureDetector(
+      onTap: () => searchByTag(label),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 14.0, vertical: 8.0),
+        decoration: BoxDecoration(
+          color: MyStyle().mainColor,
+          borderRadius: BorderRadius.circular(20.0),
+        ),
+        child: Text(
+          '#$label',
+          style: TextStyle(
+            fontSize: 13.0,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+
+  List<_HashtagItem> get activeHashtagItems {
+    switch (hashtagTabIndex) {
+      case 1:
+        return bestGenericTags;
+      case 2:
+        return bestIndyTags;
+      default:
+        return bestSearchTags;
+    }
+  }
+
+  Widget hashtagTabButton(int index, IconData icon, String label) {
+    bool active = hashtagTabIndex == index;
+    Color color = active ? MyStyle().mainColor : Colors.grey.shade500;
+
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => setState(() => hashtagTabIndex = index),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 10.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Icon(icon, size: 16.0, color: color),
+                  SizedBox(width: 4.0),
+                  Flexible(
+                    child: Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: 12.5,
+                        fontWeight: active ? FontWeight.bold : FontWeight.w500,
+                        color: color,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              height: 2.5,
+              color: active ? MyStyle().mainColor : Colors.transparent,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget hashtagSection() {
+    if (bestSearchTags.isEmpty &&
+        bestGenericTags.isEmpty &&
+        bestIndyTags.isEmpty) {
+      return SizedBox();
+    }
+
+    List<_HashtagItem> items = activeHashtagItems.take(18).toList();
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(MyStyle().radiusM),
+          border: Border.all(color: MyStyle().borderColor),
+        ),
+        child: Column(
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                hashtagTabButton(0, Icons.search_rounded, 'คำค้นหายอดนิยม'),
+                hashtagTabButton(
+                    1, Icons.medication_rounded, 'ชื่อสามัญยอดนิยม'),
+                hashtagTabButton(
+                    2, Icons.assignment_outlined, 'ข้อบ่งใช้ยอดนิยม'),
+              ],
+            ),
+            Divider(height: 1.0, color: MyStyle().borderColor),
+            Padding(
+              padding: EdgeInsets.all(14.0),
+              child: items.isEmpty
+                  ? Padding(
+                      padding: EdgeInsets.symmetric(vertical: 12.0),
+                      child:
+                          Text('ไม่มีข้อมูล', style: MyStyle().captionStyle),
+                    )
+                  : Wrap(
+                      spacing: 8.0,
+                      runSpacing: 8.0,
+                      children: items
+                          .map((item) => hashtagChip(item.label))
+                          .toList(),
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   void routeToBestSellerDetail(ProductAllModel product) {
     MaterialPageRoute materialPageRoute =
         MaterialPageRoute(builder: (BuildContext buildContext) {
       return Detail(userModel: myUserModel, productAllModel: product);
     });
-    Navigator.of(context).push(materialPageRoute).then((value) => readCart());
+    Navigator.of(context).push(materialPageRoute).then((value) {
+      readCart();
+      updateProductCartInfo(product);
+    });
+  }
+
+  /// เหมือน updateDatalist() ในหน้า list_product แต่รับ ProductAllModel ตรงๆ แทนดัชนี
+  /// เพราะการ์ดใน bestSellerSection/trendingSection อ้าง product โดยตรง ไม่ได้ผูกกับ index
+  /// ของ list ใด list หนึ่งเป็นการเฉพาะ (การ์ดใช้ร่วมกันทั้งสอง section)
+  Future<void> updateProductCartInfo(ProductAllModel product) async {
+    String? memberId = myUserModel?.id.toString();
+    if (memberId == null || product.id == null) return;
+    String url = '${MyStyle().serverName}/json_loadmycart.php?memberId=$memberId';
+    try {
+      http.Response response = await http.get(Uri.parse(url));
+      var result = json.decode(response.body);
+      var cartList = result['cart'];
+
+      Map<String, dynamic>? mapCart;
+      if (cartList != null) {
+        for (var m in cartList) {
+          if (m['id'] == product.id) {
+            mapCart = m;
+            break;
+          }
+        }
+      }
+
+      if (mounted) {
+        setState(() {
+          product.itemincartSunit =
+              (mapCart != null && mapCart['price_list'].containsKey('s'))
+                  ? mapCart['price_list']['s']['quantity']
+                  : '0';
+          product.itemincartMunit =
+              (mapCart != null && mapCart['price_list'].containsKey('m'))
+                  ? mapCart['price_list']['m']['quantity']
+                  : '0';
+          product.itemincartLunit =
+              (mapCart != null && mapCart['price_list'].containsKey('l'))
+                  ? mapCart['price_list']['l']['quantity']
+                  : '0';
+        });
+      }
+    } catch (e) {} // ignore: empty_catches
   }
 
   /// เหมือน priceUnitText() ในหน้า list_product (grid view) แต่รับ model ตรงๆ แทนดัชนี
@@ -785,9 +1147,7 @@ class _HomeState extends State<Home> {
       if (qrString != '') {
         decodeQRcode(qrString);
       }
-    } on PlatformException catch (e) {
-      print('e = $e');
-    }
+    } on PlatformException {} // ignore: empty_catches
   }
 
   Future<void> decodeQRcode(var code) async {
@@ -796,6 +1156,7 @@ class _HomeState extends State<Home> {
         String url =
             '${MyStyle().serverName}/json_productlist.php?bqcode=$code';
         http.Response response = await http.get(Uri.parse(url));
+        if (!mounted) return;
         var result = json.decode(response.body);
 
         int status = result['status'];
@@ -815,7 +1176,13 @@ class _HomeState extends State<Home> {
           }
         }
       }
-    } catch (e) {}
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('ค้นหาสินค้าไม่สำเร็จ กรุณาลองใหม่อีกครั้ง')),
+        );
+      }
+    }
   }
 
   /// ---------------- UI sections ----------------
@@ -867,6 +1234,43 @@ class _HomeState extends State<Home> {
     );
   }
 
+  Widget pointBadge() {
+    final point = myUserModel?.point ?? 0;
+
+    return GestureDetector(
+      onTap: () {
+        MaterialPageRoute materialPageRoute =
+            MaterialPageRoute(builder: (BuildContext buildContext) {
+          return RewardList(userModel: myUserModel);
+        });
+        Navigator.of(context).push(materialPageRoute);
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
+        decoration: BoxDecoration(
+          color: Colors.green.shade50,
+          borderRadius: BorderRadius.circular(20.0),
+          border: Border.all(color: Colors.green.shade300),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Icon(Icons.stars, color: Colors.orange.shade700, size: 16.0),
+            SizedBox(width: 4.0),
+            Text(
+              '$point',
+              style: TextStyle(
+                fontSize: 13.0,
+                fontWeight: FontWeight.bold,
+                color: MyStyle().textColor,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget greetingHeader() {
     String? login = myUserModel!.name;
     String? address = myUserModel!.address;
@@ -903,6 +1307,8 @@ class _HomeState extends State<Home> {
               ],
             ),
           ),
+          SizedBox(width: 8.0),
+          pointBadge(),
         ],
       ),
     );
@@ -943,7 +1349,7 @@ class _HomeState extends State<Home> {
         child: Container(
           padding: EdgeInsets.all(12.0),
           decoration: BoxDecoration(
-            color: colorAlertBox.withOpacity(0.08),
+            color: colorAlertBox.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(MyStyle().radiusS),
             border: Border(left: BorderSide(color: colorAlertBox, width: 4.0)),
           ),
@@ -1393,6 +1799,9 @@ class _HomeState extends State<Home> {
             quickAccessGrid(),
             bestSellerSection(),
             trendingSection(),
+            medicinePromotionSection(),
+            updatepriceSection(),
+            hashtagSection(),
             // sectionHeader('ข่าวสาร', Icons.newspaper_rounded,
             //     onSeeAll: routeToNews),
             // newsSection(),

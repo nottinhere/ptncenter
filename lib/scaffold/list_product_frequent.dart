@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -15,10 +15,7 @@ import 'detail_cart.dart';
 import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
 
 import 'my_service.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 
-import 'package:flutter/services.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 // import 'package:loading/loading.dart';
@@ -32,9 +29,8 @@ class ListProductFrequent extends StatefulWidget {
   final int? cate;
   final String? cateName;
 
-  ListProductFrequent(
-      {Key? key, this.index, this.userModel, this.cate, this.cateName})
-      : super(key: key);
+  const ListProductFrequent(
+      {super.key, this.index, this.userModel, this.cate, this.cateName});
 
   @override
   _ListProductFrequent createState() => _ListProductFrequent();
@@ -84,7 +80,7 @@ class _ListProductFrequent extends State<ListProductFrequent> {
   int currentIndex = 1;
   int selectIndex = 2;
 
-  var _isShowincart = {};
+  final _isShowincart = {};
   // List<ProductAllModel> productAllModels_buffer = List(); // []; //
 
   int substart = 0;
@@ -114,9 +110,8 @@ class _ListProductFrequent extends State<ListProductFrequent> {
       if (scrollController!.position.atEdge) {
         if (scrollController!.position.pixels ==
             scrollController!.position.maxScrollExtent) {
-          page = page! + 1;
+          page = page + 1;
           readData();
-          print('in the end');
         }
       } else {
         setState(() {
@@ -126,9 +121,8 @@ class _ListProductFrequent extends State<ListProductFrequent> {
     });
   }
 
-/************************************** */
+/// ************************************
   Future<void> readCart() async {
-    print('Here is readcart function');
 
     amontCart = 0;
     lastItemName = '';
@@ -144,7 +138,7 @@ class _ListProductFrequent extends State<ListProductFrequent> {
     for (var map in cartList) {
       lastItemName = map['title'];
       // setState(() {
-      amontCart = amontCart! + 1;
+      amontCart = amontCart + 1;
       // });
     }
     setState(() {
@@ -192,7 +186,6 @@ class _ListProductFrequent extends State<ListProductFrequent> {
   Future<void> readData() async {
     // List<ProductAllModel> productAllModels_buffer = List(); // []; //
     // String url = MyStyle().readAllProduct;
-    print('Here is readdata function');
     setState(() {
       visible = true;
     });
@@ -202,7 +195,6 @@ class _ListProductFrequent extends State<ListProductFrequent> {
         '${MyStyle().serverName}/json_productfrequentlist.php?memberId=$memberId&searchKey=$searchString&page=$page';
 
     // url = '${MyStyle().readProductWhereMode}$myIndex';
-    print("URL = $url");
 
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
@@ -216,8 +208,6 @@ class _ListProductFrequent extends State<ListProductFrequent> {
     // else
     //   int substart = 20;
 
-    int len = (filterProductAllModels!.length);
-
     for (var map in itemProductfavs) {
       ProductAllModel productAllModel = ProductAllModel.fromJson(map);
 
@@ -225,8 +215,6 @@ class _ListProductFrequent extends State<ListProductFrequent> {
         productAllModels!.add(productAllModel);
         filterProductAllModels = productAllModels;
       });
-      print(
-          ' >> ${len} =>($i)  ${productAllModel.id}  || ${productAllModels![i].title} (${filterProductAllModels![i].itemincartSunit}) <<  (${productAllModel.itemincartSunit})');
 
       i = i + 1;
     }
@@ -240,7 +228,7 @@ class _ListProductFrequent extends State<ListProductFrequent> {
       visible: true,
       child: Row(
         children: <Widget>[
-          Container(
+          SizedBox(
             width: MediaQuery.of(context).size.width * 0.75,
             child: Text(
               filterProductAllModels![index].title!,
@@ -255,7 +243,7 @@ class _ListProductFrequent extends State<ListProductFrequent> {
   Widget showHilight(int index) {
     return Row(
       children: <Widget>[
-        Container(
+        SizedBox(
           width: MediaQuery.of(context).size.width * 0.75,
           child: Text(
             filterProductAllModels![index].hilight!,
@@ -273,26 +261,29 @@ class _ListProductFrequent extends State<ListProductFrequent> {
     if (filterProductAllModels![index].itemSprice.toString() != '0') {
       txtShowPrice = filterProductAllModels![index].itemSprice.toString();
       txtShowUnit = filterProductAllModels![index].itemSunit.toString();
-      if (txtShowPrice != '' && txtShowUnit != '')
-        txtPriceUnit = '$txtPriceUnit' + " [$txtShowPrice/$txtShowUnit] ";
+      if (txtShowPrice != '' && txtShowUnit != '') {
+        txtPriceUnit = "$txtPriceUnit [$txtShowPrice/$txtShowUnit] ";
+      }
     }
     if (filterProductAllModels![index].itemMprice.toString() != '0') {
       txtShowPrice = filterProductAllModels![index].itemMprice.toString();
       txtShowUnit = filterProductAllModels![index].itemMunit.toString();
-      if (txtShowPrice != '' && txtShowUnit != '')
-        txtPriceUnit = '$txtPriceUnit' + " [$txtShowPrice/$txtShowUnit] ";
+      if (txtShowPrice != '' && txtShowUnit != '') {
+        txtPriceUnit = "$txtPriceUnit [$txtShowPrice/$txtShowUnit] ";
+      }
     }
     if (filterProductAllModels![index].itemLprice.toString() != '0') {
       txtShowPrice = filterProductAllModels![index].itemLprice.toString();
       txtShowUnit = filterProductAllModels![index].itemLunit.toString();
-      if (txtShowPrice != '' && txtShowUnit != '')
-        txtPriceUnit = '$txtPriceUnit' + " [$txtShowPrice/$txtShowUnit] ";
+      if (txtShowPrice != '' && txtShowUnit != '') {
+        txtPriceUnit = "$txtPriceUnit [$txtShowPrice/$txtShowUnit] ";
+      }
     }
 
     return Row(
       children: <Widget>[
         Text(
-          '$txtPriceUnit',
+          txtPriceUnit,
           style: TextStyle(
             fontSize: 16.0,
             //  fontWeight: FontWeight.bold,
@@ -333,11 +324,11 @@ class _ListProductFrequent extends State<ListProductFrequent> {
       // child: Image.network(filterProductAllModels![index].photo),
       width: 80,
       height: 80,
-      decoration: new BoxDecoration(
-          image: new DecorationImage(
+      decoration: BoxDecoration(
+          image: DecorationImage(
         fit: BoxFit.cover,
         alignment: FractionalOffset.topCenter,
-        image: new NetworkImage(filterProductAllModels![index].photo!),
+        image: NetworkImage(filterProductAllModels![index].photo!),
       )),
     );
   }
@@ -370,13 +361,12 @@ class _ListProductFrequent extends State<ListProductFrequent> {
       String productID,
       String selectUnit,
       String qty,
-      bool _isFavorite,
+      bool isFavorite,
       String productName,
       String unit) async {
     String url =
-        '${MyStyle().serverName}/json_addfeqitemtocart.php?memberId=$memberID&productID=$productID&selectUnit=$selectUnit&qty=$qty&status=$_isFavorite';
+        '${MyStyle().serverName}/json_addfeqitemtocart.php?memberId=$memberID&productID=$productID&selectUnit=$selectUnit&qty=$qty&status=$isFavorite';
 
-    print('url Favorites url ====>>>>> $url');
     await http.get(Uri.parse(url)).then((response) {
       setState(() {
         // readCart();
@@ -434,14 +424,14 @@ class _ListProductFrequent extends State<ListProductFrequent> {
                   isFavorite: true, //favStatus,
                   iconSize: 40.0,
                   // iconDisabledColor: Colors.white,
-                  valueChanged: (_isFavorite) {
+                  valueChanged: (isFavorite) {
                     // print('Is Favorite : $_isFavorite');
                     iconAddCart(
                         memberID,
                         productID,
                         selectUnit,
                         qty!,
-                        _isFavorite,
+                        isFavorite,
                         filterProductAllModels![index].title ?? '',
                         unitLabel ?? '');
 
@@ -477,12 +467,9 @@ class _ListProductFrequent extends State<ListProductFrequent> {
     _isShowincart[index] =
         (favStatus == false || _isShowincart[index] == true) ? true : false;
 
-    print(
-        '($index)_isShowincart[$index] >> ' + _isShowincart[index].toString());
-
     return Row(
       children: <Widget>[
-        Container(
+        SizedBox(
           width: MediaQuery.of(context).size.width * 0.15,
           child: Text(
             'สั่งประจำ:',
@@ -492,7 +479,7 @@ class _ListProductFrequent extends State<ListProductFrequent> {
             ),
           ),
         ),
-        Container(
+        SizedBox(
           width: MediaQuery.of(context).size.width * 0.16,
           child: Text(
             ((filterProductAllModels![index].itemFeqSunit != '0')
@@ -514,7 +501,7 @@ class _ListProductFrequent extends State<ListProductFrequent> {
         Visibility(
           visible: _isShowincart[index],
           child: Row(children: <Widget>[
-            Container(
+            SizedBox(
               width: MediaQuery.of(context).size.width * 0.15,
               child: Text(
                 ' ตะกร้า:',
@@ -524,7 +511,7 @@ class _ListProductFrequent extends State<ListProductFrequent> {
                 ),
               ),
             ),
-            Container(
+            SizedBox(
               width: MediaQuery.of(context).size.width * 0.15,
               child: Text(
                 ((filterProductAllModels![index].itemFeqSunit != '0')
@@ -572,18 +559,16 @@ class _ListProductFrequent extends State<ListProductFrequent> {
             return Column(
               children: [
                 GestureDetector(
-                  child: Container(
-                    child: Card(
-                      child: Container(
-                        decoration: myBoxDecoration(),
-                        padding: EdgeInsets.only(top: 0.5),
-                        child: Row(
-                          children: <Widget>[
-                            showImage(index),
-                            showText(index),
-                            showThumb(index),
-                          ],
-                        ),
+                  child: Card(
+                    child: Container(
+                      decoration: myBoxDecoration(),
+                      padding: EdgeInsets.only(top: 0.5),
+                      child: Row(
+                        children: <Widget>[
+                          showImage(index),
+                          showText(index),
+                          showThumb(index),
+                        ],
                       ),
                     ),
                   ),
@@ -595,18 +580,16 @@ class _ListProductFrequent extends State<ListProductFrequent> {
           }
 
           return GestureDetector(
-            child: Container(
-              child: Card(
-                child: Container(
-                  decoration: myBoxDecoration(),
-                  padding: EdgeInsets.only(top: 0.5),
-                  child: Row(
-                    children: <Widget>[
-                      showImage(index),
-                      showText(index),
-                      showThumb(index),
-                    ],
-                  ),
+            child: Card(
+              child: Container(
+                decoration: myBoxDecoration(),
+                padding: EdgeInsets.only(top: 0.5),
+                child: Row(
+                  children: <Widget>[
+                    showImage(index),
+                    showText(index),
+                    showThumb(index),
+                  ],
                 ),
               ),
             ),
@@ -623,7 +606,7 @@ class _ListProductFrequent extends State<ListProductFrequent> {
       searchKey = true;
     }
 
-    if (filterProductAllModels!.length == 0) {
+    if (filterProductAllModels!.isEmpty) {
       if (myIndex != 4) {
         return showProgressIndicate(searchKey);
       } else {
@@ -638,7 +621,7 @@ class _ListProductFrequent extends State<ListProductFrequent> {
     // print('searchKey >> $searchKey');
 
     if (searchKey == true) {
-      if (filterProductAllModels!.length == 0) {
+      if (filterProductAllModels!.isEmpty) {
         return Center(child: Text('')); // Search not found
       } else {
         return Center(child: Text(''));
@@ -657,7 +640,6 @@ class _ListProductFrequent extends State<ListProductFrequent> {
     String url =
         '${MyStyle().serverName}/json_addallfeqitemtocart.php?memberId=$memberID';
 
-    print('url Favorites url ====>>>>> $url');
     await http.get(Uri.parse(url)).then((response) {
       setState(() {
         page = 1;
@@ -958,13 +940,12 @@ class FavoriteButton extends StatefulWidget {
     Color? iconDisabledColor,
     bool? isFavorite,
     Function? valueChanged,
-    Key? key,
+    super.key,
   })  : _iconSize = iconSize ?? 60.0,
         _iconColor = iconColor ?? Colors.green,
         _iconDisabledColor = iconDisabledColor ?? Colors.grey[400]!,
         _isFavorite = isFavorite ?? false,
-        _valueChanged = valueChanged!,
-        super(key: key);
+        _valueChanged = valueChanged!;
 
   final double? _iconSize;
   final Color? _iconColor;
@@ -987,7 +968,7 @@ class _FavoriteButtonState extends State<FavoriteButton>
   double? _maxIconSize = 0.0;
   double? _minIconSize = 0.0;
 
-  final int? _animationTime = 400;
+  final int _animationTime = 400;
 
   bool? _isFavorite = false;
   bool? _isAnimationCompleted = false;
@@ -1002,28 +983,28 @@ class _FavoriteButtonState extends State<FavoriteButton>
         : (widget._iconSize! > 100.0)
             ? 100.0
             : widget._iconSize;
-    final double _sizeDifference = _maxIconSize! * 0.30;
-    _minIconSize = _maxIconSize! - _sizeDifference;
+    final double sizeDifference = _maxIconSize! * 0.30;
+    _minIconSize = _maxIconSize! - sizeDifference;
 
     _controller = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: _animationTime!),
+      duration: Duration(milliseconds: _animationTime),
     );
 
     _curve = CurvedAnimation(curve: Curves.slowMiddle, parent: _controller!);
-    Animation<Color?> _selectedColorAnimation = ColorTween(
+    Animation<Color?> selectedColorAnimation = ColorTween(
       begin: widget._iconColor,
       end: widget._iconDisabledColor,
     ).animate(_curve!);
 
-    Animation<Color?> _deSelectedColorAnimation = ColorTween(
+    Animation<Color?> deSelectedColorAnimation = ColorTween(
       begin: widget._iconDisabledColor,
       end: widget._iconColor,
     ).animate(_curve!);
 
     _colorAnimation = (_isFavorite == true)
-        ? _selectedColorAnimation
-        : _deSelectedColorAnimation;
+        ? selectedColorAnimation
+        : deSelectedColorAnimation;
     _sizeAnimation = TweenSequence(
       <TweenSequenceItem<double>>[
         TweenSequenceItem<double>(
@@ -1089,6 +1070,8 @@ class _FavoriteButtonState extends State<FavoriteButton>
 }
 
 class ScanPreviewPage extends StatefulWidget {
+  const ScanPreviewPage({super.key});
+
   @override
   _ScanPreviewPageState createState() => _ScanPreviewPageState();
 }

@@ -1,4 +1,4 @@
-import 'dart:io';
+﻿import 'dart:io';
 
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
@@ -17,7 +17,7 @@ import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
 class SuggestionForm extends StatefulWidget {
   final UserModel? userModel;
 
-  SuggestionForm({Key? key, this.userModel}) : super(key: key);
+  const SuggestionForm({super.key, this.userModel});
 
   @override
   _SuggestionFormState createState() => _SuggestionFormState();
@@ -83,7 +83,6 @@ class _SuggestionFormState extends State<SuggestionForm> {
     try {
       Uri uri = Uri.parse(
           'https://www.ptnpharma.com/apishop/json_submit_complain.php?memberId=$memberId&memberCode=$memberCode');
-          print('submitSuggestion >> $uri');
       http.MultipartRequest request = http.MultipartRequest('POST', uri);
       request.fields['user'] = myUserModel?.name ?? '';
       request.fields['customer_code'] = myUserModel?.customerCode ?? '';
@@ -101,13 +100,11 @@ class _SuggestionFormState extends State<SuggestionForm> {
       }
 
       http.StreamedResponse response = await request.send();
-      String responseBody = await response.stream.bytesToString();
 
+      if (!mounted) return;
       setState(() {
         isSubmitting = false;
       });
-      print('Response status: ${response.statusCode}');
-      print('Response body: $responseBody');
       if (response.statusCode == 200) {
         normalDialogPopup(
             context, 'สำเร็จ', 'ส่งข้อเสนอแนะเรียบร้อยแล้ว');
@@ -116,6 +113,7 @@ class _SuggestionFormState extends State<SuggestionForm> {
             'ไม่สามารถส่งข้อมูลได้ กรุณาลองใหม่\n(status ${response.statusCode})');
       }
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         isSubmitting = false;
       });

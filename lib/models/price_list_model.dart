@@ -17,12 +17,12 @@ class PriceListModel {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['lable'] = this.lable;
-    data['price'] = this.price;
-    data['unit'] = this.unit;
-    data['quantity'] = this.quantity;
-    data['pricechange'] = this.pricechange;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['lable'] = lable;
+    data['price'] = price;
+    data['unit'] = unit;
+    data['quantity'] = quantity;
+    data['pricechange'] = pricechange;
     return data;
   }
 }

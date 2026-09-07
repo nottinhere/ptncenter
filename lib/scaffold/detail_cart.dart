@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -20,9 +20,7 @@ import 'package:ptncenter/scaffold/list_product_favorite.dart';
 // import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
 import 'my_service.dart';
 import 'package:flutter_spinbox/flutter_spinbox.dart';
-import 'package:flutter/services.dart';
 // import 'package:scan_preview/scan_preview_widget.dart';
-import 'package:flutter/foundation.dart';
 import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:chat_bubbles/chat_bubbles.dart';
@@ -74,7 +72,7 @@ class NearMissPromotion {
 
 class DetailCart extends StatefulWidget {
   final UserModel? userModel;
-  DetailCart({Key? key, this.userModel}) : super(key: key);
+  const DetailCart({super.key, this.userModel});
 
   @override
   _DetailCartState createState() => _DetailCartState();
@@ -189,12 +187,10 @@ class _DetailCartState extends State<DetailCart> {
   Future<void> readCart() async {
     String? memberId = myUserModel!.id.toString();
     String? url = '${MyStyle().loadMyCart}$memberId&screen=cart';
-    print('url Detail Cart ====>>>>> $url');
 
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var cartList = result['cart'];
-    print('cartList =======>>> $cartList');
 
     // เคลียร์หลัง await (ไม่ใช่ก่อนเรียก) เพื่อกัน race condition เวลา readCart() ถูกเรียกซ้อนกัน
     // (เช่น แก้ไข/ลบสินค้าติดกันเร็วๆ) ไม่งั้นการเรียกครั้งหลังจะ "บวกเพิ่ม" บนข้อมูลของครั้งก่อน
@@ -213,11 +209,8 @@ class _DetailCartState extends State<DetailCart> {
       // print('productAllModel = ${productAllModel.toJson().toString()}');
 
       setState(() {
-        print('Start setState size S-1');
         Map<String, dynamic> priceListMap = map['price_list'];
-        print('Start setState size S-2');
         int? productID = productAllModel.id;
-        print('Start setState size S-3');
 
 
         if (priceListMap['s'] != null) {
@@ -299,7 +292,6 @@ class _DetailCartState extends State<DetailCart> {
       // http.Response responseDT = await http.get(Uri.parse(urlDT));
       // var resultDT = json.decode(responseDT.body);
 
-      print('Start setState readCart');
       setState(() {
         amontCart = amontCart! + 1;
         productAllModels!.add(productAllModel);
@@ -314,9 +306,6 @@ class _DetailCartState extends State<DetailCart> {
         promotionalert    = myData['promotionalert'];
         promotionsuccess    = myData['promotionsuccess'];
         promotionsuccessgift    = myData['promotionsuccessgift'];
-        print('MY CREDIT > $creditterm + $financialamount + $contactAdmin');
-        var countIC = productAllModels?.length;
-            print('read productAllModels?.length >> {$countIC}');
 
       });
     }
@@ -324,7 +313,6 @@ class _DetailCartState extends State<DetailCart> {
     setState(() {
       Map<String, dynamic>? dataList = result['data'];
       countpricechange = dataList?['countpricechange'];
-      print('countpricechange >>' + countpricechange.toString());
     });
 
     computeReceivedGifts();
@@ -355,9 +343,7 @@ class _DetailCartState extends State<DetailCart> {
             result.map((map) => MedicinePromotionModel.fromJson(map)).toList();
         computeReceivedGifts();
       }
-    } catch (e) {
-      print('readMedicinePromotions error: $e');
-    }
+    } catch (e) {} // ignore: empty_catches
   }
 
   Future<void> readPromotionGroupRules() async {
@@ -370,9 +356,7 @@ class _DetailCartState extends State<DetailCart> {
             result.map((map) => PromotionGroupModel.fromJson(map)).toList();
         computeReceivedGifts();
       }
-    } catch (e) {
-      print('readPromotionGroupRules error: $e');
-    }
+    } catch (e) {} // ignore: empty_catches
   }
 
   Future<void> readInhousePromotions() async {
@@ -385,9 +369,7 @@ class _DetailCartState extends State<DetailCart> {
             result.map((map) => PromotionGroupModel.fromJson(map)).toList();
         computeReceivedGifts();
       }
-    } catch (e) {
-      print('readInhousePromotions error: $e');
-    }
+    } catch (e) {} // ignore: empty_catches
   }
 
   Future<void> readGiftItems() async {
@@ -404,9 +386,7 @@ class _DetailCartState extends State<DetailCart> {
         giftMap = map;
         computeReceivedGifts();
       }
-    } catch (e) {
-      print('readGiftItems error: $e');
-    }
+    } catch (e) {} // ignore: empty_catches
   }
 
   Future<void> readRewardExtrapoints() async {
@@ -424,9 +404,7 @@ class _DetailCartState extends State<DetailCart> {
           });
         }
       }
-    } catch (e) {
-      print('readRewardExtrapoints error: $e');
-    }
+    } catch (e) {} // ignore: empty_catches
   }
 
   /// จำนวนคะแนนพิเศษที่สินค้าชิ้นนี้เข้าเงื่อนไข (รวมทุกขนาดบรรจุที่เข้าเงื่อนไข)
@@ -473,9 +451,7 @@ class _DetailCartState extends State<DetailCart> {
           });
         }
       }
-    } catch (e) {
-      print('readUnitNames error: $e');
-    }
+    } catch (e) {} // ignore: empty_catches
   }
 
   String formatNum(double value) {
@@ -701,14 +677,12 @@ class _DetailCartState extends State<DetailCart> {
     String? memberCode = myUserModel!.customerCode;
     String? url =
         '${MyStyle().serverName}/json_loadmyreward.php?memberId=$memberId&memberCode=$memberCode'; // ?memberId=$memberId
-    print('urlReward >> $url');
 
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var mapItemNews =
         result['itemsData']; // dynamic    จะส่ง value อะไรก็ได้ รวมถึง null
 
-    print('Start setState readReward');
 
     for (var map in mapItemNews) {
       RewardredeemModel? rewardModel = RewardredeemModel.fromJson(map);
@@ -755,7 +729,6 @@ class _DetailCartState extends State<DetailCart> {
   }
 
   Widget showTitle(int index) {
-    print('Here is showTitle');
     return Container(
       padding: EdgeInsets.only(left: 16.0, right: 10.0),
       width: MediaQuery.of(context).size.width,
@@ -940,7 +913,6 @@ class _DetailCartState extends State<DetailCart> {
     //   limitValue = productAllModel!.limitL!.toDouble();
     // }
 
-    print('size -> $size -> $limitValue');
     String? memberID = myUserModel!.id.toString();
     return SizedBox(
       width: 140.0,
@@ -953,9 +925,6 @@ class _DetailCartState extends State<DetailCart> {
         max: (limitValue==0)?10000:limitValue.toDouble(),  //10000,// 
         onChanged: (changevalue) {
           newQTY = (changevalue == 0) ? 0 : (changevalue).toDouble();
-          print(
-            'productID = $productID ,unitSize = $size ,memberID = $memberID, newQTY = $newQTY',
-          );
           updateDetailCart(productID, size, memberID);
         },
       ),
@@ -983,9 +952,6 @@ class _DetailCartState extends State<DetailCart> {
     return TextButton(
       child: Text('OK'),
       onPressed: () {
-        print(
-          'productID = $productID ,unitSize = $unitSize ,memberID = $memberID, newQTY = $newQTY',
-        );
         editDetailCart(productID, unitSize, memberID);
         Navigator.of(context).pop();
       },
@@ -1001,7 +967,6 @@ class _DetailCartState extends State<DetailCart> {
     String url =
         '${MyStyle().serverName}/json_updatemycart.php?productID=$productID&unitSize=$unitSize&newQTY=$newQTY&memberId=$memberID';
 
-    print('url editDetailCart ====>>>>> $url');
 
     await http.get(Uri.parse(url)).then((response) {
       setState(() {
@@ -1017,7 +982,6 @@ class _DetailCartState extends State<DetailCart> {
   ) async {
     String url =
         '${MyStyle().serverName}/json_updatemycart.php?productID=$productID&unitSize=$unitSize&newQTY=$newQTY&memberId=$memberID';
-    print('url editDetailCart ====>>>>> $url');
     await http.get(Uri.parse(url)).then((response) {});
 
     double totalPrice = 0;
@@ -1087,15 +1051,12 @@ class _DetailCartState extends State<DetailCart> {
     String unitSize = size;
     String memberID = myUserModel!.id.toString();
 
-    print('productID = $productID ,unitSize = $unitSize ,memberID = $memberID');
 
     String url =
         '${MyStyle().serverName}/json_removeitemincart.php?productID=$productID&unitSize=$unitSize&memberId=$memberID';
-    print('url DeleteCart======>>>> $url');
 
     await http.get(Uri.parse(url)).then((response) {
       setState(() {
-        print('amontCart after remove item>> $amontCart');
         readCart();
       });
     });
@@ -1110,39 +1071,29 @@ class _DetailCartState extends State<DetailCart> {
 
   void calculateTotal(String price, String quantity) {
     double? priceDou = double.parse(price);
-    print('price Dou ====>>>> $priceDou');
     quantity = quantity.replaceAll(',', '');
     double? quantityDou = double.parse(quantity);
-    print('quantityDou ====>> $quantityDou');
     total = total! + (priceDou * quantityDou);
-    print('total = $total');
   }
 
   Widget showSText(int proIndex, int index) {
     // print('unit >' + sMap?[index]['unit']);
     // if (sMap?[index]['unit']) {
     String? productID = productAllModels![proIndex].id.toString();
-    print('Here is showSText ($productID) ($index)');
-    print('Here is showSText 1.1');
     String? priceS = sMap?[index]['price']?.toString();
-    print('Here is showSText 1.2');
     String? lableS = sMap?[index]['lable'];
-    print('Here is showSText 1.3');
     String? quantityS = sMap?[index]['quantity'];
-    print('Here is showSText 1.4');
     String? pricechange = sMap?[index]['pricechange']?.toString();
     // String? txtpricechange = (sMap![index]['pricechange'].toString() != '');
-    print('Here is showSText 2');
 
     double? showQTYS =
         (quantityS == null) ? 0.0 : double.parse(quantityS.replaceAll(',', ''));
 
-    double? limitS = double.parse(sMap?[index]['limitorder']);
-    double? showlimitS = (limitS == null) ? 0.0 : limitS;
+    double? showlimitS = (sMap?[index]['limitorder'] == null)
+        ? 0.0
+        : double.parse(sMap![index]['limitorder']);
 
-    print('Here is showSText 3');
 
-    print('$productID > $priceS > $lableS > $quantityS > $pricechange');
 
     return lableS!.isEmpty
         ? SizedBox()
@@ -1156,7 +1107,7 @@ class _DetailCartState extends State<DetailCart> {
                         // (pricechange != '-')?
                         (pricechange != '-')
                             ? Text(
-                                'ปรับราคา ' + pricechange! + ' บาท',
+                                'ปรับราคา ${pricechange!} บาท',
                                 style: (double.parse(pricechange) > 0)
                                     ? MyStyle().h5StyleRed
                                     : MyStyle().h5StyleBlue,
@@ -1175,27 +1126,20 @@ class _DetailCartState extends State<DetailCart> {
 
   Widget showMText(int proIndex, int index) {
     String? productID = productAllModels![proIndex].id.toString();
-    print('Here is showMText ($productID) ($index)');
-    print('Here is showMText 1.1');
     String? priceM = mMap?[index]['price']?.toString();
-    print('Here is showMText 1.2');
     String? lableM = mMap?[index]['lable'];
-    print('Here is showMText 1.3');
     String? quantityM = mMap?[index]['quantity'];
-    print('Here is showMText 1.4');
     String? pricechange = mMap?[index]['pricechange']?.toString();
-    print('Here is showMText 2');
 
     double? showQTYM =
         (quantityM == null) ? 0.0 : double.parse(quantityM.replaceAll(',', ''));
 
-    double? limitM = double.parse(mMap?[index]['limitorder']);
-    double? showlimitM = (limitM == null) ? 0.0 : limitM;
+    double? showlimitM = (mMap?[index]['limitorder'] == null)
+        ? 0.0
+        : double.parse(mMap![index]['limitorder']);
 
 
-    print('Here is showMText 3');
 
-    print('$productID > $priceM > $lableM > $quantityM > $pricechange');
 
     return lableM!.isEmpty
         ? SizedBox()
@@ -1209,7 +1153,7 @@ class _DetailCartState extends State<DetailCart> {
                         // (pricechange != '-')?
                         (pricechange != '-')
                             ? Text(
-                                'ปรับราคา ' + pricechange! + ' บาท',
+                                'ปรับราคา ${pricechange!} บาท',
                                 style: (double.parse(pricechange) > 0)
                                     ? MyStyle().h5StyleRed
                                     : MyStyle().h5StyleBlue,
@@ -1227,21 +1171,18 @@ class _DetailCartState extends State<DetailCart> {
 
   Widget showLText(int proIndex, int index) {
     String? productID = productAllModels![proIndex].id.toString();
-    print('Here is showLText ($productID) ($index)');
     String? priceL = lMap?[index]['price']?.toString();
     String? lableL = lMap?[index]['lable'];
     String? quantityL = lMap?[index]['quantity'];
     String? pricechange = lMap?[index]['pricechange']?.toString();
-    print('Here is showLText 2');
 
     double? showQTYL =
         (quantityL == null) ? 0.0 : double.parse(quantityL.replaceAll(',', ''));
-            print('showQTYL->$showQTYL ');
 
-    double? limitL = double.parse(lMap?[index]['limitorder']);
-    double? showlimitL = (limitL == null) ? 0.0 : limitL;
+    double? showlimitL = (lMap?[index]['limitorder'] == null)
+        ? 0.0
+        : double.parse(lMap![index]['limitorder']);
 
-    print('showQTYL->$showQTYL | limitL->$limitL  | showlimitL->$showlimitL ');
 
     return lableL!.isEmpty
         ? SizedBox()
@@ -1255,7 +1196,7 @@ class _DetailCartState extends State<DetailCart> {
                         // (pricechange != '-') ?
                         (pricechange != '-')
                             ? Text(
-                                'ปรับราคา ' + pricechange! + ' บาท',
+                                'ปรับราคา ${pricechange!} บาท',
                                 style: (double.parse(pricechange) > 0)
                                     ? MyStyle().h5StyleRed
                                     : MyStyle().h5StyleBlue,
@@ -1272,9 +1213,6 @@ class _DetailCartState extends State<DetailCart> {
   }
 
   Widget showListCart() {
-    print('allArrIncartS >> $allArrIncartS');
-    print('allArrIncartM >> $allArrIncartM');
-    print('allArrIncartL >> $allArrIncartL');
 
 
     return ListView.builder(
@@ -1366,7 +1304,7 @@ class _DetailCartState extends State<DetailCart> {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 2.0),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         border: Border.all(color: color),
         borderRadius: BorderRadius.circular(20.0),
       ),
@@ -1383,7 +1321,7 @@ class _DetailCartState extends State<DetailCart> {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 2.0),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         border: Border.all(color: color),
         borderRadius: BorderRadius.circular(20.0),
       ),
@@ -1503,7 +1441,6 @@ class _DetailCartState extends State<DetailCart> {
 
   void selectedTransport(String string) {
     transport = string;
-    print('Transport ==> $transport');
     setState(() {
       selectedTranindex = int.parse(string);
     });
@@ -1511,7 +1448,7 @@ class _DetailCartState extends State<DetailCart> {
 
   Widget showTitleTransport() {
     return Text(
-      'การจัดส่ง :' + listTransport![selectedTranindex!.toInt()], // ,
+      'การจัดส่ง :${listTransport![selectedTranindex!.toInt()]}', // ,
       style: TextStyle(
           fontSize: 18.0,
           color: Colors.blueAccent,
@@ -1536,54 +1473,54 @@ class _DetailCartState extends State<DetailCart> {
             itemBuilder: (BuildContext context) {
               return [
                 PopupMenuItem(
-                  child: new Container(
+                  value: '1',
+                  child: SizedBox(
                     width: 500.0,
                     child: Text(
                       listTransport![1],
                       style: TextStyle(fontSize: 16.0, color: Colors.black),
                     ),
                   ),
-                  value: '1',
                 ),
                 PopupMenuItem(
-                  child: new Container(
+                  value: '2',
+                  child: SizedBox(
                     width: 500.0,
                     child: Text(
                       listTransport![2],
                       style: TextStyle(fontSize: 16.0, color: Colors.black),
                     ),
                   ),
-                  value: '2',
                 ),
                 PopupMenuItem(
-                  child: new Container(
+                  value: '3',
+                  child: SizedBox(
                     width: 500.0,
                     child: Text(
                       listTransport![3],
                       style: TextStyle(fontSize: 16.0, color: Colors.black),
                     ),
                   ),
-                  value: '3',
                 ),
                 PopupMenuItem(
-                  child: new Container(
+                  value: '4',
+                  child: SizedBox(
                     width: 500.0,
                     child: Text(
                       listTransport![4],
                       style: TextStyle(fontSize: 16.0, color: Colors.black),
                     ),
                   ),
-                  value: '4',
                 ),
                 PopupMenuItem(
-                  child: new Container(
+                  value: '5',
+                  child: SizedBox(
                     width: 500.0,
                     child: Text(
                       listTransport![5],
                       style: TextStyle(fontSize: 16.0, color: Colors.black),
                     ),
                   ),
-                  value: '5',
                 ),
               ];
             },
@@ -1609,20 +1546,16 @@ class _DetailCartState extends State<DetailCart> {
   }
 
   Widget promotionAlert(String msg) {
-    return Container(
-          // padding: EdgeInsets.only(top: 50.0),
-          // width: MediaQuery.of(context).size.width * 0.75,
-          child: BubbleSpecialOne(
-            text: msg,  // myUserModel!.promotionalert!
-            isSender: true,
-            color: Color.fromARGB(255, 254, 255, 175),
-            tail: true,
-            textStyle: TextStyle(fontSize: 14, color: const Color.fromARGB(255, 223, 5, 5)),
-          ),
-        );
+    return BubbleSpecialOne(
+      text: msg,  // myUserModel!.promotionalert!
+      isSender: true,
+      color: Color.fromARGB(255, 254, 255, 175),
+      tail: true,
+      textStyle: TextStyle(fontSize: 14, color: const Color.fromARGB(255, 223, 5, 5)),
+    );
   }
 
-  Widget nearMissBanner(NearMissPromotion item) {
+  Widget nearMissBanner(NearMissPromotion item, {bool showDivider = true}) {
     String giftName = item.gift?.name ?? 'ของแถม';
     // String sizeClause = (item.sizeLabel != null && item.sizeLabel!.isNotEmpty)
     //     ? ' ไซส์ ${item.sizeLabel} (หน่วยเป็น${item.remainingUnit})'
@@ -1635,17 +1568,14 @@ class _DetailCartState extends State<DetailCart> {
     String message = '$prefix "${item.sourceLabel}"' // $sizeClause
         ' ขาดอีก ${item.remaining} ${item.remainingUnit} เพื่อรับ $giftName ${item.giftQty} ${item.giftUnit} ฟรี';
 
-    double clampedProgress = item.progress.clamp(0.0, 1.0);
-    int percent = (clampedProgress * 100).round();
-
     return Container(
-      margin: EdgeInsets.only(bottom: 8.0),
-      padding: EdgeInsets.all(10.0),
-      decoration: BoxDecoration(
-        color: Color(0xFFFFFBEA),
-        borderRadius: BorderRadius.circular(10.0),
-        border: Border.all(color: Color(0xFFFFE8A3)),
-      ),
+      padding: EdgeInsets.symmetric(vertical: 8.0),
+      decoration: showDivider
+          ? BoxDecoration(
+              border: Border(
+                  bottom: BorderSide(color: Color(0xFFFFE8A3), width: 1.0)),
+            )
+          : null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -1725,7 +1655,24 @@ class _DetailCartState extends State<DetailCart> {
 
   Widget nearMissSection() {
     if (nearMissPromotions.isEmpty) return Container();
-    return Column(children: nearMissPromotions.map(nearMissBanner).toList());
+
+    return Card(
+      color: Color(0xFFFFFBEA),
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10.0),
+        side: BorderSide(color: Color(0xFFFFE8A3)),
+      ),
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 10.0),
+        child: Column(
+          children: nearMissPromotions.asMap().entries.map((entry) {
+            bool isLast = entry.key == nearMissPromotions.length - 1;
+            return nearMissBanner(entry.value, showDivider: !isLast);
+          }).toList(),
+        ),
+      ),
+    );
   }
 
   Widget receivedGiftTile(ReceivedGiftItem item) {
@@ -1829,15 +1776,10 @@ class _DetailCartState extends State<DetailCart> {
     // String? promotionalert = myUserModel!.promotionalert;
     // String? promotionsuccess = myUserModel!.promotionsuccess;
 
-    print('CREDIT CHECK > $creditterm + $financialamount + $contactAdmin');
-    print('promotionalert > $promotionalert');
-    print('promotionsuccess > $promotionsuccess');
-    print('transport = $transport, comment = $comment, memberId = $memberID');
-    print(creditterm.toString() +'-'+  financialamount.toString()  +'-'+ contactAdmin.toString());
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: <Widget>[
-        Container(
+        SizedBox(
           width: MediaQuery.of(context).size.width * 0.75,
           child: Column(
             children: [
@@ -1861,7 +1803,6 @@ class _DetailCartState extends State<DetailCart> {
             onPressed: _isPressed == false
                 ? () {
                     setState(() {
-                      print('amontCart submit >> $amontCart');
                       if (amontCart == 0) {
                         // normalDialog(
                         //   context,
@@ -1916,12 +1857,13 @@ class _DetailCartState extends State<DetailCart> {
                         }else
                         if (creditterm !='-' || financialamount !='-' || contactAdmin !='-') {
                            var txtCreditTitle =  '';
-                            if(creditterm !='-' )
+                            if(creditterm !='-' ) {
                               txtCreditTitle =  'ท่านมียอดค้างชำระเกินกำหนด';
-                            else if(financialamount !='-' )
+                            } else if(financialamount !='-' ) {
                               txtCreditTitle =  'ท่านมียอดค้างชำระเกินวงเงินที่กำหนด';
-                            else if(contactAdmin !='-' )
+                            } else if(contactAdmin !='-' ) {
                               txtCreditTitle =  'กรุณาติดต่อผู้ดูแลระบบ';
+                            }
 
                            AwesomeDialog(
                                 context: context,
@@ -1966,11 +1908,6 @@ class _DetailCartState extends State<DetailCart> {
                           } else {
                             _isPressed = true;
                             memberID = myUserModel!.id.toString();
-                            print(
-                              'Submit >> transport = $transport, comment = $comment, memberId = $memberID, promotionsuccess = $promotionsuccess',
-                            );
-                            print(
-                                'promotionsuccessgift = $promotionsuccessgift');
                             submitThread();
                           }
                         }
@@ -1990,7 +1927,6 @@ class _DetailCartState extends State<DetailCart> {
     try {
       String url =
           '${MyStyle().serverName}/json_submit_myorder.php?memberId=$memberID&transport=$transport&comment=$comment';
-      print('url ==> $url');
 
       // await http.get(Uri.parse(url)).then((value) {
       //   // confirmSubmit();
@@ -2008,7 +1944,13 @@ class _DetailCartState extends State<DetailCart> {
     });
 
 
-    } catch (e) {}
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('ส่งคำสั่งซื้อไม่สำเร็จ กรุณาลองใหม่อีกครั้ง')),
+        );
+      }
+    }
   }
 
   Future<void> confirmSubmit() async {
@@ -2183,7 +2125,7 @@ class _DetailCartState extends State<DetailCart> {
                   inhouseGiftsReceived.isNotEmpty)
               ? promotionSuccess()
               : Container(),
-          (rewardredeemModels!.length != 0) ? showReward() : Container(),
+          (rewardredeemModels!.isNotEmpty) ? showReward() : Container(),
           showTransport(),
           commentBox(),
           (countpricechange != 0)

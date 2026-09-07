@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -20,7 +20,7 @@ class DetailNews extends StatefulWidget {
   final PopupModel? popupModel;
   final UserModel? userModel;
 
-  DetailNews({Key? key, this.popupModel, this.userModel}) : super(key: key);
+  const DetailNews({super.key, this.popupModel, this.userModel});
 
   @override
   _DetailState createState() => _DetailState();
@@ -37,7 +37,7 @@ class _DetailState extends State<DetailNews> {
   String? textButton = '';
   String? textURL = '';
   String? subjectPopup = '';
-  String? DetailNews = '';
+  String? detailText = '';
   String? postdatePopup = '';
   int? currentIndex = 1;
   int selectIndex = 3;
@@ -57,7 +57,6 @@ class _DetailState extends State<DetailNews> {
     String id = currentPopupModel!.id.toString();
 
     String url = '${MyStyle().serverName}/json_newsdetail.php?id=$id';
-    print('urlPopup >> $url');
 
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
@@ -67,17 +66,17 @@ class _DetailState extends State<DetailNews> {
 
     for (var map in mapItemPopup) {
       PopupModel? popupModel = PopupModel.fromJson(map);
-      String? urlImage = popupModel!.photo!;
-      String? subject = popupModel!.subject!;
-      String? postdate = popupModel!.postdate!;
-      String? detail = popupModel!.detail!;
-      String? txtBTN = popupModel!.txtBTN!;
-      String? txtURL = popupModel!.url!;
+      String? urlImage = popupModel.photo!;
+      String? subject = popupModel.subject!;
+      String? postdate = popupModel.postdate!;
+      String? detail = popupModel.detail!;
+      String? txtBTN = popupModel.txtBTN!;
+      String? txtURL = popupModel.url!;
       setState(() {
         //promoteModels.add(promoteModel); // push ค่าลง arra
         subjectPopup = subject;
         imagePopup = urlImage;
-        DetailNews = detail;
+        detailText = detail;
         postdatePopup = postdate;
         textButton = txtBTN;
         textURL = txtURL;
@@ -111,7 +110,7 @@ class _DetailState extends State<DetailNews> {
     return Card(
       child: Container(
         width: MediaQuery.of(context).size.width * 0.9,
-        padding: new EdgeInsets.all(10.0),
+        padding: EdgeInsets.all(10.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
@@ -128,7 +127,7 @@ class _DetailState extends State<DetailNews> {
   Widget showButton() {
     return Container(
       width: MediaQuery.of(context).size.width * 0.9,
-      padding: new EdgeInsets.all(10.0),
+      padding: EdgeInsets.all(10.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
@@ -164,7 +163,7 @@ class _DetailState extends State<DetailNews> {
           children: <Widget>[
             SizedBox(width: 10.0, height: 5.0),
             Text(
-              'โพสเมื่อ :' + postdatePopup!,
+              'โพสเมื่อ :${postdatePopup!}',
               style: TextStyle(
                 fontSize: 16.0,
                 fontWeight: FontWeight.bold,
@@ -175,7 +174,7 @@ class _DetailState extends State<DetailNews> {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Text(
-                DetailNews!.replaceAll('\\n', '\n\n'),
+                detailText!.replaceAll('\\n', '\n\n'),
                 /* 'Like\nAndroidRide\n\nShare Posts', */
                 style: TextStyle(
                   fontSize: 19.0,
@@ -307,7 +306,7 @@ class _DetailState extends State<DetailNews> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        Container(
+        SizedBox(
           width: MediaQuery.of(context).size.width * 0.30,
           // color: Colors.greenAccent,
           // height: 80.0,
@@ -333,7 +332,6 @@ class _DetailState extends State<DetailNews> {
               ),
             ),
             onTap: () {
-              print('You click home');
               MaterialPageRoute materialPageRoute = MaterialPageRoute(
                 builder: (BuildContext buildContext) {
                   return MyService(userModel: myUserModel);
@@ -413,9 +411,8 @@ class _WebViewExampleState extends State<WebViewExample> {
     mywebPage = widget.webPage;
 
     String? url = mywebPage!; //
-    print('URL ==>> $url');
 
-    String? urlView =  url!;
+    String? urlView =  url;
     
 
     // #docregion webview_controller

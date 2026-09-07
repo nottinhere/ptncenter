@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -16,8 +16,6 @@ import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
 
 import 'my_service.dart';
 
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
@@ -34,9 +32,8 @@ class ListProductfav extends StatefulWidget {
   final int? cate;
   final String? cateName;
 
-  ListProductfav(
-      {Key? key, this.index, this.userModel, this.cate, this.cateName})
-      : super(key: key);
+  const ListProductfav(
+      {super.key, this.index, this.userModel, this.cate, this.cateName});
 
   @override
   _ListProductfavState createState() => _ListProductfavState();
@@ -88,7 +85,7 @@ class _ListProductfavState extends State<ListProductfav> {
 
   // List<ProductAllModel> productAllModels_buffer = List(); // []; //
 
-  var _controller = TextEditingController();
+  final _controller = TextEditingController();
 
   int substart = 0;
   bool visible = true;
@@ -119,7 +116,6 @@ class _ListProductfavState extends State<ListProductfav> {
             scrollController!.position.maxScrollExtent) {
           page = page! + 1;
           readData();
-          print('in the end');
         }
       } else {
         setState(() {
@@ -129,9 +125,8 @@ class _ListProductfavState extends State<ListProductfav> {
     });
   }
 
-/************************************** */
+/// ************************************
   Future<void> readCart() async {
-    print('Here is readcart function');
 
     amontCart = 0;
     lastItemName = '';
@@ -139,7 +134,6 @@ class _ListProductfavState extends State<ListProductfav> {
     String url =
         '${MyStyle().serverName}/json_loadmycart.php?memberId=$memberId&screen=listproductfav';
 
-    print('url Detail =====>>>>>>>> $url');
 
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
@@ -156,92 +150,6 @@ class _ListProductfavState extends State<ListProductfav> {
     });
   }
 
-/*************************** 
-  String _scanBarcode = 'Unknown';
-
-  Future<void> startBarcodeScanStream() async {
-    FlutterBarcodeScanner.getBarcodeStreamReceiver(
-            '#ff6666', 'Cancel', true, ScanMode.BARCODE)!
-        .listen((barcode) => print(barcode));
-  }
-
-  Future<void> scanQR() async {
-    String barcodeScanRes;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    try {
-      barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-          '#ff6666', 'Cancel', true, ScanMode.QR);
-      print(barcodeScanRes);
-    } on PlatformException {
-      barcodeScanRes = 'Failed to get platform version.';
-    }
-
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
-
-    setState(() {
-      _scanBarcode = barcodeScanRes;
-    });
-  }
-
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> scanBarcodeNormal() async {
-    String barcodeScanRes;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    try {
-      barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-          '#ff6666', 'Cancel', true, ScanMode.BARCODE);
-      print(barcodeScanRes);
-
-      String url =
-          '${MyStyle().serverName}/json_productlist.php?bqcode=$barcodeScanRes';
-      http.Response response = await http.get(Uri.parse(url));
-      var result = json.decode(response.body);
-      // print('result ===*******>>>> $result');
-
-      int status = result['status'];
-      // print('status ===>>> $status');
-      if (status == 0) {
-        normalDialog(
-            context, 'Not found', 'ไม่พบ code :: $barcodeScanRes ในระบบ');
-      } else {
-        var itemProducts = result['itemsProduct'];
-        for (var map in itemProducts) {
-          // print('map ===*******>>>> $map');
-
-          ProductAllModel productAllModel = ProductAllModel.fromJson(map);
-          MaterialPageRoute route = MaterialPageRoute(
-            builder: (BuildContext context) => Detail(
-              userModel: myUserModel,
-              productAllModel: productAllModel,
-            ),
-          );
-          Navigator.of(context).push(route).then((value) => readCart());
-
-          // Navigator.of(context).push(route).then((value) {
-          //   setState(() {
-          //     // readCart();
-          //   });
-          // });
-        }
-      }
-    } on PlatformException {
-      barcodeScanRes = 'Failed to get platform version.';
-    }
-
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
-
-    setState(() {
-      _scanBarcode = barcodeScanRes;
-    });
-  }
-
-*************************** */
 
   Widget showCart() {
     return GestureDetector(
@@ -282,7 +190,6 @@ class _ListProductfavState extends State<ListProductfav> {
   Future<void> readData() async {
     // List<ProductAllModel> productAllModels_buffer = List(); // []; //
     // String url = MyStyle().readAllProduct;
-    print('Here is readdata function');
     setState(() {
       visible = true;
     });
@@ -292,7 +199,6 @@ class _ListProductfavState extends State<ListProductfav> {
         '${MyStyle().serverName}/json_productfavoritelist.php?memberId=$memberId&searchKey=$searchString&page=$page';
 
     // url = '${MyStyle().readProductWhereMode}$myIndex';
-    print("URL = $url");
 
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
@@ -306,8 +212,6 @@ class _ListProductfavState extends State<ListProductfav> {
     // else
     //   int substart = 20;
 
-    int len = (filterProductAllModels!.length);
-
     for (var map in itemProductfavs) {
       ProductAllModel productAllModel = ProductAllModel.fromJson(map);
 
@@ -315,8 +219,6 @@ class _ListProductfavState extends State<ListProductfav> {
         productAllModels!.add(productAllModel);
         filterProductAllModels = productAllModels;
       });
-      print(
-          ' >> ${len} =>($i)  ${productAllModel.id}  || ${productAllModels![i].title} (${filterProductAllModels![i].itemincartSunit}) <<  (${productAllModel.itemincartSunit})');
 
       i = i + 1;
     }
@@ -328,14 +230,12 @@ class _ListProductfavState extends State<ListProductfav> {
   Future<void> updateDatalist(index) async {
     // List<ProductAllModel> productAllModels_buffer = List(); // []; //
     // String url = MyStyle().readAllProduct;
-    print('Here is updateDatalist function');
 
     String? memberId = myUserModel!.id.toString();
     int? productID = filterProductAllModels![index].id!;
     String? url =
         '${MyStyle().serverName}/json_loadmycart.php?memberId=$memberId';
 
-    print("URL update item = $url");
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var cartList = result['cart'];
@@ -369,7 +269,7 @@ class _ListProductfavState extends State<ListProductfav> {
   Widget showName(int index) {
     return Row(
       children: <Widget>[
-        Container(
+        SizedBox(
           width: MediaQuery.of(context).size.width * 0.75,
           child: Text(
             filterProductAllModels![index].title!,
@@ -383,7 +283,7 @@ class _ListProductfavState extends State<ListProductfav> {
   Widget showHilight(int index) {
     return Row(
       children: <Widget>[
-        Container(
+        SizedBox(
           width: MediaQuery.of(context).size.width * 0.75,
           child: Text(
             filterProductAllModels![index].hilight!,
@@ -397,14 +297,14 @@ class _ListProductfavState extends State<ListProductfav> {
   Widget showStock(int index) {
     return Row(
       children: <Widget>[
-        Container(
+        SizedBox(
           width: MediaQuery.of(context).size.width * 0.12,
           child: Text(
             'Stock:',
             style: MyStyle().h4StyleGray,
           ),
         ),
-        Container(
+        SizedBox(
           width: MediaQuery.of(context).size.width * 0.12,
           child: Text(
             ' ${filterProductAllModels![index].stock}',
@@ -421,7 +321,7 @@ class _ListProductfavState extends State<ListProductfav> {
 
   Widget showIncart(int index) {
     return Row(children: <Widget>[
-      Container(
+      SizedBox(
         width: MediaQuery.of(context).size.width * 0.13,
         child: Text(
           (filterProductAllModels![index].itemincartSunit != '0' ||
@@ -432,7 +332,7 @@ class _ListProductfavState extends State<ListProductfav> {
           style: MyStyle().h4StyleRed,
         ),
       ),
-      Container(
+      SizedBox(
         width: MediaQuery.of(context).size.width * 0.25,
         child: Text(
           ((filterProductAllModels![index].itemincartSunit != '0')
@@ -457,26 +357,29 @@ class _ListProductfavState extends State<ListProductfav> {
     if (filterProductAllModels![index].itemSprice.toString() != '0') {
       txtShowPrice = filterProductAllModels![index].itemSprice.toString();
       txtShowUnit = filterProductAllModels![index].itemSunit.toString();
-      if (txtShowPrice != '' && txtShowUnit != '')
-        txtPriceUnit = '$txtPriceUnit' + " [$txtShowPrice/$txtShowUnit] ";
+      if (txtShowPrice != '' && txtShowUnit != '') {
+        txtPriceUnit += " [$txtShowPrice/$txtShowUnit] ";
+      }
     }
     if (filterProductAllModels![index].itemMprice.toString() != '0') {
       txtShowPrice = filterProductAllModels![index].itemMprice.toString();
       txtShowUnit = filterProductAllModels![index].itemMunit.toString();
-      if (txtShowPrice != '' && txtShowUnit != '')
-        txtPriceUnit = '$txtPriceUnit' + " [$txtShowPrice/$txtShowUnit] ";
+      if (txtShowPrice != '' && txtShowUnit != '') {
+        txtPriceUnit += " [$txtShowPrice/$txtShowUnit] ";
+      }
     }
     if (filterProductAllModels![index].itemLprice.toString() != '0') {
       txtShowPrice = filterProductAllModels![index].itemLprice.toString();
       txtShowUnit = filterProductAllModels![index].itemLunit.toString();
-      if (txtShowPrice != '' && txtShowUnit != '')
-        txtPriceUnit = '$txtPriceUnit' + " [$txtShowPrice/$txtShowUnit] ";
+      if (txtShowPrice != '' && txtShowUnit != '') {
+        txtPriceUnit += " [$txtShowPrice/$txtShowUnit] ";
+      }
     }
 
     return Row(
       children: <Widget>[
         Text(
-          '$txtPriceUnit',
+          txtPriceUnit,
           style: TextStyle(
             fontSize: 16.0,
             //  fontWeight: FontWeight.bold,
@@ -491,7 +394,7 @@ class _ListProductfavState extends State<ListProductfav> {
   Widget showExtrapoint(int index) {
     return Row(
       children: <Widget>[
-        Container(
+        SizedBox(
           width: MediaQuery.of(context).size.width * 0.75,
           child: Text(
             filterProductAllModels![index].extrapoint!,
@@ -534,11 +437,11 @@ class _ListProductfavState extends State<ListProductfav> {
       // child: Image.network(filterProductAllModels![index].photo),
       width: 80,
       height: 80,
-      decoration: new BoxDecoration(
-          image: new DecorationImage(
+      decoration: BoxDecoration(
+          image: DecorationImage(
         fit: BoxFit.cover,
         alignment: FractionalOffset.topCenter,
-        image: new NetworkImage(filterProductAllModels![index].photo!),
+        image: NetworkImage(filterProductAllModels![index].photo!),
       )),
     );
   }
@@ -616,23 +519,19 @@ class _ListProductfavState extends State<ListProductfav> {
             return Column(
               children: [
                 GestureDetector(
-                  child: Container(
-                    child: Card(
-                      child: Container(
-                        decoration: myBoxDecoration(),
-                        padding: EdgeInsets.only(top: 0.5),
-                        child: Row(
-                          children: <Widget>[
-                            showImage(index),
-                            showText(index),
-                          ],
-                        ),
+                  child: Card(
+                    child: Container(
+                      decoration: myBoxDecoration(),
+                      padding: EdgeInsets.only(top: 0.5),
+                      child: Row(
+                        children: <Widget>[
+                          showImage(index),
+                          showText(index),
+                        ],
                       ),
                     ),
                   ),
                   onTap: () {
-                    print(
-                        'index select item => ${filterProductAllModels![index]}');
                     MaterialPageRoute materialPageRoute =
                         MaterialPageRoute(builder: (BuildContext buildContext) {
                       return Detail(
@@ -656,22 +555,19 @@ class _ListProductfavState extends State<ListProductfav> {
           }
 
           return GestureDetector(
-            child: Container(
-              child: Card(
-                child: Container(
-                  decoration: myBoxDecoration(),
-                  padding: EdgeInsets.only(top: 0.5),
-                  child: Row(
-                    children: <Widget>[
-                      showImage(index),
-                      showText(index),
-                    ],
-                  ),
+            child: Card(
+              child: Container(
+                decoration: myBoxDecoration(),
+                padding: EdgeInsets.only(top: 0.5),
+                child: Row(
+                  children: <Widget>[
+                    showImage(index),
+                    showText(index),
+                  ],
                 ),
               ),
             ),
             onTap: () {
-              print('index select item => ${filterProductAllModels![index]}');
               MaterialPageRoute materialPageRoute =
                   MaterialPageRoute(builder: (BuildContext buildContext) {
                 return Detail(
@@ -700,7 +596,7 @@ class _ListProductfavState extends State<ListProductfav> {
       searchKey = true;
     }
 
-    if (filterProductAllModels!.length == 0) {
+    if (filterProductAllModels!.isEmpty) {
       if (myIndex != 4) {
         return showProgressIndicate(searchKey);
       } else {
@@ -715,7 +611,7 @@ class _ListProductfavState extends State<ListProductfav> {
     // print('searchKey >> $searchKey');
 
     if (searchKey == true) {
-      if (filterProductAllModels!.length == 0) {
+      if (filterProductAllModels!.isEmpty) {
         return Center(child: Text('')); // Search not found
       } else {
         return Center(child: Text(''));
@@ -749,14 +645,14 @@ class _ListProductfavState extends State<ListProductfav> {
   Widget lastItemInCart() {
     return Column(
       children: <Widget>[
-        Container(
+        SizedBox(
           width: MediaQuery.of(context).size.width * 0.9,
           child: Text(
             'รายการล่าสุดในตะกร้า',
             style: MyStyle().h3bStyle,
           ),
         ),
-        Container(
+        SizedBox(
           width: MediaQuery.of(context).size.width * 0.9,
           child: Text(lastItemName.toString(),
               style: TextStyle(
@@ -785,20 +681,14 @@ class _ListProductfavState extends State<ListProductfav> {
     try {
       // final qrScanString = await Navigator.push(this.context,
       //     MaterialPageRoute(builder: (context) => ScanPreviewPage()));
-      var qrScanString;
-      print('Before scan');
+      ScanResult qrScanString;
       qrScanString = await BarcodeScanner.scan();
-      print('After scan');
-      print('scanl result: $qrScanString');
       qrString = qrScanString.rawContent;
-      print('qrString > $qrString');
       if (qrString != null) {
         decodeQRcode(qrString);
       }
       // setState(() => scanResult = qrScanString);
-    } on PlatformException catch (e) {
-      print('e = $e');
-    }
+    } on PlatformException {} // ignore: empty_catches
   }
 
   Future<void> decodeQRcode(var code) async {
@@ -807,11 +697,11 @@ class _ListProductfavState extends State<ListProductfav> {
         String url =
             '${MyStyle().serverName}/json_productlist.php?bqcode=$code';
         http.Response response = await http.get(Uri.parse(url));
+        if (!mounted) return;
         var result = json.decode(response.body);
         // print('result ===*******>>>> $result');
 
         int status = result['status'];
-        print('status ===>>> $status');
         if (status == 0) {
           normalDialog(context, 'Not found', 'ไม่พบ code :: $code ในระบบ');
         } else {
@@ -831,7 +721,13 @@ class _ListProductfavState extends State<ListProductfav> {
           }
         }
       }
-    } catch (e) {}
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('ค้นหาสินค้าไม่สำเร็จ กรุณาลองใหม่อีกครั้ง')),
+        );
+      }
+    }
   }
 
   Widget searchForm() {
@@ -840,12 +736,11 @@ class _ListProductfavState extends State<ListProductfav> {
       // color: Colors.grey,
       padding: EdgeInsets.only(left: 5.0, right: 5.0, top: 2.0, bottom: 2.0),
       child: ListTile(
-        trailing: Container(
+        trailing: SizedBox(
           width: 45.0,
           child: Image.asset('images/icon_barcode.png'),
         ),
         onTap: () {
-          print('You click barcode scan');
           // readQRcode();
           readQRcodePreview();
           // scanBarcodeNormal();
@@ -1114,6 +1009,8 @@ class _ListProductfavState extends State<ListProductfav> {
 }
 
 class ScanPreviewPage extends StatefulWidget {
+  const ScanPreviewPage({super.key});
+
   @override
   _ScanPreviewPageState createState() => _ScanPreviewPageState();
 }

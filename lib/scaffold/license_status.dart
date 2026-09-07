@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'dart:async';
 import 'dart:io';
 
@@ -22,7 +22,7 @@ import 'package:awesome_dialog/awesome_dialog.dart';
 class License extends StatefulWidget {
   final UserModel? userModel;
 
-  License({Key? key, this.userModel}) : super(key: key);
+  const License({super.key, this.userModel});
 
   @override
   _LicenseState createState() => _LicenseState();
@@ -43,7 +43,6 @@ class _LicenseState extends State<License> {
     super.initState();
     setState(() {
     myUserModel = widget.userModel;
-    print(myUserModel!.name);
     });
     updateUserProfile();
     readLicenseAlert();
@@ -58,13 +57,9 @@ Future<void> updateUserProfile() async {
     String? url =
         '${MyStyle().serverName}/json_customer_profile.php?memberId=$memberId';
 
-    print("URL update item = $url");
     http.Response response = await http.get(Uri.parse(url));
-    print(111);
      var result = json.decode(response.body);
-    print("result updateuserModel = $result");
       Map<String, dynamic> map = result['data'];
-      print('map = $map');
       setState(() {
         updateuserModel = UserModel.fromJson(map);
         userlicenseyear   = updateuserModel!.lastupdateLicenseYear;
@@ -100,7 +95,7 @@ Future<void> updateUserProfile() async {
     String? address = myUserModel!.address;
     // int loginStatus = myUserModel.status;
 
-    return Container(
+    return SizedBox(
       width: MediaQuery.of(context).size.width * 0.8,
       // height: 80.0,
       child: GestureDetector(
@@ -113,8 +108,8 @@ Future<void> updateUserProfile() async {
               children: <Widget>[
                 Container(
                     width: 45.0,
-                    child: Image.asset('images/icon_user.png'),
-                    padding: EdgeInsets.only(right: 8.0)),
+                    padding: EdgeInsets.only(right: 8.0),
+                    child: Image.asset('images/icon_user.png')),
                 Column(
                   children: [
                     Text(
@@ -140,7 +135,6 @@ Future<void> updateUserProfile() async {
           ),
         ),
         onTap: () {
-          print('You click profile');
           // routeToListProduct(0);
         },
       ),
@@ -182,7 +176,7 @@ Future<void> updateUserProfile() async {
       child: Container(
         padding: EdgeInsets.all(12.0),
         decoration: BoxDecoration(
-          color: colorAlertBox.withOpacity(0.08),
+          color: colorAlertBox.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(MyStyle().radiusS),
           border: Border(left: BorderSide(color: colorAlertBox, width: 4.0)),
         ),
@@ -262,7 +256,7 @@ Future<void> updateUserProfile() async {
 
               children: [
                 // const  SizedBox(height: 20.0,),
-                _selectimage1 != null ? Container(width: 200.0,height: 200.0, child: Image.file(_selectimage1!)) : const Text('ยังไม่มีรูปใบอนุญาต'),
+                _selectimage1 != null ? SizedBox(width: 200.0,height: 200.0, child: Image.file(_selectimage1!)) : const Text('ยังไม่มีรูปใบอนุญาต'),
                 // Container(width: 200.0,),
               ],
             ),
@@ -294,7 +288,7 @@ Future<void> updateUserProfile() async {
 
   // Upload image to server
   Future uploadImage1() async {
-    Dio dio = new Dio();
+    Dio dio = Dio();
     dio.options.headers["Content-Type"] = "multipart/form-data";
     
     if (_selectimage1 == null) return;
@@ -302,7 +296,6 @@ Future<void> updateUserProfile() async {
     String? memId = myUserModel!.id;
 
     var uri = Uri.parse("https://ptnpharma.com/apishop/json_submit_license.php?memId=$memId");
-    print("Upload uri > $uri");
     var request = http.MultipartRequest("POST", uri);
     // Attach file
     var multipartFile = await http.MultipartFile.fromPath('image1', _selectimage1!.path,
@@ -310,12 +303,8 @@ Future<void> updateUserProfile() async {
     request.files.add(multipartFile);
 
     var response = await request.send();
-    var statusCode = response.statusCode;
-    print('upload statusCode = $statusCode');
     if (response.statusCode == 200) {
-      print("Image Uploaded Successfully");
     } else {
-      print("Upload Failed");
     }
   }
 
@@ -326,6 +315,7 @@ Future<void> updateUserProfile() async {
 
     // Simulate network request
     await Future.delayed(Duration(seconds: 5));
+    if (!mounted) return;
     setState(() => _isLoading = false);
 
      MaterialPageRoute materialPageRoute = MaterialPageRoute(
@@ -344,7 +334,7 @@ Future<void> updateUserProfile() async {
 
 
   Widget submitButton() {
-    return Container(
+    return SizedBox(
       width: MediaQuery.of(context).size.width * 0.80,
       child: Row(
          mainAxisAlignment: MainAxisAlignment.end,

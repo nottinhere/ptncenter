@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:html/parser.dart' as html_parser;
 import 'package:http/http.dart' as http;
 
@@ -28,7 +28,7 @@ class OrderHistoryItem {
 class HistoryList extends StatefulWidget {
   final UserModel? userModel;
 
-  const HistoryList({Key? key, this.userModel}) : super(key: key);
+  const HistoryList({super.key, this.userModel});
 
   @override
   _HistoryListState createState() => _HistoryListState();
@@ -59,7 +59,6 @@ class _HistoryListState extends State<HistoryList> {
     String? memberCode = myUserModel?.customerCode;
     String url = 'https://ptnpharma.com/shop/pages/tables/pageforapp_orderhistory.php'
         '?memberId=$memberId&memberCode=$memberCode&page=$page';
-    print('url (history) > $url');
 
     try {
       http.Response response = await http.get(Uri.parse(url));
@@ -112,7 +111,6 @@ class _HistoryListState extends State<HistoryList> {
         loading = false;
       });
     } catch (e) {
-      print('readData (history) error: $e');
       setState(() {
         loading = false;
       });

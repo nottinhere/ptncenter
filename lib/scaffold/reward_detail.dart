@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
@@ -18,8 +18,7 @@ class RewardDetail extends StatefulWidget {
   final RewardModel rewardModel;
   final UserModel? userModel;
 
-  const RewardDetail({Key? key, required this.rewardModel, this.userModel})
-      : super(key: key);
+  const RewardDetail({super.key, required this.rewardModel, this.userModel});
 
   @override
   _RewardDetailState createState() => _RewardDetailState();
@@ -45,7 +44,6 @@ class _RewardDetailState extends State<RewardDetail> {
     String? memberCode = myUserModel?.customerCode;
     String url = '${MyStyle().serverName}/json_loadmyreward.php'
         '?memberId=$memberId&memberCode=$memberCode';
-    print('url > $url');
 
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
@@ -61,7 +59,7 @@ class _RewardDetailState extends State<RewardDetail> {
   }
 
   Widget showImage(BuildContext context) {
-    return Container(
+    return SizedBox(
       height: MediaQuery.of(context).size.height * 0.3,
       child: (rewardModel!.photo != null && rewardModel!.photo != '')
           ? Image.network(rewardModel!.photo!, fit: BoxFit.contain)
@@ -82,29 +80,24 @@ class _RewardDetailState extends State<RewardDetail> {
                 alignment: Alignment.centerLeft,
                 child: Text('รายละเอียด :', style: MyStyle().h4bStyleGray),
               ),
-              Container(
-                child:
-                    Text(rewardModel!.detail!, style: MyStyle().h4StyleGray),
-              ),
+              Text(rewardModel!.detail!, style: MyStyle().h4StyleGray),
               SizedBox(height: 20.0),
             ],
           );
   }
 
   Widget showPointStock() {
-    return Container(
+    return SizedBox(
       width: double.infinity,
       child: Row(
         children: <Widget>[
-          Container(
+          SizedBox(
             width: 90.0,
             child: Text('แต้มที่ใช้ :', style: MyStyle().h4bStyleGray),
           ),
-          Container(
-            child: Text(
-              rewardModel!.point ?? '',
-              style: MyStyle().h3StyleRed,
-            ),
+          Text(
+            rewardModel!.point ?? '',
+            style: MyStyle().h3StyleRed,
           ),
         ],
       ),
@@ -112,21 +105,19 @@ class _RewardDetailState extends State<RewardDetail> {
   }
 
   Widget showStock() {
-    return Container(
+    return SizedBox(
       width: double.infinity,
       child: Row(
         children: <Widget>[
-          Container(
+          SizedBox(
             width: 90.0,
             child: Text('คงเหลือ :', style: MyStyle().h4bStyleGray),
           ),
-          Container(
-            child: Text(
-              '${rewardModel!.stock ?? ''} ${rewardModel!.unit ?? ''}',
-              style: (rewardModel!.stock.toString() != '0')
-                  ? MyStyle().h3StyleGray
-                  : MyStyle().h3StyleRed,
-            ),
+          Text(
+            '${rewardModel!.stock ?? ''} ${rewardModel!.unit ?? ''}',
+            style: (rewardModel!.stock.toString() != '0')
+                ? MyStyle().h3StyleGray
+                : MyStyle().h3StyleRed,
           ),
         ],
       ),
@@ -142,7 +133,7 @@ class _RewardDetailState extends State<RewardDetail> {
       padding: EdgeInsets.only(top: 10.0, bottom: 10.0),
       child: Row(
         children: <Widget>[
-          Container(
+          SizedBox(
             width: 90.0,
             child: Text('จำนวน :', style: MyStyle().h4bStyleGray),
           ),
@@ -173,9 +164,9 @@ class _RewardDetailState extends State<RewardDetail> {
     String? memberCode = myUserModel?.customerCode;
     String url = '${MyStyle().serverName}/json_loadmyreward.php'
         '?memberId=$memberId&memberCode=$memberCode';
-    print('url > $url');
 
     http.Response response = await http.get(Uri.parse(url));
+    if (!mounted) return;
     var result = json.decode(response.body);
     var itemsData = result['itemsData'];
     int cartCount = (itemsData is List) ? itemsData.length : 0;
@@ -211,7 +202,6 @@ class _RewardDetailState extends State<RewardDetail> {
     String? memberId = myUserModel?.id;
     String url = '${MyStyle().serverName}/json_submit_reward_redeem.php'
         '?memberId=$memberId&rw_id=${rewardModel!.id}&qty=$qty';
-    print('url > $url');
 
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
@@ -310,15 +300,15 @@ class _RewardDetailState extends State<RewardDetail> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            child: Text(
-              'แลกของสมนาคุณ',
-              style: TextStyle(fontSize: 18.0, color: Colors.white),
-            ),
             onPressed: alreadyInCart
                 ? null
                 : () {
                     checkRewardCartThenSubmit();
                   },
+            child: Text(
+              'แลกของสมนาคุณ',
+              style: TextStyle(fontSize: 18.0, color: Colors.white),
+            ),
           ),
           if (alreadyInCart)
             Padding(

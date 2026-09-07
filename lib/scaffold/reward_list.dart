@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -18,7 +18,7 @@ import 'my_service.dart';
 class RewardList extends StatefulWidget {
   final UserModel? userModel;
 
-  const RewardList({Key? key, this.userModel}) : super(key: key);
+  const RewardList({super.key, this.userModel});
 
   @override
   _RewardListState createState() => _RewardListState();
@@ -103,7 +103,6 @@ class _RewardListState extends State<RewardList> {
     String? memberCode = myUserModel!.customerCode;
     String url =
         '${MyStyle().serverName}/json_loadmyreward.php?memberId=$memberId&memberCode=$memberCode';
-    print('url > $url');
 
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
@@ -124,7 +123,6 @@ class _RewardListState extends State<RewardList> {
             scrollController.position.maxScrollExtent) {
           page = page + 1;
           readReward();
-          print('in the end');
         }
       }
     });
@@ -145,7 +143,6 @@ class _RewardListState extends State<RewardList> {
     if (searchString.isNotEmpty) {
       url = '$url&searchKey=${Uri.encodeQueryComponent(searchString)}';
     }
-    print('url > $url');
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var mapItemReward = result['itemsData'];
@@ -489,7 +486,7 @@ class _RewardListState extends State<RewardList> {
           Expanded(
             flex: 4,
             child: DropdownButtonFormField<String>(
-              value: selectedCateId,
+              initialValue: selectedCateId,
               isExpanded: true,
               decoration: InputDecoration(
                 labelText: 'หมวดหมู่',

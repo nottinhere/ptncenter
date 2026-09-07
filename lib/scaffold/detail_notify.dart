@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -18,7 +18,7 @@ class DetailNotify extends StatefulWidget {
   final PopupModel? popupModel;
   final UserModel? userModel;
 
-  DetailNotify({Key? key, this.popupModel, this.userModel}) : super(key: key);
+  const DetailNotify({super.key, this.popupModel, this.userModel});
 
   @override
   _DetailState createState() => _DetailState();
@@ -35,7 +35,7 @@ class _DetailState extends State<DetailNotify> {
   String? textButton = '';
   String? textURL = '';
   String? subjectPopup = '';
-  String? DetailNotify = '';
+  String? detailText = '';
   String? postdatePopup = '';
   int? currentIndex = 1;
   int selectIndex = 3;
@@ -55,7 +55,6 @@ class _DetailState extends State<DetailNotify> {
     String id = currentPopupModel!.id.toString();
 
     String url = '${MyStyle().serverName}/json_notifydetail.php?id=$id';
-    print('urlPopup >> $url');
 
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
@@ -75,7 +74,7 @@ class _DetailState extends State<DetailNotify> {
         //promoteModels.add(promoteModel); // push ค่าลง arra
         subjectPopup = subject;
         imagePopup = urlImage;
-        DetailNotify = detail;
+        detailText = detail;
         postdatePopup = postdate;
         textButton = txtBTN;
         textURL = txtURL;
@@ -115,7 +114,7 @@ class _DetailState extends State<DetailNotify> {
     return Card(
       child: Container(
         width: MediaQuery.of(context).size.width * 0.9,
-        padding: new EdgeInsets.all(10.0),
+        padding: EdgeInsets.all(10.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
@@ -132,7 +131,7 @@ class _DetailState extends State<DetailNotify> {
   Widget showButton() {
     return Container(
       width: MediaQuery.of(context).size.width * 0.9,
-      padding: new EdgeInsets.all(10.0),
+      padding: EdgeInsets.all(10.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
@@ -171,7 +170,7 @@ class _DetailState extends State<DetailNotify> {
               height: 5.0,
             ),
             Text(
-              'โพสเมื่อ :' + postdatePopup!,
+              'โพสเมื่อ :${postdatePopup!}',
               style: TextStyle(
                 fontSize: 16.0,
                 fontWeight: FontWeight.bold,
@@ -185,7 +184,7 @@ class _DetailState extends State<DetailNotify> {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Text(
-                DetailNotify!.replaceAll('\\n', '\n\n'),
+                detailText!.replaceAll('\\n', '\n\n'),
                 /* 'Like\nAndroidRide\n\nShare Posts', */
                 style: TextStyle(
                   fontSize: 19.0,
@@ -406,7 +405,7 @@ class _DetailState extends State<DetailNotify> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        Container(
+        SizedBox(
           width: MediaQuery.of(context).size.width * 0.30,
           // color: Colors.greenAccent,
           // height: 80.0,
@@ -435,7 +434,6 @@ class _DetailState extends State<DetailNotify> {
               ),
             ),
             onTap: () {
-              print('You click home');
               MaterialPageRoute materialPageRoute =
                   MaterialPageRoute(builder: (BuildContext buildContext) {
                 return MyService(
@@ -544,9 +542,8 @@ class _WebViewExampleState extends State<WebViewExample> {
     mywebPage = widget.webPage;
 
     String? url = mywebPage!; //
-    print('URL ==>> $url');
 
-    String? urlView =  url!;
+    String? urlView =  url;
     
 
     // #docregion webview_controller

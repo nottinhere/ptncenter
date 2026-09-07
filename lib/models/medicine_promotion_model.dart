@@ -68,27 +68,27 @@ class MedicinePromotionModel {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['code'] = this.code;
-    data['name'] = this.name;
-    data['hilight'] = this.hilight;
-    data['size'] = this.size;
-    data['subtract_s'] = this.subtractS;
-    data['subtract_m'] = this.subtractM;
-    data['subtract_l'] = this.subtractL;
-    data['qty'] = this.qty;
-    data['gift'] = this.gift;
-    data['getqty'] = this.getqty;
-    data['limitgift'] = this.limitgift;
-    data['qty2'] = this.qty2;
-    data['gift2'] = this.gift2;
-    data['getqty2'] = this.getqty2;
-    data['limitgift2'] = this.limitgift2;
-    data['qty3'] = this.qty3;
-    data['gift3'] = this.gift3;
-    data['getqty3'] = this.getqty3;
-    data['limitgift3'] = this.limitgift3;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['code'] = code;
+    data['name'] = name;
+    data['hilight'] = hilight;
+    data['size'] = size;
+    data['subtract_s'] = subtractS;
+    data['subtract_m'] = subtractM;
+    data['subtract_l'] = subtractL;
+    data['qty'] = qty;
+    data['gift'] = gift;
+    data['getqty'] = getqty;
+    data['limitgift'] = limitgift;
+    data['qty2'] = qty2;
+    data['gift2'] = gift2;
+    data['getqty2'] = getqty2;
+    data['limitgift2'] = limitgift2;
+    data['qty3'] = qty3;
+    data['gift3'] = gift3;
+    data['getqty3'] = getqty3;
+    data['limitgift3'] = limitgift3;
     return data;
   }
 

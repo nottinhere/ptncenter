@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:html/dom.dart' as dom;
@@ -42,11 +42,11 @@ class HistoryDetail extends StatefulWidget {
   final String? orderNo;
 
   const HistoryDetail({
-    Key? key,
+    super.key,
     this.userModel,
     required this.detailId,
     this.orderNo,
-  }) : super(key: key);
+  });
 
   @override
   _HistoryDetailState createState() => _HistoryDetailState();
@@ -124,7 +124,6 @@ class _HistoryDetailState extends State<HistoryDetail> {
     String? memberId = myUserModel?.id;
     String url =
         '${MyStyle().serverName}/json_loadmycart.php?memberId=$memberId';
-    print('url readCart (history detail) > $url');
 
     try {
       http.Response response = await http.get(Uri.parse(url));
@@ -148,9 +147,7 @@ class _HistoryDetailState extends State<HistoryDetail> {
           });
         }
       }
-    } catch (e) {
-      print('readCart (history detail) error: $e');
-    }
+    } catch (e) {} // ignore: empty_catches
   }
 
   String extractSummaryValue(dom.Document document, String label) {
@@ -176,7 +173,6 @@ class _HistoryDetailState extends State<HistoryDetail> {
     String? memberCode = myUserModel?.customerCode;
     String url = 'https://ptnpharma.com/shop/pages/tables/'
         'pageforapp_orderhistory_detail.php?mode=v&id=${widget.detailId}&memberCode=$memberCode';
-    print('url (history detail) > $url');
 
     try {
       http.Response response = await http.get(Uri.parse(url));
@@ -257,7 +253,6 @@ class _HistoryDetailState extends State<HistoryDetail> {
         loading = false;
       });
     } catch (e) {
-      print('readData (history detail) error: $e');
       setState(() {
         loading = false;
       });
@@ -271,7 +266,6 @@ class _HistoryDetailState extends State<HistoryDetail> {
     String? memberId = myUserModel?.id;
     String url = '${MyStyle().serverName}/json_savemycart.php'
         '?productID=${item.productId}&unitSize=${item.unitCode}&QTY=$qty&memberId=$memberId';
-    print('url addToCart (history detail) > $url');
 
     try {
       await http.get(Uri.parse(url));
@@ -286,7 +280,6 @@ class _HistoryDetailState extends State<HistoryDetail> {
         );
       }
     } catch (e) {
-      print('addToCart (history detail) error: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('เพิ่มลงตะกร้าไม่สำเร็จ')),

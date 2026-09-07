@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -14,13 +14,12 @@ import 'package:ptncenter/scaffold/list_product_favorite.dart';
 
 import 'package:ptncenter/utility/my_style.dart';
 import 'my_service.dart';
-import 'package:flutter/services.dart';
 import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
 
 class Promotionbanner extends StatefulWidget {
   final UserModel? userModel;
 
-  Promotionbanner({Key? key, this.userModel}) : super(key: key);
+  const Promotionbanner({super.key, this.userModel});
 
   @override
   _PromotionbannerState createState() => _PromotionbannerState();
@@ -69,11 +68,10 @@ class _PromotionbannerState extends State<Promotionbanner> {
     return Image.network(urlImage);
   }
 
-  /*************************** */
+  /// *************************
 
   Future<void> readSlide() async {
     String? url = '${MyStyle().serverName}/json_slideshow.php';
-    print('url = $url');
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var mapItemProduct =
@@ -88,23 +86,20 @@ class _PromotionbannerState extends State<Promotionbanner> {
         slideshowLists!.add(showImageNetWork(urlImage!));
         urlImages!.add(urlImage);
       });
-      print('slideshowLists (readSlide) >> $slideshowLists ');
     }
   }
 
   Widget showSlide() {
-    print('slideshowModels.length (showNotify) >> ' +
-        slideshowModels!.length.toString());
 
-    return Container(
+    return SizedBox(
       width: MediaQuery.of(context).size.width * 0.99,
       height: MediaQuery.of(context).size.height * 0.8,
-      child: slideshowModels!.length > 0 ? listSlide() : Container(),
+      child: slideshowModels!.isNotEmpty ? listSlide() : Container(),
     );
   }
 
   Widget cartBox() {
-    return Container(
+    return SizedBox(
       width: MediaQuery.of(context).size.width * 0.45,
       // height: 80.0,
       child: GestureDetector(
@@ -115,7 +110,7 @@ class _PromotionbannerState extends State<Promotionbanner> {
             alignment: AlignmentDirectional(0.0, 0.0),
             child: Column(
               children: <Widget>[
-                Container(
+                SizedBox(
                   width: 45.0,
                   child: Image.asset('images/icon_cart.png'),
                 ),
@@ -131,7 +126,6 @@ class _PromotionbannerState extends State<Promotionbanner> {
           ),
         ),
         onTap: () {
-          print('You click cart');
           MaterialPageRoute materialPageRoute =
               MaterialPageRoute(builder: (BuildContext buildContext) {
             return DetailCart(
@@ -178,7 +172,6 @@ class _PromotionbannerState extends State<Promotionbanner> {
                 ),
               ),
               onTap: () {
-                print('You Click index >> $index');
                 MaterialPageRoute materialPageRoute =
                     MaterialPageRoute(builder: (BuildContext buildContext) {
                   return ListProduct(
@@ -211,7 +204,7 @@ class _PromotionbannerState extends State<Promotionbanner> {
     if (cartList != null) {
       for (var _ in cartList) {
         setState(() {
-          amontCart = amontCart! + 1;
+          amontCart = amontCart + 1;
         });
         // print('amontCart (service page))>>>> $amontCart');
       }

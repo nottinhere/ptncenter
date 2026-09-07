@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -30,7 +30,7 @@ class OcrLookupResult {
 class OcrScan extends StatefulWidget {
   final UserModel? userModel;
 
-  const OcrScan({Key? key, this.userModel}) : super(key: key);
+  const OcrScan({super.key, this.userModel});
 
   @override
   _OcrScanState createState() => _OcrScanState();
@@ -120,7 +120,6 @@ class _OcrScanState extends State<OcrScan> {
       RecognizedText recognizedText =
           await textRecognizer.processImage(inputImage);
 
-      print('OCR full text: ${recognizedText.text}');
 
       for (TextBlock block in recognizedText.blocks) {
         for (TextLine line in block.lines) {
@@ -144,11 +143,7 @@ class _OcrScanState extends State<OcrScan> {
         }
       }
 
-      print('OCR barcodes found: $barcodes');
-      print('OCR name candidates found: $nameCandidates');
-    } catch (e) {
-      print('OCR error: $e');
-    }
+    } catch (e) {} // ignore: empty_catches
 
     List<OcrLookupResult> twoWordResults = [];
     List<OcrLookupResult> firstWordResults = [];
@@ -210,7 +205,6 @@ class _OcrScanState extends State<OcrScan> {
     String? memberId = myUserModel?.id;
     String url = '${MyStyle().serverName}/json_productlist.php'
         '?memberId=$memberId&bqcode=$barcode&page=1';
-    print('url > $url');
     return _fetchFirstProduct(url);
   }
 
@@ -218,7 +212,6 @@ class _OcrScanState extends State<OcrScan> {
     String? memberId = myUserModel?.id;
     String url = '${MyStyle().serverName}/json_productlist.php'
         '?memberId=$memberId&searchKey=ocr|${Uri.encodeComponent(keyword)}&page=1';
-    print('url > $url');
     return _fetchAllProduct(url);
   }
 
@@ -233,9 +226,7 @@ class _OcrScanState extends State<OcrScan> {
       if (itemsProduct is List && itemsProduct.isNotEmpty) {
         return ProductAllModel.fromJson(itemsProduct[0]);
       }
-    } catch (e) {
-      print('lookup error: $e');
-    }
+    } catch (e) {} // ignore: empty_catches
     return null;
   }
 
@@ -252,9 +243,7 @@ class _OcrScanState extends State<OcrScan> {
             .map((item) => ProductAllModel.fromJson(item))
             .toList();
       }
-    } catch (e) {
-      print('lookup error: $e');
-    }
+    } catch (e) {} // ignore: empty_catches
     return [];
   }
 
@@ -360,7 +349,6 @@ class _OcrScanState extends State<OcrScan> {
     String? memberId = myUserModel?.id;
     String url = '${MyStyle().serverName}/json_savemycart.php'
         '?productID=${product.id}&unitSize=$unitSize&QTY=$qty&memberId=$memberId';
-    print('url addToCart > $url');
     await http.get(Uri.parse(url));
   }
 
@@ -474,6 +462,7 @@ class _OcrScanState extends State<OcrScan> {
                       if (qtyL > 0) product.itemincartLunit = qtyL.toString();
                     });
 
+                    if (!dialogContext.mounted) return;
                     Navigator.of(dialogContext).pop();
                   },
                 ),

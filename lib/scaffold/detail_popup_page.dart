@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:ptncenter/models/user_model.dart';
 import 'package:ptncenter/utility/my_style.dart';
 import 'package:ptncenter/models/popup_model.dart';
@@ -15,7 +15,7 @@ class DetailPopup extends StatefulWidget {
   final PopupModel? popupModel;
   final UserModel? userModel;
 
-  DetailPopup({Key? key, this.popupModel, this.userModel}) : super(key: key);
+  const DetailPopup({super.key, this.popupModel, this.userModel});
 
   @override
   _DetailState createState() => _DetailState();
@@ -77,7 +77,7 @@ class _DetailState extends State<DetailPopup> {
     return Card(
       child: Container(
         width: MediaQuery.of(context).size.width * 0.9,
-        padding: new EdgeInsets.all(10.0),
+        padding: EdgeInsets.all(10.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
@@ -94,7 +94,7 @@ class _DetailState extends State<DetailPopup> {
   Widget showButton() {
     return Container(
       width: MediaQuery.of(context).size.width * 0.9,
-      padding: new EdgeInsets.all(10.0),
+      padding: EdgeInsets.all(10.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
@@ -131,7 +131,7 @@ class _DetailState extends State<DetailPopup> {
           children: <Widget>[
             SizedBox(width: 10.0, height: 5.0),
             Text(
-              'โพสเมื่อ :' + postdatePopup!,
+              'โพสเมื่อ :${postdatePopup!}',
               style: TextStyle(
                 fontSize: 16.0,
                 fontWeight: FontWeight.bold,
@@ -255,7 +255,7 @@ class _DetailState extends State<DetailPopup> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        Container(
+        SizedBox(
           width: MediaQuery.of(context).size.width * 0.30,
           // color: Colors.greenAccent,
           // height: 80.0,
@@ -281,7 +281,6 @@ class _DetailState extends State<DetailPopup> {
               ),
             ),
             onTap: () {
-              print('You click home');
               MaterialPageRoute materialPageRoute = MaterialPageRoute(
                 builder: (BuildContext buildContext) {
                   return MyService(userModel: myUserModel);
@@ -365,7 +364,6 @@ class _WebViewExampleState extends State<WebViewExample> {
     mywebPage = widget.webPage;
 
     String? url = mywebPage!; //
-    print('URL ==>> $url');
 
     String? urlView = url;
 
