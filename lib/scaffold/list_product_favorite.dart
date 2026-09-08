@@ -7,8 +7,6 @@ import 'package:ptncenter/models/product_all_model.dart';
 import 'package:ptncenter/models/user_model.dart';
 import 'package:ptncenter/scaffold/list_product.dart';
 import 'package:ptncenter/utility/my_style.dart';
-import 'package:barcode_scan2/barcode_scan2.dart';
-import 'package:ptncenter/utility/normal_dialog.dart';
 import 'detail.dart';
 import 'detail_cart.dart';
 
@@ -16,9 +14,10 @@ import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
 
 import 'my_service.dart';
 
-import 'package:flutter/services.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:ptncenter/utility/qr_scan_mixins.dart';
+import 'package:ptncenter/widget/product_list_item_card.dart';
 
 // import 'package:scan_preview/scan_preview_widget.dart';
 // import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
@@ -58,7 +57,8 @@ class Debouncer {
   }
 }
 
-class _ListProductfavState extends State<ListProductfav> {
+class _ListProductfavState extends State<ListProductfav>
+    with ProductBarcodeScannerMixin<ListProductfav> {
   // Explicit
   int? myIndex;
   List<ProductAllModel>? productAllModels = []; // []; // set array
@@ -72,7 +72,6 @@ class _ListProductfavState extends State<ListProductfav> {
   int? amountListView = 6;
   int? page = 1;
 
-  String? qrString;
   int? myCate = 0;
   String? myCateName = '';
   ScrollController? scrollController = ScrollController();
@@ -266,195 +265,6 @@ class _ListProductfavState extends State<ListProductfav> {
     });
   }
 
-  Widget showName(int index) {
-    return Row(
-      children: <Widget>[
-        SizedBox(
-          width: MediaQuery.of(context).size.width * 0.75,
-          child: Text(
-            filterProductAllModels![index].title!,
-            style: MyStyle().h3Style,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget showHilight(int index) {
-    return Row(
-      children: <Widget>[
-        SizedBox(
-          width: MediaQuery.of(context).size.width * 0.75,
-          child: Text(
-            filterProductAllModels![index].hilight!,
-            style: MyStyle().h3StyleRed,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget showStock(int index) {
-    return Row(
-      children: <Widget>[
-        SizedBox(
-          width: MediaQuery.of(context).size.width * 0.12,
-          child: Text(
-            'Stock:',
-            style: MyStyle().h4StyleGray,
-          ),
-        ),
-        SizedBox(
-          width: MediaQuery.of(context).size.width * 0.12,
-          child: Text(
-            ' ${filterProductAllModels![index].stock}',
-            style: (filterProductAllModels![index].stock.toString() != '0')
-                ? MyStyle().h4StyleGray
-                : MyStyle().h4StyleRed,
-          ),
-        ),
-        showIncart(index),
-      ],
-    );
-    // return Text('na');
-  }
-
-  Widget showIncart(int index) {
-    return Row(children: <Widget>[
-      SizedBox(
-        width: MediaQuery.of(context).size.width * 0.13,
-        child: Text(
-          (filterProductAllModels![index].itemincartSunit != '0' ||
-                  filterProductAllModels![index].itemincartMunit != '0' ||
-                  filterProductAllModels![index].itemincartLunit != '0')
-              ? 'ตะกร้า:'
-              : '',
-          style: MyStyle().h4StyleRed,
-        ),
-      ),
-      SizedBox(
-        width: MediaQuery.of(context).size.width * 0.25,
-        child: Text(
-          ((filterProductAllModels![index].itemincartSunit != '0')
-                  ? '${filterProductAllModels![index].itemincartSunit} ${filterProductAllModels![index].itemSunit}  '
-                  : '') +
-              ((filterProductAllModels![index].itemincartMunit != '0')
-                  ? '${filterProductAllModels![index].itemincartMunit} ${filterProductAllModels![index].itemMunit}  '
-                  : '') +
-              ((filterProductAllModels![index].itemincartLunit != '0')
-                  ? '${filterProductAllModels![index].itemincartLunit} ${filterProductAllModels![index].itemLunit}'
-                  : ''),
-          style: MyStyle().h4StyleRed,
-        ),
-      ),
-    ]);
-  }
-
-  Widget showPrice(int index) {
-    String txtShowPrice;
-    String txtShowUnit;
-    String txtPriceUnit = '';
-    if (filterProductAllModels![index].itemSprice.toString() != '0') {
-      txtShowPrice = filterProductAllModels![index].itemSprice.toString();
-      txtShowUnit = filterProductAllModels![index].itemSunit.toString();
-      if (txtShowPrice != '' && txtShowUnit != '') {
-        txtPriceUnit += " [$txtShowPrice/$txtShowUnit] ";
-      }
-    }
-    if (filterProductAllModels![index].itemMprice.toString() != '0') {
-      txtShowPrice = filterProductAllModels![index].itemMprice.toString();
-      txtShowUnit = filterProductAllModels![index].itemMunit.toString();
-      if (txtShowPrice != '' && txtShowUnit != '') {
-        txtPriceUnit += " [$txtShowPrice/$txtShowUnit] ";
-      }
-    }
-    if (filterProductAllModels![index].itemLprice.toString() != '0') {
-      txtShowPrice = filterProductAllModels![index].itemLprice.toString();
-      txtShowUnit = filterProductAllModels![index].itemLunit.toString();
-      if (txtShowPrice != '' && txtShowUnit != '') {
-        txtPriceUnit += " [$txtShowPrice/$txtShowUnit] ";
-      }
-    }
-
-    return Row(
-      children: <Widget>[
-        Text(
-          txtPriceUnit,
-          style: TextStyle(
-            fontSize: 16.0,
-            //  fontWeight: FontWeight.bold,
-            color: Color.fromRGBO(50, 117, 168, 1.0),
-          ), // h3StyleGray
-        ),
-      ],
-    );
-    // return Text('na');
-  }
-
-  Widget showExtrapoint(int index) {
-    return Row(
-      children: <Widget>[
-        SizedBox(
-          width: MediaQuery.of(context).size.width * 0.75,
-          child: Text(
-            filterProductAllModels![index].extrapoint!,
-            style: MyStyle().h3StyleOrange,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget showText(int index) {
-    return Container(
-      padding: EdgeInsets.only(left: 5.0, right: 0.0),
-      // height: MediaQuery.of(context).size.width * 0.5,
-      width: MediaQuery.of(context).size.width * 0.78,
-      child: Container(
-        padding: EdgeInsets.only(bottom: 5.0, top: 5.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            showName(index),
-            (filterProductAllModels![index].hilight != '')
-                ? showHilight(index)
-                : Container(),
-            (filterProductAllModels![index].extrapoint != '')
-                ? showExtrapoint(index)
-                : Container(),
-            showPrice(index),
-            showStock(index),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget showImage(int index) {
-    return Container(
-      padding: EdgeInsets.all(5.0),
-      // width: MediaQuery.of(context).size.width * 0.25,
-      // child: Image.network(filterProductAllModels![index].photo),
-      width: 80,
-      height: 80,
-      decoration: BoxDecoration(
-          image: DecorationImage(
-        fit: BoxFit.cover,
-        alignment: FractionalOffset.topCenter,
-        image: NetworkImage(filterProductAllModels![index].photo!),
-      )),
-    );
-  }
-
-  BoxDecoration myBoxDecoration() {
-    return BoxDecoration(
-      border: Border.all(color: Colors.green.shade300),
-      borderRadius: BorderRadius.all(
-        Radius.circular(5.0), //                 <--- border radius here
-      ),
-    );
-  }
-
   Widget loading() {
     return Visibility(
       maintainSize: true,
@@ -514,59 +324,8 @@ class _ListProductfavState extends State<ListProductfav> {
             loadingIcon = false;
           }
 
-          if (loadingIcon == true) {
-            // return CupertinoActivityIndicator();
-            return Column(
-              children: [
-                GestureDetector(
-                  child: Card(
-                    child: Container(
-                      decoration: myBoxDecoration(),
-                      padding: EdgeInsets.only(top: 0.5),
-                      child: Row(
-                        children: <Widget>[
-                          showImage(index),
-                          showText(index),
-                        ],
-                      ),
-                    ),
-                  ),
-                  onTap: () {
-                    MaterialPageRoute materialPageRoute =
-                        MaterialPageRoute(builder: (BuildContext buildContext) {
-                      return Detail(
-                        productAllModel: filterProductAllModels![index],
-                        userModel: myUserModel,
-                      );
-                    });
-
-                    Navigator.of(context)
-                        .push(materialPageRoute)
-                        .then((value) => setState(() {
-                              readCart();
-                              updateDatalist(index);
-                            }));
-                    // Navigator.of(context).push(materialPageRoute);
-                  },
-                ),
-                myCircularProgress(),
-              ],
-            );
-          }
-
-          return GestureDetector(
-            child: Card(
-              child: Container(
-                decoration: myBoxDecoration(),
-                padding: EdgeInsets.only(top: 0.5),
-                child: Row(
-                  children: <Widget>[
-                    showImage(index),
-                    showText(index),
-                  ],
-                ),
-              ),
-            ),
+          Widget card = ProductListItemCard(
+            product: filterProductAllModels![index],
             onTap: () {
               MaterialPageRoute materialPageRoute =
                   MaterialPageRoute(builder: (BuildContext buildContext) {
@@ -582,9 +341,19 @@ class _ListProductfavState extends State<ListProductfav> {
                         readCart();
                         updateDatalist(index);
                       }));
-              // Navigator.of(context).push(materialPageRoute);
             },
           );
+
+          if (loadingIcon == true) {
+            return Column(
+              children: [
+                card,
+                myCircularProgress(),
+              ],
+            );
+          }
+
+          return card;
         },
       ),
     );
@@ -665,69 +434,15 @@ class _ListProductfavState extends State<ListProductfav> {
     );
   }
 
-  // Future<void> readQRcode() async {
-  //   try {
-  //     var qrString = await BarcodeScanner.scan();
-  //     print('QR code = $qrString');
-  //     if (qrString != null) {
-  //       decodeQRcode(qrString);
-  //     }
-  //   } catch (e) {
-  //     print('e = $e');
-  //   }
-  // }
-
-  Future<void> readQRcodePreview() async {
-    try {
-      // final qrScanString = await Navigator.push(this.context,
-      //     MaterialPageRoute(builder: (context) => ScanPreviewPage()));
-      ScanResult qrScanString;
-      qrScanString = await BarcodeScanner.scan();
-      qrString = qrScanString.rawContent;
-      if (qrString != null) {
-        decodeQRcode(qrString);
-      }
-      // setState(() => scanResult = qrScanString);
-    } on PlatformException {} // ignore: empty_catches
-  }
-
-  Future<void> decodeQRcode(var code) async {
-    try {
-      if(code != '' && code != null){
-        String url =
-            '${MyStyle().serverName}/json_productlist.php?bqcode=$code';
-        http.Response response = await http.get(Uri.parse(url));
-        if (!mounted) return;
-        var result = json.decode(response.body);
-        // print('result ===*******>>>> $result');
-
-        int status = result['status'];
-        if (status == 0) {
-          normalDialog(context, 'Not found', 'ไม่พบ code :: $code ในระบบ');
-        } else {
-          var itemProducts = result['itemsProduct'];
-          for (var map in itemProducts) {
-            // print('map ===*******>>>> $map');
-
-            ProductAllModel productAllModel = ProductAllModel.fromJson(map);
-            MaterialPageRoute route = MaterialPageRoute(
-              builder: (BuildContext context) => Detail(
-                userModel: myUserModel,
-                productAllModel: productAllModel,
-              ),
-            );
-
-            Navigator.of(context).push(route).then((value) => readCart());
-          }
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('ค้นหาสินค้าไม่สำเร็จ กรุณาลองใหม่อีกครั้ง')),
-        );
-      }
-    }
+  @override
+  void onProductFound(ProductAllModel product) {
+    MaterialPageRoute route = MaterialPageRoute(
+      builder: (BuildContext context) => Detail(
+        userModel: myUserModel,
+        productAllModel: product,
+      ),
+    );
+    Navigator.of(context).push(route).then((value) => readCart());
   }
 
   Widget searchForm() {
