@@ -30,21 +30,27 @@ class PackageSizeRow extends StatelessWidget {
 
   Widget _showPackage() {
     return _isOutOfStock
-        ? Text(unitSizeModel.lable!, style: MyStyle().h3bStyleRed)
-        : Text(unitSizeModel.lable!, style: MyStyle().h3Style);
+        ? Text(unitSizeModel.lable!,
+            style: MyStyle().h3bStyleRed,
+            overflow: TextOverflow.ellipsis)
+        : Text(unitSizeModel.lable!,
+            style: MyStyle().h3Style, overflow: TextOverflow.ellipsis);
   }
 
   Widget _showPricePackage() {
     return _isOutOfStock
-        ? Text('งดจำหน่าย / ', style: MyStyle().h3bStyleRed)
+        ? Text('งดจำหน่าย / ',
+            style: MyStyle().h3bStyleRed, overflow: TextOverflow.ellipsis)
         : Text('${unitSizeModel.price.toString()} บาท / ',
-            style: MyStyle().h3bStyleGreen);
+            style: MyStyle().h3bStyleGreen, overflow: TextOverflow.ellipsis);
   }
 
   Widget _showDetailPrice() {
     return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[_showPricePackage(), _showPackage()],
+      children: <Widget>[
+        Flexible(flex: 2, child: _showPricePackage()),
+        Flexible(flex: 3, child: _showPackage()),
+      ],
     );
   }
 
@@ -106,7 +112,7 @@ class PackageSizeRow extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
-        _showDetailPrice(),
+        Flexible(child: _showDetailPrice()),
         _showValue(context),
       ],
     );

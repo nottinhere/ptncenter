@@ -348,11 +348,17 @@ class _HistoryDetailState extends State<HistoryDetail> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
-                      priceUnitText(item),
-                      Text('สั่ง ${item.orderedQty} / ได้รับ ${item.receivedQty}',
-                          style: item.orderedQty == item.receivedQty
-                              ? MyStyle().h4StyleGray
-                              : TextStyle(fontSize: 14.0, color: Colors.red)),
+                      Flexible(child: priceUnitText(item)),
+                      SizedBox(width: 8.0),
+                      Flexible(
+                        child: Text(
+                            'สั่ง ${item.orderedQty} / ได้รับ ${item.receivedQty}',
+                            textAlign: TextAlign.end,
+                            overflow: TextOverflow.ellipsis,
+                            style: item.orderedQty == item.receivedQty
+                                ? MyStyle().h4StyleGray
+                                : TextStyle(fontSize: 14.0, color: Colors.red)),
+                      ),
                     ],
                   ),
                 ],
@@ -388,8 +394,12 @@ class _HistoryDetailState extends State<HistoryDetail> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Text('ยอดรวมทั้งหมด', style: MyStyle().h3bStyle),
-                Text('${formatAmount(grandTotal)} บาท',
-                    style: MyStyle().h3bStyleRed),
+                Flexible(
+                  child: Text('${formatAmount(grandTotal)} บาท',
+                      textAlign: TextAlign.end,
+                      overflow: TextOverflow.ellipsis,
+                      style: MyStyle().h3bStyleRed),
+                ),
               ],
             ),
           ],

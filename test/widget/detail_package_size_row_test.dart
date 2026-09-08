@@ -42,6 +42,31 @@ void main() {
       expect(field.initialValue, '3');
     });
 
+    testWidgets(
+        'does not overflow on a narrow screen even with a long price label',
+        (tester) async {
+      final view = tester.view;
+      view.physicalSize = const Size(320, 640);
+      view.devicePixelRatio = 1.0;
+      addTearDown(view.resetPhysicalSize);
+      addTearDown(view.resetDevicePixelRatio);
+
+      final unit = UnitSizeModel(
+        lable: 'แผงยาวมากๆขนาดใหญ่พิเศษ (คละสี)',
+        price: '1234.50',
+        unit: 'บาท',
+      );
+
+      await tester.pumpWidget(wrap(PackageSizeRow(
+        unitSizeModel: unit,
+        currentQtyInCart: 0,
+        limit: 10,
+        onQuantityChanged: (_) {},
+      )));
+
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('reports the new quantity when the spinner is incremented',
         (tester) async {
       final unit = UnitSizeModel(lable: 'กล่อง', price: '120', unit: 'บาท');
