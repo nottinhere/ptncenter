@@ -692,22 +692,10 @@ class _DetailCartState extends State<DetailCart> {
   ) async {
     String url =
         '${MyStyle().serverName}/json_updatemycart.php?productID=$productID&unitSize=$unitSize&newQTY=$newQTY&memberId=$memberID';
-    await http.get(Uri.parse(url)).then((response) {});
-
-    double totalPrice = 0;
-    List<dynamic>? arrIncartS = [];
-    List<dynamic>? arrIncartM = [];
-    List<dynamic>? arrIncartL = [];
-    clearArray();
-    readCart();
-    setState(() {
-      productAllModels!.add(productAllModel!);
-      allArrIncartS = arrIncartS;
-      allArrIncartM = arrIncartM;
-      allArrIncartL = arrIncartL;
-      amontCart = amontCart! + 1;
-      total = totalPrice;
-      showTotal();
+    await http.get(Uri.parse(url)).then((response) {
+      setState(() {
+        readCart();
+      });
     });
   }
 
