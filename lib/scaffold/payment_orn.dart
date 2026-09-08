@@ -8,7 +8,6 @@ import 'package:gal/gal.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:ptncenter/models/orn_model.dart';
 import 'package:ptncenter/models/user_model.dart';
 import 'package:ptncenter/scaffold/orn_menu.dart';
@@ -16,7 +15,9 @@ import 'package:ptncenter/scaffold/payment_ornlist.dart';
 
 import 'package:ptncenter/utility/my_style.dart';
 import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
-import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:ptncenter/utility/qr_scan_mixins.dart';
+import 'package:ptncenter/widget/payment_orn_info_card.dart';
+import 'package:ptncenter/widget/payment_orn_status_box.dart';
 
 import 'my_service.dart';
 
@@ -30,7 +31,8 @@ class PaymentOrn extends StatefulWidget {
   _PaymentOrnState createState() => _PaymentOrnState();
 }
 
-class _PaymentOrnState extends State<PaymentOrn> {
+class _PaymentOrnState extends State<PaymentOrn>
+    with OrnBarcodeScannerMixin<PaymentOrn> {
   UserModel? myUserModel;
   String? ornId;
   OrnModel? ornModel;
@@ -49,7 +51,6 @@ class _PaymentOrnState extends State<PaymentOrn> {
   String? ccSlipImagePath;
   String? ccSlipImageError;
   final TextEditingController bankTransferNoteController = TextEditingController();
-  String? qrString;
 
   String selectedBankTransferMethod = 'bank_transfer';
   DateTime? bankTransferDate = DateTime.now();
@@ -175,24 +176,6 @@ class _PaymentOrnState extends State<PaymentOrn> {
     }
   }
 
-  Widget infoRow(String label, String value, {TextStyle? valueStyle}) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: 8.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          SizedBox(
-            width: MediaQuery.of(context).size.width * 0.32,
-            child: Text(label, style: MyStyle().h4bStyleGray),
-          ),
-          Expanded(
-            child: Text(value, style: valueStyle ?? MyStyle().h3Style),
-          ),
-        ],
-      ),
-    );
-  }
-
   String formatNumber(String? value) {
     if (value == null || value.toString().trim().isEmpty) {
       return '';
@@ -217,63 +200,6 @@ class _PaymentOrnState extends State<PaymentOrn> {
     return '$integerPart.${parts[1]}';
   }
 
-  Widget paymentInfoCard() {
-    return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-        side: BorderSide(color: Colors.grey.shade200, width: 2),
-      ),
-      child: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            infoRow(
-              'เลขที่ใบส่งของ :',
-              ornModel?.ornNo ?? '',
-              valueStyle: TextStyle(
-                fontSize: 18.0,
-                fontWeight: FontWeight.bold,
-                color: Colors.blue,
-              ),
-            ),
-            // infoRow('ร้านค้า :', ornModel?.shopname ?? ''),
-            Divider(),
-            infoRow(
-              'ยอดรวม :',
-              '${formatNumber(ornModel?.amount)} บาท',
-              valueStyle: MyStyle().h3StyleBlue,
-            ),
-            ornModel?.shipping != null && ornModel?.shipping != '0'
-                ? infoRow(
-                    'ค่าจัดส่ง :',
-                    '${formatNumber(ornModel?.shipping)} บาท',
-                  )
-                : Container(),
-            ornModel?.cn != null && ornModel?.cn != '0'
-                ? infoRow(
-                    'ยาคืน :',
-                    '${formatNumber(ornModel?.cn)} บาท',
-                  )
-                : Container(),
-            infoRow(
-              'ยอดชำระ :',
-              '${formatNumber(ornModel?.total)} บาท',
-              valueStyle: MyStyle().h3bStyleRed,
-            ),
-
-
-
-            Divider(),
-            infoRow('ประเภทชำระ :', ornModel?.paytype ?? ''),
-            infoRow('วันที่ชำระ :', ornModel?.paydate ?? ''),
-            infoRow('สถานะเก็บบิล :', ornModel?.billingStatus ?? ''),
-            infoRow('เลขที่บิล :', ornModel?.billNo ?? ''),
-          ],
-        ),
-      ),
-    );
-  }
 
   Widget paymentOptionTile({
     required String value,
@@ -855,115 +781,12 @@ class _PaymentOrnState extends State<PaymentOrn> {
     );
   }
 
-  static const Map<String, Map<String, dynamic>> ornStatusMap = {
-    '0': {'text': '', 'color': Colors.red, 'icon': Icons.hourglass_top},
-    '1': {'text': 'รอเพิ่มยา', 'color': Color(0xFF008285), 'icon': Icons.hourglass_top},
-    '2': {'text': 'รอเพิ่มค่าขนส่ง', 'color': Colors.orange, 'icon': Icons.hourglass_top},
-    '6': {'text': 'รอหัก cn / รวมบิล', 'color': Colors.red, 'icon': Icons.hourglass_top},
-    '3': {'text': 'รอชำระเงิน', 'color': Colors.red, 'icon': Icons.hourglass_top},
-    '4': {'text': 'รอตรวจสอบ', 'color': Color(0xFFD69E02), 'icon': Icons.hourglass_top},
-    '5': {'text': 'ชำระแล้ว', 'color': Colors.green, 'icon': Icons.check_circle},
-    '7': {'text': 'ยกเลิกโดยผู้ดูแล', 'color': Color(0xFFD17F79), 'icon': Icons.error},
-    '8': {'text': 'ระหว่างจัดส่ง', 'color': Colors.green, 'icon': Icons.local_shipping},
-    '9': {'text': 'จัดส่งแล้ว', 'color': Colors.green, 'icon': Icons.check_circle},
-  };
-
-  Widget ornStatusBox() {
-    Map<String, dynamic> statusInfo = ornStatusMap[ornModel?.status] ??
-        {'text': '', 'color': Colors.grey, 'icon': Icons.info};
-
-    return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-        side: BorderSide(color: Colors.grey.shade200, width: 2),
-      ),
-      child: Padding(
-        padding: EdgeInsets.all(24.0),
-        child: Column(
-          children: <Widget>[
-            Icon(statusInfo['icon'], color: statusInfo['color'], size: 48.0),
-            SizedBox(height: 12.0),
-            Text(
-              'สถานะ ORN : ${statusInfo['text']}',
-              style: TextStyle(
-                fontSize: 18.0,
-                fontWeight: FontWeight.bold,
-                color: statusInfo['color'],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   // แถวของ BI เอง orn_no จะเท่ากับ bill_no; ORN ที่ถูกผูกไปรวมกับ BI อื่น bill_no จะไม่ตรงกับ orn_no ของตัวเอง
   bool isMergedIntoBill(OrnModel o) {
     return o.billNo != null &&
         o.billNo != '' &&
         o.billNo != '-' &&
         o.billNo != o.ornNo;
-  }
-
-  Widget linkedToBillBox() {
-    return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-        side: BorderSide(color: Colors.orange.shade200, width: 2),
-      ),
-      child: Padding(
-        padding: EdgeInsets.all(20.0),
-        child: Column(
-          children: <Widget>[
-            Icon(Icons.info_outline, color: Colors.orange, size: 48.0),
-            SizedBox(height: 12.0),
-            Text(
-              '${ornModel?.ornNo ?? ''} ได้ทำรายการไว้กับ ${ornModel?.billNo ?? ''}',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 16.0,
-                fontWeight: FontWeight.bold,
-                color: Colors.orange.shade800,
-              ),
-            ),
-            SizedBox(height: 6.0),
-            Text(
-              'ท่านสามารถตรวจสอบหรือทำรายการได้ที่หมายเลขบิลที่แจ้ง',
-              textAlign: TextAlign.center,
-              style: MyStyle().h4StyleGray,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget paymentCompleteBox() {
-    return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-        side: BorderSide(color: MyStyle().mainColor, width: 2),
-      ),
-      child: Padding(
-        padding: EdgeInsets.all(24.0),
-        child: Column(
-          children: <Widget>[
-            Icon(Icons.check_circle, color: MyStyle().mainColor, size: 56.0),
-            SizedBox(height: 12.0),
-            Text(
-              paymentCompleteTitle,
-              style: TextStyle(
-                fontSize: 20.0,
-                fontWeight: FontWeight.bold,
-                color: MyStyle().mainColor,
-              ),
-            ),
-            SizedBox(height: 4.0),
-            Text(paymentCompleteMessage, style: MyStyle().h4StyleGray),
-          ],
-        ),
-      ),
-    );
   }
 
   Future<void> submitCreditCardPayment(
@@ -1132,75 +955,19 @@ class _PaymentOrnState extends State<PaymentOrn> {
     );
   }
 
-    Future<void> readQRcodeORNPreview() async {
-    try {
-      // final qrScanString = await Navigator.push(this.context,
-      //     MaterialPageRoute(builder: (context) => ScanPreviewPage()));
-      ScanResult qrScanString;
-      qrString = '';
-      qrScanString = await BarcodeScanner.scan();
-      // print('scan result: $qrScanString');
-      qrString = qrScanString.rawContent;
+  @override
+  String? get scannerMemberId => myUserModel?.id.toString();
 
-      if (qrString != null) {
-        decodeQRcodeORN(qrString!);
-      }
-      // setState(() => scanResult = qrScanString);
-    } on PlatformException {} // ignore: empty_catches
-  }
-
-  Future<void> decodeQRcodeORN(var code) async {
-    // normalDialog(context,'xxxx','code -> $code');
-    try {
-      if (code != '' && code != null) {
-        String? memberId = myUserModel!.id.toString();
-        // id = currentOrnAllModel!.id.toString();
-        String? url =
-            '${MyStyle().serverName}/json_ornlist.php?memberId=$memberId&code=$code'; // &code=$code
-        http.Response response = await http.get(Uri.parse(url));
-        if (!mounted) return;
-        var result = json.decode(response.body);
-
-
-        int? status = result!['status'];
-        String? title = 'ข้อมูลไม่ถูกต้อง';
-        String? message = result!['message'];
-        OrnModel? ornScanAllModel;
-        if (status == 0) {
-          // normalDialog(context, 'Not found', 'ไม่พบ code :: $code ในระบบ');
-          AwesomeDialog(
-            context: context,
-            headerAnimationLoop: false,
-            dialogType: DialogType.error,
-            autoHide: const Duration(seconds: 4),
-            title: title,
-            desc: message,
-            btnOkColor: Colors.red,
-            btnOkOnPress: () {},
-            btnOkIcon: Icons.check_circle,
-          ).show();
-        } else {
-          var mapItemScanOrn = result!['itemsData'];
-          for (var map in mapItemScanOrn) {
-            ornScanAllModel = OrnModel.fromJson(map);
-          }
-          MaterialPageRoute materialPageRoute =
-              MaterialPageRoute(builder: (BuildContext buildContext) {
-            return MenuOrn(
-              ornID: ornScanAllModel!.id.toString(),
-              userModel: myUserModel,
-            );
-          });
-          Navigator.of(context).push(materialPageRoute);
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('ค้นหาข้อมูลไม่สำเร็จ กรุณาลองใหม่อีกครั้ง')),
-        );
-      }
-    }
+  @override
+  void onOrnFound(OrnModel orn) {
+    MaterialPageRoute materialPageRoute =
+        MaterialPageRoute(builder: (BuildContext buildContext) {
+      return MenuOrn(
+        ornID: orn.id.toString(),
+        userModel: myUserModel,
+      );
+    });
+    Navigator.of(context).push(materialPageRoute);
   }
 
 
@@ -1282,14 +1049,20 @@ class _PaymentOrnState extends State<PaymentOrn> {
               : ListView(
                   padding: EdgeInsets.all(16.0),
                   children: <Widget>[
-                    paymentInfoCard(),
+                    PaymentOrnInfoCard(ornModel: ornModel),
                     SizedBox(height: 16.0),
                     ornModel?.status != '3'
-                        ? ornStatusBox()
+                        ? OrnStatusBox(status: ornModel?.status)
                         : (isMergedIntoBill(ornModel!)
-                            ? linkedToBillBox()
+                            ? LinkedToBillBox(
+                                ornNo: ornModel?.ornNo,
+                                billNo: ornModel?.billNo,
+                              )
                             : (paymentCompleted
-                                ? paymentCompleteBox()
+                                ? PaymentCompleteBox(
+                                    title: paymentCompleteTitle,
+                                    message: paymentCompleteMessage,
+                                  )
                                 : paymentOptionsCard())),
                     // if (selectedPayment != 'qr') SizedBox(height: 16.0),
                     // if (selectedPayment != 'qr') confirmButton(),
