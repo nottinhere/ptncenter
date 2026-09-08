@@ -12,11 +12,17 @@ import 'package:ptncenter/models/promotion_group_model.dart';
 import 'package:ptncenter/models/promotion_tier.dart';
 import 'package:ptncenter/models/gift_model.dart';
 import 'package:ptncenter/models/reward_extrapoint_model.dart';
+import 'package:ptncenter/models/near_miss_promotion.dart';
+import 'package:ptncenter/models/received_gift_item.dart';
 import 'package:ptncenter/utility/my_style.dart';
-import 'package:ptncenter/scaffold/detail.dart';
+import 'package:ptncenter/scaffold/detail.dart'
+    hide NearMissPromotion, ReceivedGiftItem;
 import 'package:ptncenter/scaffold/list_product.dart';
-import 'package:ptncenter/scaffold/list_product_promotion.dart';
+import 'package:ptncenter/scaffold/list_product_promotion.dart'
+    hide NearMissPromotion, ReceivedGiftItem;
 import 'package:ptncenter/scaffold/list_product_favorite.dart';
+import 'package:ptncenter/widget/detail_cart_near_miss_section.dart';
+import 'package:ptncenter/widget/detail_cart_reward_section.dart';
 // import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
 import 'my_service.dart';
 import 'package:flutter_spinbox/flutter_spinbox.dart';
@@ -25,50 +31,6 @@ import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:chat_bubbles/chat_bubbles.dart';
        
-
-class ReceivedGiftItem {
-  final String sourceLabel;
-  final GiftModel? gift;
-  final String sets; // จำนวนชุดที่ได้ คำนวนจากจำนวนในตะกร้า
-  final String perSetQty; // จำนวนของแถมต่อชุด มาจาก getqty/getqty2/getqty3
-  final String totalQty; // sets * perSetQty (ไม่เกิน limitgift ถ้ามีการกำหนด)
-  final bool isInhouse; // true = โปรโมชันร้าน (inhousepromotion.json) อิงยอดรวมทั้งบิล
-
-  ReceivedGiftItem(
-      {required this.sourceLabel,
-      required this.gift,
-      required this.sets,
-      required this.perSetQty,
-      required this.totalQty,
-      this.isInhouse = false});
-}
-
-class NearMissPromotion {
-  final String sourceLabel;
-  final String remaining;
-  final String remainingUnit;
-  final GiftModel? gift;
-  final String giftQty;
-  final String giftUnit;
-  final double progress; // 0.0 - 1.0 ความคืบหน้าไปยัง tier ถัดไป
-  final String? productId; // สำหรับโปรโมชันรายสินค้า
-  final PromotionGroupModel? group; // สำหรับโปรโมชันกลุ่มสินค้า
-  final String? sizeLabel; // ไซส์ (S/M/L) ที่เข้าเงื่อนไขโปรโมชันนี้ ถ้ามี
-  final int? level; // ขั้นของ tier ที่กำลังจะไปถึง (1, 2, 3) level > 1 หมายถึงได้ของแถมขั้นก่อนหน้าแล้ว
-
-  NearMissPromotion(
-      {required this.sourceLabel,
-      required this.remaining,
-      required this.remainingUnit,
-      required this.gift,
-      required this.giftQty,
-      required this.giftUnit,
-      required this.progress,
-      this.productId,
-      this.group,
-      this.sizeLabel,
-      this.level});
-}
 
 class DetailCart extends StatefulWidget {
   final UserModel? userModel;
@@ -1265,180 +1227,6 @@ class _DetailCartState extends State<DetailCart> {
     );
   }
 
-  Widget extraPointSummaryBadge(double points) {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
-      padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-      decoration: BoxDecoration(
-        color: Color(0xFFFFF3D6),
-        borderRadius: BorderRadius.circular(20.0),
-        border: Border.all(color: Color(0xFFFFE0A3)),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Icon(Icons.star, size: 16.0, color: Color(0xFFF5A623)),
-          SizedBox(width: 6.0),
-          Flexible(
-            child: Text(
-              'คุณจะได้รับ ${formatNum(points)} คะแนน (อาจปรับตามสินค้าที่ได้รับจริง)',
-              style: TextStyle(
-                  fontSize: 13.0,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF7A5B00)),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  bool isFreeGift(RewardredeemModel reward) {
-    String? point = reward.point;
-    return point == null || point.isEmpty || point == '0';
-  }
-
-  Widget storeGiftBadge() {
-    Color color = Colors.pink;
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 2.0),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        border: Border.all(color: color),
-        borderRadius: BorderRadius.circular(20.0),
-      ),
-      child: Text(
-        'ของสมนาคุณจากทางร้าน',
-        style: TextStyle(
-            color: color, fontSize: 12.0, fontWeight: FontWeight.bold),
-      ),
-    );
-  }
-
-  Widget rewardTypeBadge(bool isFree) {
-    Color color = isFree ? Colors.green : Colors.blue;
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 2.0),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        border: Border.all(color: color),
-        borderRadius: BorderRadius.circular(20.0),
-      ),
-      child: Text(
-        isFree ? 'ของแถม' : 'แลกคะแนน',
-        style: TextStyle(
-            color: color, fontSize: 12.0, fontWeight: FontWeight.bold),
-      ),
-    );
-  }
-
-  Widget rewardItemTile(RewardredeemModel reward) {
-    bool isFree = isFreeGift(reward);
-    Color color = isFree ? Colors.green : Colors.blue;
-
-    return Card(
-      margin: EdgeInsets.only(bottom: 8.0),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10.0),
-        side: BorderSide(color: Colors.grey.shade200),
-      ),
-      child: Padding(
-        padding: EdgeInsets.all(10.0),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Icon(isFree ? Icons.card_giftcard : Icons.workspace_premium,
-                color: color, size: 32.0),
-            SizedBox(width: 10.0),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Wrap(
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    spacing: 6.0,
-                    runSpacing: 4.0,
-                    children: <Widget>[
-                      Text(reward.rwSubject ?? '', style: MyStyle().h4bStyleGray),
-                      rewardTypeBadge(isFree),
-                    ],
-                  ),
-                  // Text(reward.rwCode ?? '',
-                  //     style: TextStyle(fontSize: 12.0, color: Colors.grey)),
-                ],
-              ),
-            ),
-            SizedBox(
-              width: 40.0,
-              child: Text(
-                isFree ? 'ฟรี' : 'ได้รับ',
-                textAlign: TextAlign.right,
-                style: TextStyle(
-                  color: isFree ? Colors.green : Colors.grey,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            SizedBox(
-              width: 30.0,
-              child: Text(reward.qty ?? '',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-            ),
-            SizedBox(
-              width: 40.0,
-              child: Text(reward.unit ?? '',
-                  textAlign: TextAlign.center, style: MyStyle().h4StyleGray),
-            ),
-
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget showReward() {
-    return Card(
-      child: Container(
-        padding: EdgeInsets.only(
-          top: 5.0,
-          bottom: 5.0,
-          left: 10.0,
-          right: 10.0,
-        ),
-        child: Column(
-          children: [
-            Align(
-              alignment: Alignment.topLeft,
-              child: Text(
-                'ของสมนาคุณที่เลือก',
-                style: MyStyle().h3bStyleGray,
-                textAlign: TextAlign.left,
-              ),
-            ),
-            Container(
-              padding: EdgeInsets.only(
-                top: 5.0,
-                bottom: 5.0,
-                left: 10.0,
-                right: 10.0,
-              ),
-              child: ListView.builder(
-                physics: ScrollPhysics(),
-                shrinkWrap: true,
-                itemCount: rewardredeemModels?.length,
-                itemBuilder: (BuildContext buildContext, int index) {
-                  return rewardItemTile(rewardredeemModels![index]);
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   void selectedTransport(String string) {
     transport = string;
     setState(() {
@@ -1552,221 +1340,6 @@ class _DetailCartState extends State<DetailCart> {
       color: Color.fromARGB(255, 254, 255, 175),
       tail: true,
       textStyle: TextStyle(fontSize: 14, color: const Color.fromARGB(255, 223, 5, 5)),
-    );
-  }
-
-  Widget nearMissBanner(NearMissPromotion item, {bool showDivider = true}) {
-    String giftName = item.gift?.name ?? 'ของแถม';
-    // String sizeClause = (item.sizeLabel != null && item.sizeLabel!.isNotEmpty)
-    //     ? ' ไซส์ ${item.sizeLabel} (หน่วยเป็น${item.remainingUnit})'
-    //     : '';
-    // level > 1 หมายถึงได้ของแถมขั้นก่อนหน้าไปแล้ว กำลังจะขยับไปขั้นที่ดีกว่า จึงเรียกว่า "อัปเกรด"
-    // แทนที่จะเป็น "ใกล้ได้ของแถมแล้ว" ซึ่งสื่อถึงการได้ของแถมเป็นครั้งแรก
-    String prefix = (item.level != null && item.level! > 1)
-        ? 'อัปเกรดของแถมได้!'
-        : 'ใกล้ได้ของแถมแล้ว!';
-    String message = '$prefix "${item.sourceLabel}"' // $sizeClause
-        ' ขาดอีก ${item.remaining} ${item.remainingUnit} เพื่อรับ $giftName ${item.giftQty} ${item.giftUnit} ฟรี';
-
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 8.0),
-      decoration: showDivider
-          ? BoxDecoration(
-              border: Border(
-                  bottom: BorderSide(color: Color(0xFFFFE8A3), width: 1.0)),
-            )
-          : null,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              Container(
-                width: 32.0,
-                height: 32.0,
-                decoration:
-                    BoxDecoration(color: Colors.orange, shape: BoxShape.circle),
-                child: Icon(Icons.campaign, color: Colors.white, size: 18.0),
-              ),
-              SizedBox(width: 10.0),
-              Expanded(
-                child: Text(message,
-                    style:
-                        TextStyle(fontSize: 12.5, color: Colors.grey.shade800)),
-              ),
-              SizedBox(width: 8.0),
-              OutlinedButton(
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: MyStyle().mainColor,
-                  side: BorderSide(color: MyStyle().mainColor),
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.0)),
-                ),
-                onPressed: () {
-                  if (item.group != null) {
-                    routeToGroupProducts(item.group!);
-                  } else {
-                    routeToPromoProduct(item.productId);
-                  }
-                },
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Text('ดูเพิ่มเติม',
-                        style: TextStyle(
-                            fontSize: 12.0, fontWeight: FontWeight.bold)),
-                    SizedBox(width: 4.0),
-                    Icon(Icons.arrow_forward, size: 14.0),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          // SizedBox(height: 8.0),
-          // Row(
-          //   children: <Widget>[
-          //     Expanded(
-          //       child: ClipRRect(
-          //         borderRadius: BorderRadius.circular(4.0),
-          //         child: LinearProgressIndicator(
-          //           value: clampedProgress,
-          //           minHeight: 6.0,
-          //           backgroundColor: Color(0xFFFFE8A3),
-          //           valueColor:
-          //               AlwaysStoppedAnimation<Color>(Colors.orange),
-          //         ),
-          //       ),
-          //     ),
-          //     SizedBox(width: 8.0),
-          //     Text('$percent%',
-          //         style: TextStyle(
-          //             fontSize: 11.0,
-          //             fontWeight: FontWeight.bold,
-          //             color: Colors.orange.shade800)),
-          //   ],
-          // ),
-        ],
-      ),
-    );
-  }
-
-  Widget nearMissSection() {
-    if (nearMissPromotions.isEmpty) return Container();
-
-    return Card(
-      color: Color(0xFFFFFBEA),
-      margin: EdgeInsets.zero,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10.0),
-        side: BorderSide(color: Color(0xFFFFE8A3)),
-      ),
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 10.0),
-        child: Column(
-          children: nearMissPromotions.asMap().entries.map((entry) {
-            bool isLast = entry.key == nearMissPromotions.length - 1;
-            return nearMissBanner(entry.value, showDivider: !isLast);
-          }).toList(),
-        ),
-      ),
-    );
-  }
-
-  Widget receivedGiftTile(ReceivedGiftItem item) {
-    String unitName = unitNameMap[item.gift?.unit] ?? '';
-
-    // ถ้าโดน limitgift ตัดยอดจนไม่เท่ากับ perSetQty x sets จริง (เช่น limit น้อยกว่า
-    // 1 ชุดเต็ม) การโชว์ breakdown "x sets" จะขัดกับยอดรวมที่แสดง จึงซ่อน breakdown ไว้
-    double perSetVal = double.tryParse(item.perSetQty) ?? 0;
-    double setsVal = double.tryParse(item.sets) ?? 0;
-    double totalVal = double.tryParse(item.totalQty) ?? 0;
-    bool showBreakdown =
-        perSetVal <= 0 || (perSetVal * setsVal) <= totalVal + 0.0001;
-
-    return Card(
-      margin: EdgeInsets.only(bottom: 8.0),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10.0),
-        side: BorderSide(color: Colors.grey.shade200),
-      ),
-      child: Padding(
-        padding: EdgeInsets.all(10.0),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Icon(Icons.card_giftcard, color: Colors.green, size: 32.0),
-            SizedBox(width: 10.0),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Wrap(
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    spacing: 6.0,
-                    runSpacing: 4.0,
-                    children: <Widget>[
-                      Text(item.gift?.name ?? 'ของแถม', style: MyStyle().h4bStyleGray),
-                      item.isInhouse ? storeGiftBadge() : rewardTypeBadge(true),
-                    ],
-                  ),
-                  SizedBox(height: 2.0),
-                  Text('จาก "${item.sourceLabel}"',
-                      style: TextStyle(fontSize: 11.0, color: Colors.grey)),
-                ],
-              ),
-            ),
-            SizedBox(width: 8.0),
-            Text(
-              'ฟรี',
-              style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
-            ),
-            if (showBreakdown) ...[
-              SizedBox(width: 10.0),
-              Text('${item.perSetQty} $unitName x ${item.sets} ชุด',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-            ],
-            SizedBox(width: 10.0),
-            Text('${item.totalQty} $unitName',
-                style: TextStyle(fontWeight: FontWeight.bold)),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget promotionSuccess() {
-    List<ReceivedGiftItem> giftItems = [
-      ...productGiftsReceived,
-      ...groupGiftsReceived,
-      ...inhouseGiftsReceived,
-    ];
-
-    return Card(
-      child: Container(
-        padding: EdgeInsets.only(
-          top: 5.0,
-          bottom: 5.0,
-          left: 10.0,
-          right: 10.0,
-        ),
-        child: Column(
-          children: [
-            Align(
-              alignment: Alignment.topLeft,
-              child: Text(
-                'รายการพิเศษที่ได้รับ',
-                style: MyStyle().h3bStyleGray,
-                textAlign: TextAlign.left,
-              ),
-            ),
-            SizedBox(height: 6.0),
-            ...giftItems.map(receivedGiftTile),
-          ],
-        ),
-      ),
     );
   }
 
@@ -2112,20 +1685,33 @@ class _DetailCartState extends State<DetailCart> {
         children: <Widget>[
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
-            child: nearMissSection(),
+            child: NearMissSection(
+              nearMissPromotions: nearMissPromotions,
+              onRouteToGroupProducts: routeToGroupProducts,
+              onRouteToPromoProduct: routeToPromoProduct,
+            ),
           ),
           showTotal(),
           showListCart(),
           showTotal(),
           (totalExtraPoints() > 0)
-              ? extraPointSummaryBadge(totalExtraPoints())
+              ? ExtraPointSummaryBadge(points: totalExtraPoints())
               : Container(),
           (productGiftsReceived.isNotEmpty ||
                   groupGiftsReceived.isNotEmpty ||
                   inhouseGiftsReceived.isNotEmpty)
-              ? promotionSuccess()
+              ? PromotionSuccessSection(
+                  giftItems: [
+                    ...productGiftsReceived,
+                    ...groupGiftsReceived,
+                    ...inhouseGiftsReceived,
+                  ],
+                  unitNameMap: unitNameMap,
+                )
               : Container(),
-          (rewardredeemModels!.isNotEmpty) ? showReward() : Container(),
+          (rewardredeemModels!.isNotEmpty)
+              ? RewardSection(rewardredeemModels: rewardredeemModels!)
+              : Container(),
           showTransport(),
           commentBox(),
           (countpricechange != 0)
