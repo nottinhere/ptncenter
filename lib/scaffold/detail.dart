@@ -17,7 +17,6 @@ import 'package:ptncenter/scaffold/list_product_favorite.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:ptncenter/models/promote_model.dart';
 import 'my_service.dart';
-import 'package:flutter_spinbox/flutter_spinbox.dart';
 import 'package:favorite_button/favorite_button.dart';
 
 
@@ -28,6 +27,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 
 import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
 import 'package:ptncenter/widget/detail_promotion_card.dart';
+import 'package:ptncenter/widget/detail_package_size_row.dart';
 
 class NearMissPromotion {
   final String sourceLabel;
@@ -772,141 +772,6 @@ class _DetailState extends State<Detail> {
     );
   }
 
-  Widget showPackage(int index) {
-    if (unitSizeModels![index].price.toString() == '0') {
-      return Text(unitSizeModels![index].lable!, style: MyStyle().h3bStyleRed);
-    } else {
-      return Text(unitSizeModels![index].lable!, style: MyStyle().h3Style);
-    }
-  }
-
-  Widget showPricePackage(int index) {
-    if (unitSizeModels![index].price.toString() == '0') {
-      return Text('งดจำหน่าย / ', style: MyStyle().h3bStyleRed);
-    } else {
-      return Text(
-        '${unitSizeModels![index].price.toString()} บาท / ',
-        style: MyStyle().h3bStyleGreen,
-      );
-    }
-  }
-
-  Widget showChoosePricePackage(int index) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: <Widget>[
-        showDetailPrice(index),
-        // incDecValue(index),
-        showValue(index),
-      ],
-    );
-  }
-
-  Widget showDetailPrice(int index) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[showPricePackage(index), showPackage(index)],
-    );
-  }
-
-  Widget showValue(int index) {
-    //  int value = amounts[index];
-    //  return Text('$value');
-    int? iniValue = 0;
-    int? limitValue = 0;
-    bool? readOnlyMode;
-    IconData iconName;
-    Color iconColor;
-    if (index == 0) {
-      iniValue = showSincart;
-      limitValue = limitS;
-    } else if (index == 1) {
-      iniValue = showMincart;
-      limitValue = limitM;
-    } else if (index == 2) {
-      iniValue = showLincart;
-      limitValue = limitL;
-    }
-
-    iniValue = (iniValue); // (iniValue).toInt();
-
-    /////////////////////////////////////////////////////////
-    if (unitSizeModels![index].price.toString() == '0') {
-      readOnlyMode = true;
-      iconName = Icons.cancel;
-      iconColor = Color.fromARGB(0xff, 0xff, 0x99, 0x99);
-      return Container(
-        // decoration: MyStyle().boxLightGreen,
-        // height: 35.0,
-        width: MediaQuery.of(context).size.width * 0.50,
-        padding: EdgeInsets.only(left: 20.0, right: 10.0),
-        child: Column(
-          children: <Widget>[
-            TextFormField(
-              style: TextStyle(color: Colors.black),
-              initialValue: '$iniValue',
-              // controller: TextEditingController()..text = '$iniValue',
-              readOnly: readOnlyMode,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                contentPadding: EdgeInsets.only(top: 3.0),
-                prefixIcon: Icon(iconName, color: iconColor),
-                border: InputBorder.none,
-                // hintText: 'ระบุจำนวน',
-                hintStyle: TextStyle(color: iconColor),
-              ),
-            ),
-          ],
-        ),
-      );
-    } else {
-      readOnlyMode = false;
-      iconName = Icons.mode_edit;
-      iconColor = Colors.grey;
-      return Container(
-        // decoration: MyStyle().boxLightGreen,
-        // height: 35.0,
-        width: MediaQuery.of(context).size.width * 0.50,
-        padding: EdgeInsets.only(left: 10.0, right: 10.0),
-        child: Column(
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(0),
-              child: SpinBox(
-                min: 0,
-                max: (limitValue==0)?10000:limitValue!.toDouble(),  //10000,//
-                value: (iniValue)!
-                    .toDouble(), //(iniValue == 0) ? 0 : (iniValue).toInt(),
-                onChanged: (changevalue) {
-                  if (index == 0) {
-                    setState(() {
-                      qtyS = (changevalue == 0) ? 0 : (changevalue).toInt();
-                    });
-                  } else if (index == 1) {
-                    setState(() {
-                      qtyM = (changevalue == 0) ? 0 : (changevalue).toInt();
-                    });
-                  } else if (index == 2) {
-                    setState(() {
-                      qtyL = (changevalue == 0) ? 0 : (changevalue).toInt();
-                    });
-                  }
-                },
-                // decoration: InputDecoration(labelText: 'Decimals'),
-                decoration: InputDecoration(
-                  border: UnderlineInputBorder(), // InputBorder.none,
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    // var x = (iniValue!='0')?int.tryParse(iniValue):('').toString();
-    // print('iniValue ($index)>> $iniValue');
-  }
-
   Widget infoTile(IconData icon, String label, String value,
       {Color? valueColor}) {
     return Expanded(
@@ -1147,10 +1012,35 @@ class _DetailState extends State<Detail> {
           ...sellableIndexes.asMap().entries.map((entry) {
             int position = entry.key;
             int index = entry.value;
+            int? currentQtyInCart = index == 0
+                ? showSincart
+                : index == 1
+                    ? showMincart
+                    : showLincart;
+            int? limit = index == 0
+                ? limitS
+                : index == 1
+                    ? limitM
+                    : limitL;
             return Padding(
               padding: EdgeInsets.only(
                   bottom: position == sellableIndexes.length - 1 ? 0 : 10.0),
-              child: showChoosePricePackage(index),
+              child: PackageSizeRow(
+                unitSizeModel: unitSizeModels![index],
+                currentQtyInCart: currentQtyInCart,
+                limit: limit,
+                onQuantityChanged: (newQty) {
+                  setState(() {
+                    if (index == 0) {
+                      qtyS = newQty;
+                    } else if (index == 1) {
+                      qtyM = newQty;
+                    } else if (index == 2) {
+                      qtyL = newQty;
+                    }
+                  });
+                },
+              ),
             );
           }),
           quickAddButtonsRow(),
