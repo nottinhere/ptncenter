@@ -250,15 +250,25 @@ class GroupPromotionCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-                Text('ยอดในกลุ่มปัจจุบัน ${_formatNum(subtotal)} บาท',
-                    style: TextStyle(fontSize: 12.5, color: Colors.grey.shade700)),
-                Text(
-                    'ขาดอีก ${_formatNum(remaining)} บาท ได้ ${_formatNum(nextSetOrdinal)} ชุด '
-                    '(ของขั้นที่ ${activeTier.level})',
-                    style: TextStyle(
-                        fontSize: 12.5,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.orange.shade800)),
+                Flexible(
+                  child: Text('ยอดในกลุ่มปัจจุบัน ${_formatNum(subtotal)} บาท',
+                      overflow: TextOverflow.ellipsis,
+                      style:
+                          TextStyle(fontSize: 12.5, color: Colors.grey.shade700)),
+                ),
+                SizedBox(width: 8.0),
+                Flexible(
+                  child: Text(
+                      'ขาดอีก ${_formatNum(remaining)} บาท ได้ ${_formatNum(nextSetOrdinal)} ชุด '
+                      '(ของขั้นที่ ${activeTier.level})',
+                      textAlign: TextAlign.end,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 2,
+                      style: TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.orange.shade800)),
+                ),
               ],
             ),
             SizedBox(height: 6.0),
