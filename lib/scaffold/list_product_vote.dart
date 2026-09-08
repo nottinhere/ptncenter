@@ -14,6 +14,7 @@ import 'my_service.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:favorite_button/favorite_button.dart';
+import 'package:ptncenter/widget/simple_search_bar.dart';
 
 
 
@@ -564,50 +565,23 @@ class _ListProductvoteState extends State<ListProductvote> {
   }
 
   Widget searchForm() {
-    return Container(
+    return SimpleSearchBar(
+      controller: _controller,
       decoration: MyStyle().boxLightGray,
-      // color: Colors.grey,
-      padding: EdgeInsets.only(left: 5.0, right: 5.0, top: 2.0, bottom: 2.0),
-      child: ListTile(
-        trailing: SizedBox(
-          width: 45.0,
-          child: Image.asset('images/icon_barcode.png'),
-        ),
-        onTap: () {
-          // readQRcode();
-          // readQRcodePreview();
-          // Navigator.of(context).pop();
-        },
-        title: TextField(
-          controller: _controller,
-          textAlign: TextAlign.center,
-          scrollPadding: EdgeInsets.all(1.00),
-          style: TextStyle(
-              color: Colors.blue.shade900,
-              fontWeight: FontWeight.w300,
-              fontSize: 18.00),
-          decoration: InputDecoration(
-            border: OutlineInputBorder(),
-            hintText: 'ค้นหาสินค้า',
-            suffixIcon: IconButton(
-              onPressed: () => _controller.clear(),
-              icon: Icon(Icons.clear),
-            ),
-          ),
-          onChanged: (String string) {
-            searchString = string.trim();
-          },
-          textInputAction: TextInputAction.search,
-          onSubmitted: (value) {
-            setState(() {
-              page = 1;
-              myIndex = 0;
-              productVoteModels!.clear();
-              readData();
-            });
-          },
-        ),
-      ),
+      hintText: 'ค้นหาสินค้า',
+      iconAsset: 'images/icon_barcode.png',
+      onScanTap: () {},
+      onChanged: (String string) {
+        searchString = string.trim();
+      },
+      onSubmitted: (value) {
+        setState(() {
+          page = 1;
+          myIndex = 0;
+          productVoteModels!.clear();
+          readData();
+        });
+      },
     );
   }
 

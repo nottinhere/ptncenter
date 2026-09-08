@@ -14,6 +14,7 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
 import 'package:intl/intl.dart';
 import 'package:ptncenter/utility/qr_scan_mixins.dart';
+import 'package:ptncenter/widget/simple_search_bar.dart';
 
 class OrnList extends StatefulWidget {
   final int? index;
@@ -521,59 +522,33 @@ DateTime parseDate =
   }
 
   Widget searchForm() {
-
-
-    return Container(
-      // decoration: MyStyle().boxLightGrey,
-      // color: Colors.grey,
-      padding: EdgeInsets.only(left: 5.0, right: 5.0, top: 2.0, bottom: 2.0),
-      child: ListTile(
-        trailing: SizedBox(
-          width: 45.0,
-          child: Image.asset('images/qr_code.png'),
-        ),
-        onTap: () {
-          readQRcodeORNPreview();
-        },
-        title: TextField(
-          controller: _controller,
-          textAlign: TextAlign.center,
-          scrollPadding: EdgeInsets.all(1.00),
-          style: TextStyle(
-              color: Colors.blue.shade900,
-              fontWeight: FontWeight.w300,
-              fontSize: 18.00),
-          decoration: InputDecoration(
-            border: OutlineInputBorder(),
-            hintText: 'ค้นหา ORN',
-            suffixIcon: IconButton(
-              onPressed: () {
-                setState(() {
-                  _controller.clear();
-                  searchString = '';
-                  ornAllModels!.clear();
-                  readData();
-                });
-              },
-              icon: Icon(Icons.clear),
-            ),
-          ),
-          onChanged: (String? string) {
-            setState(() {
-              searchString = string!.trim();
-            });
-          },
-          textInputAction: TextInputAction.search,
-          onSubmitted: (value) {
-            setState(() {
-              page = 1;
-              myIndex = 0;
-              ornAllModels!.clear();
-              readData();
-            });
-          },
-        ),
-      ),
+    return SimpleSearchBar(
+      controller: _controller,
+      hintText: 'ค้นหา ORN',
+      iconAsset: 'images/qr_code.png',
+      onScanTap: () {
+        readQRcodeORNPreview();
+      },
+      onChanged: (String? string) {
+        setState(() {
+          searchString = string!.trim();
+        });
+      },
+      onSubmitted: (value) {
+        setState(() {
+          page = 1;
+          myIndex = 0;
+          ornAllModels!.clear();
+          readData();
+        });
+      },
+      onClear: () {
+        setState(() {
+          searchString = '';
+          ornAllModels!.clear();
+          readData();
+        });
+      },
     );
   }
 

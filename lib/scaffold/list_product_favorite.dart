@@ -18,6 +18,7 @@ import 'package:loading_indicator/loading_indicator.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:ptncenter/utility/qr_scan_mixins.dart';
 import 'package:ptncenter/widget/product_list_item_card.dart';
+import 'package:ptncenter/widget/simple_search_bar.dart';
 
 // import 'package:scan_preview/scan_preview_widget.dart';
 // import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
@@ -446,50 +447,25 @@ class _ListProductfavState extends State<ListProductfav>
   }
 
   Widget searchForm() {
-    return Container(
+    return SimpleSearchBar(
+      controller: _controller,
       decoration: MyStyle().boxLightGray,
-      // color: Colors.grey,
-      padding: EdgeInsets.only(left: 5.0, right: 5.0, top: 2.0, bottom: 2.0),
-      child: ListTile(
-        trailing: SizedBox(
-          width: 45.0,
-          child: Image.asset('images/icon_barcode.png'),
-        ),
-        onTap: () {
-          // readQRcode();
-          readQRcodePreview();
-          // scanBarcodeNormal();
-        },
-        title: TextField(
-          controller: _controller,
-          textAlign: TextAlign.center,
-          scrollPadding: EdgeInsets.all(1.00),
-          style: TextStyle(
-              color: Colors.blue.shade900,
-              fontWeight: FontWeight.w300,
-              fontSize: 18.00),
-          decoration: InputDecoration(
-            border: OutlineInputBorder(),
-            hintText: 'ค้นหาสินค้า',
-            suffixIcon: IconButton(
-              onPressed: () => _controller.clear(),
-              icon: Icon(Icons.clear),
-            ),
-          ),
-          onChanged: (String string) {
-            searchString = string.trim();
-          },
-          textInputAction: TextInputAction.search,
-          onSubmitted: (value) {
-            setState(() {
-              page = 1;
-              myIndex = 0;
-              productAllModels!.clear();
-              readData();
-            });
-          },
-        ),
-      ),
+      hintText: 'ค้นหาสินค้า',
+      iconAsset: 'images/icon_barcode.png',
+      onScanTap: () {
+        readQRcodePreview();
+      },
+      onChanged: (String string) {
+        searchString = string.trim();
+      },
+      onSubmitted: (value) {
+        setState(() {
+          page = 1;
+          myIndex = 0;
+          productAllModels!.clear();
+          readData();
+        });
+      },
     );
   }
 
