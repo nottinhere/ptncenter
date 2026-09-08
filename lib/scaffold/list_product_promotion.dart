@@ -20,6 +20,8 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:toast/toast.dart';
 import 'package:ptncenter/utility/qr_scan_mixins.dart';
 import 'package:ptncenter/widget/list_product_promotion_group_card.dart';
+import 'package:ptncenter/widget/list_product_promotion_item_card.dart';
+import 'package:ptncenter/widget/list_product_promotion_search_form.dart';
 
 class NearMissPromotion {
   final String sourceLabel;
@@ -590,205 +592,6 @@ class _ListProductPromotionState extends State<ListProductPromotion>
     });
   }
 
-  Widget showName(int index) {
-    return Row(
-      children: <Widget>[
-        SizedBox(
-          width: MediaQuery.of(context).size.width * 0.75,
-          child: Text(
-            filterProductAllModels![index].title!,
-            style: MyStyle().h3Style,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget showHilight(int index) {
-    return Row(
-      children: <Widget>[
-        SizedBox(
-          width: MediaQuery.of(context).size.width * 0.75,
-          child: Text(
-            filterProductAllModels![index].hilight!,
-            style: MyStyle().h3StyleRed,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget showExtrapoint(int index) {
-    return Row(
-      children: <Widget>[
-        SizedBox(
-          width: MediaQuery.of(context).size.width * 0.75,
-          child: Text(
-            filterProductAllModels![index].extrapoint!,
-            style: MyStyle().h3StyleOrange,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget showStock(int index) {
-    return Row(
-      children: <Widget>[
-        SizedBox(
-          width: MediaQuery.of(context).size.width * 0.12,
-          child: Text(
-            'Stock:',
-            style: MyStyle().h4StyleGray,
-          ),
-        ),
-        SizedBox(
-          width: MediaQuery.of(context).size.width * 0.12,
-          child: Text(
-            ' ${filterProductAllModels![index].stock}',
-            style: (filterProductAllModels![index].stock.toString() != '0')
-                ? MyStyle().h4StyleGray
-                : MyStyle().h4StyleRed,
-          ),
-        ),
-        showIncart(index),
-      ],
-    );
-    // return Text('na');
-  }
-
-  Widget showIncart(int index) {
-    return Row(children: <Widget>[
-      SizedBox(
-        width: MediaQuery.of(context).size.width * 0.13,
-        child: Text(
-          (filterProductAllModels![index].itemincartSunit != '0' ||
-                  filterProductAllModels![index].itemincartMunit != '0' ||
-                  filterProductAllModels![index].itemincartLunit != '0')
-              ? 'ตะกร้า:'
-              : '',
-          style: MyStyle().h4StyleRed,
-        ),
-      ),
-      SizedBox(
-        width: MediaQuery.of(context).size.width * 0.25,
-        child: Text(
-          ((filterProductAllModels![index].itemincartSunit != '0')
-                  ? '${filterProductAllModels![index].itemincartSunit} ${filterProductAllModels![index].itemSunit}  '
-                  : '') +
-              ((filterProductAllModels![index].itemincartMunit != '0')
-                  ? '${filterProductAllModels![index].itemincartMunit} ${filterProductAllModels![index].itemMunit}  '
-                  : '') +
-              ((filterProductAllModels![index].itemincartLunit != '0')
-                  ? '${filterProductAllModels![index].itemincartLunit} ${filterProductAllModels![index].itemLunit}'
-                  : ''),
-          style: MyStyle().h4StyleRed,
-        ),
-      ),
-    ]);
-  }
-
-  Widget showPrice(int index) {
-    String txtShowPrice;
-    String txtShowUnit;
-    String txtPriceUnit = '';
-    if (filterProductAllModels![index].itemSprice.toString() != '0') {
-      txtShowPrice = filterProductAllModels![index].itemSprice.toString();
-      txtShowUnit = filterProductAllModels![index].itemSunit.toString();
-      if (txtShowPrice != '' && txtShowUnit != '') {
-        txtPriceUnit += " [$txtShowPrice/$txtShowUnit] ";
-      }
-    }
-    if (filterProductAllModels![index].itemMprice.toString() != '0') {
-      txtShowPrice = filterProductAllModels![index].itemMprice.toString();
-      txtShowUnit = filterProductAllModels![index].itemMunit.toString();
-      if (txtShowPrice != '' && txtShowUnit != '') {
-        txtPriceUnit += " [$txtShowPrice/$txtShowUnit] ";
-      }
-    }
-    if (filterProductAllModels![index].itemLprice.toString() != '0') {
-      txtShowPrice = filterProductAllModels![index].itemLprice.toString();
-      txtShowUnit = filterProductAllModels![index].itemLunit.toString();
-      if (txtShowPrice != '' && txtShowUnit != '') {
-        txtPriceUnit += " [$txtShowPrice/$txtShowUnit] ";
-      }
-    }
-
-    return Row(
-      children: <Widget>[
-        Text(
-          txtPriceUnit,
-          style: TextStyle(
-            fontSize: 16.0,
-            //  fontWeight: FontWeight.bold,
-            color: Color.fromRGBO(50, 117, 168, 1.0),
-          ), // h3StyleGray
-        ),
-      ],
-    );
-    // return Text('na');
-  }
-
-  Widget showText(int index) {
-    return Container(
-      padding: EdgeInsets.only(left: 5.0, right: 0.0),
-      // height: MediaQuery.of(context).size.width * 0.5,
-      width: MediaQuery.of(context).size.width * 0.78,
-      child: Container(
-        padding: EdgeInsets.only(bottom: 5.0, top: 5.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            showName(index),
-            (filterProductAllModels![index].hilight != '')
-                ? showHilight(index)
-                : Container(),
-            (filterProductAllModels![index].extrapoint != '')
-                ? showExtrapoint(index)
-                : Container(),
-            showPrice(index),
-            showStock(index),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget showImage(int index) {
-    return Container(
-      padding: EdgeInsets.all(5.0),
-      // width: MediaQuery.of(context).size.width * 0.25,
-      // child: Image.network(filterProductAllModels![index].photo),
-      width: 80,
-      height: 80,
-      decoration: BoxDecoration(
-          image: DecorationImage(
-        fit: BoxFit.cover,
-        alignment: FractionalOffset.topCenter,
-        image: NetworkImage(filterProductAllModels![index].photo!),
-      )),
-    );
-  }
-
-  BoxDecoration myBoxDecoration() {
-    return BoxDecoration(
-      border: Border.all(color: Colors.green.shade300),
-      borderRadius: BorderRadius.all(
-        Radius.circular(5.0), //                 <--- border radius here
-      ),
-      // border: Border(
-      //   top: BorderSide(
-      //     color: Colors.blueGrey.shade100,
-      //     width: 1.0,
-      //   ),
-      // bottom: BorderSide(
-      //   color: Colors.blueGrey.shade100,
-      //   width: 1.0,
-      // ),
-      // ),
-    );
-  }
-
   Widget loading() {
     return Visibility(
       maintainSize: true,
@@ -816,8 +619,6 @@ class _ListProductPromotionState extends State<ListProductPromotion>
     );
   }
 
-  /// การ์ดสรุปโปรโมชันกลุ่มสินค้า แสดงทุกขั้น (ขั้น 1/2/3) พร้อมสถานะสำเร็จ/ยังไม่สำเร็จ
-  /// ยอดปัจจุบัน progress bar ไปยังขั้นถัดไป และของแถมที่จะได้รับเมื่อถึงขั้นถัดไป
   Widget loadMoreIndicator() {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 16.0),
@@ -853,19 +654,8 @@ class _ListProductPromotionState extends State<ListProductPromotion>
             return loadMoreIndicator();
           }
 
-          return GestureDetector(
-            child: Card(
-              child: Container(
-                decoration: myBoxDecoration(),
-                padding: EdgeInsets.only(top: 0.5),
-                child: Row(
-                  children: <Widget>[
-                    showImage(index),
-                    showText(index),
-                  ],
-                ),
-              ),
-            ),
+          return ProductPromotionListItem(
+            product: filterProductAllModels![index],
             onTap: () {
               MaterialPageRoute materialPageRoute =
                   MaterialPageRoute(builder: (BuildContext buildContext) {
@@ -881,7 +671,6 @@ class _ListProductPromotionState extends State<ListProductPromotion>
                         readCart();
                         updateDatalist(index);
                       }));
-              // Navigator.of(context).push(materialPageRoute);
             },
           );
         },
@@ -977,7 +766,6 @@ class _ListProductPromotionState extends State<ListProductPromotion>
   }
 
   List<String> jsonSuggestMed =[];
-  String autocompleteQuery = '';
   Future<void> loadJsonAsset() async {
     String url = 'https://ptnpharma.com/jsonData/medicine_unit.json';
     http.Response response = await http.get(Uri.parse(url));
@@ -988,56 +776,6 @@ class _ListProductPromotionState extends State<ListProductPromotion>
     setState(() {
        jsonSuggestMed;
     });
-  }
-
-  List<String> searchWords(String query) {
-    return query
-        .toLowerCase()
-        .trim()
-        .split(RegExp(r'\s+'))
-        .where((String word) => word.isNotEmpty)
-        .toList();
-  }
-
-  Widget highlightedOptionText(BuildContext context, String text, String query) {
-    List<String> words = searchWords(query);
-    if (words.isEmpty) {
-      return Text(text);
-    }
-
-    String lowerText = text.toLowerCase();
-    List<TextSpan> spans = <TextSpan>[];
-    int cursor = 0;
-
-    while (cursor < text.length) {
-      int bestIndex = -1;
-      int bestLength = 0;
-      for (String word in words) {
-        int idx = lowerText.indexOf(word, cursor);
-        if (idx != -1 && (bestIndex == -1 || idx < bestIndex)) {
-          bestIndex = idx;
-          bestLength = word.length;
-        }
-      }
-
-      if (bestIndex == -1) {
-        spans.add(TextSpan(text: text.substring(cursor)));
-        break;
-      }
-
-      if (bestIndex > cursor) {
-        spans.add(TextSpan(text: text.substring(cursor, bestIndex)));
-      }
-      spans.add(TextSpan(
-        text: text.substring(bestIndex, bestIndex + bestLength),
-        style: TextStyle(fontWeight: FontWeight.bold),
-      ));
-      cursor = bestIndex + bestLength;
-    }
-
-    TextStyle baseStyle =
-        DefaultTextStyle.of(context).style.copyWith(fontSize: 15.0);
-    return RichText(text: TextSpan(style: baseStyle, children: spans));
   }
 
   String buildSearchKey(String query) {
@@ -1055,112 +793,33 @@ class _ListProductPromotionState extends State<ListProductPromotion>
   }
 
   Widget searchForm() {
-    
-    List<String> listjsonSuggestMed = jsonSuggestMed;
-    // const List<String> _kOptions = jsonSuggestMed;
-    return Column(
-
-      children: [
-        Row(
-          children: [
-            Container(
-              padding: EdgeInsets.all(5.00),
-              width: MediaQuery.of(context).size.width * 0.85,
-              child: Autocomplete<String>(
-                 optionsMaxHeight : 700.00,
-                 fieldViewBuilder:
-                    (context, textEditingController, focusNode, onFieldSubmitted) {
-                  return TextField(
-                    controller: textEditingController,
-                    focusNode: focusNode,
-                    onChanged: (String string) {
-                      searchString = string.trim();
-                    },
-                    textInputAction: TextInputAction.search,
-                    onSubmitted: (value) {
-                      setState(() {
-                        searchString = buildSearchKey(value);
-                        page = 1;
-                        myIndex = 0;
-                        productAllModels!.clear();
-                        readData();
-                      });
-                    },
-                     decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      hintText: 'ค้นหาสินค้า',
-                      suffixIcon: IconButton(
-                        onPressed: () => textEditingController.clear(),
-                        icon: Icon(Icons.clear),
-                      ),
-                    ),
-                  );
-                },  
-                optionsBuilder: (TextEditingValue textEditingValue) {
-                  autocompleteQuery = textEditingValue.text.trim();
-                  List<String> words = searchWords(textEditingValue.text);
-                  if (words.isEmpty) {
-                    return const Iterable<String>.empty();
-                  }
-                  return listjsonSuggestMed.where((String option) {
-                    return words.every((String word) => option.contains(word));
-                  });
-                },
-                optionsViewBuilder: (context, onSelected, options) {
-                  List<String> optionsList = options.toList();
-                  return Align(
-                    alignment: Alignment.topLeft,
-                    child: Material(
-                      elevation: 4.0,
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(maxHeight: 700.0),
-                        child: ListView.builder(
-                          padding: EdgeInsets.zero,
-                          shrinkWrap: true,
-                          itemCount: optionsList.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            String option = optionsList[index];
-                            String displayName = option.split('|').first;
-                            return InkWell(
-                              onTap: () => onSelected(option),
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 5.0, vertical: 5.0),
-                                child: highlightedOptionText(
-                                    context, displayName, autocompleteQuery),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                  );
-                },
-                onSelected: (String selection) {    // onSelected: (String selection) {
-                    var parts = selection.split('|');
-                    searchString = 'x|${parts.sublist(1).join('|').trim()}';
-                    setState(() {
-                      page = 1;
-                      myIndex = 0;
-                      productAllModels!.clear();
-                      readData();
-                    });
-                
-                },
-              ),
-            ),
-             GestureDetector(
-              onTap: () {
-                readQRcodePreview();
-              }, // Image tapped
-              // padding: EdgeInsets.only(left: 5.00,right: 5.00),
-              // width: MediaQuery.of(context).size.width * 0.15,
-              child: Image.asset('images/icon_barcode.png',
-                  width: 50.0, height: 50.0),
-            ),
-          ],
-        ),
-      ],
+    return ProductPromotionSearchForm(
+      suggestions: jsonSuggestMed,
+      onSearchChanged: (String string) {
+        searchString = string.trim();
+      },
+      onSearchSubmitted: (value) {
+        setState(() {
+          searchString = buildSearchKey(value);
+          page = 1;
+          myIndex = 0;
+          productAllModels!.clear();
+          readData();
+        });
+      },
+      onSuggestionSelected: (String selection) {
+        var parts = selection.split('|');
+        searchString = 'x|${parts.sublist(1).join('|').trim()}';
+        setState(() {
+          page = 1;
+          myIndex = 0;
+          productAllModels!.clear();
+          readData();
+        });
+      },
+      onScanBarcode: () {
+        readQRcodePreview();
+      },
     );
   }
 
