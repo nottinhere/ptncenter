@@ -3,12 +3,13 @@ import 'package:ptncenter/models/product_all_model.dart';
 import 'package:ptncenter/utility/my_style.dart';
 
 /// การ์ดสินค้าหนึ่งชิ้นในรายการ (รูป + ชื่อ/ไฮไลต์/แต้มพิเศษ/ราคา/สต๊อก/จำนวนในตะกร้า)
-/// ที่ใช้ในหน้ารายการสินค้าตามโปรโมชันกลุ่ม
-class ProductPromotionListItem extends StatelessWidget {
+/// ใช้ร่วมกันในหน้ารายการสินค้า (list_product.dart) และหน้ารายการสินค้าตามโปรโมชันกลุ่ม
+/// (list_product_promotion.dart)
+class ProductListItemCard extends StatelessWidget {
   final ProductAllModel product;
   final VoidCallback onTap;
 
-  const ProductPromotionListItem({
+  const ProductListItemCard({
     super.key,
     required this.product,
     required this.onTap,

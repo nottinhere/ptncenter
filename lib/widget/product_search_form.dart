@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
 /// ช่องค้นหาสินค้าแบบ autocomplete (พร้อมไฮไลต์คำที่ตรงกับคำค้น) และปุ่มสแกนบาร์โค้ด
-/// ที่ใช้ในหน้ารายการสินค้าตามโปรโมชันกลุ่ม
-class ProductPromotionSearchForm extends StatelessWidget {
+/// ใช้ร่วมกันในหน้ารายการสินค้า (list_product.dart) และหน้ารายการสินค้าตามโปรโมชันกลุ่ม
+/// (list_product_promotion.dart)
+class ProductSearchForm extends StatelessWidget {
   /// รายการคำแนะนำทั้งหมดในรูปแบบ "ชื่อ|รหัส" (โหลดจาก jsonData/medicine_unit.json)
   final List<String> suggestions;
 
@@ -18,13 +19,17 @@ class ProductPromotionSearchForm extends StatelessWidget {
   /// เรียกเมื่อผู้ใช้แตะไอคอนสแกนบาร์โค้ด
   final VoidCallback onScanBarcode;
 
-  const ProductPromotionSearchForm({
+  /// padding ของแต่ละแถวคำแนะนำ (ค่าเดิมต่างกันเล็กน้อยระหว่าง 2 หน้าที่ใช้ widget นี้)
+  final EdgeInsetsGeometry optionPadding;
+
+  const ProductSearchForm({
     super.key,
     required this.suggestions,
     required this.onSearchChanged,
     required this.onSearchSubmitted,
     required this.onSuggestionSelected,
     required this.onScanBarcode,
+    this.optionPadding = const EdgeInsets.symmetric(horizontal: 5.0, vertical: 5.0),
   });
 
   List<String> _searchWords(String query) {
@@ -139,8 +144,7 @@ class ProductPromotionSearchForm extends StatelessWidget {
                             return InkWell(
                               onTap: () => onSelected(option),
                               child: Padding(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 5.0, vertical: 5.0),
+                                padding: optionPadding,
                                 child: _highlightedOptionText(
                                     context, displayName, autocompleteQuery),
                               ),

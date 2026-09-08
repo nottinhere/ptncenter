@@ -20,8 +20,8 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:toast/toast.dart';
 import 'package:ptncenter/utility/qr_scan_mixins.dart';
 import 'package:ptncenter/widget/list_product_promotion_group_card.dart';
-import 'package:ptncenter/widget/list_product_promotion_item_card.dart';
-import 'package:ptncenter/widget/list_product_promotion_search_form.dart';
+import 'package:ptncenter/widget/product_list_item_card.dart';
+import 'package:ptncenter/widget/product_search_form.dart';
 
 class NearMissPromotion {
   final String sourceLabel;
@@ -654,7 +654,7 @@ class _ListProductPromotionState extends State<ListProductPromotion>
             return loadMoreIndicator();
           }
 
-          return ProductPromotionListItem(
+          return ProductListItemCard(
             product: filterProductAllModels![index],
             onTap: () {
               MaterialPageRoute materialPageRoute =
@@ -793,7 +793,7 @@ class _ListProductPromotionState extends State<ListProductPromotion>
   }
 
   Widget searchForm() {
-    return ProductPromotionSearchForm(
+    return ProductSearchForm(
       suggestions: jsonSuggestMed,
       onSearchChanged: (String string) {
         searchString = string.trim();

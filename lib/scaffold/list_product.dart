@@ -6,17 +6,17 @@ import 'package:http/http.dart' as http;
 import 'package:ptncenter/models/product_all_model.dart';
 import 'package:ptncenter/models/user_model.dart';
 import 'package:ptncenter/utility/my_style.dart';
-import 'package:barcode_scan2/barcode_scan2.dart';
-import 'package:ptncenter/utility/normal_dialog.dart';
 import 'package:ptncenter/scaffold/list_product_favorite.dart';
 import 'my_service.dart';
 import 'detail.dart';
 import 'detail_cart.dart';
 import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
 import 'package:loading_indicator/loading_indicator.dart';
-import 'package:flutter/services.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:toast/toast.dart';
+import 'package:ptncenter/utility/qr_scan_mixins.dart';
+import 'package:ptncenter/widget/product_list_item_card.dart';
+import 'package:ptncenter/widget/product_search_form.dart';
 
 class ListProduct extends StatefulWidget {
   final int? index;
@@ -58,7 +58,8 @@ class Debouncer {
   }
 }
 
-class _ListProductState extends State<ListProduct> {
+class _ListProductState extends State<ListProduct>
+    with ProductBarcodeScannerMixin<ListProduct> {
   // Explicit
   int? myIndex;
   List<ProductAllModel>? productAllModels = []; // []; // set array
@@ -72,7 +73,6 @@ class _ListProductState extends State<ListProduct> {
   int? amountListView = 6;
   int? page = 1;
 
-  String? qrString;
   int? myCate = 0;
   String? myCateName = '';
   String? mysearchString = '';
@@ -357,104 +357,6 @@ class _ListProductState extends State<ListProduct> {
     });
   }
 
-  Widget showName(int index) {
-    return Row(
-      children: <Widget>[
-        SizedBox(
-          width: MediaQuery.of(context).size.width * 0.75,
-          child: Text(
-            filterProductAllModels![index].title!,
-            style: MyStyle().h3Style,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget showHilight(int index) {
-    return Row(
-      children: <Widget>[
-        SizedBox(
-          width: MediaQuery.of(context).size.width * 0.75,
-          child: Text(
-            filterProductAllModels![index].hilight!,
-            style: MyStyle().h3StyleRed,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget showExtrapoint(int index) {
-    return Row(
-      children: <Widget>[
-        SizedBox(
-          width: MediaQuery.of(context).size.width * 0.75,
-          child: Text(
-            filterProductAllModels![index].extrapoint!,
-            style: MyStyle().h3StyleOrange,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget showStock(int index) {
-    return Row(
-      children: <Widget>[
-        SizedBox(
-          width: MediaQuery.of(context).size.width * 0.12,
-          child: Text(
-            'Stock:',
-            style: MyStyle().h4StyleGray,
-          ),
-        ),
-        SizedBox(
-          width: MediaQuery.of(context).size.width * 0.12,
-          child: Text(
-            ' ${filterProductAllModels![index].stock}',
-            style: (filterProductAllModels![index].stock.toString() != '0')
-                ? MyStyle().h4StyleGray
-                : MyStyle().h4StyleRed,
-          ),
-        ),
-        showIncart(index),
-      ],
-    );
-    // return Text('na');
-  }
-
-  Widget showIncart(int index) {
-    return Row(children: <Widget>[
-      SizedBox(
-        width: MediaQuery.of(context).size.width * 0.13,
-        child: Text(
-          (filterProductAllModels![index].itemincartSunit != '0' ||
-                  filterProductAllModels![index].itemincartMunit != '0' ||
-                  filterProductAllModels![index].itemincartLunit != '0')
-              ? 'ตะกร้า:'
-              : '',
-          style: MyStyle().h4StyleRed,
-        ),
-      ),
-      SizedBox(
-        width: MediaQuery.of(context).size.width * 0.25,
-        child: Text(
-          ((filterProductAllModels![index].itemincartSunit != '0')
-                  ? '${filterProductAllModels![index].itemincartSunit} ${filterProductAllModels![index].itemSunit}  '
-                  : '') +
-              ((filterProductAllModels![index].itemincartMunit != '0')
-                  ? '${filterProductAllModels![index].itemincartMunit} ${filterProductAllModels![index].itemMunit}  '
-                  : '') +
-              ((filterProductAllModels![index].itemincartLunit != '0')
-                  ? '${filterProductAllModels![index].itemincartLunit} ${filterProductAllModels![index].itemLunit}'
-                  : ''),
-          style: MyStyle().h4StyleRed,
-        ),
-      ),
-    ]);
-  }
-
   String priceUnitText(int index) {
     String txtShowPrice;
     String txtShowUnit;
@@ -481,81 +383,6 @@ class _ListProductState extends State<ListProduct> {
       }
     }
     return txtPriceUnit;
-  }
-
-  Widget showPrice(int index) {
-    return Row(
-      children: <Widget>[
-        Text(
-          priceUnitText(index),
-          style: TextStyle(
-            fontSize: 16.0,
-            //  fontWeight: FontWeight.bold,
-            color: Color.fromRGBO(50, 117, 168, 1.0),
-          ), // h3StyleGray
-        ),
-      ],
-    );
-  }
-
-  Widget showText(int index) {
-    return Container(
-      padding: EdgeInsets.only(left: 5.0, right: 0.0),
-      // height: MediaQuery.of(context).size.width * 0.5,
-      width: MediaQuery.of(context).size.width * 0.78,
-      child: Container(
-        padding: EdgeInsets.only(bottom: 5.0, top: 5.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            showName(index),
-            (filterProductAllModels![index].hilight != '')
-                ? showHilight(index)
-                : Container(),
-            (filterProductAllModels![index].extrapoint != '')
-                ? showExtrapoint(index)
-                : Container(),
-            showPrice(index),
-            showStock(index),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget showImage(int index) {
-    return Container(
-      padding: EdgeInsets.all(5.0),
-      // width: MediaQuery.of(context).size.width * 0.25,
-      // child: Image.network(filterProductAllModels![index].photo),
-      width: 80,
-      height: 80,
-      decoration: BoxDecoration(
-          image: DecorationImage(
-        fit: BoxFit.cover,
-        alignment: FractionalOffset.topCenter,
-        image: NetworkImage(filterProductAllModels![index].photo!),
-      )),
-    );
-  }
-
-  BoxDecoration myBoxDecoration() {
-    return BoxDecoration(
-      border: Border.all(color: Colors.green.shade300),
-      borderRadius: BorderRadius.all(
-        Radius.circular(5.0), //                 <--- border radius here
-      ),
-      // border: Border(
-      //   top: BorderSide(
-      //     color: Colors.blueGrey.shade100,
-      //     width: 1.0,
-      //   ),
-      // bottom: BorderSide(
-      //   color: Colors.blueGrey.shade100,
-      //   width: 1.0,
-      // ),
-      // ),
-    );
   }
 
   Widget loading() {
@@ -827,19 +654,8 @@ class _ListProductState extends State<ListProduct> {
             return loadMoreIndicator();
           }
 
-          return GestureDetector(
-            child: Card(
-              child: Container(
-                decoration: myBoxDecoration(),
-                padding: EdgeInsets.only(top: 0.5),
-                child: Row(
-                  children: <Widget>[
-                    showImage(index),
-                    showText(index),
-                  ],
-                ),
-              ),
-            ),
+          return ProductListItemCard(
+            product: filterProductAllModels![index],
             onTap: () => onTapProduct(index),
           );
         },
@@ -928,61 +744,18 @@ class _ListProductState extends State<ListProduct> {
   }
 
 
-  Future<void> readQRcodePreview() async {
-    try {
-      // final qrScanString = await Navigator.push(this.context,
-      //     MaterialPageRoute(builder: (context) => ScanPreviewPage()));
-      ScanResult qrScanString;
-      qrScanString = await BarcodeScanner.scan();
-      qrString = qrScanString.rawContent;
-      if (qrString != null) {
-        decodeQRcode(qrString);
-      }
-      // setState(() => scanResult = qrScanString);
-    } on PlatformException {} // ignore: empty_catches
-  }
-
-Future<void> decodeQRcode(var code) async {
-    try {
-      if(code != '' && code != null){
-        String url =
-            '${MyStyle().serverName}/json_productlist.php?bqcode=$code';
-        http.Response response = await http.get(Uri.parse(url));
-        if (!mounted) return;
-        var result = json.decode(response.body);
-        // print('result (decodeQRcode) ===>>>> $result');
-
-        int status = result['status'];
-        if (status == 0) {
-          normalDialog(context, 'Not found', 'ไม่พบ code :: $code ในระบบ');
-        } else {
-          var itemProducts = result['itemsProduct'];
-          for (var map in itemProducts) {
-            // print('map ===*******>>>> $map');
-
-            ProductAllModel productAllModel = ProductAllModel.fromJson(map);
-            MaterialPageRoute route = MaterialPageRoute(
-              builder: (BuildContext context) => Detail(
-                userModel: myUserModel,
-                productAllModel: productAllModel,
-              ),
-            );
-
-            Navigator.of(context).push(route).then((value) => readCart());
-          }
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('ค้นหาสินค้าไม่สำเร็จ กรุณาลองใหม่อีกครั้ง')),
-        );
-      }
-    }
+  @override
+  void onProductFound(ProductAllModel product) {
+    MaterialPageRoute route = MaterialPageRoute(
+      builder: (BuildContext context) => Detail(
+        userModel: myUserModel,
+        productAllModel: product,
+      ),
+    );
+    Navigator.of(context).push(route).then((value) => readCart());
   }
 
   List<String> jsonSuggestMed =[];
-  String autocompleteQuery = '';
   Future<void> loadJsonAsset() async {
     String url = 'https://ptnpharma.com/jsonData/medicine_unit.json';
     http.Response response = await http.get(Uri.parse(url));
@@ -993,56 +766,6 @@ Future<void> decodeQRcode(var code) async {
     setState(() {
        jsonSuggestMed;
     });
-  }
-
-  List<String> searchWords(String query) {
-    return query
-        .toLowerCase()
-        .trim()
-        .split(RegExp(r'\s+'))
-        .where((String word) => word.isNotEmpty)
-        .toList();
-  }
-
-  Widget highlightedOptionText(BuildContext context, String text, String query) {
-    List<String> words = searchWords(query);
-    if (words.isEmpty) {
-      return Text(text);
-    }
-
-    String lowerText = text.toLowerCase();
-    List<TextSpan> spans = <TextSpan>[];
-    int cursor = 0;
-
-    while (cursor < text.length) {
-      int bestIndex = -1;
-      int bestLength = 0;
-      for (String word in words) {
-        int idx = lowerText.indexOf(word, cursor);
-        if (idx != -1 && (bestIndex == -1 || idx < bestIndex)) {
-          bestIndex = idx;
-          bestLength = word.length;
-        }
-      }
-
-      if (bestIndex == -1) {
-        spans.add(TextSpan(text: text.substring(cursor)));
-        break;
-      }
-
-      if (bestIndex > cursor) {
-        spans.add(TextSpan(text: text.substring(cursor, bestIndex)));
-      }
-      spans.add(TextSpan(
-        text: text.substring(bestIndex, bestIndex + bestLength),
-        style: TextStyle(fontWeight: FontWeight.bold),
-      ));
-      cursor = bestIndex + bestLength;
-    }
-
-    TextStyle baseStyle =
-        DefaultTextStyle.of(context).style.copyWith(fontSize: 15.0);
-    return RichText(text: TextSpan(style: baseStyle, children: spans));
   }
 
   // productCode รูปแบบ "js|<url-encoded query string ในเครื่องหมายคำพูด>"
@@ -1076,112 +799,34 @@ Future<void> decodeQRcode(var code) async {
   }
 
   Widget searchForm() {
-    
-    List<String> listjsonSuggestMed = jsonSuggestMed;
-    // const List<String> _kOptions = jsonSuggestMed;
-    return Column(
-
-      children: [
-        Row(
-          children: [
-            Container(
-              padding: EdgeInsets.all(5.00),
-              width: MediaQuery.of(context).size.width * 0.85,
-              child: Autocomplete<String>(
-                 optionsMaxHeight : 700.00,
-                 fieldViewBuilder:
-                    (context, textEditingController, focusNode, onFieldSubmitted) {
-                  return TextField(
-                    controller: textEditingController,
-                    focusNode: focusNode,
-                    onChanged: (String string) {
-                      searchString = string.trim();
-                    },
-                    textInputAction: TextInputAction.search,
-                    onSubmitted: (value) {
-                      setState(() {
-                        searchString = buildSearchKey(value);
-                        page = 1;
-                        myIndex = 0;
-                        productAllModels!.clear();
-                        readData();
-                      });
-                    },
-                     decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      hintText: 'ค้นหาสินค้า',
-                      suffixIcon: IconButton(
-                        onPressed: () => textEditingController.clear(),
-                        icon: Icon(Icons.clear),
-                      ),
-                    ),
-                  );
-                },  
-                optionsBuilder: (TextEditingValue textEditingValue) {
-                  autocompleteQuery = textEditingValue.text.trim();
-                  List<String> words = searchWords(textEditingValue.text);
-                  if (words.isEmpty) {
-                    return const Iterable<String>.empty();
-                  }
-                  return listjsonSuggestMed.where((String option) {
-                    return words.every((String word) => option.contains(word));
-                  });
-                },
-                optionsViewBuilder: (context, onSelected, options) {
-                  List<String> optionsList = options.toList();
-                  return Align(
-                    alignment: Alignment.topLeft,
-                    child: Material(
-                      elevation: 4.0,
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(maxHeight: 700.0),
-                        child: ListView.builder(
-                          padding: EdgeInsets.zero,
-                          shrinkWrap: true,
-                          itemCount: optionsList.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            String option = optionsList[index];
-                            String displayName = option.split('|').first;
-                            return InkWell(
-                              onTap: () => onSelected(option),
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 16.0, vertical: 10.0),
-                                child: highlightedOptionText(
-                                    context, displayName, autocompleteQuery),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                  );
-                },
-                onSelected: (String selection) {    // onSelected: (String selection) {
-                    var parts = selection.split('|');
-                    searchString = 'x|${parts.sublist(1).join('|').trim()}';
-                    setState(() {
-                      page = 1;
-                      myIndex = 0;
-                      productAllModels!.clear();
-                      readData();
-                    });
-                
-                },
-              ),
-            ),
-             GestureDetector(
-              onTap: () {
-                readQRcodePreview();
-              }, // Image tapped
-              // padding: EdgeInsets.only(left: 5.00,right: 5.00),
-              // width: MediaQuery.of(context).size.width * 0.15,
-              child: Image.asset('images/icon_barcode.png',
-                  width: 50.0, height: 50.0),
-            ),
-          ],
-        ),
-      ],
+    return ProductSearchForm(
+      suggestions: jsonSuggestMed,
+      optionPadding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+      onSearchChanged: (String string) {
+        searchString = string.trim();
+      },
+      onSearchSubmitted: (value) {
+        setState(() {
+          searchString = buildSearchKey(value);
+          page = 1;
+          myIndex = 0;
+          productAllModels!.clear();
+          readData();
+        });
+      },
+      onSuggestionSelected: (String selection) {
+        var parts = selection.split('|');
+        searchString = 'x|${parts.sublist(1).join('|').trim()}';
+        setState(() {
+          page = 1;
+          myIndex = 0;
+          productAllModels!.clear();
+          readData();
+        });
+      },
+      onScanBarcode: () {
+        readQRcodePreview();
+      },
     );
   }
 
