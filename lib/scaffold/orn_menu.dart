@@ -5,19 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:ptncenter/models/user_model.dart';
 import 'package:ptncenter/models/orn_model.dart';
-
-
-
 import 'package:ptncenter/scaffold/orn_list.dart';
 import 'package:ptncenter/scaffold/orn_listproduct.dart';
-
-
 import 'my_service.dart';
-
-
 import 'package:ptncenter/utility/my_style.dart';
-
-
 import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
 
 class MenuOrn extends StatefulWidget {
@@ -71,8 +62,7 @@ class _MenuOrnState extends State<MenuOrn> {
       String? staffID = myUserModel!.id.toString();
       id = currentOrnID.toString();
       String? url =
-      '${MyStyle().serverName}/apipacking/json_ornlist.php?memberId=$staffID&ornId=$id';
-    
+      '${MyStyle().serverName}/json_ornlist.php?memberId=$staffID&ornId=$id';
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
     var mapItemOrn = result['itemsData']; 
