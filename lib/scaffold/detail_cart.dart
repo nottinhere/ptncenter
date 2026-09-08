@@ -23,9 +23,9 @@ import 'package:ptncenter/scaffold/list_product_promotion.dart'
 import 'package:ptncenter/scaffold/list_product_favorite.dart';
 import 'package:ptncenter/widget/detail_cart_near_miss_section.dart';
 import 'package:ptncenter/widget/detail_cart_reward_section.dart';
+import 'package:ptncenter/widget/detail_cart_list_section.dart';
 // import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
 import 'my_service.dart';
-import 'package:flutter_spinbox/flutter_spinbox.dart';
 // import 'package:scan_preview/scan_preview_widget.dart';
 import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
@@ -58,13 +58,8 @@ class _DetailCartState extends State<DetailCart> {
   List<Map<String, dynamic>>? lMap = [];
   int? amontCart = 0;
   double? newQTY = 0;
-  double? newQTYS = 0;
-  double? newQTYM = 0;
-  double? newQTYL = 0;
-  int? newQTYint = 0;
   double? total = 0;
   String? transport;
-  int? index = 0;
   int? selectedTranindex = 0;
   int selectIndex = 3;
   int countpricechange = 0;
@@ -690,253 +685,6 @@ class _DetailCartState extends State<DetailCart> {
     );
   }
 
-  Widget showTitle(int index) {
-    return Container(
-      padding: EdgeInsets.only(left: 16.0, right: 10.0),
-      width: MediaQuery.of(context).size.width,
-      child: Row(
-        children: <Widget>[
-          SizedBox(
-            width: MediaQuery.of(context).size.width - 40,
-            child: Text(
-              productAllModels![index].title!,
-              style: TextStyle(
-                fontSize: 16.0,
-                fontWeight: FontWeight.bold,
-                color: Color.fromARGB(0xff, 0x00, 0x73, 0x26),
-              ),
-              // style: MyStyle().h2Style,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget extraPointInlineBadge(double points) {
-    return Container(
-      margin: EdgeInsets.only(left: 6.0),
-      padding: EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
-      decoration: BoxDecoration(
-        color: Color(0xFFFFF3D6),
-        borderRadius: BorderRadius.circular(20.0),
-        border: Border.all(color: Color(0xFFFFE0A3)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Icon(Icons.star, size: 12.0, color: Color(0xFFF5A623)),
-          SizedBox(width: 2.0),
-          Text('+${formatNum(points)}',
-              style: TextStyle(
-                  fontSize: 11.0,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF7A5B00))),
-        ],
-      ),
-    );
-  }
-
-  Widget showHilight(int index) {
-    double extraPoints = extraPointsForProduct(productAllModels![index].id);
-
-    return Row(
-      children: <Widget>[
-        Container(
-          padding: EdgeInsets.only(left: 16.00),
-          width: MediaQuery.of(context).size.width * 0.75,
-          child: Wrap(
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: <Widget>[
-              Text(productAllModels![index].hilight!,
-                  style: MyStyle().h3StyleRed),
-              if (extraPoints > 0) extraPointInlineBadge(extraPoints),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget editButton(int index, String size) {
-    return IconButton(
-      icon: Icon(Icons.edit),
-      onPressed: () {
-        myAlertDialog(index, size);
-      },
-    );
-  }
-
-  Widget alertTitle() {
-    return ListTile(
-      leading: Icon(Icons.edit, size: 36.0),
-      title: Text('แก้ไขจำนวน'),
-    );
-  }
-
-  Widget alertContent(int index, String size) {
-    double quantity = 0;
-    String unitText = '';
-    if (size == 's') {
-      quantity = double.parse(priceListSModels![index].quantity!);
-      newQTYS = (quantity).toDouble();
-      unitText = priceListSModels![index].lable!;
-    } else if (size == 'm') {
-      quantity = double.parse(priceListMModels![index].quantity!);
-      newQTYM = (quantity).toDouble();
-      unitText = priceListMModels![index].lable!;
-    } else if (size == 'l') {
-      quantity = double.parse(priceListLModels![index].quantity!);
-      newQTYL = (quantity).toDouble();
-      unitText = priceListLModels![index].lable!;
-    }
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        Text(productAllModels![index].title!),
-        Text('Size = $unitText'),
-        Container(
-          // width: 50.0,
-          child: editQTY(quantity),
-        ),
-      ],
-    );
-  }
-
-  Widget decButton() {
-    return IconButton(
-      icon: Icon(Icons.remove_circle_outline),
-      onPressed: () {},
-    );
-  }
-
-  Widget incButton() {
-    return IconButton(icon: Icon(Icons.add_circle_outline), onPressed: () {});
-  }
-
-  Widget showValue(int value) {
-    return Text('$value');
-  }
-
-  Widget editQTY(double quantity) {
-    int? limitValue = 0;
-    if (index == 0) {
-      limitValue = productAllModel!.limitS;
-    } else if (index == 1) {
-      limitValue = productAllModel!.limitM;
-    } else if (index == 2) {
-      limitValue = productAllModel!.limitL;
-    }
-
-    // return TextFormField(
-    //   keyboardType: TextInputType.number,
-    //   onChanged: (String string) {
-    //     newQTY = string.trim();
-    //   },
-    //   initialValue: quantity,
-    // );
-    return SpinBox(
-      value: (quantity).toDouble(),
-      min: 1,
-      max: (limitValue==0)?10000:limitValue!.toDouble(),  //10000,// 
-      onChanged: (changevalue) {
-        newQTY = (changevalue == 0) ? 0 : (changevalue).toDouble();
-
-        // if (index == 0) {
-        //   setState(() {
-        //     qtyS = (changevalue == 0) ? 0 : (changevalue).toInt();
-        //   });
-        // } else if (index == 1) {
-        //   setState(() {
-        //     qtyM = (changevalue == 0) ? 0 : (changevalue).toInt();
-        //   });
-        // } else if (index == 2) {
-        //   setState(() {
-        //     qtyL = (changevalue == 0) ? 0 : (changevalue).toInt();
-        //   });
-        // }
-      },
-      // decoration: InputDecoration(labelText: 'Decimals'),
-      decoration: InputDecoration(
-        border: UnderlineInputBorder(), // InputBorder.none,
-      ),
-    );
-  }
-
-  Widget changeQTY(String productID, String size, double quantity, double limitorder) {
-
-    double? limitValue = limitorder;
-    // if (size =='s') {
-    //   limitValue = productAllModel!.limitS!.toDouble();
-    // } else if (size =='m') {
-    //   limitValue = productAllModel!.limitM!.toDouble();
-    // } else if (size =='l') {
-    //   limitValue = productAllModel!.limitL!.toDouble();
-    // }
-
-    String? memberID = myUserModel!.id.toString();
-    return SizedBox(
-      width: 140.0,
-      child: SpinBox(
-        decoration: InputDecoration(
-          border: UnderlineInputBorder(), // InputBorder.none,
-        ),
-        value: (quantity).toDouble(),
-        min: 1,
-        max: (limitValue==0)?10000:limitValue.toDouble(),  //10000,// 
-        onChanged: (changevalue) {
-          newQTY = (changevalue == 0) ? 0 : (changevalue).toDouble();
-          updateDetailCart(productID, size, memberID);
-        },
-      ),
-    );
-  }
-
-  void myAlertDialog(int index, String size) {
-    showDialog(
-      context: context,
-      builder: (BuildContext buildContext) {
-        return AlertDialog(
-          title: alertTitle(),
-          content: alertContent(index, size),
-          actions: <Widget>[cancelButton(), okButton(index, size)],
-        );
-      },
-    );
-  }
-
-  Widget okButton(int index, String size) {
-    String? productID = productAllModels![index].id.toString();
-    String? unitSize = size;
-    String? memberID = myUserModel!.id.toString();
-
-    return TextButton(
-      child: Text('OK'),
-      onPressed: () {
-        editDetailCart(productID, unitSize, memberID);
-        Navigator.of(context).pop();
-      },
-    );
-  }
-
-  // Post ค่าไปยัง API ที่ต้องการ
-  Future<void> editDetailCart(
-    String productID,
-    String unitSize,
-    String memberID,
-  ) async {
-    String url =
-        '${MyStyle().serverName}/json_updatemycart.php?productID=$productID&unitSize=$unitSize&newQTY=$newQTY&memberId=$memberID';
-
-
-    await http.get(Uri.parse(url)).then((response) {
-      setState(() {
-        readCart();
-      });
-    });
-  }
-
   Future<void> updateDetailCart(
     String productID,
     String unitSize,
@@ -963,51 +711,6 @@ class _DetailCartState extends State<DetailCart> {
     });
   }
 
-  Widget cancelButton() {
-    return TextButton(
-      child: Text('Cancel'),
-      onPressed: () {
-       // Navigator.of(context).pop();
-       Navigator.pop(context);
-      },
-    );
-  }
-
-  Widget deleteButton(int index, String size) {
-    return IconButton(
-      icon: Icon(Icons.delete, color: Colors.red),
-      onPressed: () {
-        confirmDelete(index, size);
-      },
-    );
-  }
-
-  void confirmDelete(int index, String size) {
-    String titleProduct = productAllModels![index].title!;
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('ลบสินค้าออกจากตะกร้า'),
-          content: Text('ต้องการลบรายการออกจากตะกร้า : $titleProduct'),
-          actions: <Widget>[cancelButton(), comfirmButton(index, size)],
-        );
-      },
-    );
-  }
-
-  Widget comfirmButton(int index, String size) {
-    return TextButton(
-      child: Text('Confirm'),
-      onPressed: () {
-        deleteCart(index, size);
-       // Navigator.of(context).pop();
-       Navigator.pop(context);
-      },
-    );
-  }
-
   Future<void> deleteCart(int index, String size) async {
     String productID = productAllModels![index].id.toString();
     String unitSize = size;
@@ -1024,196 +727,11 @@ class _DetailCartState extends State<DetailCart> {
     });
   }
 
-  Widget editAndDeleteButton(int index, String size) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[editButton(index, size), deleteButton(index, size)],
-    );
-  }
-
   void calculateTotal(String price, String quantity) {
     double? priceDou = double.parse(price);
     quantity = quantity.replaceAll(',', '');
     double? quantityDou = double.parse(quantity);
     total = total! + (priceDou * quantityDou);
-  }
-
-  Widget showSText(int proIndex, int index) {
-    // print('unit >' + sMap?[index]['unit']);
-    // if (sMap?[index]['unit']) {
-    String? productID = productAllModels![proIndex].id.toString();
-    String? priceS = sMap?[index]['price']?.toString();
-    String? lableS = sMap?[index]['lable'];
-    String? quantityS = sMap?[index]['quantity'];
-    String? pricechange = sMap?[index]['pricechange']?.toString();
-    // String? txtpricechange = (sMap![index]['pricechange'].toString() != '');
-
-    double? showQTYS =
-        (quantityS == null) ? 0.0 : double.parse(quantityS.replaceAll(',', ''));
-
-    double? showlimitS = (sMap?[index]['limitorder'] == null)
-        ? 0.0
-        : double.parse(sMap![index]['limitorder']);
-
-
-
-    return lableS!.isEmpty
-        ? SizedBox()
-        : Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: <Widget>[
-              (pricechange != '-')
-                  ? Column(
-                      children: [
-                        Text('$priceS บาท/ $lableS', style: MyStyle().h3Style),
-                        // (pricechange != '-')?
-                        (pricechange != '-')
-                            ? Text(
-                                'ปรับราคา ${pricechange!} บาท',
-                                style: (double.parse(pricechange) > 0)
-                                    ? MyStyle().h5StyleRed
-                                    : MyStyle().h5StyleBlue,
-                              )
-                            : Container(),
-                        // : '',
-                      ],
-                    )
-                  : Text('$priceS บาท/ $lableS', style: MyStyle().h3Style),
-              changeQTY(productID, 's', showQTYS, showlimitS),
-              deleteButton(proIndex, 's'),
-            ],
-          );
-    // }
-  }
-
-  Widget showMText(int proIndex, int index) {
-    String? productID = productAllModels![proIndex].id.toString();
-    String? priceM = mMap?[index]['price']?.toString();
-    String? lableM = mMap?[index]['lable'];
-    String? quantityM = mMap?[index]['quantity'];
-    String? pricechange = mMap?[index]['pricechange']?.toString();
-
-    double? showQTYM =
-        (quantityM == null) ? 0.0 : double.parse(quantityM.replaceAll(',', ''));
-
-    double? showlimitM = (mMap?[index]['limitorder'] == null)
-        ? 0.0
-        : double.parse(mMap![index]['limitorder']);
-
-
-
-
-    return lableM!.isEmpty
-        ? SizedBox()
-        : Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: <Widget>[
-              (pricechange != '-')
-                  ? Column(
-                      children: [
-                        Text('$priceM บาท/ $lableM', style: MyStyle().h3Style),
-                        // (pricechange != '-')?
-                        (pricechange != '-')
-                            ? Text(
-                                'ปรับราคา ${pricechange!} บาท',
-                                style: (double.parse(pricechange) > 0)
-                                    ? MyStyle().h5StyleRed
-                                    : MyStyle().h5StyleBlue,
-                              )
-                            : Container(),
-                        // : '',
-                      ],
-                    )
-                  : Text('$priceM บาท/ $lableM', style: MyStyle().h3Style),
-              changeQTY(productID, 'm', showQTYM,showlimitM),
-              deleteButton(proIndex, 'm'),
-            ],
-          );
-  }
-
-  Widget showLText(int proIndex, int index) {
-    String? productID = productAllModels![proIndex].id.toString();
-    String? priceL = lMap?[index]['price']?.toString();
-    String? lableL = lMap?[index]['lable'];
-    String? quantityL = lMap?[index]['quantity'];
-    String? pricechange = lMap?[index]['pricechange']?.toString();
-
-    double? showQTYL =
-        (quantityL == null) ? 0.0 : double.parse(quantityL.replaceAll(',', ''));
-
-    double? showlimitL = (lMap?[index]['limitorder'] == null)
-        ? 0.0
-        : double.parse(lMap![index]['limitorder']);
-
-
-    return lableL!.isEmpty
-        ? SizedBox()
-        : Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: <Widget>[
-              (pricechange != '-')
-                  ? Column(
-                      children: [
-                        Text('$priceL บาท/ $lableL', style: MyStyle().h3Style),
-                        // (pricechange != '-') ?
-                        (pricechange != '-')
-                            ? Text(
-                                'ปรับราคา ${pricechange!} บาท',
-                                style: (double.parse(pricechange) > 0)
-                                    ? MyStyle().h5StyleRed
-                                    : MyStyle().h5StyleBlue,
-                              )
-                            : Container(),
-                        // : '',
-                      ],
-                    )
-                  : Text('$priceL บาท/ $lableL', style: MyStyle().h3Style),
-              changeQTY(productID, 'l', showQTYL,showlimitL),
-              deleteButton(proIndex, 'l'),
-            ],
-          );
-  }
-
-  Widget showListCart() {
-
-
-    return ListView.builder(
-      padding: EdgeInsets.only(top: 5.0, bottom: 5.0),
-      physics: ScrollPhysics(),
-      shrinkWrap: true,
-      itemCount: productAllModels?.length,
-      itemBuilder: (BuildContext buildContext, int index) {
-        int? proID = productAllModels![index].id;
-        // print('proID >> $proID');
-
-        return Card(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(10)),
-            side: BorderSide(width: 2, color: Colors.grey.shade200),
-          ),
-          child: Container(
-            padding: EdgeInsets.only(bottom: 10.0, top: 10.0),
-            child: Column(
-              children: <Widget>[
-                showTitle(index),
-                (productAllModels![index].hilight! == '')
-                    ? Container()
-                    : showHilight(index),
-                (allArrIncartS!.contains(proID))
-                    ? showSText(index, allArrIncartS!.indexOf(proID))
-                    : Container(),
-                (allArrIncartM!.contains(proID))
-                    ? showMText(index, allArrIncartM!.indexOf(proID))
-                    : Container(),
-                (allArrIncartL!.contains(proID))
-                    ? showLText(index, allArrIncartL!.indexOf(proID))
-                    : Container(),
-              ],
-            ),
-          ),
-        );
-      },
-    );
   }
 
   Widget showTotal() {
@@ -1692,7 +1210,23 @@ class _DetailCartState extends State<DetailCart> {
             ),
           ),
           showTotal(),
-          showListCart(),
+          CartListSection(
+            productAllModels: productAllModels!,
+            allArrIncartS: allArrIncartS!,
+            allArrIncartM: allArrIncartM!,
+            allArrIncartL: allArrIncartL!,
+            sMap: sMap!,
+            mMap: mMap!,
+            lMap: lMap!,
+            extraPointsForProduct: extraPointsForProduct,
+            onQuantityChanged: (productID, size, newQty) {
+              newQTY = newQty;
+              updateDetailCart(productID, size, myUserModel!.id.toString());
+            },
+            onDeleteConfirmed: (index, size) {
+              deleteCart(index, size);
+            },
+          ),
           showTotal(),
           (totalExtraPoints() > 0)
               ? ExtraPointSummaryBadge(points: totalExtraPoints())
