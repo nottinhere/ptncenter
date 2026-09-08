@@ -12,7 +12,7 @@ import 'package:ptncenter/scaffold/list_product_favorite.dart';
 
 import 'my_service.dart';
 
-import 'package:webview_flutter/webview_flutter.dart';
+import 'package:ptncenter/widget/webview_example.dart';
 
 class DetailNotify extends StatefulWidget {
   final PopupModel? popupModel;
@@ -144,10 +144,7 @@ class _DetailState extends State<DetailNotify> {
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => WebViewExample(
-                            userModel: myUserModel!,
-                            webPage: textURL!,
-                          )));
+                      builder: (context) => WebViewExample(url: textURL!)));
               },
             child: Text('เพิ่มเติม',style: TextStyle(fontSize: 16, color: Colors.white)),
           ),
@@ -521,68 +518,5 @@ class _DetailState extends State<DetailNotify> {
   // }
 }
 
-
-class WebViewExample extends StatefulWidget {
-  final UserModel? userModel;
-  final String? webPage;
-  const WebViewExample({super.key, this.userModel, this.webPage});
-  @override
-  State<WebViewExample> createState() => _WebViewExampleState();
-}
-
-class _WebViewExampleState extends State<WebViewExample> {
-  UserModel? myUserModel;
-  String? mywebPage;
-  late final WebViewController controller;
-
-  @override
-  void initState() {
-    super.initState();
-    myUserModel = widget.userModel;
-    mywebPage = widget.webPage;
-
-    String? url = mywebPage!; //
-
-    String? urlView =  url;
-    
-
-    // #docregion webview_controller
-    controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onProgress: (int progress) {
-            // Update loading bar.
-          },
-          onPageStarted: (String url) {},
-          onPageFinished: (String url) {},
-          onHttpError: (HttpResponseError error) {},
-          onWebResourceError: (WebResourceError error) {},
-          onNavigationRequest: (NavigationRequest request) {
-            if (request.url.startsWith('https://www.youtube.com/')) {
-              return NavigationDecision.prevent;
-            }
-            return NavigationDecision.navigate;
-          },
-        ),
-      )
-      ..loadRequest(Uri.parse(urlView));
-    // #enddocregion webview_controller
-  }
-
-  // #docregion webview_widget
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-          backgroundColor: Colors.green,
-          iconTheme: IconThemeData(color: Colors.white),
-          title:
-              const Text('PTN Pharma', style: TextStyle(color: Colors.white))),
-      body: WebViewWidget(controller: controller),
-    );
-  }
-  // #enddocregion webview_widget
-}
 
 

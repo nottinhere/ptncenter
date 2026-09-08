@@ -1,10 +1,8 @@
 ﻿import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:ptncenter/models/orn_model.dart';
 import 'package:ptncenter/models/orn_product_model.dart';
 import 'package:ptncenter/models/user_model.dart';
@@ -12,7 +10,7 @@ import 'package:ptncenter/scaffold/orn_list.dart';
 import 'package:ptncenter/scaffold/orn_menu.dart';
 import 'package:ptncenter/utility/my_style.dart';
 import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
-import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:ptncenter/utility/qr_scan_mixins.dart';
 
 import 'my_service.dart';
 
@@ -27,7 +25,8 @@ class ListProductOrn extends StatefulWidget {
   _ListProductOrnState createState() => _ListProductOrnState();
 }
 
-class _ListProductOrnState extends State<ListProductOrn> {
+class _ListProductOrnState extends State<ListProductOrn>
+    with OrnBarcodeScannerMixin<ListProductOrn> {
   UserModel? myUserModel;
   String? ornId;
   String? ornNo;
@@ -38,7 +37,6 @@ class _ListProductOrnState extends State<ListProductOrn> {
   bool visible = true;
   ScrollController scrollController = ScrollController();
   int selectIndex = 2;
-  String? qrString;
 
   String productTab = 'all'; // 'notreceived' or 'all'
   Set<String> addedToCartKeys = {};
@@ -359,75 +357,19 @@ class _ListProductOrnState extends State<ListProductOrn> {
     return showProductItem();
   }
 
-  Future<void> readQRcodeORNPreview() async {
-    try {
-      // final qrScanString = await Navigator.push(this.context,
-      //     MaterialPageRoute(builder: (context) => ScanPreviewPage()));
-      ScanResult qrScanString;
-      qrString = '';
-      qrScanString = await BarcodeScanner.scan();
-      // print('scan result: $qrScanString');
-      qrString = qrScanString.rawContent;
+  @override
+  String? get scannerMemberId => myUserModel?.id.toString();
 
-      if (qrString != null) {
-        decodeQRcodeORN(qrString!);
-      }
-      // setState(() => scanResult = qrScanString);
-    } on PlatformException {} // ignore: empty_catches
-  }
-
-  Future<void> decodeQRcodeORN(var code) async {
-    // normalDialog(context,'xxxx','code -> $code');
-    try {
-      if (code != '' && code != null) {
-        String? memberId = myUserModel!.id.toString();
-        // id = currentOrnAllModel!.id.toString();
-        String? url =
-            '${MyStyle().serverName}/json_ornlist.php?memberId=$memberId&code=$code'; // &code=$code
-        http.Response response = await http.get(Uri.parse(url));
-        if (!mounted) return;
-        var result = json.decode(response.body);
-
-
-        int? status = result!['status'];
-        String? title = 'ข้อมูลไม่ถูกต้อง';
-        String? message = result!['message'];
-        OrnModel? ornScanAllModel;
-        if (status == 0) {
-          // normalDialog(context, 'Not found', 'ไม่พบ code :: $code ในระบบ');
-          AwesomeDialog(
-            context: context,
-            headerAnimationLoop: false,
-            dialogType: DialogType.error,
-            autoHide: const Duration(seconds: 4),
-            title: title,
-            desc: message,
-            btnOkColor: Colors.red,
-            btnOkOnPress: () {},
-            btnOkIcon: Icons.check_circle,
-          ).show();
-        } else {
-          var mapItemScanOrn = result!['itemsData'];
-          for (var map in mapItemScanOrn) {
-            ornScanAllModel = OrnModel.fromJson(map);
-          }
-          MaterialPageRoute materialPageRoute =
-              MaterialPageRoute(builder: (BuildContext buildContext) {
-            return MenuOrn(
-              ornID: ornScanAllModel!.id.toString(),
-              userModel: myUserModel,
-            );
-          });
-          Navigator.of(context).push(materialPageRoute);
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('ค้นหาข้อมูลไม่สำเร็จ กรุณาลองใหม่อีกครั้ง')),
-        );
-      }
-    }
+  @override
+  void onOrnFound(OrnModel orn) {
+    MaterialPageRoute materialPageRoute =
+        MaterialPageRoute(builder: (BuildContext buildContext) {
+      return MenuOrn(
+        ornID: orn.id.toString(),
+        userModel: myUserModel,
+      );
+    });
+    Navigator.of(context).push(materialPageRoute);
   }
 
 

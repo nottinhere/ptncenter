@@ -13,6 +13,7 @@ import 'package:ptncenter/scaffold/list_notify.dart';
 import 'package:ptncenter/utility/my_style.dart';
 import 'package:ptncenter/widget/contact.dart';
 import 'package:ptncenter/widget/home.dart';
+import 'package:ptncenter/widget/webview_example.dart';
 // import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 import 'package:ptncenter/scaffold/list_product.dart';
 import 'package:ptncenter/scaffold/list_product_favorite.dart';
@@ -29,8 +30,6 @@ import 'detail_cart.dart';
 // import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 
 import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
-
-import 'package:webview_flutter/webview_flutter.dart';
 
 class MyService extends StatefulWidget {
   final UserModel? userModel;
@@ -362,18 +361,19 @@ class _MyServiceState extends State<MyService> {
   }
 
   Widget menuORN() {
-    String webPage = 'orn';
-
     return ListTile(
       leading: Icon(Icons.checklist, size: 36.0),
       title: Text('ตรวจสอบใบส่งของ'),
       // subtitle: Text('Read QR code or barcode'),
       onTap: () {
+        String? memberId = myUserModel!.id;
+        String? memberCode = myUserModel!.customerCode;
+        String url = 'https://www.ptnpharma.com/shop/pages/tables/'
+            'orn_list_mobile.php?memberId=$memberId&memberCode=$memberCode';
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) =>
-                WebViewExample(userModel: myUserModel!, webPage: webPage),
+            builder: (context) => WebViewExample(url: url),
           ),
         );
         // Navigator.push(
@@ -699,80 +699,4 @@ class _ScanPreviewPageState extends State<ScanPreviewPage> {
       ),
     );
   }
-}
-
-class WebViewExample extends StatefulWidget {
-  final UserModel? userModel;
-  final String? webPage;
-  const WebViewExample({super.key, this.userModel, this.webPage});
-  @override
-  State<WebViewExample> createState() => _WebViewExampleState();
-}
-
-class _WebViewExampleState extends State<WebViewExample> {
-  UserModel? myUserModel;
-  String? mywebPage;
-  late final WebViewController controller;
-
-  @override
-  void initState() {
-    super.initState();
-    myUserModel = widget.userModel;
-    mywebPage = widget.webPage;
-    String? memberId = myUserModel!.id;
-    String? memberCode = myUserModel!.customerCode;
-    String webPage = mywebPage.toString();
-
-    String? urlView =
-        'https://www.ptnpharma.com/shop/pages/tables/orderhistory_mb.php?memberId=$memberId&memberCode=$memberCode'; //
-
-    if (webPage == 'pay') {
-      urlView =
-          'https://www.ptnpharma.com/shop/pages/forms/pay_mobile.php?memberId=$memberId&memberCode=$memberCode'; //
-    } else if (webPage == 'orn') {
-      urlView =
-          'https://www.ptnpharma.com/shop/pages/tables/orn_list_mobile.php?memberId=$memberId&memberCode=$memberCode'; //
-    } else {
-      urlView =
-          'https://www.ptnpharma.com/shop/pages/forms/complain_mobile.php?memberId=$memberId&memberCode=$memberCode'; //
-    }
-
-    // #docregion webview_controller
-    controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onProgress: (int progress) {
-            // Update loading bar.
-          },
-          onPageStarted: (String url) {},
-          onPageFinished: (String url) {},
-          onHttpError: (HttpResponseError error) {},
-          onWebResourceError: (WebResourceError error) {},
-          onNavigationRequest: (NavigationRequest request) {
-            if (request.url.startsWith('https://www.youtube.com/')) {
-              return NavigationDecision.prevent;
-            }
-            return NavigationDecision.navigate;
-          },
-        ),
-      )
-      ..loadRequest(Uri.parse(urlView));
-    // #enddocregion webview_controller
-  }
-
-  // #docregion webview_widget
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-          backgroundColor: Colors.green,
-          iconTheme: IconThemeData(color: Colors.white),
-          title:
-              const Text('PTN Pharma', style: TextStyle(color: Colors.white))),
-      body: WebViewWidget(controller: controller),
-    );
-  }
-
-  // #enddocregion webview_widget
 }

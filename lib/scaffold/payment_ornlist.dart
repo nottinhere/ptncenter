@@ -6,16 +6,14 @@ import 'package:http/http.dart' as http;
 import 'package:ptncenter/models/orn_model.dart';
 import 'package:ptncenter/models/user_model.dart';
 import 'package:ptncenter/utility/my_style.dart';
-import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:ptncenter/scaffold/payment_orn.dart';
 
 import 'my_service.dart';
-import 'package:flutter/services.dart';
 
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
 import 'package:intl/intl.dart';
-import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:ptncenter/utility/qr_scan_mixins.dart';
 
 class PaymentOrnList extends StatefulWidget {
   final int? index;
@@ -46,7 +44,8 @@ class Debouncer {
   }
 }
 
-class _PaymentOrnListState extends State<PaymentOrnList> {
+class _PaymentOrnListState extends State<PaymentOrnList>
+    with OrnBarcodeScannerMixin<PaymentOrnList> {
   // Explicit
   int? myIndex;
   List<OrnModel>? ornAllModels = []; // []; // set array
@@ -453,74 +452,25 @@ class _PaymentOrnListState extends State<PaymentOrnList> {
     );
   }
 
-  String? qrString;
-  Future<void> readQRcodeORNPreview() async {
-    try {
-      ScanResult qrScanString;
-      qrString = '';
-      qrScanString = await BarcodeScanner.scan();
-      qrString = qrScanString.rawContent;
+  @override
+  String? get scannerMemberId => myUserModel?.id.toString();
 
-      if (qrString != null) {
-        decodeQRcodeORN(qrString!);
-      }
-    } on PlatformException {} // ignore: empty_catches
-  }
-
-  Future<void> decodeQRcodeORN(var code) async {
-    try {
-      if (code != '' && code != null) {
-        String? memberId = myUserModel!.id.toString();
-        String? url =
-            '${MyStyle().serverName}/json_ornlist.php?memberId=$memberId&code=$code';
-        http.Response response = await http.get(Uri.parse(url));
-        if (!mounted) return;
-        var result = json.decode(response.body);
-
-        int? status = result!['status'];
-        String? title = 'ข้อมูลไม่ถูกต้อง';
-        String? message = result!['message'];
-        OrnModel? ornScanAllModel;
-        if (status == 0) {
-          AwesomeDialog(
-            context: context,
-            headerAnimationLoop: false,
-            dialogType: DialogType.error,
-            autoHide: const Duration(seconds: 4),
-            title: title,
-            desc: message,
-            btnOkColor: Colors.red,
-            btnOkOnPress: () {},
-            btnOkIcon: Icons.check_circle,
-          ).show();
-        } else {
-          var mapItemScanOrn = result!['itemsData'];
-          for (var map in mapItemScanOrn) {
-            ornScanAllModel = OrnModel.fromJson(map);
-          }
-          MaterialPageRoute materialPageRoute =
-              MaterialPageRoute(builder: (BuildContext buildContext) {
-            return PaymentOrn(
-              ornId: ornScanAllModel!.id.toString(),
-              userModel: myUserModel,
-            );
-          });
-          Navigator.of(context)
-              .push(materialPageRoute)
-              .then((value) => setState(() {
-                    page = 1;
-                    ornAllModels!.clear();
-                    readData();
-                  }));
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('ค้นหาข้อมูลไม่สำเร็จ กรุณาลองใหม่อีกครั้ง')),
-        );
-      }
-    }
+  @override
+  void onOrnFound(OrnModel orn) {
+    MaterialPageRoute materialPageRoute =
+        MaterialPageRoute(builder: (BuildContext buildContext) {
+      return PaymentOrn(
+        ornId: orn.id.toString(),
+        userModel: myUserModel,
+      );
+    });
+    Navigator.of(context)
+        .push(materialPageRoute)
+        .then((value) => setState(() {
+              page = 1;
+              ornAllModels!.clear();
+              readData();
+            }));
   }
 
   Widget searchForm() {

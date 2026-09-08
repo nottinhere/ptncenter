@@ -6,17 +6,14 @@ import 'package:http/http.dart' as http;
 import 'package:ptncenter/models/orn_model.dart';
 import 'package:ptncenter/models/user_model.dart';
 import 'package:ptncenter/utility/my_style.dart';
-import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:ptncenter/scaffold/orn_menu.dart';
 
 import 'my_service.dart';
-import 'package:flutter/services.dart';
-
 
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
 import 'package:intl/intl.dart';
-import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:ptncenter/utility/qr_scan_mixins.dart';
 
 class OrnList extends StatefulWidget {
   final int? index;
@@ -47,7 +44,7 @@ class Debouncer {
   }
 }
 
-class _OrnListState extends State<OrnList> {
+class _OrnListState extends State<OrnList> with OrnBarcodeScannerMixin<OrnList> {
   // Explicit
   int? myIndex;
   OrnModel? ornAllModel;
@@ -62,7 +59,6 @@ class _OrnListState extends State<OrnList> {
   int? amountListView = 6;
   int? page = 1;
 
-  String? qrString;
   int? myCate = 0;
   String? myCateName = '';
   ScrollController scrollController = ScrollController();
@@ -509,75 +505,19 @@ DateTime parseDate =
     );
   }
 
-  Future<void> readQRcodeORNPreview() async {
-    try {
-      // final qrScanString = await Navigator.push(this.context,
-      //     MaterialPageRoute(builder: (context) => ScanPreviewPage()));
-      ScanResult qrScanString;
-      qrString = '';
-      qrScanString = await BarcodeScanner.scan();
-      // print('scan result: $qrScanString');
-      qrString = qrScanString.rawContent;
+  @override
+  String? get scannerMemberId => myUserModel?.id.toString();
 
-      if (qrString != null) {
-        decodeQRcodeORN(qrString!);
-      }
-      // setState(() => scanResult = qrScanString);
-    } on PlatformException {} // ignore: empty_catches
-  }
-
-  Future<void> decodeQRcodeORN(var code) async {
-    // normalDialog(context,'xxxx','code -> $code');
-    try {
-      if (code != '' && code != null) {
-        String? memberId = myUserModel!.id.toString();
-        // id = currentOrnAllModel!.id.toString();
-        String? url =
-            '${MyStyle().serverName}/json_ornlist.php?memberId=$memberId&code=$code'; // &code=$code
-        http.Response response = await http.get(Uri.parse(url));
-        if (!mounted) return;
-        var result = json.decode(response.body);
-
-
-        int? status = result!['status'];
-        String? title = 'ข้อมูลไม่ถูกต้อง';
-        String? message = result!['message'];
-        OrnModel? ornScanAllModel;
-        if (status == 0) {
-          // normalDialog(context, 'Not found', 'ไม่พบ code :: $code ในระบบ');
-          AwesomeDialog(
-            context: context,
-            headerAnimationLoop: false,
-            dialogType: DialogType.error,
-            autoHide: const Duration(seconds: 4),
-            title: title,
-            desc: message,
-            btnOkColor: Colors.red,
-            btnOkOnPress: () {},
-            btnOkIcon: Icons.check_circle,
-          ).show();
-        } else {
-          var mapItemScanOrn = result!['itemsData'];
-          for (var map in mapItemScanOrn) {
-            ornScanAllModel = OrnModel.fromJson(map);
-          }
-          MaterialPageRoute materialPageRoute =
-              MaterialPageRoute(builder: (BuildContext buildContext) {
-            return MenuOrn(
-              ornID: ornScanAllModel!.id.toString(),
-              userModel: myUserModel,
-            );
-          });
-          Navigator.of(context).push(materialPageRoute);
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('ค้นหาข้อมูลไม่สำเร็จ กรุณาลองใหม่อีกครั้ง')),
-        );
-      }
-    }
+  @override
+  void onOrnFound(OrnModel orn) {
+    MaterialPageRoute materialPageRoute =
+        MaterialPageRoute(builder: (BuildContext buildContext) {
+      return MenuOrn(
+        ornID: orn.id.toString(),
+        userModel: myUserModel,
+      );
+    });
+    Navigator.of(context).push(materialPageRoute);
   }
 
   Widget searchForm() {
