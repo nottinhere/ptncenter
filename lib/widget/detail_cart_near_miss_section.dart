@@ -18,13 +18,18 @@ class NearMissSection extends StatelessWidget {
 
   Widget _nearMissBanner(NearMissPromotion item, {bool showDivider = true}) {
     String giftName = item.gift?.name ?? 'ของแถม';
-    // level > 1 หมายถึงได้ของแถมขั้นก่อนหน้าไปแล้ว กำลังจะขยับไปขั้นที่ดีกว่า จึงเรียกว่า "อัปเกรด"
-    // แทนที่จะเป็น "ใกล้ได้ของแถมแล้ว" ซึ่งสื่อถึงการได้ของแถมเป็นครั้งแรก
-    String prefix = (item.level != null && item.level! > 1)
+    // ได้ของแถมอย่างน้อย 1 เซ็ตแล้ว (เซ็ตที่ 2 เป็นต้นไป หรือกำลังขยับไปขั้นที่ดีกว่า)
+    // จึงเรียกว่า "อัปเกรด" แทน "ใกล้ได้ของแถมแล้ว" ที่สื่อถึงการได้ของแถมครั้งแรก
+    String prefix = item.showAsUpgrade
         ? 'อัปเกรดของแถมได้!'
         : 'ใกล้ได้ของแถมแล้ว!';
+    // เซ็ตที่ 2 เป็นต้นไป บอกลำดับเซ็ตของของแถมที่กำลังจะได้ด้วย เช่น "1 ขวด x 2 ชุด"
+    String setSuffix =
+        (item.nextSetNumber != null && item.nextSetNumber! >= 2)
+            ? ' x ${item.nextSetNumber} ชุด'
+            : '';
     String message = '$prefix "${item.sourceLabel}"'
-        ' ขาดอีก ${item.remaining} ${item.remainingUnit} เพื่อรับ $giftName ${item.giftQty} ${item.giftUnit} ฟรี';
+        ' ขาดอีก ${item.remaining} ${item.remainingUnit} เพื่อรับ $giftName ${item.giftQty} ${item.giftUnit}$setSuffix ฟรี';
 
     return Container(
       padding: EdgeInsets.symmetric(vertical: 8.0),

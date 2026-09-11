@@ -148,12 +148,19 @@ class ProductPromotionCard extends StatelessWidget {
       double currentSets = (cartQty / activeTier.target).floorToDouble();
       nextSetOrdinal = currentSets + 1;
       double amountForNextSet = nextSetOrdinal * activeTier.target;
-      remainingPromoUnit = (amountForNextSet - cartQty).ceilToDouble();
+      // เก็บส่วนที่ขาดแบบดิบ (ยังไม่ปัดขึ้น) แล้วค่อยปัดขึ้นหลังแปลงเป็นหน่วย referenceUnit
+      // ถ้าปัดขึ้นเป็นหน่วยโปรโมชัน (เช่น 0.96 ลัง -> 1 ลัง) ก่อนคูณตัวคูณไซส์ จำนวน "ขาดอีก"
+      // จะเกินจริง (1 ลัง x 96 = 96 ขวด แทนที่จะเป็น 92 ขวด)
+      remainingPromoUnit = amountForNextSet - cartQty;
       progress = ((cartQty - currentSets * activeTier.target) / activeTier.target)
           .clamp(0.0, 1.0);
     }
     double remainingReferenceUnit =
         (remainingPromoUnit * safeOwnFactor / safeReferenceFactor).ceilToDouble();
+    // จำนวนในตะกร้าตอนนี้ แปลงเป็นหน่วยของไซส์ที่ลูกค้าสั่งจริง (referenceUnit) ให้ตรงกับฝั่ง "ขาดอีก"
+    // ไม่ใช่หน่วยบรรจุของโปรโมชัน (promoUnit) ที่ลูกค้าอาจไม่ได้สั่งในหน่วยนั้น
+    double cartReferenceUnit =
+        (cartQty * safeOwnFactor / safeReferenceFactor).roundToDouble();
 
     return Container(
       margin: EdgeInsets.only(bottom: 14.0),
@@ -236,7 +243,7 @@ class ProductPromotionCard extends StatelessWidget {
               children: <Widget>[
                 Flexible(
                   child: Text(
-                      'จำนวนในตะกร้าปัจจุบัน ${_formatNum(cartQty)} $promoUnit',
+                      'จำนวนในตะกร้าปัจจุบัน ${_formatNum(cartReferenceUnit)} $referenceUnit',
                       overflow: TextOverflow.ellipsis,
                       style:
                           TextStyle(fontSize: 12.5, color: Colors.grey.shade700)),

@@ -793,7 +793,7 @@ class _ListProductState extends State<ListProduct>
       // ค้นหาด้วย 2 คำแรกพร้อมกัน (ต้องเจอทั้งคู่ใน field เดียวกัน) เช่น "Acetin 200"
       String keyword1 = Uri.encodeComponent(words[0]);
       String keyword2 = Uri.encodeComponent(words[1]);
-      return 'kw2|$keyword1|$keyword2';
+      return 'kw2|$keyword1^$keyword2';
     }
     return trimmed;
   }

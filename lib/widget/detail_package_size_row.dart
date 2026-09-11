@@ -41,7 +41,7 @@ class PackageSizeRow extends StatelessWidget {
     return _isOutOfStock
         ? Text('งดจำหน่าย / ',
             style: MyStyle().h3bStyleRed, overflow: TextOverflow.ellipsis)
-        : Text('${unitSizeModel.price.toString()} บาท / ',
+        : Text('${unitSizeModel.price.toString()} / ',
             style: MyStyle().h3bStyleGreen, overflow: TextOverflow.ellipsis);
   }
 

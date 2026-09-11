@@ -40,6 +40,18 @@ class DetailCart extends StatefulWidget {
   _DetailCartState createState() => _DetailCartState();
 }
 
+/// แผนการแจ้งเตือน near-miss ของโปรโมชันหนึ่งรายการ (ผลจาก _nearMissPlan)
+class _NearMissPlan {
+  final MedicinePromotionTier tier; // tier ที่ใช้ดึง gift / getqty / หน่วย
+  final double targetQty; // ยอด/จำนวนต่อ 1 เซ็ตของ tier นี้
+  final double progressAmount; // ยอดสะสมภายในเซ็ตปัจจุบัน (0..targetQty)
+  final bool showAsUpgrade; // ได้ของแถมมาแล้ว >= 1 เซ็ต (เซ็ตที่ 2 เป็นต้นไป)
+  final int nextSetNumber; // ลำดับเซ็ตของของแถมที่กำลังจะได้ (1, 2, 3 ...)
+
+  _NearMissPlan(this.tier, this.targetQty, this.progressAmount,
+      this.showAsUpgrade, this.nextSetNumber);
+}
+
 class _DetailCartState extends State<DetailCart> {
   // Explicit
   UserModel? myUserModel;
@@ -451,11 +463,62 @@ class _DetailCartState extends State<DetailCart> {
     );
   }
 
-  /// โปรโมชันที่ยังไม่ถึงเงื่อนไข tier ถัดไป แต่มีความคืบหน้า >= 50%
+  /// หา "เซ็ตถัดไป" ที่ลูกค้ากำลังสะสมไปหา สำหรับโปรโมชันหนึ่งรายการ
+  /// - ยังไม่เคยได้ของแถม  -> สะสมไปหา tier แรก (เซ็ตที่ 1)
+  /// - ได้ของแถมแล้ว >= 1 เซ็ต -> เทียบทั้ง "อัปเกรดไป tier ที่สูงกว่า" กับ
+  ///   "เซ็ตถัดไปของ tier เดิม" แล้วเลือกอันที่ใกล้กว่า (คืบหน้ามากกว่า)
+  /// - ถ้าได้ของแถม tier เดิมครบ limitgift แล้ว จะไม่นับเซ็ตถัดไปของ tier นั้น
+  _NearMissPlan? _nearMissPlan(MedicinePromotionTier? best,
+      MedicinePromotionTier? next, double cartAmount) {
+    if (best == null) {
+      if (next == null) return null;
+      double nq = double.tryParse(next.qty ?? '') ?? 0;
+      if (nq <= 0) return null;
+      return _NearMissPlan(next, nq, cartAmount, false, 1);
+    }
+
+    // ได้ของแถม tier `best` มาแล้วอย่างน้อย 1 เซ็ต
+    double bestQty = double.tryParse(best.qty ?? '') ?? 0;
+    double repeatProgress = -1;
+    double repeatPartial = 0;
+    double repeatSets = 0;
+    if (bestQty > 0) {
+      repeatSets = (cartAmount / bestQty).floorToDouble();
+      double perSet = double.tryParse(best.getqty ?? '') ?? 0;
+      double? limit = double.tryParse(best.limitgift ?? '');
+      bool atLimit = limit != null &&
+          limit > 0 &&
+          perSet > 0 &&
+          repeatSets * perSet >= limit;
+      if (!atLimit) {
+        repeatPartial = cartAmount - repeatSets * bestQty;
+        repeatProgress = repeatPartial / bestQty;
+      }
+    }
+
+    double upgradeProgress = -1;
+    double nextQty = 0;
+    if (next != null) {
+      nextQty = double.tryParse(next.qty ?? '') ?? 0;
+      if (nextQty > 0) upgradeProgress = cartAmount / nextQty;
+    }
+
+    if (upgradeProgress >= 0 && upgradeProgress >= repeatProgress) {
+      // ขยับไป tier ที่สูงกว่า = เซ็ตแรกของ tier นั้น
+      return _NearMissPlan(next!, nextQty, cartAmount, true, 1);
+    }
+    if (repeatProgress >= 0) {
+      // เซ็ตถัดไปของ tier เดิม = จำนวนเซ็ตที่ได้แล้ว + 1
+      return _NearMissPlan(
+          best, bestQty, repeatPartial, true, repeatSets.toInt() + 1);
+    }
+    return null;
+  }
+
+  /// การ์ด near-miss จะแสดงเมื่อคืบหน้า >= 80% ของเซ็ตถัดไป (เซ็ตแรกหรือเซ็ตที่ 2+)
   NearMissPromotion? buildNearMiss({
     required String sourceLabel,
-    required double cartAmount,
-    required MedicinePromotionTier tier,
+    required _NearMissPlan plan,
     required String remainingUnit,
     String? productId,
     PromotionGroupModel? group,
@@ -463,32 +526,33 @@ class _DetailCartState extends State<DetailCart> {
     double ownFactor = 1, // จำนวนตัดของไซส์ที่โปรโมชันกำหนด (promo.size)
     double referenceFactor = 1, // จำนวนตัดของไซส์ที่จะใช้แสดงผล (sizeLabel)
   }) {
-    double tierQty = double.tryParse(tier.qty ?? '') ?? 0;
-    if (tierQty <= 0) return null;
+    if (plan.targetQty <= 0) return null;
 
-    double progress = cartAmount / tierQty;
-    if (progress < 0.5 || progress >= 1.0) return null;
+    double progress = plan.progressAmount / plan.targetQty;
+    if (progress < 0.8 || progress >= 1.0) return null;
 
     // แปลงจำนวนที่ขาดจากหน่วยของ promo.size ให้เป็นหน่วยฐานก่อน (คูณ ownFactor)
     // แล้วแปลงเป็นหน่วยของไซส์ที่ลูกค้ากำลังสั่งจริง (หาร referenceFactor)
     double safeReferenceFactor = referenceFactor > 0 ? referenceFactor : 1;
     double remaining =
-        ((tierQty - cartAmount) * ownFactor / safeReferenceFactor)
+        ((plan.targetQty - plan.progressAmount) * ownFactor / safeReferenceFactor)
             .ceilToDouble();
-    GiftModel? gift = giftMap[tier.gift];
+    GiftModel? gift = giftMap[plan.tier.gift];
 
     return NearMissPromotion(
       sourceLabel: sourceLabel,
       remaining: formatNum(remaining),
       remainingUnit: remainingUnit,
       gift: gift,
-      giftQty: formatNum(double.tryParse(tier.getqty ?? '') ?? 0),
+      giftQty: formatNum(double.tryParse(plan.tier.getqty ?? '') ?? 0),
       giftUnit: unitNameMap[gift?.unit] ?? '',
       progress: progress,
       productId: productId,
       group: group,
       sizeLabel: sizeLabel,
-      level: tier.level,
+      level: plan.tier.level,
+      showAsUpgrade: plan.showAsUpgrade,
+      nextSetNumber: plan.nextSetNumber,
     );
   }
 
@@ -511,7 +575,8 @@ class _DetailCartState extends State<DetailCart> {
       }
 
       MedicinePromotionTier? next = promo.nextTierFor(cartQty);
-      if (next != null) {
+      _NearMissPlan? plan = _nearMissPlan(tier, next, cartQty);
+      if (plan != null) {
         // แสดงจำนวนที่ขาดเป็นหน่วยของไซส์ที่ลูกค้าสั่งอยู่จริง (ไซส์ที่มีจำนวนในตะกร้ามากสุด)
         // ไม่ใช่หน่วยของไซส์ที่โปรโมชันกำหนดไว้ (promo.size) เสมอไป
         String referenceSize = promo.size ?? '';
@@ -529,8 +594,7 @@ class _DetailCartState extends State<DetailCart> {
 
         NearMissPromotion? item = buildNearMiss(
           sourceLabel: promo.name ?? '',
-          cartAmount: cartQty,
-          tier: next,
+          plan: plan,
           remainingUnit: cartLabelBySizeKey['${promo.id}_$referenceSize'] ??
               cartLabelBySizeKey[key] ??
               '',
@@ -560,11 +624,11 @@ class _DetailCartState extends State<DetailCart> {
       }
 
       MedicinePromotionTier? next = group.nextTierFor(subtotal);
-      if (next != null) {
+      _NearMissPlan? plan = _nearMissPlan(tier, next, subtotal);
+      if (plan != null) {
         NearMissPromotion? item = buildNearMiss(
           sourceLabel: group.name ?? '',
-          cartAmount: subtotal,
-          tier: next,
+          plan: plan,
           remainingUnit: 'บาท',
           group: group,
         );
@@ -1003,32 +1067,56 @@ class _DetailCartState extends State<DetailCart> {
   }
 
   Future<void> submitThread() async {
+    // ส่งพารามิเตอร์ทั้งหมดผ่าน body ที่ http package encode ให้เอง
+    // เดิมต่อ transport/comment ดิบเข้า query string ทำให้ Uri.parse พังเมื่อ comment
+    // มีช่องว่าง / ขึ้นบรรทัดใหม่ / อักขระ & # = -> submit ไม่ออกเลย
+    final Map<String, String> params = <String, String>{
+      'memberId': memberID ?? '',
+      'transport': transport ?? '',
+      'comment': comment ?? '',
+      'promotionsuccess': promotionsuccess ?? '',
+      'promotionsuccessgift': promotionsuccessgift ?? '',
+    };
+    final Uri url = Uri.parse('${MyStyle().serverName}/json_submit_myorder.php')
+        .replace(queryParameters: params);
+
     try {
-      String url =
-          '${MyStyle().serverName}/json_submit_myorder.php?memberId=$memberID&transport=$transport&comment=$comment';
+      final http.Response response = await http.post(url, body: params);
 
-      // await http.get(Uri.parse(url)).then((value) {
-      //   // confirmSubmit();
-      //   routeToHome();
-      // });
+      bool saved = false;
+      String serverMessage = '';
+      try {
+        final dynamic decoded = json.decode(response.body);
+        if (decoded is Map) {
+          serverMessage = (decoded['message'] ?? '').toString();
+          final dynamic status = decoded['status'];
+          saved = response.statusCode == 200 &&
+              (status == 1 || status == '1' || status == true);
+        }
+      } catch (_) {
+        saved = false;
+      }
 
-    await http.post(Uri.parse(url), body: {
-      'memberId': memberID,
-      'transport': transport,
-      'comment': comment,
-      'promotionsuccess': promotionsuccess,
-      'promotionsuccessgift': promotionsuccessgift,
-    }).then((value) {
-      routeToHome();
-    });
+      if (!mounted) return;
 
-
-    } catch (e) {
-      if (mounted) {
+      if (saved) {
+        routeToHome();
+      } else {
+        setState(() => _isPressed = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('ส่งคำสั่งซื้อไม่สำเร็จ กรุณาลองใหม่อีกครั้ง')),
+          SnackBar(
+            content: Text(serverMessage.isNotEmpty
+                ? 'บันทึกคำสั่งซื้อไม่สำเร็จ: $serverMessage'
+                : 'บันทึกคำสั่งซื้อไม่สำเร็จ กรุณาลองใหม่อีกครั้ง'),
+          ),
         );
       }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isPressed = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('ส่งคำสั่งซื้อไม่สำเร็จ กรุณาลองใหม่อีกครั้ง')),
+      );
     }
   }
 
