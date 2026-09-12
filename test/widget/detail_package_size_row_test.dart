@@ -19,7 +19,7 @@ void main() {
         onQuantityChanged: (_) {},
       )));
 
-      expect(find.textContaining('120 บาท'), findsOneWidget);
+      expect(find.textContaining('120 /'), findsOneWidget);
       expect(find.text('กล่อง'), findsOneWidget);
       expect(find.textContaining('งดจำหน่าย'), findsNothing);
       expect(find.byType(SpinBox), findsOneWidget);

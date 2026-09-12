@@ -159,13 +159,20 @@ class _DetailCartState extends State<DetailCart> {
 
     http.Response response = await http.get(Uri.parse(url));
     var result = json.decode(response.body);
-    var cartList = result['cart'];
+    // ตะกร้าว่างสนิทบางครั้งเซิร์ฟเวอร์ส่ง "cart": null แทนที่จะเป็น [] ถ้าไม่กันไว้
+    // for (var map in cartList) ด้านล่างจะ throw ก่อนถึง setState สุดท้าย ทำให้ clearArray()
+    // ที่เพิ่งเคลียร์ productAllModels ไปไม่ถูกนำไป rebuild เลย -> การ์ดสินค้าค้างอยู่บนจอ
+    // ทั้งที่ข้อมูลจริงว่างแล้ว (เห็นชัดตอนลบสินค้าชิ้นสุดท้าย เพราะตะกร้าว่างพอดี)
+    List<dynamic> cartList = (result['cart'] is List) ? result['cart'] : [];
 
     // เคลียร์หลัง await (ไม่ใช่ก่อนเรียก) เพื่อกัน race condition เวลา readCart() ถูกเรียกซ้อนกัน
     // (เช่น แก้ไข/ลบสินค้าติดกันเร็วๆ) ไม่งั้นการเรียกครั้งหลังจะ "บวกเพิ่ม" บนข้อมูลของครั้งก่อน
     // ที่เพิ่ง populate ไป (cartQtyBySizeKey/cartValueByProduct สะสมค่าด้วย +=) ทำให้จำนวนเพี้ยน
     // เกินทุก tier จน nextTierFor() คืน null และ nearMissSection() หายไปเป็นบางครั้ง
-    clearArray();
+    //
+    // อยู่ใน setState เอง (ไม่ใช่แค่พึ่ง setState ที่ตามมาทีหลัง) เพื่อให้การเคลียร์นี้ถูก
+    // rebuild ทันที ต่อให้โค้ดหลังจากนี้ throw ขึ้นมาก็ตาม
+    setState(clearArray);
 
     // List<Map<bool, dynamic>> arrIncart = [];
     List<dynamic>? arrIncartS = [];
@@ -176,6 +183,16 @@ class _DetailCartState extends State<DetailCart> {
     for (var map in cartList) {
      ProductAllModel2 productAllModel = ProductAllModel2.fromJson(map);
       // print('productAllModel = ${productAllModel.toJson().toString()}');
+
+      // เซิร์ฟเวอร์บางครั้งยังส่งสินค้าที่เพิ่งลบออกจนหมดแล้วมาเป็นแถวว่าง (price_list ของทุก
+      // ไซส์เป็น {} ไม่มี quantity) โดยเฉพาะตอนลบสินค้าชิ้นสุดท้ายในตะกร้า ถ้าไม่กรองออก การ์ด
+      // สินค้านั้นจะยังค้างอยู่บนจอ (ไม่มีราคา/จำนวน/ปุ่มลบให้กดซ้ำ เพราะแถวไซส์ว่างหมด)
+      Map<String, dynamic> rawPriceListMap = map['price_list'] ?? {};
+      bool hasActiveSize = ['s', 'm', 'l'].any((sizeKey) {
+        var sizeMap = rawPriceListMap[sizeKey];
+        return sizeMap is Map && sizeMap.isNotEmpty;
+      });
+      if (!hasActiveSize) continue;
 
       setState(() {
         Map<String, dynamic> priceListMap = map['price_list'];
@@ -264,9 +281,6 @@ class _DetailCartState extends State<DetailCart> {
       setState(() {
         amontCart = amontCart! + 1;
         productAllModels!.add(productAllModel);
-        allArrIncartS = arrIncartS;
-        allArrIncartM = arrIncartM;
-        allArrIncartL = arrIncartL;
 
         final Map<String, dynamic>  myData = result['data'];
         creditterm      = myData['credittermAlert'];
@@ -278,6 +292,14 @@ class _DetailCartState extends State<DetailCart> {
 
       });
     }
+
+    // ทำนอกลูปเสมอ (ไม่ใช่แค่ตอนวนซ้ำ) เพื่อไม่ให้ allArrIncart* ค้างค่าจากตะกร้ารอบก่อน
+    // เวลาตะกร้าว่างสนิท (ลูปข้างบนไม่มีการวนเลย เพราะกรอง/ไม่มีสินค้าเลย)
+    setState(() {
+      allArrIncartS = arrIncartS;
+      allArrIncartM = arrIncartM;
+      allArrIncartL = arrIncartL;
+    });
 
     setState(() {
       Map<String, dynamic>? dataList = result['data'];
@@ -716,6 +738,9 @@ class _DetailCartState extends State<DetailCart> {
 
   void clearArray() {
     total = 0;
+    // amontCart ไม่เคยถูกรีเซ็ตมาก่อน (มีแต่ += ในลูปของ readCart) ถ้าลบสินค้าชิ้นสุดท้าย
+    // ออกจนตะกร้าว่าง ตัวเลขนี้จะค้างที่ค่าเดิม ทำให้เช็ค "ตะกร้าว่างไหม" ตอนกด submit ไม่ทำงาน
+    amontCart = 0;
     productAllModels?.clear();
     priceListSModels?.clear();
     priceListMModels?.clear();
@@ -793,6 +818,33 @@ class _DetailCartState extends State<DetailCart> {
           padding: EdgeInsets.only(top: 10.0, bottom: 10.0),
           child: Text('ยอดรวม        $total บาท', style: MyStyle().h1Style),
         ),
+      ),
+    );
+  }
+
+  Widget emptyCartMessage() {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(vertical: 60.0, horizontal: 24.0),
+      child: Column(
+        children: <Widget>[
+          Icon(Icons.shopping_cart_outlined, size: 64.0, color: Colors.grey.shade400),
+          SizedBox(height: 12.0),
+          Text(
+            'ยังไม่มีสินค้าในตะกร้า',
+            style: TextStyle(
+              fontSize: 16.0,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey.shade600,
+            ),
+          ),
+          SizedBox(height: 4.0),
+          Text(
+            'เลือกสินค้าที่ต้องการแล้วกดเพิ่มลงตะกร้าได้เลย',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 13.0, color: Colors.grey.shade500),
+          ),
+        ],
       ),
     );
   }
@@ -1286,7 +1338,9 @@ class _DetailCartState extends State<DetailCart> {
             ),
           ),
           showTotal(),
-          CartListSection(
+          (productAllModels!.isEmpty)
+              ? emptyCartMessage()
+              : CartListSection(
             productAllModels: productAllModels!,
             allArrIncartS: allArrIncartS!,
             allArrIncartM: allArrIncartM!,
