@@ -18,14 +18,14 @@ if (localPropertiesFile.exists()) {
 
 def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
 if (flutterVersionCode == null) {
-    flutterVersionCode = '24'
+    flutterVersionCode = '25'
 }
 
 def flutterVersionName = localProperties.getProperty('flutter.versionName')
 if (flutterVersionName == null) {
     flutterVersionName = '3.0.1'
 }
-    flutterVersionCode = '24'
+    flutterVersionCode = '25'
     flutterVersionName = '3.0.1'
 
 def keystoreProperties = new Properties()
@@ -79,6 +79,12 @@ android {
             // Signing with the debug keys for now, so `flutter run --release` works.
             // signingConfig = signingConfigs.debug
             signingConfig signingConfigs.release
+            // ลดขนาด appbundle: R8 ตัดโค้ด/ไลบรารีที่ไม่ได้เรียกใช้ทิ้ง (minify) และ resource
+            // shrinker ตัด drawable/layout ที่ไม่ถูกอ้างถึงทิ้ง (ของ Flutter widget เองไม่กระทบ
+            // เพราะ Flutter render เองไม่ผ่าน Android resource system - กระทบแค่ native/plugin
+            // resource ที่ไม่ได้ใช้จริง)
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
